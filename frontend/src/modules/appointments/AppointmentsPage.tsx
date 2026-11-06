@@ -35,12 +35,14 @@ export default function AppointmentsPage() {
   const changeView = (v: View) => { setView(v); try { localStorage.setItem("hv.appt.view", v); } catch { /* ignore */ } };
   const isCal = view !== "list" && view !== "cards";
   const [shift, setShiftState] = useState<Shift>(() => { try { return (localStorage.getItem("hv.appt.shift") as Shift) || "all"; } catch { return "all"; } });
+  const [docFilter, setDocFilterState] = useState(() => { try { return localStorage.getItem("hv.appt.doctor") || ""; } catch { return ""; } });
+  const setDocFilter = (v: string) => { setDocFilterState(v); try { localStorage.setItem("hv.appt.doctor", v); } catch { /* ignore */ } };
   const setShift = (v: Shift) => { setShiftState(v); try { localStorage.setItem("hv.appt.shift", v); } catch { /* ignore */ } };
   const dayStart = boot?.shifts?.day_start ?? "07:00:00";
   const nightStart = boot?.shifts?.night_start ?? "17:00:00";
   const inShift = (tm?: string) => { if (shift === "all") return true; const x = hhmm(tm); if (!x) return shift === "day"; const day = x >= hhmm(dayStart) && x < hhmm(nightStart); return shift === "day" ? day : !day; };
   const { data } = useApi<{ rows: Appt[]; stats: { source_channel: string; status: string; n: number }[] }>("appointments.board",
-    { date, branch, channel: channel && channel !== "Requests" ? channel : undefined, status: channel === "Requests" ? "Pending" : undefined }, { refetchInterval: 30_000 });
+    { date, branch, doctor: docFilter || undefined, channel: channel && channel !== "Requests" ? channel : undefined, status: channel === "Requests" ? "Pending" : undefined }, { refetchInterval: 30_000 });
   const status = useAction<Appt>("appointments.set_status", { invalidate: ["appointments.board"],
     success: (r) => (r.status === "Confirmed" ? "Confirmed — WhatsApp confirmation sent" : r.status === "Rejected" ? "Rejected — patient informed" : "Updated") });
   const resend = useAction<{ status: string; event: string }>("appointments.resend_message", { invalidate: ["appointments.board"],
@@ -54,6 +56,8 @@ export default function AppointmentsPage() {
   const pendingCount = (data?.stats ?? []).filter((s) => s.status === "Pending").reduce((a, s) => a + s.n, 0);
   const byStatus = (st: string) => (data?.stats ?? []).filter((s) => s.status === st).reduce((a, s) => a + s.n, 0);
   const total = (data?.stats ?? []).reduce((a, s) => a + s.n, 0);
+  const docList = useApi<{ doctors: { name: string; doctor_name: string; specialization?: string; color?: string; branch?: string }[] }>("opd.counter_context", { branch });
+  const filterDoctors = (docList.data?.doctors ?? []).filter((d) => !d.branch || d.branch === branch);
   const allRows = data?.rows ?? [];
   const rows = allRows.filter((r) => inShift(r.start_time));
   const count = (c: string) => (data?.stats ?? []).filter((s) => s.source_channel === c).reduce((a, s) => a + s.n, 0);
@@ -95,6 +99,10 @@ export default function AppointmentsPage() {
           <div className="flex rounded-xl bg-muted p-1">{([["all", "All", null], ["day", "Day", Sun], ["night", "Night", Moon]] as const).map(([v, l, I]) => (
             <button key={v} onClick={() => setShift(v)} title={v === "day" ? `${hhmm(dayStart)}–${hhmm(nightStart)}` : v === "night" ? `${hhmm(nightStart)}–${hhmm(dayStart)}` : "All hours"}
               className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold", shift === v ? "bg-card shadow-sm" : "text-muted-foreground")}>{I && <I className="h-4 w-4" />}{l}</button>))}</div>
+          <label className="flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 text-sm">
+            <span className="h-2.5 w-2.5 rounded-full ring-2 ring-white/40" style={{ background: filterDoctors.find((d) => d.name === docFilter)?.color || "conic-gradient(#14b8a6,#8b5cf6,#f59e0b,#ec4899,#14b8a6)" }} />
+            <select value={docFilter} onChange={(e) => setDocFilter(e.target.value)} className="max-w-[220px] bg-transparent text-white outline-none [&>option]:text-black">
+              <option value="">All doctors</option>{filterDoctors.map((d) => <option key={d.name} value={d.name}>{d.doctor_name}{d.specialization ? ` · ${d.specialization}` : ""}</option>)}</select></label>
           {!isCal && <input type="date" className="h-9 w-40 rounded-xl border border-white/20 bg-white/10 px-3 text-sm text-white outline-none [color-scheme:dark]" value={date} onChange={(e) => setDate(e.target.value)} />}
         </div>
         <div className="relative mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -108,7 +116,7 @@ export default function AppointmentsPage() {
           <span className="flex h-9 w-9 animate-pulse items-center justify-center rounded-xl bg-amber-500 text-white"><BellRing className="h-4 w-4" /></span>
           <span className="flex-1"><b>{pendingCount} booking request{pendingCount > 1 ? "s" : ""}</b> waiting for reception. Confirming sends the patient a WhatsApp confirmation.</span>
           <span className="font-semibold text-amber-700 dark:text-amber-300">Review →</span></button>)}
-      {isCal && <CalendarView view={view as CalView} shift={shift} setView={changeView} onBook={(p) => { setPreset(p); setBook(true); }}
+      {isCal && <CalendarView view={view as CalView} shift={shift} doctor={docFilter} setView={changeView} onBook={(p) => { setPreset(p); setBook(true); }}
         onOpen={(name) => { const r = rows.find((x) => x.name === name); toast(r ? `${r.patient_name} · ${r.phone} · ${r.status}` : `Appointment ${name}`, { icon: "📅" }); }} />}
       {!isCal && <>
       <div className="mb-3 flex flex-wrap items-center gap-2"><Tabs value={channel} onChange={setChannel} tabs={[{ key: "", label: "All", count: (data?.stats ?? []).reduce((a, s) => a + s.n, 0) },

@@ -42,8 +42,9 @@ def board(date=None, branch=None, status=None, channel=None, doctor=None):
 	for r in rows:
 		r["last_message"] = last.get(r.name)
 		r["message_failed"] = bool(last.get(r.name) and last[r.name].status == "Failed")
-	stats = frappe.db.sql("""select source_channel, status, count(*) n from tabAppointment where appointment_date=%s and branch=%s
-		group by source_channel, status""", (filters["appointment_date"], filters["branch"]), as_dict=True)
+	stats = frappe.db.sql(f"""select source_channel, status, count(*) n from tabAppointment where appointment_date=%s and branch=%s
+		{"and doctor=%s" if doctor else ""} group by source_channel, status""",
+		(filters["appointment_date"], filters["branch"]) + ((doctor,) if doctor else ()), as_dict=True)
 	return {"rows": rows, "stats": stats}
 
 

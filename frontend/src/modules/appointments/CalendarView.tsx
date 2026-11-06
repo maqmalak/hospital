@@ -30,11 +30,10 @@ const APPT: Record<string, string> = {
 };
 const PRI: Record<string, string> = { Urgent: "bg-red-600", Elderly: "bg-orange-500", Disabled: "bg-blue-600", "Follow-up": "bg-teal-600" };
 
-export function CalendarView({ view, setView, onBook, onOpen, shift = "all" }: { view: CalView; shift?: Shift; setView: (v: CalView) => void; onBook: (p: Preset) => void; onOpen: (appointment: string) => void }) {
+export function CalendarView({ view, setView, onBook, onOpen, shift = "all", doctor = "" }: { view: CalView; shift?: Shift; doctor?: string; setView: (v: CalView) => void; onBook: (p: Preset) => void; onOpen: (appointment: string) => void }) {
   const { boot, branch } = useAuth();
   const qc = useQueryClient();
   const [anchor, setAnchor] = useState(() => new Date());
-  const [doctor, setDoctor] = useState("");
   const [span, setSpan] = useState(() => { try { return Number(localStorage.getItem("hv.cal.span")) || 3; } catch { return 3; } });
   const range = useMemo(() => {
     if (view === "day") return [anchor, anchor];
@@ -45,10 +44,9 @@ export function CalendarView({ view, setView, onBook, onOpen, shift = "all" }: {
     return [s, addDays(s, 41)];
   }, [view, anchor, span]);
   const base = useApi<DayData | MonthData>("appointments.calendar", { start: iso(range[0]), end: iso(range[1]), branch, summary: view === "month" ? 1 : 0,
-    doctor: view === "week" || view === "multi" ? doctor || undefined : undefined, shift: shift === "all" ? undefined : shift }, { refetchInterval: 30_000 });
+    doctor: doctor || undefined, shift: shift === "all" ? undefined : shift }, { refetchInterval: 30_000 });
   useRealtime(boot?.site, ["hv:appointment_request"], () => void qc.invalidateQueries({ queryKey: ["appointments.calendar"] }));
   const doctors = base.data?.doctors ?? [];
-  const weekDoctor = doctor || doctors[0]?.name || "";
   const step = (n: number) => setAnchor((a) => (view === "day" ? addDays(a, n) : view === "multi" ? addDays(a, span * n) : view === "week" ? addDays(a, 7 * n) : new Date(a.getFullYear(), a.getMonth() + n, 1)));
   const title = view === "day" ? anchor.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })
     : view === "week" || view === "multi" ? `${range[0].toLocaleDateString(undefined, { day: "numeric", month: "short" })} – ${range[1].toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}`
@@ -67,17 +65,15 @@ export function CalendarView({ view, setView, onBook, onOpen, shift = "all" }: {
         <h2 className="min-w-0 flex-1 truncate px-2 text-lg font-bold">{title}</h2>
         {view === "multi" && <div className="flex rounded-xl bg-muted p-1">{[3, 5, 10, 14].map((n) => (
           <button key={n} onClick={() => { setSpan(n); try { localStorage.setItem("hv.cal.span", String(n)); } catch { /* ignore */ } }} className={cn("rounded-lg px-2.5 py-1 text-xs font-bold", span === n ? "bg-card shadow-sm" : "text-muted-foreground")}>{n}d</button>))}</div>}
-        {(view === "week" || view === "multi") && <select value={weekDoctor} onChange={(e) => setDoctor(e.target.value)} className="h-9 rounded-lg border border-input bg-[hsl(var(--input-bg))] px-2 text-sm">
-          {doctors.map((d) => <option key={d.name} value={d.name}>{d.doctor_name}</option>)}</select>}
         <div className="flex rounded-xl bg-muted p-1">{([["day", "Day"], ["multi", "Multi-day"], ["week", "Week"], ["month", "Month"]] as [CalView, string][]).map(([v, l]) => (
           <button key={v} onClick={() => setView(v)} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", view === v ? "bg-gradient-to-r from-teal-600 to-emerald-500 text-white shadow-sm" : "text-muted-foreground")}>{l}</button>))}</div>
       </div>
       <Legend />
       {!base.data ? <div className="h-96 animate-pulse bg-muted/40" />
         : view === "month" ? <MonthGrid data={base.data as MonthData} anchor={anchor} start={range[0]} doctors={doctors} onDay={(d) => { setAnchor(d); setView("day"); }} />
-        : view === "day" ? <Grid slots={(base.data as DayData).slots} columns={doctors.map((d) => ({ key: d.name, date: iso(anchor), label: d.doctor_name, sub: d.specialization, color: d.color, leave: onLeave(d.name, iso(anchor))?.reason ?? (onLeave(d.name, iso(anchor)) ? "On leave" : undefined) }))}
+        : view === "day" ? <Grid slots={(base.data as DayData).slots} columns={doctors.filter((d) => !doctor || d.name === doctor).map((d) => ({ key: d.name, date: iso(anchor), label: d.doctor_name, sub: d.specialization, color: d.color, leave: onLeave(d.name, iso(anchor))?.reason ?? (onLeave(d.name, iso(anchor)) ? "On leave" : undefined) }))}
             match={(s, c) => s.doctor === c.key && s.slot_date === c.date} blocked={blockedDay(iso(anchor))?.reason} onBook={onBook} onOpen={onOpen} />
-        : <Grid slots={(base.data as DayData).slots.filter((s) => s.doctor === weekDoctor)} columns={Array.from({ length: view === "multi" ? span : 7 }, (_, i) => { const d = addDays(range[0], i); const k = iso(d); const lv = onLeave(weekDoctor, k);
+        : <Grid slots={(base.data as DayData).slots} doctors={doctors} columns={Array.from({ length: view === "multi" ? span : 7 }, (_, i) => { const d = addDays(range[0], i); const k = iso(d); const lv = doctor ? onLeave(doctor, k) : undefined;
             return { key: k, date: k, label: d.toLocaleDateString(undefined, { weekday: "short", day: "numeric" }), sub: d.toLocaleDateString(undefined, { month: "short" }), today: k === iso(new Date()),
               leave: blockedDay(k) ? blockedDay(k)!.reason || "Clinic closed" : lv ? lv.reason || "On leave" : undefined }; })}
             match={(s, c) => s.slot_date === c.date} onBook={onBook} onOpen={onOpen} keepAll />}
@@ -98,8 +94,8 @@ function Legend() {
 interface Col { key: string; date: string; label: string; sub?: string; color?: string; leave?: string; today?: boolean }
 
 /** Time rows × columns (doctors for Day, days for Week). Every slot is one cell. */
-function Grid({ slots, columns, match, blocked, onBook, onOpen, keepAll }: { slots: Slot[]; columns: Col[]; match: (s: Slot, c: Col) => boolean; blocked?: string;
-  onBook: (p: Preset) => void; onOpen: (a: string) => void; keepAll?: boolean }) {
+function Grid({ slots, columns, match, blocked, onBook, onOpen, keepAll, doctors }: { slots: Slot[]; columns: Col[]; match: (s: Slot, c: Col) => boolean; blocked?: string;
+  onBook: (p: Preset) => void; onOpen: (a: string) => void; keepAll?: boolean; doctors?: Doctor[] }) {
   const times = [...new Set(slots.map((s) => s.start_time))].sort();
   const cols = keepAll ? columns.map((c) => (c.leave || slots.some((s) => match(s, c)) ? c : { ...c, leave: c.date < iso(new Date()) ? "Past" : "No clinic" })) : columns.filter((c) => slots.some((s) => match(s, c)) || c.leave);
   if (blocked) return <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground"><CalendarOff className="h-8 w-8" /><b>Clinic closed</b>{blocked}</div>;
@@ -121,8 +117,9 @@ function Grid({ slots, columns, match, blocked, onBook, onOpen, keepAll }: { slo
               <td className="sticky start-0 z-[5] border-e border-b border-border/60 bg-card px-2 py-1 text-end align-top font-semibold tabular-nums text-muted-foreground">{to12(tm)}</td>
               {cols.map((c) => {
                 if (c.leave) return <td key={c.key} className="border-b border-border/40 bg-[repeating-linear-gradient(45deg,transparent,transparent_6px,rgba(148,163,184,0.15)_6px,rgba(148,163,184,0.15)_12px)] p-1 text-center text-[10px] text-muted-foreground">{tm === times[0] ? c.leave : ""}</td>;
-                const s = slots.find((x) => match(x, c) && x.start_time === tm);
-                return <td key={c.key} className={cn("border-b border-border/40 p-1 align-top", c.today && "bg-teal-50/40 dark:bg-teal-500/5")}><Cell s={s} onBook={onBook} onOpen={onOpen} /></td>;
+                const here = slots.filter((x) => match(x, c) && x.start_time === tm);
+                return <td key={c.key} className={cn("border-b border-border/40 p-1 align-top", c.today && "bg-teal-50/40 dark:bg-teal-500/5")}>
+                  {here.length > 1 ? <MultiCell slots={here} doctors={doctors ?? []} onBook={onBook} onOpen={onOpen} /> : <Cell s={here[0]} onBook={onBook} onOpen={onOpen} />}</td>;
               })}
             </tr>))}
         </tbody>
@@ -148,6 +145,27 @@ function Cell({ s, onBook, onOpen }: { s?: Slot; onBook: (p: Preset) => void; on
         {s.priority && PRI[s.priority] && <span className={cn("ms-auto h-2 w-2 shrink-0 rounded-full", PRI[s.priority])} title={s.priority} />}</div>
       <div className="truncate text-[10px] opacity-75">{to12(s.start_time)} · {st}</div>
     </button>
+  );
+}
+
+/** Several doctors at one time (week / multi-day with all doctors): booked chips + one "free" chip. */
+function MultiCell({ slots, doctors, onBook, onOpen }: { slots: Slot[]; doctors: Doctor[]; onBook: (p: Preset) => void; onOpen: (a: string) => void }) {
+  const color = (d: string) => doctors.find((x) => x.name === d)?.color || "#0d9488";
+  const name = (d: string) => doctors.find((x) => x.name === d)?.doctor_name ?? d;
+  const booked = slots.filter((s) => s.appointment);
+  const free = slots.filter((s) => s.status === "Available" && s.name);
+  return (
+    <div className="flex min-h-11 flex-col gap-0.5">
+      {booked.map((s) => (
+        <button key={s.appointment} onClick={() => s.appointment && onOpen(s.appointment)} title={`${s.patient_name} · ${name(s.doctor)} · ${s.appt_status}`}
+          className={cn("flex items-center gap-1 truncate rounded-md border-s-4 px-1.5 py-0.5 text-start text-[10px] font-semibold", APPT[s.appt_status || "Confirmed"] ?? APPT.Confirmed)} style={{ borderInlineStartColor: color(s.doctor) }}>
+          <span className="truncate">{s.patient_name}</span></button>))}
+      {free.length > 0 && (
+        <button onClick={() => onBook({ doctor: free[0].doctor, date: free[0].slot_date, slot: free[0].name!, time: free[0].start_time })} title={free.map((f) => name(f.doctor)).join(", ")}
+          className="flex items-center gap-1 rounded-md border border-dashed border-emerald-300 bg-emerald-50/60 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 hover:bg-emerald-500 hover:text-white dark:border-emerald-500/40 dark:bg-emerald-500/5 dark:text-emerald-300">
+          <span className="flex -space-x-1">{free.slice(0, 4).map((f) => <span key={f.name} className="h-2 w-2 rounded-full ring-1 ring-white" style={{ background: color(f.doctor) }} />)}</span>+{free.length} free</button>)}
+      {!booked.length && !free.length && <div className="h-11 rounded-lg bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,rgba(148,163,184,0.25)_5px,rgba(148,163,184,0.25)_10px)]" />}
+    </div>
   );
 }
 
