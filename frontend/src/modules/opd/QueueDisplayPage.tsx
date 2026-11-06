@@ -35,7 +35,7 @@ export default function QueueDisplayPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 p-6 text-white">
       <div className="mb-6 flex items-end justify-between">
-        <div><div className="text-3xl font-extrabold">{data?.clinic}</div><div className="font-[Noto_Nastaliq_Urdu] text-xl text-teal-200">{data?.clinic_ur}</div></div>
+        <div><div className="text-3xl font-extrabold">{data?.clinic}</div><div className="font-urdu text-xl text-teal-200">{data?.clinic_ur}</div></div>
         <div className="text-end"><div className="text-4xl font-bold tabular-nums">{clock.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div><div className="text-teal-200">{clock.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</div></div>
       </div>
       {flash && <div className="mb-6 animate-pulse rounded-3xl bg-gradient-to-r from-amber-400 to-orange-500 p-6 text-center text-slate-950"><div className="text-xl font-bold">NOW CALLING · اب باری</div><div className="text-8xl font-black">{flash}</div></div>}

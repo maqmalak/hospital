@@ -121,7 +121,7 @@ export default function PatientsPage() {
                 </div>
                 <div className="px-4 pt-2">
                   <h3 className="line-clamp-1 text-base font-bold">{name(p)}</h3>
-                  {p.patient_name_ur && name(p) !== p.patient_name_ur && <div className="font-[Noto_Nastaliq_Urdu] text-sm leading-relaxed text-muted-foreground">{p.patient_name_ur}</div>}
+                  {p.patient_name_ur && name(p) !== p.patient_name_ur && <div className="font-urdu text-sm leading-relaxed text-muted-foreground">{p.patient_name_ur}</div>}
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                     <span>{t(p.gender)}{p.age != null ? ` · ${p.age} y` : ""}</span>
                     {p.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{p.phone}</span>}

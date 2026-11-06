@@ -190,3 +190,10 @@ export function fiscalYearRange(iso: string = todayISO()): { from: string; to: s
   const start = m >= 7 ? y : y - 1;
   return { from: `${start}-07-01`, to: `${start + 1}-06-30` };
 }
+
+/** Frappe time "9:00:00" / "09:00:00.000" → "09:00" (plain slice(0, 5) breaks before 10:00). */
+export function hhmm(t?: string | null): string {
+  if (!t) return "";
+  const [h, m = "00"] = String(t).split(" ").pop()!.split(":");
+  return `${h.padStart(2, "0")}:${m.slice(0, 2)}`;
+}

@@ -116,7 +116,7 @@ function Workspace({ queue, rx, patient }: { queue?: string; rx?: string; patien
       <aside className="space-y-3">
         <Section>
           <div className="flex items-center gap-3"><Avatarish name={p.patient_name} src={p.photo} size={14} />
-            <div className="min-w-0"><div className="truncate text-lg font-bold">{p.patient_name}</div><div className="font-[Noto_Nastaliq_Urdu] text-sm text-muted-foreground">{p.patient_name_ur}</div>
+            <div className="min-w-0"><div className="truncate text-lg font-bold">{p.patient_name}</div><div className="font-urdu text-sm text-muted-foreground">{p.patient_name_ur}</div>
               <div className="text-xs text-muted-foreground">{p.name} · {p.age}y · {t(p.gender)}{p.blood_group ? ` · ${p.blood_group}` : ""}</div></div></div>
           {ws.queue && <div className="mt-2 flex items-center gap-2 text-sm"><span className="rounded-lg bg-primary/10 px-2 py-0.5 font-bold text-primary">Token {ws.queue.token_no}</span><Pill value={ws.queue.status} /></div>}
         </Section>

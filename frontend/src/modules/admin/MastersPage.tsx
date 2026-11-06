@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Empty, Field, inputCls, PageHeader, Section } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
+import { toUrdu } from "@/lib/urdu";
 
 type FT = "Data" | "Int" | "Float" | "Currency" | "Check" | "Select" | "Link" | "Date" | "Time" | "Small Text" | "Color";
 interface Fd { f: string; label: string; t: FT; options?: string; reqd?: boolean; list?: boolean }
@@ -79,7 +80,7 @@ function MasterList({ kind }: { kind: Kind }) {
           <div className="mb-3 flex items-center gap-2 rounded-xl border border-input px-3"><Search className="h-4 w-4 text-muted-foreground" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search" className="h-10 flex-1 bg-transparent text-sm outline-none" /></div>
           {data.length ? <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-border text-xs uppercase text-muted-foreground">{kind.fields.filter((f) => f.list).map((f) => <th key={f.f} className="py-2 text-start">{f.label}</th>)}</tr></thead>
             <tbody>{data.map((r) => <tr key={String(r.name)} onClick={() => setOpen(String(r.name))} className={cn("cursor-pointer border-b border-border/60 hover:bg-muted/50", open === r.name && "bg-accent")}>
-              {kind.fields.filter((f) => f.list).map((f) => <td key={f.f} className="py-2">{f.t === "Check" ? (r[f.f] ? "✓" : "") : f.t === "Currency" ? `Rs ${Number(r[f.f] ?? 0).toLocaleString()}` : String(r[f.f] ?? "")}</td>)}</tr>)}</tbody></table></div> : <Empty title="Nothing yet" />}
+              {kind.fields.filter((f) => f.list).map((f) => <td key={f.f} className={cn("py-2", f.f.endsWith("_ur") && "font-urdu text-base")} dir={f.f.endsWith("_ur") ? "rtl" : undefined}>{f.t === "Check" ? (r[f.f] ? "✓" : "") : f.t === "Currency" ? `Rs ${Number(r[f.f] ?? 0).toLocaleString()}` : String(r[f.f] ?? "")}</td>)}</tr>)}</tbody></table></div> : <Empty title="Nothing yet" />}
         </Section>
         {open && <Editor kind={kind} name={open} onClose={() => setOpen(null)} onSaved={() => { void qc.invalidateQueries({ queryKey: ["master", kind.doctype] }); }} />}
       </div>
@@ -96,7 +97,16 @@ export function Editor({ kind, name, onClose, onSaved }: { kind: Kind; name: str
     else void getCall<Record<string, unknown>>("frappe.client.get", { doctype: kind.doctype, name }).then(setDoc).catch((e) => toast.error(humanizeError(e)));
   }, [name, kind]);
   if (!doc) return <Section>Loading…</Section>;
-  const set = (k: string, v: unknown) => setDoc((d) => ({ ...d!, [k]: v }));
+  const set = (k: string, v: unknown) => setDoc((d) => {
+    const next: Record<string, unknown> = { ...d!, [k]: v };
+    // English name → Urdu name, while the Urdu field is empty or still the auto-filled value
+    const ur = `${k}_ur`;
+    if (typeof v === "string" && kind.fields.some((f) => f.f === ur)) {
+      const cur = String(d?.[ur] ?? "");
+      if (!cur || cur === toUrdu(String(d?.[k] ?? ""))) next[ur] = toUrdu(v);
+    }
+    return next;
+  });
   const save = async () => {
     setBusy(true);
     try {
@@ -134,6 +144,7 @@ function FieldInput({ fd, value, onChange, disabled, compact }: { fd: Fd; value:
     : fd.t === "Link" ? <><input list={`l-${fd.f}-${fd.options}`} disabled={disabled} className={inputCls} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} placeholder={compact ? fd.label : undefined} /><datalist id={`l-${fd.f}-${fd.options}`}>{opts.map((o) => <option key={o} value={o} />)}</datalist></>
     : fd.t === "Small Text" ? <textarea disabled={disabled} className={inputCls + " h-20 py-2"} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} />
     : fd.t === "Color" ? <input type="color" disabled={disabled} className="h-10 w-20 rounded-lg border border-input" value={String(value || "#0d9488")} onChange={(e) => onChange(e.target.value)} />
+    : fd.f.endsWith("_ur") ? <input disabled={disabled} lang="ur" dir="rtl" className={inputCls + " urdu-input"} placeholder="اردو میں لکھیں" value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} />
     : <input disabled={disabled} className={inputCls} placeholder={compact ? fd.label : undefined} type={["Int", "Float", "Currency"].includes(fd.t) ? "number" : fd.t === "Date" ? "date" : fd.t === "Time" ? "time" : "text"} value={String(value ?? "")}
       onChange={(e) => onChange(["Int", "Float", "Currency"].includes(fd.t) ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value)} />;
   if (fd.t === "Check" || !label) return input;

@@ -22,6 +22,10 @@ Choices made while building, and questions that need the owner (marked **OPEN**)
 | D-16 | 2026-11-06 | Backups: Frappe backups with **System Settings → Encrypt Backups = on** (gpg), `scripts/backup.sh` (hourly DB / daily full, rsync or S3 off-site), `scripts/verify_backup.sh` (decrypt + check). | The encryption key lives in `site_config.json` → it must also be kept off the server. |
 | D-17 | 2026-11-06 | mm_core on this site: added the CRM Notification type "Email" Property Setter that other sites carry (mm_core's mail notifier needs it; the setup wizard failed without it). | Site-local, no core file changed. |
 
+| D-18 | 2026-11-07 | **Booking messages**: web/WhatsApp bookings are requests (Clinic Settings → auto_confirm off on this site) → WhatsApp `appointment_requested` (ref, doctor, time, clinic phone) at once; reception confirms → `appointment_confirmed`. Patients without a record consent per booking (tick box, default on; WhatsApp chats imply it) — stored as Appointment.messages_allowed. Request acknowledgement ignores quiet hours (direct reply to the patient). | Owner request: request notice on booking, confirmation after reception checks. |
+| D-19 | 2026-11-07 | Appointment **priority** (Urgent > Elderly/Disabled > Follow-up > Normal) orders the day list and carries into the doctor's queue; Follow-up is set automatically within the free follow-up window. **Any available doctor**: earliest free slot among doctors of the speciality on shift, tie → fewer bookings that day. | Owner's "Book & Manage Appointments" brief. |
+| D-20 | 2026-11-07 | **Urdu name auto-fill** is done in the browser (dictionary of ~300 Pakistani names + phonetic rules), not a cloud transliteration service, so patient names never leave the clinic. Urdu font: Gulzar (fallback Noto Nastaliq), larger line height in all Urdu inputs. | Privacy; Nastaliq clipping in inputs. |
+
 ## Open questions for the owner
 
 1. **Hosting** (on-premise server vs cloud with backup internet) — 09-security-ops.md. Recommendation: on-premise primary for counters/wards + off-site encrypted backups.

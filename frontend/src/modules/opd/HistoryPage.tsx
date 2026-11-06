@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BedDouble, CalendarClock, FileText, History, Pill as PillIcon, ShieldAlert, Stethoscope } from "lucide-react";
 import { useApi } from "@/lib/api";
+import { hhmm } from "@/utils/dates";
 import { axisProps, Legend, TipBox, useViz } from "@/lib/viz";
 import { Empty, PageHeader, PatientPicker, Pill, Section, Tabs } from "@/components/common";
 
@@ -70,7 +71,7 @@ export default function HistoryPage() {
           </li>))}
       </ol> : <Empty title="No visits yet" />)}
       {tab === "rx" && <div className="space-y-3">{data.prescriptions.map((r) => <Section key={r.name}><RxCard r={r} /></Section>)}{!data.prescriptions.length && <Empty title="No prescriptions" icon={FileText} />}</div>}
-      {tab === "appointments" && <Section>{data.appointments.map((a) => <div key={a.name} className="flex items-center gap-3 border-b border-border/60 py-2 text-sm last:border-0"><CalendarClock className="h-4 w-4 text-muted-foreground" /><span className="flex-1">{a.appointment_date} {a.start_time?.slice(0, 5)} · {a.doctor_name}</span><Pill value={a.source_channel} /><Pill value={a.status} /></div>)}
+      {tab === "appointments" && <Section>{data.appointments.map((a) => <div key={a.name} className="flex items-center gap-3 border-b border-border/60 py-2 text-sm last:border-0"><CalendarClock className="h-4 w-4 text-muted-foreground" /><span className="flex-1">{a.appointment_date} {hhmm(a.start_time)} · {a.doctor_name}</span><Pill value={a.source_channel} /><Pill value={a.status} /></div>)}
         {!data.appointments.length && <Empty title="No appointments" />}</Section>}
     </div>
   );

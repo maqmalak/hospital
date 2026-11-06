@@ -11,10 +11,11 @@ from hospital_vvs import roles as R
 from hospital_vvs.hospital_vvs.doctype.patient.patient import normalize_phone
 from hospital_vvs.services import appointments as svc
 from hospital_vvs.services import messaging
-from hospital_vvs.utils import default_branch, require_roles, setting, settings
+from hospital_vvs.utils import default_branch, require_roles, setting, settings, hhmm
 
 STAFF = (R.RECEPTIONIST, R.DEO)
-PUBLIC_FIELDS = ["name", "doctor_name", "doctor_name_ur", "specialization", "default_fee", "photo", "qualification", "branch"]
+PUBLIC_FIELDS = ["name", "doctor_name", "doctor_name_ur", "specialization", "default_fee", "photo", "qualification", "branch", "color",
+	"consultation_room"]
 
 
 # ------------------------------------------------------------------ staff
@@ -30,11 +31,17 @@ def board(date=None, branch=None, status=None, channel=None, doctor=None):
 		filters["doctor"] = doctor
 	rows = frappe.get_all("Appointment", filters=filters, fields=["name", "patient", "patient_name", "phone", "doctor", "doctor_name",
 		"appointment_date", "start_time", "status", "source_channel", "booking_ref", "fee", "payment_channel", "payment_status",
-		"payment_proof", "opd_slip", "is_new_patient", "new_patient_age", "new_patient_gender"], order_by="start_time asc")
-	failed = {r.reference_name for r in frappe.get_all("Message Log", filters={"reference_doctype": "Appointment", "status": "Failed",
-		"reference_name": ["in", [r.name for r in rows] or [""]]}, fields=["reference_name"])}
+		"payment_proof", "opd_slip", "is_new_patient", "new_patient_age", "new_patient_gender", "priority"], order_by="start_time asc")
+	done = {"Completed": 2, "Cancelled": 3, "Rejected": 3, "No-show": 3}
+	rows.sort(key=lambda r: (done.get(r.status, 0) if r.status != "Arrived" else 1, svc.PRIORITY_RANK.get(r.priority or "Normal", 3), str(r.start_time or "")))
+	last = {}
+	for m in frappe.get_all("Message Log", filters={"reference_doctype": "Appointment", "direction": "Out",
+		"reference_name": ["in", [r.name for r in rows] or [""]]}, fields=["name", "reference_name", "event", "status", "channel", "error", "creation"],
+		order_by="creation asc"):
+		last[m.reference_name] = m
 	for r in rows:
-		r["message_failed"] = r.name in failed
+		r["last_message"] = last.get(r.name)
+		r["message_failed"] = bool(last.get(r.name) and last[r.name].status == "Failed")
 	stats = frappe.db.sql("""select source_channel, status, count(*) n from tabAppointment where appointment_date=%s and branch=%s
 		group by source_channel, status""", (filters["appointment_date"], filters["branch"]), as_dict=True)
 	return {"rows": rows, "stats": stats}
@@ -56,8 +63,24 @@ def book(data):
 	d = frappe.parse_json(data)
 	appt = svc.book(doctor=d["doctor"], slot=d.get("slot"), date=d.get("date"), start_time=d.get("start_time"), branch=d.get("branch"),
 		patient=d.get("patient"), patient_name=d.get("patient_name"), phone=d.get("phone"), source_channel="Reception",
-		payment_channel=d.get("payment_channel") or "At Clinic")
+		payment_channel=d.get("payment_channel") or "At Clinic", priority=d.get("priority"))
 	return appt.as_dict()
+
+
+@frappe.whitelist()
+def first_available(specialization=None, date=None, branch=None):
+	"""Suggest the doctor and slot for "any available doctor" (by shift, earliest slot, lighter load)."""
+	require_roles(*STAFF)
+	return svc.first_available(specialization, date, branch)
+
+
+@frappe.whitelist(methods=["POST"])
+def set_priority(name, priority):
+	require_roles(*STAFF)
+	if priority not in svc.PRIORITY_RANK:
+		frappe.throw(_("Unknown priority"))
+	frappe.db.set_value("Appointment", name, "priority", priority)
+	return True
 
 
 @frappe.whitelist(methods=["POST"])
@@ -70,6 +93,17 @@ def set_status(name, status, reason=None):
 def reschedule(name, slot):
 	require_roles(*STAFF)
 	return svc.reschedule(name, slot).as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
+def resend_message(name):
+	"""Resend the latest WhatsApp/SMS for this appointment (request or confirmation, by its current status)."""
+	require_roles(*STAFF)
+	appt = frappe.get_doc("Appointment", name)
+	event = {"Pending": "appointment_requested", "Confirmed": "appointment_confirmed", "Cancelled": "appointment_cancelled",
+		"Rejected": "appointment_rejected"}.get(appt.status, "appointment_confirmed")
+	log = svc.notify(appt, event)
+	return {"log": log, "status": frappe.db.get_value("Message Log", log, "status") if log else None, "event": event}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -108,8 +142,20 @@ def public_options():
 		order_by="doctor_name")
 	specs = sorted({d.specialization for d in doctors if d.specialization})
 	spec_ur = {x.name: x.specialization_ur for x in frappe.get_all("Specialization", fields=["name", "specialization_ur"])}
+	names = [d.name for d in doctors] or [""]
+	nxt = {r.doctor: r for r in frappe.db.sql("""select doctor, min(slot_date) next_date, count(*) free from `tabTime Slot`
+		where status='Available' and doctor in %(d)s and (slot_date > curdate() or (slot_date = curdate() and start_time > curtime()))
+		group by doctor""", {"d": names}, as_dict=True)}
+	days = {}
+	for r in frappe.get_all("Doctor Schedule", filters={"parent": ["in", names], "parenttype": "Doctor"}, fields=["parent", "day", "start_time", "end_time"], order_by="idx"):
+		days.setdefault(r.parent, []).append({"day": r.day[:3], "from": hhmm(r.start_time), "to": hhmm(r.end_time)})
+	for d in doctors:
+		n = nxt.get(d.name)
+		d["next_date"] = str(n.next_date) if n else None
+		d["free_slots"] = int(n.free) if n else 0
+		d["days"] = days.get(d.name, [])
 	branches = frappe.get_all("Branch", fields=["name", "hv_address as address", "hv_phone as phone"], order_by="name")
-	return {"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "logo": s.logo, "phone": s.phone},
+	return {"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "logo": s.logo, "phone": s.phone, "address": s.address},
 		"branches": branches, "specializations": [{"name": x, "name_ur": spec_ur.get(x)} for x in specs], "doctors": doctors,
 		"payment_channels": [c.strip() for c in (s.web_payment_channels or "At Clinic").split("\n") if c.strip()],
 		"hold_minutes": cint(s.slot_hold_minutes) or 10}
@@ -126,7 +172,7 @@ def public_dates(doctor, branch=None):
 @rate_limit(limit=200, seconds=600)
 def public_slots(doctor, date, branch=None):
 	_require_web_booking()
-	return [{"name": s.name, "time": str(s.start_time)[:5]} for s in svc.available_slots(doctor, date, branch)]
+	return [{"name": s.name, "time": hhmm(s.start_time), "end": hhmm(s.end_time)} for s in svc.available_slots(doctor, date, branch)]
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -215,9 +261,9 @@ def public_book(data):
 		frappe.throw(_("Attach the payment proof."))
 	appt = svc.book(doctor=d["doctor"], slot=d["slot"], patient=patient, patient_name=d.get("patient_name"), phone=phone,
 		source_channel="Web", payment_channel=channel, hold_key=f"web:{d.get('hold_key')}", payment_proof=d.get("payment_proof"),
-		age=d.get("age"), gender=d.get("gender"))
-	return {"booking_ref": appt.booking_ref, "status": appt.status, "manage_token": appt.manage_token, "date": str(appt.appointment_date),
-		"time": str(appt.start_time)[:5], "doctor": appt.doctor_name, "fee": flt(appt.fee)}
+		age=d.get("age"), gender=d.get("gender"), messages_allowed=frappe.utils.cint(d.get("messages_allowed", 1)))
+	return {"booking_ref": appt.booking_ref, "phone": appt.phone, "status": appt.status, "manage_token": appt.manage_token, "date": str(appt.appointment_date),
+		"time": hhmm(appt.start_time), "doctor": appt.doctor_name, "fee": flt(appt.fee)}
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -249,7 +295,7 @@ def manage_get(token):
 	a = _by_token(token)
 	branch = frappe.db.get_value("Branch", a.branch, ["hv_address", "hv_phone"], as_dict=True) or {}
 	return {"booking_ref": a.booking_ref, "patient_name": a.patient_name, "doctor": a.doctor, "doctor_name": a.doctor_name,
-		"date": str(a.appointment_date), "time": str(a.start_time or "")[:5], "status": a.status, "fee": flt(a.fee),
+		"date": str(a.appointment_date), "time": hhmm(a.start_time or ""), "status": a.status, "fee": flt(a.fee),
 		"payment_status": a.payment_status, "branch": a.branch, "address": branch.get("hv_address"), "phone": branch.get("hv_phone"),
 		"can_change": a.status in ("Pending", "Confirmed") and getdate(a.appointment_date) >= getdate(today()),
 		"clinic": settings().clinic_name}
@@ -269,3 +315,52 @@ def manage_cancel(token):
 	a = _by_token(token)
 	svc.cancel(a.name, by_patient=True)
 	return manage_get(token)
+
+
+@frappe.whitelist()
+def calendar(start, end, doctor=None, branch=None, summary=0):
+	"""Calendar views. Day/week: every slot (free, held, booked, blocked) with its appointment. Month (summary=1): counts per day
+	and doctor. Leave and blocked dates are included so the calendar can shade them."""
+	require_roles(*STAFF, R.DOCTOR, R.NURSE)
+	branch = branch or default_branch()
+	args = {"start": start, "end": end, "branch": branch, "doctor": doctor}
+	dcond = "and ts.doctor=%(doctor)s" if doctor else ""
+	doctors = frappe.get_all("Doctor", filters={"is_active": 1, "doctor_type": ["!=", "External Referring"]},
+		fields=["name", "doctor_name", "specialization", "color", "consultation_room", "slot_minutes", "branch"], order_by="doctor_name")
+	doctors = [d for d in doctors if not d.branch or d.branch == branch]
+	leave = frappe.db.sql("""select doctor, from_date, to_date, reason from `tabDoctor Leave` where to_date >= %(start)s and from_date <= %(end)s""", args, as_dict=True)
+	blocked = frappe.db.sql("""select blocked_date, reason from `tabBlocked Date` where blocked_date between %(start)s and %(end)s
+		and (ifnull(branch,'')='' or branch=%(branch)s)""", args, as_dict=True)
+	extra = {"doctors": doctors, "leave": [dict(l, from_date=str(l.from_date), to_date=str(l.to_date)) for l in leave],
+		"blocked": [{"date": str(b.blocked_date), "reason": b.reason} for b in blocked]}
+	if cint(summary):
+		rows = frappe.db.sql(f"""select ts.slot_date d, ts.doctor, sum(ts.status='Available') free, sum(ts.status='Booked') booked,
+			sum(ts.status='Held') held, sum(ts.status='Blocked') blocked from `tabTime Slot` ts
+			where ts.slot_date between %(start)s and %(end)s and ts.branch=%(branch)s {dcond} group by ts.slot_date, ts.doctor""", args, as_dict=True)
+		appts = frappe.db.sql(f"""select appointment_date d, status, count(*) n from tabAppointment
+			where appointment_date between %(start)s and %(end)s and branch=%(branch)s {"and doctor=%(doctor)s" if doctor else ""}
+			group by appointment_date, status""", args, as_dict=True)
+		days = {}
+		for r in rows:
+			x = days.setdefault(str(r.d), {"free": 0, "booked": 0, "held": 0, "blocked": 0, "doctors": [], "status": {}})
+			for k in ("free", "booked", "held", "blocked"):
+				x[k] += cint(r[k])
+			x["doctors"].append({"doctor": r.doctor, "free": cint(r.free), "booked": cint(r.booked)})
+		for a in appts:
+			days.setdefault(str(a.d), {"free": 0, "booked": 0, "held": 0, "blocked": 0, "doctors": [], "status": {}})["status"][a.status] = cint(a.n)
+		return dict(extra, days=days)
+	slots = frappe.db.sql(f"""select ts.name, ts.doctor, ts.slot_date, ts.start_time, ts.end_time, ts.status, ts.appointment,
+		a.patient, a.patient_name, a.phone, a.status appt_status, a.source_channel, a.booking_ref, a.priority, a.payment_status
+		from `tabTime Slot` ts left join tabAppointment a on a.name=ts.appointment
+		where ts.slot_date between %(start)s and %(end)s and ts.branch=%(branch)s {dcond} order by ts.slot_date, ts.start_time""", args, as_dict=True)
+	for s in slots:
+		s["slot_date"] = str(s.slot_date)
+		s["start_time"] = hhmm(s.start_time)
+		s["end_time"] = hhmm(s.end_time)
+	# bookings without a slot (walk-in style or old slots) still show at their time
+	loose = frappe.db.sql(f"""select name appointment, doctor, appointment_date slot_date, start_time, patient, patient_name, phone, status appt_status,
+		source_channel, booking_ref, priority from tabAppointment where ifnull(time_slot,'')='' and appointment_date between %(start)s and %(end)s
+		and branch=%(branch)s {"and doctor=%(doctor)s" if doctor else ""} and status not in ('Cancelled','Rejected')""", args, as_dict=True)
+	for l in loose:
+		l.update({"name": None, "status": "Booked", "slot_date": str(l.slot_date), "start_time": hhmm(l.start_time), "end_time": ""})
+	return dict(extra, slots=slots + loose)

@@ -16,7 +16,7 @@ from frappe.utils import add_to_date, cint, flt, formatdate, get_datetime, getda
 
 from hospital_vvs.services import appointments as booking
 from hospital_vvs.services import messaging
-from hospital_vvs.utils import setting
+from hospital_vvs.utils import setting, hhmm
 
 IDLE_MINUTES = 30
 HANDOFF_WORDS = {"reception", "agent", "human", "staff", "استقبالیہ", "ریسپشن", "عملہ"}
@@ -184,7 +184,7 @@ def ask_slot(conv, d):
 	if not slots:
 		say(conv, t(conv, "taken"))
 		return ask_date(conv, d)
-	ask(conv, d, "slot", t(conv, "slot"), [(f"slot:{s.name}", str(s.start_time)[:5]) for s in slots])
+	ask(conv, d, "slot", t(conv, "slot"), [(f"slot:{s.name}", hhmm(s.start_time)) for s in slots])
 
 
 def household(phone):
@@ -211,7 +211,7 @@ def ask_summary(conv, d):
 	s = frappe.db.get_value("Time Slot", d["slot"], ["slot_date", "start_time"], as_dict=True)
 	doc = frappe.db.get_value("Doctor", d["doctor"], ["doctor_name", "default_fee"], as_dict=True)
 	body = t(conv, "summary", patient=d.get("patient_name"), doctor=doc.doctor_name, date=formatdate(s.slot_date),
-		time=str(s.start_time)[:5], fee=f"{booking.doctor_fee(d['doctor']):,.0f}")
+		time=hhmm(s.start_time), fee=f"{booking.doctor_fee(d['doctor']):,.0f}")
 	ask(conv, d, "summary", body, [("sum:confirm", t(conv, "confirm")), ("sum:change", t(conv, "change")),
 		("sum:cancel", t(conv, "cancel"))])
 
@@ -239,7 +239,7 @@ def finish(conv, d, channel, proof=None):
 	address = frappe.db.get_value("Branch", appt.branch, "hv_address") or ""
 	key = "done" if appt.status == "Confirmed" else "pending"
 	say(conv, t(conv, key, ref=appt.booking_ref, doctor=appt.doctor_name, date=formatdate(appt.appointment_date),
-		time=str(appt.start_time)[:5], address=address, link=booking.manage_link(appt)))
+		time=hhmm(appt.start_time), address=address, link=booking.manage_link(appt)))
 	save(conv, {"last_booking": appt.name}, "done")
 	return appt
 
@@ -348,7 +348,7 @@ def handle_inbound(phone, text=None, reply_id=None, media=None, provider_id=None
 			rows = frappe.get_all("Appointment", filters={"phone": phone, "status": ["in", booking.ACTIVE],
 				"appointment_date": [">=", frappe.utils.today()]}, fields=["booking_ref", "doctor_name", "appointment_date", "start_time"],
 				order_by="appointment_date", limit=5)
-			say(conv, t(conv, "upcoming", rows="\n".join(f"{r.booking_ref} · {r.doctor_name} · {formatdate(r.appointment_date)} {str(r.start_time)[:5]}"
+			say(conv, t(conv, "upcoming", rows="\n".join(f"{r.booking_ref} · {r.doctor_name} · {formatdate(r.appointment_date)} {hhmm(r.start_time)}"
 				for r in rows)) if rows else t(conv, "none"))
 			return menu(conv, d)
 		if value == "lab":

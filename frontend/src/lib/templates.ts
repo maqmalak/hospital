@@ -1,7 +1,7 @@
 import { esc, money, qrSvg } from "./print";
 
-const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap" rel="stylesheet">`;
-const URDU = `font-family:'Noto Nastaliq Urdu',serif;direction:rtl`;
+const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Gulzar&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap" rel="stylesheet">`;
+const URDU = `font-family:'Gulzar','Noto Nastaliq Urdu',serif;direction:rtl;line-height:2`;
 
 export interface SlipPrint {
   name: string; token_no: number; posting_date: string; posting_time: string; patient: string; patient_name: string; purpose: string;

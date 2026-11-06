@@ -93,3 +93,11 @@ def publish(event, message, branch=None):
 
 def first_name(full_name):
 	return (full_name or "").strip().split(" ")[0] if full_name else ""
+
+
+def hhmm(t):
+	"""Time / timedelta / "9:00:00" → "09:00" (str(timedelta)[:5] drops the leading zero)."""
+	if not t:
+		return ""
+	parts = str(t).split(" ")[-1].split(":")
+	return f"{int(parts[0]):02d}:{parts[1][:2]}" if len(parts) > 1 else str(t)

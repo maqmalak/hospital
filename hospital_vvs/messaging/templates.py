@@ -5,6 +5,9 @@ import frappe
 
 # event: (wa params, sms en, sms ur, urgent)
 DEFAULTS = {
+	"appointment_requested": ("first_name,clinic,ref,doctor,date,time,clinic_phone",
+		"Dear {first_name}, {clinic} received your appointment request {ref} with {doctor} for {date} {time}. Reception will confirm it on WhatsApp shortly. Help: {clinic_phone}",
+		"محترم {first_name}، {clinic} کو {doctor} کے ساتھ {date} {time} کے لیے آپ کی اپوائنٹمنٹ کی درخواست {ref} موصول ہو گئی ہے۔ استقبالیہ جلد واٹس ایپ پر تصدیق کرے گا۔ رابطہ: {clinic_phone}", 1),
 	"appointment_confirmed": ("first_name,clinic,ref,doctor,date,time,link",
 		"Dear {first_name}, your appointment {ref} with {doctor} at {clinic} is confirmed for {date} {time}. Manage: {link}",
 		"محترم {first_name}، {clinic} میں {doctor} کے ساتھ آپ کی اپوائنٹمنٹ {ref} کی تصدیق ہو گئی ہے: {date} {time}۔ تفصیل: {link}", 0),

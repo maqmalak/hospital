@@ -6,7 +6,7 @@ from frappe.utils import cint, flt, now_datetime, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import discounts
-from hospital_vvs.utils import check_branch, default_branch, publish, require_roles, setting, settings
+from hospital_vvs.utils import check_branch, default_branch, publish, require_roles, setting, settings, hhmm
 
 COUNTER_ROLES = (R.RECEPTIONIST,)
 
@@ -99,7 +99,7 @@ def slip_print(name):
 		"qualification", "registration_no", "show_license"], as_dict=True)
 	inv = frappe.db.get_value("Sales Invoice", doc.sales_invoice, ["name", "grand_total", "rounded_total", "paid_amount",
 		"total_taxes_and_charges"], as_dict=True) if doc.sales_invoice else None
-	return {"name": doc.name, "token_no": doc.token_no, "posting_date": str(doc.posting_date), "posting_time": str(doc.posting_time)[:5],
+	return {"name": doc.name, "token_no": doc.token_no, "posting_date": str(doc.posting_date), "posting_time": hhmm(doc.posting_time),
 		"patient": doc.patient, "patient_name": doc.patient_name, "purpose": doc.purpose, "doctor": doctor, "branch": doc.branch,
 		"items": [{"item_name": r.item_name, "qty": r.qty, "rate": r.rate, "amount": r.amount} for r in doc.items],
 		"gross_total": doc.gross_total, "discount_amount": doc.discount_amount, "net_total": doc.net_total, "payer_type": doc.payer_type,

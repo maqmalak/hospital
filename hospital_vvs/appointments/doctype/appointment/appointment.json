@@ -18,6 +18,7 @@
   "ap2",
   "status",
   "source_channel",
+  "priority",
   "booking_ref",
   "pay_sec",
   "fee",
@@ -30,6 +31,7 @@
   "misc_sec",
   "manage_token",
   "reminder_evening_sent",
+  "messages_allowed",
   "reminder_hours_sent",
   "arrived_at",
   "ap4",
@@ -134,6 +136,15 @@
    "options": "Reception\nWeb\nWhatsApp"
   },
   {
+   "default": "Normal",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Priority",
+   "options": "Normal\nUrgent\nElderly\nDisabled\nFollow-up"
+  },
+  {
    "fieldname": "booking_ref",
    "fieldtype": "Data",
    "label": "Booking Ref",
@@ -207,6 +218,12 @@
    "read_only": 1
   },
   {
+   "description": "Ticked on the booking form / implied by a WhatsApp chat",
+   "fieldname": "messages_allowed",
+   "fieldtype": "Check",
+   "label": "Patient Agreed to Booking Messages"
+  },
+  {
    "fieldname": "reminder_hours_sent",
    "fieldtype": "Check",
    "label": "Reminder Hours Sent",
@@ -254,7 +271,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-07 01:39:56.115982",
  "modified_by": "Administrator",
  "module": "Appointments",
  "name": "Appointment",

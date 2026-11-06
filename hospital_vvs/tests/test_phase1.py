@@ -231,7 +231,9 @@ class TestAppointments(IntegrationTestCase):
 		p = new_patient()
 		appt = svc.book(doctor=doctor, slot=s, patient=p.name, source_channel="Web", hold_key="web:aaaa")
 		self.assertEqual(frappe.db.get_value("Time Slot", s, "status"), "Booked")
-		self.assertTrue(frappe.db.exists("Message Log", {"reference_name": appt.name, "event": "appointment_confirmed"}))
+		self.assertTrue(frappe.db.exists("Message Log", {"reference_name": appt.name, "event": ["in", ["appointment_confirmed", "appointment_requested"]]}))
+		if appt.status == "Pending":
+			svc.set_status(appt.name, "Confirmed")
 		svc.reschedule(appt.name, slots[1].name)
 		self.assertEqual(frappe.db.get_value("Time Slot", s, "status"), "Available")
 		svc.cancel(appt.name)
@@ -336,3 +338,41 @@ class TestRoutes(IntegrationTestCase):
 		self.assertNotIn("/settings", cashier)
 		doctor = {r["route"] for r in allowed_routes(user(R.DOCTOR))}
 		self.assertIn("/pw-prescription", doctor)
+
+
+class TestBookingMessages(IntegrationTestCase):
+	def test_web_request_then_reception_confirm(self):
+		frappe.db.set_single_value("Clinic Settings", {"auto_confirm": 0, "quiet_hours_start": None, "quiet_hours_end": None})
+		frappe.clear_document_cache("Clinic Settings")
+		doctor = demo_doctor()
+		svc.generate_slots(10, doctor)
+		date = [d for d in svc.available_dates(doctor) if str(d.slot_date) > today()][0].slot_date
+		slot = svc.available_slots(doctor, date)[0].name
+		appt = svc.book(doctor=doctor, slot=slot, patient_name="New Web Patient", phone="03211234500", source_channel="Web", messages_allowed=1)
+		self.assertEqual(appt.status, "Pending")
+		req = frappe.get_all("Message Log", filters={"reference_name": appt.name, "event": "appointment_requested"}, fields=["status", "phone", "body"])
+		self.assertEqual(req[0].status, "Sent")  # no patient record yet: the booking's own consent allows it
+		self.assertEqual(req[0].phone, "+923211234500")
+		self.assertIn(appt.booking_ref, req[0].body)
+		svc.set_status(appt.name, "Confirmed")
+		self.assertTrue(frappe.db.exists("Message Log", {"reference_name": appt.name, "event": "appointment_confirmed", "status": "Sent"}))
+		frappe.db.set_single_value("Clinic Settings", {"auto_confirm": 1})
+		frappe.clear_document_cache("Clinic Settings")
+
+	def test_no_consent_no_message(self):
+		doctor = demo_doctor()
+		svc.generate_slots(10, doctor)
+		date = [d for d in svc.available_dates(doctor) if str(d.slot_date) > today()][0].slot_date
+		slot = svc.available_slots(doctor, date)[0].name
+		appt = svc.book(doctor=doctor, slot=slot, patient_name="Quiet Patient", phone="03211234501", source_channel="Web", messages_allowed=0)
+		logs = frappe.get_all("Message Log", filters={"reference_name": appt.name}, pluck="status")
+		self.assertTrue(all(s == "Skipped" for s in logs))
+
+	def test_first_available_and_priority(self):
+		svc.generate_slots(10)
+		s = svc.first_available("General Physician", branch="Lahore Main")
+		self.assertTrue(s and s["doctor"])
+		p = new_patient()
+		appt = svc.book(doctor=s["doctor"], slot=s["slot"], patient=p.name, priority="Urgent")
+		self.assertEqual(appt.priority, "Urgent")
+		self.assertEqual(appt.status, "Confirmed")

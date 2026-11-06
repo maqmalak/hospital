@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn";
+import { hhmm } from "@/utils/dates";
 import { Editor, KINDS } from "./MastersPage";
 
 interface Sched { day: string; start_time: string; end_time: string; branch?: string }
@@ -24,7 +25,7 @@ interface Doc {
 }
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const TODAY = DAYS[(new Date().getDay() + 6) % 7];
-const hm = (t?: string) => (t ? t.slice(0, 5) : "");
+const hm = hhmm;
 const rs = (v: number) => `Rs ${Math.round(v || 0).toLocaleString("en-PK")}`;
 const initials = (n: string) => n.replace(/^Dr\.?\s*/i, "").split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 /** Card band: the doctor's colour fading into a deep navy-teal (works in light and dark). */
@@ -157,7 +158,7 @@ function DoctorCard({ d, name, book, queue, edit, leave }: { d: Doc; name: strin
         <div className="rounded-full bg-card p-1 shadow-lg"><Avatar d={d} size={76} /></div>
         <span className={cn("mt-2 rounded-full px-2.5 py-0.5 text-[11px] font-semibold", st.cls)}>{st.label}</span>
         <h3 className="mt-1.5 line-clamp-1 text-lg font-bold">{name}</h3>
-        {d.doctor_name_ur && name !== d.doctor_name_ur && <div className="font-[Noto_Nastaliq_Urdu] text-sm leading-relaxed text-muted-foreground">{d.doctor_name_ur}</div>}
+        {d.doctor_name_ur && name !== d.doctor_name_ur && <div className="font-urdu text-sm leading-relaxed text-muted-foreground">{d.doctor_name_ur}</div>}
         <div className="line-clamp-1 text-xs text-muted-foreground">{d.qualification}</div>
         {d.registration_no && <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground"><BadgeCheck className="h-3 w-3 text-teal-600" />{d.registration_no}</div>}
       </div>

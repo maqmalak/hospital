@@ -85,7 +85,7 @@ export default function LoginPage() {
           <h1 className="max-w-xl text-4xl font-extrabold leading-[1.1] tracking-tight xl:text-5xl">
             Care that flows<br /><span className="bg-gradient-to-r from-teal-200 via-emerald-200 to-cyan-200 bg-clip-text text-transparent">from front desk to bedside.</span>
           </h1>
-          <p className="mt-3 font-[Noto_Nastaliq_Urdu] text-xl leading-loose text-teal-100/90" dir="rtl">استقبالیہ سے بستر تک — ایک پرسکون نظام</p>
+          <p className="mt-3 font-urdu text-xl leading-loose text-teal-100/90" dir="rtl">استقبالیہ سے بستر تک — ایک پرسکون نظام</p>
           <p className="mt-2 max-w-lg text-sm leading-relaxed text-teal-50/75">Appointments on web and WhatsApp, prescriptions with allergy and interaction checks, live wards and billing — in English and اردو.</p>
 
           {/* live preview cards */}

@@ -42,7 +42,15 @@ nurse, supervisor, accounts, lab, pathologist, pharmacist, cashier, store, deo, 
 - **History** timeline (visits, prescriptions with versions, overrides, appointments, bed stays) + vitals trend chart; every open logged.
 - **Discount approvals** (realtime), **message log** (resend), **dashboard** (KPIs, 14-day trend, collection by mode, channel mix, demographics, top diagnoses, doctor table), **6 MIS Script Reports** with React viewer + CSV, **settings editor**, **masters editor**.
 
-## Tests (`hospital_vvs/tests/test_phase1.py`, 19 green)
+## UI round 2 (2026-11-07, owner requests)
+- Doctors board (gradient cards / list, weekly strip, today's queue, leave, edit), Patients board (cards / list, KPIs, chips, paging), new login page.
+- Registration redesigned (section cards, webcam photo, live card preview, duplicate panel), Urdu name auto-filled from English, Gulzar Urdu font everywhere.
+- Patient file on every patient: reception visits with appointment + check-up status, invoices, payments, treatment costs, amount owed (patient / payer), procedures and bed log.
+- Appointments: gradient header with KPIs, **calendar Day / Multi-day (3–14) / Week / Month** with every slot, click a free slot to book; Requests tab + live alert; WhatsApp status per booking with Resend; priority; "any available doctor".
+- Web portal redesigned (5 steps, doctor cards with next free day, morning/afternoon/evening slots, sticky summary + hold timer, consent tick box, add-to-calendar).
+- Fixed: times before 10:00 printed as "9:00:" (now hhmm helper everywhere).
+
+## Tests (`hospital_vvs/tests/test_phase1.py`, 22 green; Vitest 10)
 Identity (MR, customer, CNIC encrypted/masked, duplicate + merge moves visits/invoices/customer, reveal logged, cashier blocked, clinical fields hidden from cashier API) · OPD (POS invoice on OPD profile & income account, branch, GL balanced, token, queue, free follow-up no invoice, panel split) · tax before discount · discounts (limit, approval, self-approval blocked, reason required, unapproved discount blocks the slip) · safety (allergy + Major interaction block, override, immutability, amend v2/Superseded, dose parsing) · appointments (hold race, book, reschedule, cancel, leave hides slots, expired hold released) · WhatsApp bot (Urdu booking for a new household member with payment proof; reception handoff) · messaging (no consent → skipped; WhatsApp failure → SMS fallback) · role-filtered routes.
 
 ## Deferred / known gaps

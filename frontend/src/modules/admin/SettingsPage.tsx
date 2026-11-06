@@ -41,6 +41,7 @@ export default function SettingsPage() {
               <Field key={f.fieldname} label={f.label} hint={f.description} className={["Small Text", "Text"].includes(f.fieldtype) ? "sm:col-span-2" : ""}>
                 {f.fieldtype === "Select" ? <select className={inputCls} value={String(doc[f.fieldname] ?? "")} onChange={(e) => set(f.fieldname, e.target.value)}>{(f.options ?? "").split("\n").map((o) => <option key={o}>{o}</option>)}</select>
                   : ["Small Text", "Text"].includes(f.fieldtype) ? <textarea className={inputCls + " h-20 py-2"} value={String(doc[f.fieldname] ?? "")} onChange={(e) => set(f.fieldname, e.target.value)} />
+                  : f.fieldname.endsWith("_ur") ? <input lang="ur" dir="rtl" className={inputCls + " urdu-input"} value={String(doc[f.fieldname] ?? "")} onChange={(e) => set(f.fieldname, e.target.value)} />
                   : <input className={inputCls} type={["Int", "Float", "Currency", "Percent"].includes(f.fieldtype) ? "number" : f.fieldtype === "Time" ? "time" : "text"} value={String(doc[f.fieldname] ?? "")}
                     onChange={(e) => set(f.fieldname, ["Int", "Float", "Currency", "Percent"].includes(f.fieldtype) ? Number(e.target.value) : e.target.value)} />}
               </Field>))}

@@ -10,6 +10,7 @@ import { Avatarish, PageHeader, Pill, Section } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { printCard } from "./shared";
+import { PatientFile } from "./PatientFile";
 
 interface Patient { name: string; patient_name: string; patient_name_ur?: string; gender: string; age?: number; dob?: string; dob_estimated?: number; phone: string;
   alt_phone?: string; address?: string; city?: string; category: string; cnic_masked?: string; can_reveal_cnic: boolean; blood_group?: string; photo?: string;
@@ -40,7 +41,7 @@ export default function PatientDetailPage() {
     ["Legacy MR", p.legacy_mr_no], ["Customer", p.customer]].filter(([, v]) => v);
   return (
     <div className="mx-auto max-w-6xl">
-      <PageHeader title={p.patient_name} icon={User} subtitle={<span>{p.patient_name_ur} {p.patient_name_ur && "·"} <span className="font-mono">{p.name}</span> · {t(p.gender)}</span>}
+      <PageHeader title={p.patient_name} icon={User} subtitle={<span>{p.patient_name_ur && <span className="font-urdu text-base">{p.patient_name_ur} · </span>}<span className="font-mono">{p.name}</span> · {t(p.gender)}</span>}
         actions={<>
           {boot && <Button variant="outline" onClick={() => void printCard(p.name, boot)}><CreditCard className="h-4 w-4" />{t("Patient card")}</Button>}
           {can("/pw-history") && <Link to={`/pw-history/${p.name}`}><Button variant="outline"><History className="h-4 w-4" />{t("Patient history")}</Button></Link>}
@@ -78,6 +79,7 @@ export default function PatientDetailPage() {
             : <p className="text-sm text-muted-foreground">Not linked to a household.</p>}
         </Section>
       </div>
+      <PatientFile mr={p.name} />
     </div>
   );
 }

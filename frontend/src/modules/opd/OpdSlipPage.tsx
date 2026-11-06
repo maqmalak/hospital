@@ -13,6 +13,7 @@ import { Field, inputCls, PatientPicker, Pill, Section, type PatientHit } from "
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
+import { hhmm } from "@/utils/dates";
 
 interface Doctor { name: string; doctor_name: string; doctor_name_ur?: string; specialization?: string; default_fee: number; follow_up_fee: number; consultation_room?: string; color?: string; today: number; waiting: number; with_doctor: number; branch?: string }
 interface Ctx { doctors: Doctor[]; items: { item_code: string; item_name: string; rate: number }[]; modes: string[]; consultation_item: string; follow_up_item: string; follow_up_free_days: number }
@@ -151,7 +152,7 @@ export default function OpdSlipPage() {
           <div className="max-h-72 overflow-y-auto">{(recent.data ?? []).map((s) => (
             <div key={s.name} className="flex items-center gap-3 border-b border-border/60 py-2 text-sm last:border-0">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 font-bold text-primary">{s.token_no}</span>
-              <span className="min-w-0 flex-1"><span className="block truncate font-medium">{s.patient_name}</span><span className="block truncate text-xs text-muted-foreground">{s.doctor_name} · {s.posting_time?.slice(0, 5)}</span></span>
+              <span className="min-w-0 flex-1"><span className="block truncate font-medium">{s.patient_name}</span><span className="block truncate text-xs text-muted-foreground">{s.doctor_name} · {hhmm(s.posting_time)}</span></span>
               {s.is_free_follow_up ? <Pill value="Follow-up" className="bg-teal-100 text-teal-800" /> : null}
               <span className="text-end text-xs"><b className="block tabular-nums">{rs(s.patient_share)}</b>{s.payment_mode}</span>
               <button title="Reprint" onClick={async () => boot && printDoc(opdSlipHtml(await getCall<SlipPrint>("hospital_vvs.api.opd.slip_print", { name: s.name })), "receipt", { agent: !!boot.print.agent })} className="rounded-md p-1.5 hover:bg-muted"><Printer className="h-4 w-4" /></button>

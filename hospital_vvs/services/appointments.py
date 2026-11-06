@@ -6,7 +6,7 @@ from frappe.utils import (add_days, add_to_date, cint, flt, get_datetime, getdat
 	today)
 
 from hospital_vvs.services import messaging
-from hospital_vvs.utils import setting, settings
+from hospital_vvs.utils import setting, settings, hhmm
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 ACTIVE = ("Pending", "Confirmed", "Arrived")
@@ -129,7 +129,7 @@ def doctor_fee(doctor):
 
 
 def book(*, doctor, slot=None, date=None, start_time=None, branch=None, patient=None, patient_name=None, phone=None,
-	source_channel="Reception", payment_channel="At Clinic", hold_key=None, payment_proof=None, age=None, gender=None, notify_patient=True):
+	source_channel="Reception", payment_channel="At Clinic", hold_key=None, payment_proof=None, age=None, gender=None, notify_patient=True, messages_allowed=None, priority=None):
 	"""Create an Appointment. With a slot, re-checks availability inside a row lock (hold by this key is fine)."""
 	from hospital_vvs.hospital_vvs.doctype.patient.patient import normalize_phone
 
@@ -170,12 +170,52 @@ def book(*, doctor, slot=None, date=None, start_time=None, branch=None, patient=
 		"payment_status": "Proof Submitted" if payment_proof else "Unpaid", "payment_proof": payment_proof,
 		"booking_ref": new_booking_ref(), "manage_token": frappe.generate_hash(length=32), "is_new_patient": 0 if patient else 1,
 		"new_patient_age": age, "new_patient_gender": gender,
+		"messages_allowed": 1 if (messages_allowed or source_channel == "WhatsApp") else 0,
+		"priority": priority or ("Follow-up" if patient and is_follow_up(patient, doctor) else "Normal"),
 	}).insert(ignore_permissions=True)
 	if slot:
 		frappe.db.set_value("Time Slot", slot, {"status": "Booked", "appointment": appt.name, "held_by": None, "hold_expires_at": None})
-	if appt.status == "Confirmed" and notify_patient:
-		notify(appt, "appointment_confirmed")
+	if notify_patient:
+		notify(appt, "appointment_confirmed" if appt.status == "Confirmed" else "appointment_requested")
+	if appt.status == "Pending":
+		frappe.publish_realtime("hv:appointment_request", {"name": appt.name, "patient_name": appt.patient_name, "phone": appt.phone,
+			"doctor": appt.doctor_name, "date": str(appt.appointment_date), "time": hhmm(appt.start_time or ""),
+			"source": appt.source_channel}, after_commit=True)
 	return appt
+
+
+PRIORITY_RANK = {"Urgent": 0, "Elderly": 1, "Disabled": 1, "Follow-up": 2, "Normal": 3}
+
+
+def is_follow_up(patient, doctor):
+	days = cint(setting("follow_up_free_days")) or 7
+	return bool(frappe.db.exists("OPD Slip", {"patient": patient, "doctor": doctor, "docstatus": 1, "posting_date": [">=", add_days(today(), -days)]}))
+
+
+def first_available(specialization=None, date=None, branch=None, doctor_type=None):
+	"""Assign by shift: among doctors of this speciality who work that day (or soonest), the earliest free slot wins;
+	a tie goes to the doctor with fewer bookings that day."""
+	filters = {"is_active": 1, "doctor_type": ["!=", "External Referring"]}
+	if specialization:
+		filters["specialization"] = specialization
+	docs = frappe.get_all("Doctor", filters=filters, pluck="name")
+	if not docs:
+		return None
+	date_cond = "slot_date = %(date)s" if date else "slot_date >= curdate()"
+	rows = frappe.db.sql(f"""select ts.name slot, ts.doctor, ts.slot_date, ts.start_time, ts.branch,
+		(select count(*) from tabAppointment a where a.doctor=ts.doctor and a.appointment_date=ts.slot_date and a.status in ('Pending','Confirmed','Arrived')) load_
+		from `tabTime Slot` ts where ts.status='Available' and ts.doctor in %(docs)s and {date_cond}
+		and (ts.slot_date > curdate() or ts.start_time > curtime()) {"and ts.branch=%(branch)s" if branch else ""}
+		order by ts.slot_date, ts.start_time, load_ limit 1""", {"docs": docs, "date": date, "branch": branch}, as_dict=True)
+	if not rows:
+		return None
+	r = rows[0]
+	if doctor_unavailable(r.doctor, r.slot_date, r.branch):
+		return None
+	d = frappe.db.get_value("Doctor", r.doctor, ["doctor_name", "default_fee", "slot_minutes", "consultation_room"], as_dict=True)
+	return {"slot": r.slot, "doctor": r.doctor, "doctor_name": d.doctor_name, "date": str(r.slot_date), "time": hhmm(r.start_time), "branch": r.branch,
+		"fee": flt(d.default_fee) or flt(setting("default_fee")), "minutes": cint(d.slot_minutes) or cint(setting("slot_minutes")) or 15,
+		"room": d.consultation_room, "load": r.load_}
 
 
 def new_booking_ref():
@@ -190,10 +230,12 @@ def manage_link(appt):
 
 
 def notify(appt, event):
+	branch_phone = frappe.db.get_value("Branch", appt.branch, "hv_phone") or setting("phone") or ""
 	return messaging.send(event, patient=appt.patient, phone=appt.phone, reference_doctype="Appointment", reference_name=appt.name,
-		context={"first_name": (appt.patient_name or "").split(" ")[0], "ref": appt.booking_ref, "doctor": appt.doctor_name
+		consent=bool(appt.get("messages_allowed")),
+		context={"clinic_phone": branch_phone, "first_name": (appt.patient_name or "").split(" ")[0], "ref": appt.booking_ref, "doctor": appt.doctor_name
 			or frappe.db.get_value("Doctor", appt.doctor, "doctor_name"), "date": frappe.utils.formatdate(appt.appointment_date),
-			"time": str(appt.start_time or "")[:5], "link": manage_link(appt)})
+			"time": hhmm(appt.start_time or ""), "link": manage_link(appt)})
 
 
 def set_status(name, status, reason=None):

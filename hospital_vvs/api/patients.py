@@ -6,11 +6,11 @@ from difflib import SequenceMatcher
 
 import frappe
 from frappe import _
-from frappe.utils import add_years, cint, getdate, now_datetime, today
+from frappe.utils import add_years, cint, flt, getdate, now_datetime, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.hospital_vvs.doctype.patient.patient import cnic_digits, cnic_hash, dob_from_age, normalize_phone
-from hospital_vvs.utils import can_see_clinical, check_branch, default_branch, has_any_role, log_access, require_roles
+from hospital_vvs.utils import can_see_clinical, check_branch, default_branch, has_any_role, hhmm, log_access, require_roles
 
 LIST_FIELDS = ["name", "patient_name", "patient_name_ur", "gender", "dob", "phone", "city", "category", "cnic_masked", "photo",
 	"branch", "disabled", "merged_into", "creation"]
@@ -329,3 +329,68 @@ def board(q=None, category=None, gender=None, branch=None, sort="recent", start=
 	stats["admitted"] = frappe.db.count("Hospital Bed", {"status": "Occupied"})
 	stats["seen_today"] = frappe.db.sql("select count(distinct patient) from `tabOPD Slip` where docstatus=1 and posting_date=curdate()")[0][0]
 	return {"rows": rows, "total": total, "stats": stats}
+
+
+@frappe.whitelist()
+def file(name):
+	"""Patient file: reception visits (with appointment + check-up status), invoices, payments, treatment costs, amount owed,
+	procedures and bed log. Money roles see this too; clinical text (complaint, diagnosis) only for clinical roles."""
+	require_roles(*REGISTER_ROLES, R.ACCOUNTANT, R.CASH_SUPERVISOR)
+	p = frappe.db.get_value("Patient", name, ["name", "customer", "patient_name"], as_dict=True)
+	if not p:
+		frappe.throw(_("Patient not found."))
+	clinical = can_see_clinical()
+	log_access("Patient file", patient=name, reference_doctype="Patient", reference_name=name)
+
+	visits = frappe.db.sql("""select s.name, s.posting_date, s.posting_time, s.doctor_name, s.purpose, s.token_no, s.branch, s.net_total,
+		s.patient_share, s.payer_share, s.payer_type, s.discount_amount, s.is_free_follow_up, s.sales_invoice, s.payment_mode, s.chief_complaint,
+		s.appointment, q.status queue_status, q.called_at, q.completed_at, a.booking_ref, a.source_channel, a.start_time appt_time, a.status appt_status,
+		(select name from tabPrescription rx where rx.opd_slip=s.name and rx.docstatus=1 order by rx.creation desc limit 1) prescription
+		from `tabOPD Slip` s left join `tabQueue Entry` q on q.name=s.queue_entry left join tabAppointment a on a.name=s.appointment
+		where s.patient=%s and s.docstatus=1 order by s.posting_date desc, s.posting_time desc""", name, as_dict=True)
+	for v in visits:
+		v["checkup"] = ("Seen" if v.queue_status == "Done" or v.prescription else "With doctor" if v.queue_status in ("Called", "In Consultation")
+			else "Skipped" if v.queue_status == "Skipped" else "Waiting")
+		v["appt_time"] = hhmm(v.appt_time)
+		v["posting_time"] = hhmm(v.posting_time)
+		if not clinical:
+			v["chief_complaint"] = None
+	appointments = frappe.get_all("Appointment", filters={"patient": name}, fields=["name", "booking_ref", "appointment_date", "start_time", "doctor_name",
+		"status", "source_channel", "fee", "payment_status", "opd_slip"], order_by="appointment_date desc")
+	for a in appointments:
+		a["start_time"] = hhmm(a.start_time)
+
+	invoices = frappe.db.sql("""select name, posting_date, customer, hv_billing_type billing_type, hv_reference_doctype ref_doctype, hv_reference_name ref_name,
+		grand_total, rounded_total, paid_amount, outstanding_amount, status, is_return, is_pos, hv_is_payer_share payer
+		from `tabSales Invoice` where docstatus=1 and (hv_patient=%(p)s or customer=%(c)s) order by posting_date desc, creation desc""",
+		{"p": name, "c": p.customer or ""}, as_dict=True)
+	inv_names = [i.name for i in invoices] or [""]
+	payments = frappe.db.sql("""select si.name invoice, si.posting_date date, sip.mode_of_payment mode, sip.amount, 'Counter (POS)' source, null reference
+		from `tabSales Invoice Payment` sip join `tabSales Invoice` si on si.name=sip.parent where si.name in %(inv)s and si.docstatus=1 and sip.amount != 0
+		union all
+		select pe.name invoice, pe.posting_date date, pe.mode_of_payment mode, pe.paid_amount amount, 'Payment Entry' source, pe.reference_no reference
+		from `tabPayment Entry` pe where pe.docstatus=1 and pe.party_type='Customer' and pe.party=%(c)s
+		order by date desc""", {"inv": inv_names, "c": p.customer or ""}, as_dict=True)
+	costs = frappe.db.sql("""select coalesce(si.hv_billing_type, 'Other') billing_type, sii.item_name, sum(sii.qty) qty, sum(sii.amount) amount
+		from `tabSales Invoice Item` sii join `tabSales Invoice` si on si.name=sii.parent where si.name in %(inv)s and si.docstatus=1 and si.is_return=0
+		group by billing_type, sii.item_code order by amount desc""", {"inv": inv_names}, as_dict=True)
+	procedures = frappe.db.sql("""select s.posting_date date, i.item_name, i.qty, i.amount, s.doctor_name, s.name source
+		from `tabOPD Slip Item` i join `tabOPD Slip` s on s.name=i.parent join tabItem it on it.name=i.item_code
+		where s.patient=%s and s.docstatus=1 and it.item_code like 'PROC-%%' order by s.posting_date desc""", name, as_dict=True)
+	beds = frappe.get_all("Bed Status Log", filters={"patient": name}, fields=["bed", "ward", "from_status", "to_status", "changed_on", "changed_by", "note"],
+		order_by="changed_on desc")
+
+	own = [i for i in invoices if i.customer == p.customer]
+	payer = [i for i in invoices if i.customer != p.customer]
+	totals = {
+		"billed": sum(flt(i.grand_total) for i in own if not i.is_return) + sum(flt(i.grand_total) for i in payer),
+		"patient_billed": sum(flt(i.grand_total) for i in own),
+		"payer_billed": sum(flt(i.grand_total) for i in payer),
+		"paid": sum(flt(x.amount) for x in payments),
+		"owed": sum(flt(i.outstanding_amount) for i in own),
+		"payer_owed": sum(flt(i.outstanding_amount) for i in payer),
+		"discount": sum(flt(v.discount_amount) for v in visits),
+		"visits": len(visits), "seen": sum(1 for v in visits if v.checkup == "Seen"),
+	}
+	return {"visits": visits, "appointments": appointments, "invoices": invoices, "payments": payments, "costs": costs,
+		"procedures": procedures, "beds": beds, "totals": totals, "customer": p.customer}

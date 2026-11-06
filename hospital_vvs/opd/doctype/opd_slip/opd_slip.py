@@ -124,6 +124,7 @@ class OPDSlip(Document):
 			q = frappe.get_doc({"doctype": "Queue Entry", "doctor": self.doctor, "patient": self.patient, "branch": self.branch,
 				"queue_date": self.posting_date, "room": room, "token_no": self.token_no, "status": "Waiting",
 				"is_follow_up": self.purpose == "Follow-up", "opd_slip": self.name, "appointment": self.appointment,
+				"priority": appt_priority(self.appointment),
 			}).insert(ignore_permissions=True)
 		self.db_set("queue_entry", q.name)
 		publish("queue", {"doctor": self.doctor, "action": "added", "token": self.token_no}, self.branch)
@@ -141,3 +142,8 @@ def next_token(doctor, branch, date):
 	rows = frappe.db.sql("""select max(token_no) from `tabQueue Entry` where doctor=%s and branch=%s and queue_date=%s for update""",
 		(doctor, branch, date))
 	return cint(rows[0][0] if rows else 0) + 1
+
+
+def appt_priority(appointment):
+	p = frappe.db.get_value("Appointment", appointment, "priority") if appointment else None
+	return p if p in ("Urgent", "Elderly", "Disabled") else None

@@ -351,8 +351,22 @@
   }
 }
 
-/* RTL (Urdu / Arabic): Nastaliq / Kufi fonts and a little more line height */
-html[lang="ur"] body { font-family: "Noto Nastaliq Urdu", Inter, system-ui, sans-serif; line-height: 1.9; }
+/* Urdu / Arabic typography.
+   Gulzar (Google Fonts, Nastaliq) reads cleaner than Noto Nastaliq at UI sizes; Nastaliq needs extra line height or the
+   descenders get clipped — every Urdu input uses .urdu-input / lang="ur" for that reason. */
+.font-urdu, [lang="ur"] { font-family: "Gulzar", "Noto Nastaliq Urdu", serif; }
+.font-urdu { line-height: 2; letter-spacing: 0; }
+input.urdu-input, textarea.urdu-input, input[lang="ur"], textarea[lang="ur"] {
+  font-family: "Gulzar", "Noto Nastaliq Urdu", serif !important;
+  font-size: 1.05rem; line-height: 2.1 !important; direction: rtl; text-align: right;
+  padding-top: 0.15rem; padding-bottom: 0.15rem; min-height: 2.9rem; height: auto !important;
+}
+input.urdu-input::placeholder, input[lang="ur"]::placeholder { font-family: "Gulzar", "Noto Nastaliq Urdu", serif; opacity: 0.55; }
+html[lang="ur"] body { font-family: "Gulzar", "Noto Nastaliq Urdu", Inter, system-ui, sans-serif; line-height: 1.85; }
+html[lang="ur"] body h1, html[lang="ur"] body h2, html[lang="ur"] body h3 { line-height: 1.9; }
+/* numbers, codes and English data stay in Inter even in the Urdu UI */
+html[lang="ur"] .font-mono, html[lang="ur"] input:not([lang="ur"]):not(.urdu-input), html[lang="ur"] select, html[lang="ur"] .tabular-nums, html[lang="ur"] table td {
+  font-family: Inter, system-ui, sans-serif; line-height: 1.5;
+}
 html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-serif; }
-html[lang="ur"] .font-mono, html[lang="ur"] input, html[lang="ur"] .tabular-nums { font-family: Inter, system-ui, sans-serif; line-height: 1.5; }
 @media print { .no-print { display: none !important; } }

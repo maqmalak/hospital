@@ -27,7 +27,7 @@ export default function WardKioskPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 p-6 text-white">
       <header className="mb-5 flex flex-wrap items-end gap-6">
-        <div className="flex-1"><div className="text-3xl font-extrabold">{boot?.clinic.name} · Bed status</div><div className="font-[Noto_Nastaliq_Urdu] text-lg text-teal-200">{boot?.clinic.name_ur} · بستروں کی صورتحال</div></div>
+        <div className="flex-1"><div className="text-3xl font-extrabold">{boot?.clinic.name} · Bed status</div><div className="font-urdu text-lg text-teal-200">{boot?.clinic.name_ur} · بستروں کی صورتحال</div></div>
         {([["Available", "خالی", "bg-emerald-500"], ["Occupied", "زیر استعمال", "bg-rose-500"], ["Reserved", "مخصوص", "bg-sky-500"], ["Cleaning", "صفائی", "bg-amber-400"]] as const).map(([k, ur, c]) => (
           <div key={k} className="text-center"><div className="text-4xl font-black tabular-nums">{tot[k] ?? 0}</div><div className="flex items-center gap-1.5 text-sm text-white/70"><span className={cn("h-3 w-3 rounded-full", c)} />{k} · {ur}</div></div>))}
         <div className="text-end"><div className="text-4xl font-black tabular-nums">{data?.occupancy ?? 0}%</div><div className="text-sm text-white/70">Occupancy</div></div>
@@ -40,7 +40,7 @@ export default function WardKioskPage() {
           return (
             <section key={w.name} className="flex flex-col rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
               <div className="mb-3 flex items-center gap-2"><span className="h-3 w-3 rounded-full" style={{ background: w.color || "#14b8a6" }} /><h2 className="flex-1 text-xl font-bold">{w.ward_name}</h2>
-                <span className="font-[Noto_Nastaliq_Urdu] text-teal-200">{w.ward_name_ur}</span><span className="rounded-full bg-white/10 px-3 py-0.5 text-sm font-semibold tabular-nums">{occ}/{beds.length}</span></div>
+                <span className="font-urdu text-teal-200">{w.ward_name_ur}</span><span className="rounded-full bg-white/10 px-3 py-0.5 text-sm font-semibold tabular-nums">{occ}/{beds.length}</span></div>
               <div className="mb-3 h-2 rounded-full bg-white/10"><div className="h-2 rounded-full bg-gradient-to-r from-teal-400 to-rose-500" style={{ width: `${beds.length ? (occ / beds.length) * 100 : 0}%` }} /></div>
               <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
                 {beds.map((b) => { const st = stayState(b, now); const Icon = b.status === "Cleaning" ? Sparkles : b.status === "Maintenance" ? Wrench : b.status === "Reserved" ? CalendarPlus : BedDouble; return (

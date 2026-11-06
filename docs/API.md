@@ -19,8 +19,11 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `slots` | doctor, date, branch |  |  |  |
 | `dates` | doctor, branch |  |  |  |
 | `book` | data | POST | STAFF |  |
+| `first_available` | specialization, date, branch |  | STAFF | Suggest the doctor and slot for "any available doctor" (by shift, earliest slot, lighter load). |
+| `set_priority` | name, priority | POST | STAFF |  |
 | `set_status` | name, status, reason | POST | STAFF |  |
 | `reschedule` | name, slot | POST | STAFF |  |
+| `resend_message` | name | POST | STAFF | Resend the latest WhatsApp/SMS for this appointment (request or confirmation, by its current status). |
 | `mark_paid` | name | POST | STAFF |  |
 | `link_patient` | name, patient | POST | STAFF | Booking made for a new patient: link it to the patient registered at the desk. |
 | `regenerate_slots` | days | POST | ADMIN, RECEPTIONIST |  |
@@ -36,6 +39,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `manage_get` | token | guest |  |  |
 | `manage_reschedule` | token, slot | guest POST |  |  |
 | `manage_cancel` | token | guest POST |  |  |
+| `calendar` | start, end, doctor, branch, summary |  | STAFF, DOCTOR, NURSE | Calendar views. Day/week: every slot (free, held, booked, blocked) with its appointment. Month (summary=1): counts per day |
 
 ## billing
 
@@ -108,6 +112,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `merge_preview` | survivor, duplicate |  | ADMIN |  |
 | `merge` | survivor, duplicate, confirm_mr | POST | ADMIN | Move every linked record and the Customer to the survivor; disable the duplicate. Cannot be undone automatically. |
 | `board` | q, category, gender, branch, sort, start, limit |  | REGISTER_ROLES | Patients screen: a page of patients with visit counts, last visit, allergy flag and upcoming booking, plus totals. |
+| `file` | name |  | REGISTER_ROLES, ACCOUNTANT, CASH_SUPERVISOR | Patient file: reception visits (with appointment + check-up status), invoices, payments, treatment costs, amount owed, |
 
 ## prescription
 

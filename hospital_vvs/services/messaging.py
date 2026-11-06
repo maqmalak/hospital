@@ -139,8 +139,9 @@ def render(text, context):
 
 # ------------------------------------------------------------------ public API
 def send(event, *, phone=None, patient=None, context=None, reference_doctype=None, reference_name=None,
-	language=None, conversation=None, channel=None):
-	"""Queue one message. Returns the Message Log name, or None when skipped (template off, no consent, …)."""
+	language=None, conversation=None, channel=None, consent=False):
+	"""Queue one message. Returns the Message Log name, or None when skipped (template off, no consent, …).
+	consent=True: the patient agreed to messages about this booking (form tick box / patient-started WhatsApp chat)."""
 	tpl = frappe.db.get_value("Message Template", event, ["enabled", "marketing", "urgent", "fallback_to_sms"], as_dict=True)
 	ctx = dict(context or {})
 	ctx.setdefault("clinic", setting("sender_name") or setting("clinic_name"))
@@ -158,7 +159,7 @@ def send(event, *, phone=None, patient=None, context=None, reference_doctype=Non
 	channel = channel or ("WhatsApp" if channel_enabled("WhatsApp") else "SMS")
 	if not reason and not channel_enabled(channel):
 		reason = f"{channel} disabled"
-	if not reason and tpl.marketing and not conversation and not has_consent(patient, channel):
+	if not reason and tpl.marketing and not conversation and not consent and not has_consent(patient, channel):
 		if channel == "WhatsApp" and tpl.fallback_to_sms and channel_enabled("SMS") and has_consent(patient, "SMS"):
 			channel = "SMS"
 		else:
