@@ -8,6 +8,7 @@ import { cn } from "@/utils/cn";
 import { toISODate } from "@/utils/dates";
 
 export type CalView = "day" | "multi" | "week" | "month";
+export type Shift = "all" | "day" | "night";
 interface Doctor { name: string; doctor_name: string; specialization?: string; color?: string; consultation_room?: string }
 interface Slot { name: string | null; doctor: string; slot_date: string; start_time: string; end_time: string; status: string; appointment?: string;
   patient?: string; patient_name?: string; phone?: string; appt_status?: string; source_channel?: string; booking_ref?: string; priority?: string }
@@ -29,7 +30,7 @@ const APPT: Record<string, string> = {
 };
 const PRI: Record<string, string> = { Urgent: "bg-red-600", Elderly: "bg-orange-500", Disabled: "bg-blue-600", "Follow-up": "bg-teal-600" };
 
-export function CalendarView({ view, setView, onBook, onOpen }: { view: CalView; setView: (v: CalView) => void; onBook: (p: Preset) => void; onOpen: (appointment: string) => void }) {
+export function CalendarView({ view, setView, onBook, onOpen, shift = "all" }: { view: CalView; shift?: Shift; setView: (v: CalView) => void; onBook: (p: Preset) => void; onOpen: (appointment: string) => void }) {
   const { boot, branch } = useAuth();
   const qc = useQueryClient();
   const [anchor, setAnchor] = useState(() => new Date());
@@ -44,7 +45,7 @@ export function CalendarView({ view, setView, onBook, onOpen }: { view: CalView;
     return [s, addDays(s, 41)];
   }, [view, anchor, span]);
   const base = useApi<DayData | MonthData>("appointments.calendar", { start: iso(range[0]), end: iso(range[1]), branch, summary: view === "month" ? 1 : 0,
-    doctor: view === "week" || view === "multi" ? doctor || undefined : undefined }, { refetchInterval: 30_000 });
+    doctor: view === "week" || view === "multi" ? doctor || undefined : undefined, shift: shift === "all" ? undefined : shift }, { refetchInterval: 30_000 });
   useRealtime(boot?.site, ["hv:appointment_request"], () => void qc.invalidateQueries({ queryKey: ["appointments.calendar"] }));
   const doctors = base.data?.doctors ?? [];
   const weekDoctor = doctor || doctors[0]?.name || "";

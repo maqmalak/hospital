@@ -51,6 +51,7 @@ def boot():
 		"show_first_name_on_display": cint(s.show_first_name_on_display),
 		"message_mode": s.message_mode,
 		"site": frappe.local.site,
+		"shifts": {"day_start": str(s.day_shift_start or "07:00:00")[:8], "night_start": str(s.night_shift_start or "17:00:00")[:8]},
 		"csrf_token": frappe.sessions.get_csrf_token(),
 	}
 

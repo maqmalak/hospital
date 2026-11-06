@@ -9,6 +9,7 @@ export interface Boot {
   doctor?: { name: string; doctor_name: string } | null; branches: string[]; branch: string | null;
   routes: { route: string; label: string }[]; modules: Record<string, number>;
   clinic: { name: string; name_ur?: string; name_ar?: string; logo?: string; address?: string; phone?: string; mode?: string; currency: string };
+  shifts?: { day_start: string; night_start: string };
   training: number; idle_lock_minutes: number; show_first_name_on_display: number; message_mode: string; site: string; csrf_token: string;
   print: { receipt: string; prescription: string; card: string; agent: number; printers: Record<string, string>[] };
 }

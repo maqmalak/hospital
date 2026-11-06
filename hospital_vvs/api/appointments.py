@@ -318,13 +318,29 @@ def manage_cancel(token):
 
 
 @frappe.whitelist()
-def calendar(start, end, doctor=None, branch=None, summary=0):
+def shift_cond(shift, col):
+	"""SQL condition for the Day / Night filter (shift start times from Clinic Settings)."""
+	if shift not in ("day", "night"):
+		return ""
+	import re
+
+	def t(v, default):
+		v = str(v or default).strip()
+		return v.zfill(8) if re.fullmatch(r"\d{1,2}:\d{2}:\d{2}", v) else default  # strict HH:MM:SS before it goes into SQL
+
+	day, night = t(setting("day_shift_start"), "07:00:00"), t(setting("night_shift_start"), "17:00:00")
+	inside = f"({col} >= '{day}' and {col} < '{night}')"
+	return f" and {inside}" if shift == "day" else f" and not {inside}"
+
+
+@frappe.whitelist()
+def calendar(start, end, doctor=None, branch=None, summary=0, shift=None):
 	"""Calendar views. Day/week: every slot (free, held, booked, blocked) with its appointment. Month (summary=1): counts per day
 	and doctor. Leave and blocked dates are included so the calendar can shade them."""
 	require_roles(*STAFF, R.DOCTOR, R.NURSE)
 	branch = branch or default_branch()
 	args = {"start": start, "end": end, "branch": branch, "doctor": doctor}
-	dcond = "and ts.doctor=%(doctor)s" if doctor else ""
+	dcond = ("and ts.doctor=%(doctor)s" if doctor else "") + shift_cond(shift, "ts.start_time")
 	doctors = frappe.get_all("Doctor", filters={"is_active": 1, "doctor_type": ["!=", "External Referring"]},
 		fields=["name", "doctor_name", "specialization", "color", "consultation_room", "slot_minutes", "branch"], order_by="doctor_name")
 	doctors = [d for d in doctors if not d.branch or d.branch == branch]
@@ -339,7 +355,7 @@ def calendar(start, end, doctor=None, branch=None, summary=0):
 			where ts.slot_date between %(start)s and %(end)s and ts.branch=%(branch)s {dcond} group by ts.slot_date, ts.doctor""", args, as_dict=True)
 		appts = frappe.db.sql(f"""select appointment_date d, status, count(*) n from tabAppointment
 			where appointment_date between %(start)s and %(end)s and branch=%(branch)s {"and doctor=%(doctor)s" if doctor else ""}
-			group by appointment_date, status""", args, as_dict=True)
+			{shift_cond(shift, "start_time")} group by appointment_date, status""", args, as_dict=True)
 		days = {}
 		for r in rows:
 			x = days.setdefault(str(r.d), {"free": 0, "booked": 0, "held": 0, "blocked": 0, "doctors": [], "status": {}})
@@ -360,7 +376,7 @@ def calendar(start, end, doctor=None, branch=None, summary=0):
 	# bookings without a slot (walk-in style or old slots) still show at their time
 	loose = frappe.db.sql(f"""select name appointment, doctor, appointment_date slot_date, start_time, patient, patient_name, phone, status appt_status,
 		source_channel, booking_ref, priority from tabAppointment where ifnull(time_slot,'')='' and appointment_date between %(start)s and %(end)s
-		and branch=%(branch)s {"and doctor=%(doctor)s" if doctor else ""} and status not in ('Cancelled','Rejected')""", args, as_dict=True)
+		and branch=%(branch)s {"and doctor=%(doctor)s" if doctor else ""} {shift_cond(shift, "start_time")} and status not in ('Cancelled','Rejected')""", args, as_dict=True)
 	for l in loose:
 		l.update({"name": None, "status": "Booked", "slot_date": str(l.slot_date), "start_time": hhmm(l.start_time), "end_time": ""})
 	return dict(extra, slots=slots + loose)

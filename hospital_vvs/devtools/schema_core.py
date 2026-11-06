@@ -118,7 +118,9 @@ SETTINGS = doctype("Clinic Settings", M, [
 	f("reminder_evening_before", "Check", default="1"), f("reminder_evening_time", "Time", default="19:00:00"),
 	f("reminder_hours_before", "Int", default="3"),
 	f("one_booking_per_doctor_per_day", "Check", default="1"),
-	f("max_unpaid_pending_per_phone", "Int", default="3"), f("otp_minutes", "Int", default="5", label="OTP Validity (minutes)"),
+	f("max_unpaid_pending_per_phone", "Int", default="3"),
+	f("day_shift_start", "Time", default="07:00:00", description="Day / night filter on the appointments screen"),
+	f("night_shift_start", "Time", default="17:00:00"), f("otp_minutes", "Int", default="5", label="OTP Validity (minutes)"),
 
 	tab("messaging_tab", "Messaging"),
 	f("message_mode", "Select", ["Test (no provider)", "Live"], default="Test (no provider)",

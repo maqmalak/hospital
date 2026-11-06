@@ -39,7 +39,8 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `manage_get` | token | guest |  |  |
 | `manage_reschedule` | token, slot | guest POST |  |  |
 | `manage_cancel` | token | guest POST |  |  |
-| `calendar` | start, end, doctor, branch, summary |  | STAFF, DOCTOR, NURSE | Calendar views. Day/week: every slot (free, held, booked, blocked) with its appointment. Month (summary=1): counts per day |
+| `shift_cond` | shift, col |  |  | SQL condition for the Day / Night filter (shift start times from Clinic Settings). |
+| `calendar` | start, end, doctor, branch, summary, shift |  | STAFF, DOCTOR, NURSE | Calendar views. Day/week: every slot (free, held, booked, blocked) with its appointment. Month (summary=1): counts per day |
 
 ## billing
 

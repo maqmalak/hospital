@@ -102,6 +102,8 @@
   "reminder_hours_before",
   "one_booking_per_doctor_per_day",
   "max_unpaid_pending_per_phone",
+  "day_shift_start",
+  "night_shift_start",
   "otp_minutes",
   "messaging_tab",
   "message_mode",
@@ -689,6 +691,19 @@
    "label": "Max Unpaid Pending Per Phone"
   },
   {
+   "default": "07:00:00",
+   "description": "Day / night filter on the appointments screen",
+   "fieldname": "day_shift_start",
+   "fieldtype": "Time",
+   "label": "Day Shift Start"
+  },
+  {
+   "default": "17:00:00",
+   "fieldname": "night_shift_start",
+   "fieldtype": "Time",
+   "label": "Night Shift Start"
+  },
+  {
    "default": "5",
    "fieldname": "otp_minutes",
    "fieldtype": "Int",
@@ -816,7 +831,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-07 03:01:09.089988",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, BellRing, CalendarClock, CalendarPlus, Check, CheckCheck, Clock, ExternalLink, FilePlus2, MessageCircle, Paperclip, RotateCcw, X } from "lucide-react";
+import { AlertCircle, BellRing, CalendarClock, CalendarDays, CalendarPlus, Check, CheckCheck, Clock, ExternalLink, FilePlus2, Globe, LayoutGrid, List, MessageCircle, Moon, Paperclip, Phone, RotateCcw, Sun, UserRound, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/lib/auth";
 import { call, getCall, humanizeError, useAction, useApi } from "@/lib/api";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { hhmm, todayISO } from "@/utils/dates";
 import { useRealtime } from "@/lib/realtime";
-import { CalendarView, type CalView, type Preset } from "./CalendarView";
+import { CalendarView, type CalView, type Preset, type Shift } from "./CalendarView";
 import { cn } from "@/utils/cn";
 
 interface Appt { name: string; patient?: string; patient_name: string; phone: string; doctor: string; doctor_name: string; start_time: string; status: string; source_channel: string;
@@ -30,8 +30,15 @@ export default function AppointmentsPage() {
   const [channel, setChannel] = useState<"" | "Reception" | "Web" | "WhatsApp" | "Requests">("");
   const [book, setBook] = useState(!!params.get("patient"));
   const [preset, setPreset] = useState<Preset | null>(null);
-  const [view, setView] = useState<"list" | CalView>(() => { try { return (localStorage.getItem("hv.appt.view") as "list" | CalView) || "week"; } catch { return "week"; } });
-  const changeView = (v: "list" | CalView) => { setView(v); try { localStorage.setItem("hv.appt.view", v); } catch { /* ignore */ } };
+  type View = "list" | "cards" | CalView;
+  const [view, setView] = useState<View>(() => { try { return (localStorage.getItem("hv.appt.view") as View) || "week"; } catch { return "week"; } });
+  const changeView = (v: View) => { setView(v); try { localStorage.setItem("hv.appt.view", v); } catch { /* ignore */ } };
+  const isCal = view !== "list" && view !== "cards";
+  const [shift, setShiftState] = useState<Shift>(() => { try { return (localStorage.getItem("hv.appt.shift") as Shift) || "all"; } catch { return "all"; } });
+  const setShift = (v: Shift) => { setShiftState(v); try { localStorage.setItem("hv.appt.shift", v); } catch { /* ignore */ } };
+  const dayStart = boot?.shifts?.day_start ?? "07:00:00";
+  const nightStart = boot?.shifts?.night_start ?? "17:00:00";
+  const inShift = (tm?: string) => { if (shift === "all") return true; const x = hhmm(tm); if (!x) return shift === "day"; const day = x >= hhmm(dayStart) && x < hhmm(nightStart); return shift === "day" ? day : !day; };
   const { data } = useApi<{ rows: Appt[]; stats: { source_channel: string; status: string; n: number }[] }>("appointments.board",
     { date, branch, channel: channel && channel !== "Requests" ? channel : undefined, status: channel === "Requests" ? "Pending" : undefined }, { refetchInterval: 30_000 });
   const status = useAction<Appt>("appointments.set_status", { invalidate: ["appointments.board"],
@@ -47,7 +54,8 @@ export default function AppointmentsPage() {
   const pendingCount = (data?.stats ?? []).filter((s) => s.status === "Pending").reduce((a, s) => a + s.n, 0);
   const byStatus = (st: string) => (data?.stats ?? []).filter((s) => s.status === st).reduce((a, s) => a + s.n, 0);
   const total = (data?.stats ?? []).reduce((a, s) => a + s.n, 0);
-  const rows = data?.rows ?? [];
+  const allRows = data?.rows ?? [];
+  const rows = allRows.filter((r) => inShift(r.start_time));
   const count = (c: string) => (data?.stats ?? []).filter((s) => s.source_channel === c).reduce((a, s) => a + s.n, 0);
   const arrive = async (a: Appt) => {
     try {
@@ -56,6 +64,16 @@ export default function AppointmentsPage() {
       if (a.patient) nav(`/opd_slip?patient=${a.patient}`); else nav(`/registration`);
     } catch (e) { toast.error(humanizeError(e)); }
   };
+  const RowActions = ({ a }: { a: Appt }) => (
+    <div className="flex justify-end gap-1">
+                {a.status === "Pending" && <><Button size="xs" variant="submit" onClick={() => status.mutate({ name: a.name, status: "Confirmed" })}><Check className="h-3 w-3" />{t("Confirm")}</Button>
+                  <Button size="xs" variant="outline" onClick={() => status.mutate({ name: a.name, status: "Rejected" })}>{t("Reject")}</Button></>}
+                {a.status === "Confirmed" && <Button size="xs" variant="primary" onClick={() => void arrive(a)}><FilePlus2 className="h-3 w-3" />{t("Arrived")}</Button>}
+                {["Pending", "Confirmed"].includes(a.status) && <Button size="xs" variant="ghost" onClick={() => { const r = prompt("Reason for cancelling"); if (r !== null) status.mutate({ name: a.name, status: "Cancelled", reason: r }); }}><X className="h-3 w-3" /></Button>}
+                {a.status === "Arrived" && !a.opd_slip && a.patient && <Button size="xs" variant="outline" onClick={() => nav(`/opd_slip?patient=${a.patient}`)}>{t("OPD slip")}</Button>}
+</div>
+  );
+
   return (
     <div className="mx-auto max-w-7xl">
       <div className="relative mb-5 overflow-hidden rounded-3xl bg-[#1b1446] p-5 text-white shadow-lg sm:p-6">
@@ -65,15 +83,21 @@ export default function AppointmentsPage() {
           <div className="min-w-0 flex-1"><h1 className="text-2xl font-extrabold">{t("Appointments")}</h1>
             <p className="text-sm text-white/75">Reception, web portal and WhatsApp bookings · {new Date(date + "T00:00").toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</p></div>
           <div className="flex flex-wrap items-center gap-2 [&_button]:border-white/20 [&_.bg-muted]:bg-white/10 [&_.bg-card]:bg-white [&_.bg-card]:text-indigo-900 [&_.text-muted-foreground]:text-white/70">
-          <div className="flex rounded-xl bg-muted p-1">{([["list", "List"], ["calendar", "Calendar"]] as const).map(([v, l]) => (
-            <button key={v} onClick={() => changeView(v === "list" ? "list" : view === "list" ? "week" : view)} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", (v === "list") === (view === "list") ? "bg-card shadow-sm" : "text-muted-foreground")}>{l}</button>))}</div>
-          {view === "list" && <input type="date" className={inputCls + " w-40"} value={date} onChange={(e) => setDate(e.target.value)} />}
           <Link to="/appointments/inbox"><Button variant="outline">{t("WhatsApp inbox")}</Button></Link>
           <a href="/hms/book-appointment" target="_blank" rel="noreferrer"><Button variant="outline"><ExternalLink className="h-4 w-4" />Web portal</Button></a>
           <Button variant="primary" onClick={() => { setPreset(null); setBook(true); }}><CalendarPlus className="h-4 w-4" />{t("Book appointment")}</Button>
         </div>
         </div>
-        <div className="relative mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="relative mt-4 flex flex-wrap items-center gap-2 [&_.bg-muted]:bg-white/10 [&_.bg-card]:bg-white [&_.bg-card]:text-indigo-900 [&_.text-muted-foreground]:text-white/75">
+          <div className="flex rounded-xl bg-muted p-1">{([["list", "List", List], ["cards", "Cards", LayoutGrid], ["calendar", "Calendar", CalendarDays]] as const).map(([v, l, I]) => {
+            const active = v === "calendar" ? isCal : view === v;
+            return <button key={v} onClick={() => changeView(v === "calendar" ? (isCal ? view : "week") : v)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold", active ? "bg-card shadow-sm" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>; })}</div>
+          <div className="flex rounded-xl bg-muted p-1">{([["all", "All", null], ["day", "Day", Sun], ["night", "Night", Moon]] as const).map(([v, l, I]) => (
+            <button key={v} onClick={() => setShift(v)} title={v === "day" ? `${hhmm(dayStart)}–${hhmm(nightStart)}` : v === "night" ? `${hhmm(nightStart)}–${hhmm(dayStart)}` : "All hours"}
+              className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold", shift === v ? "bg-card shadow-sm" : "text-muted-foreground")}>{I && <I className="h-4 w-4" />}{l}</button>))}</div>
+          {!isCal && <input type="date" className="h-9 w-40 rounded-xl border border-white/20 bg-white/10 px-3 text-sm text-white outline-none [color-scheme:dark]" value={date} onChange={(e) => setDate(e.target.value)} />}
+        </div>
+        <div className="relative mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {([["Today", total, "bg-white/10"], ["Requests", pendingCount, pendingCount ? "bg-amber-400/30 ring-2 ring-amber-300" : "bg-white/10"], ["Confirmed", byStatus("Confirmed"), "bg-white/10"],
             ["Arrived", byStatus("Arrived") + byStatus("Completed"), "bg-white/10"], ["No-show", byStatus("No-show"), "bg-white/10"], ["Web + WhatsApp", count("Web") + count("WhatsApp"), "bg-white/10"]] as const).map(([l, v, c]) => (
             <div key={l} className={cn("rounded-2xl border border-white/10 p-3 backdrop-blur", c)}><div className="text-[11px] font-semibold uppercase tracking-wide text-white/70">{l}</div><div className="text-2xl font-extrabold tabular-nums">{v}</div></div>))}
@@ -84,13 +108,16 @@ export default function AppointmentsPage() {
           <span className="flex h-9 w-9 animate-pulse items-center justify-center rounded-xl bg-amber-500 text-white"><BellRing className="h-4 w-4" /></span>
           <span className="flex-1"><b>{pendingCount} booking request{pendingCount > 1 ? "s" : ""}</b> waiting for reception. Confirming sends the patient a WhatsApp confirmation.</span>
           <span className="font-semibold text-amber-700 dark:text-amber-300">Review →</span></button>)}
-      {view !== "list" && <CalendarView view={view} setView={changeView} onBook={(p) => { setPreset(p); setBook(true); }}
+      {isCal && <CalendarView view={view as CalView} shift={shift} setView={changeView} onBook={(p) => { setPreset(p); setBook(true); }}
         onOpen={(name) => { const r = rows.find((x) => x.name === name); toast(r ? `${r.patient_name} · ${r.phone} · ${r.status}` : `Appointment ${name}`, { icon: "📅" }); }} />}
-      {view === "list" && <>
-      <div className="mb-3"><Tabs value={channel} onChange={setChannel} tabs={[{ key: "", label: "All", count: (data?.stats ?? []).reduce((a, s) => a + s.n, 0) },
+      {!isCal && <>
+      <div className="mb-3 flex flex-wrap items-center gap-2"><Tabs value={channel} onChange={setChannel} tabs={[{ key: "", label: "All", count: (data?.stats ?? []).reduce((a, s) => a + s.n, 0) },
         { key: "Requests", label: "Requests", count: pendingCount },
-        { key: "Reception", label: "Reception", count: count("Reception") }, { key: "Web", label: "Web", count: count("Web") }, { key: "WhatsApp", label: "WhatsApp", count: count("WhatsApp") }]} /></div>
-      <Section>
+        { key: "Reception", label: "Reception", count: count("Reception") }, { key: "Web", label: "Web", count: count("Web") }, { key: "WhatsApp", label: "WhatsApp", count: count("WhatsApp") }]} />
+        {shift !== "all" && <span className="ms-auto flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">{shift === "day" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+          {shift === "day" ? "Day" : "Night"} shift · {rows.length} of {allRows.length}</span>}</div>
+      {view === "cards" ? <CardsView rows={rows} actions={(a) => <RowActions a={a} />} msg={(a) => <MsgStatus m={a.last_message} onResend={() => resend.mutate({ name: a.name })} busy={resend.isPending && resend.variables?.name === a.name} />} />
+      : <Section>
         {rows.length ? <div className="overflow-x-auto"><table className="w-full text-sm">
           <thead><tr className="border-b border-border text-xs uppercase text-muted-foreground"><th className="py-2 text-start">Time</th><th className="text-start">{t("Patient")}</th><th className="text-start">{t("Doctor")}</th><th className="text-start">Channel</th><th className="text-start">Payment</th><th className="text-start">Status</th><th className="text-start">WhatsApp</th><th /></tr></thead>
           <tbody>{rows.map((a) => (
@@ -102,15 +129,9 @@ export default function AppointmentsPage() {
               <td className="text-xs">{a.payment_channel}<div><Pill value={a.payment_status === "Proof Submitted" ? "Pending" : a.payment_status === "Paid" ? "Approved" : undefined} />{a.payment_proof && <a href={a.payment_proof} target="_blank" rel="noreferrer" className="ms-1 inline-flex items-center text-primary"><Paperclip className="h-3 w-3" />proof</a>}</div></td>
               <td><Pill value={a.status} /></td>
               <td><MsgStatus m={a.last_message} onResend={() => resend.mutate({ name: a.name })} busy={resend.isPending && resend.variables?.name === a.name} /></td>
-              <td className="text-end"><div className="flex justify-end gap-1">
-                {a.status === "Pending" && <><Button size="xs" variant="submit" onClick={() => status.mutate({ name: a.name, status: "Confirmed" })}><Check className="h-3 w-3" />{t("Confirm")}</Button>
-                  <Button size="xs" variant="outline" onClick={() => status.mutate({ name: a.name, status: "Rejected" })}>{t("Reject")}</Button></>}
-                {a.status === "Confirmed" && <Button size="xs" variant="primary" onClick={() => void arrive(a)}><FilePlus2 className="h-3 w-3" />{t("Arrived")}</Button>}
-                {["Pending", "Confirmed"].includes(a.status) && <Button size="xs" variant="ghost" onClick={() => { const r = prompt("Reason for cancelling"); if (r !== null) status.mutate({ name: a.name, status: "Cancelled", reason: r }); }}><X className="h-3 w-3" /></Button>}
-                {a.status === "Arrived" && !a.opd_slip && a.patient && <Button size="xs" variant="outline" onClick={() => nav(`/opd_slip?patient=${a.patient}`)}>{t("OPD slip")}</Button>}
-              </div></td>
+              <td className="text-end"><RowActions a={a} /></td>
             </tr>))}</tbody></table></div> : <Empty title="No appointments" hint="Bookings from reception, the web portal and WhatsApp appear here." icon={CalendarClock} />}
-      </Section>
+      </Section>}
       </>}
       <BookDialog open={book} preset={preset} onClose={() => setBook(false)} initialPatient={params.get("patient") || undefined} onBooked={() => { setBook(false); void qc.invalidateQueries({ queryKey: ["appointments.board"] }); void qc.invalidateQueries({ queryKey: ["appointments.calendar"] }); }} />
     </div>
@@ -212,5 +233,46 @@ function BookDialog({ open, onClose, onBooked, initialPatient, preset }: { open:
         <p className="text-center text-[11px] text-muted-foreground">Reception bookings are confirmed at once and the patient gets a WhatsApp / SMS confirmation.</p>
       </div>
     </Dialog>
+  );
+}
+
+const STATUS_BAND: Record<string, string> = {
+  Pending: "from-amber-400 to-orange-500", Confirmed: "from-sky-500 to-indigo-600", Arrived: "from-violet-500 to-fuchsia-600", Completed: "from-emerald-500 to-teal-600",
+  "No-show": "from-rose-500 to-red-600", Cancelled: "from-slate-400 to-slate-500", Rejected: "from-slate-400 to-slate-500",
+};
+
+/** Card view: one gradient tile per booking, grouped by hour. */
+function CardsView({ rows, actions, msg }: { rows: Appt[]; actions: (a: Appt) => React.ReactNode; msg: (a: Appt) => React.ReactNode }) {
+  if (!rows.length) return <Empty title="No appointments" hint="Nothing in this shift for the chosen day." icon={CalendarClock} />;
+  const groups: Record<string, Appt[]> = {};
+  for (const r of rows) (groups[hhmm(r.start_time).slice(0, 2) || "--"] ??= []).push(r);
+  const to12 = (h: string) => (h === "--" ? "Walk-in" : `${((Number(h) + 11) % 12) + 1} ${Number(h) < 12 ? "AM" : "PM"}`);
+  return (
+    <div className="space-y-5">
+      {Object.entries(groups).sort(([a], [b]) => a.localeCompare(b)).map(([h, list]) => (
+        <div key={h}>
+          <div className="mb-2 flex items-center gap-2"><span className="rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-3 py-0.5 text-xs font-bold text-white">{to12(h)}</span>
+            <span className="h-px flex-1 bg-border" /><span className="text-xs text-muted-foreground">{list.length}</span></div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {list.map((a) => { const Ch = a.source_channel === "WhatsApp" ? MessageCircle : a.source_channel === "Web" ? Globe : UserRound; return (
+              <article key={a.name} className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div className={cn("relative flex items-center gap-3 bg-gradient-to-r p-3 text-white", STATUS_BAND[a.status] ?? STATUS_BAND.Confirmed)}>
+                  <div className="absolute -end-6 -top-8 h-20 w-20 rounded-full bg-white/15 blur-xl" />
+                  <div className="relative text-center"><div className="text-2xl font-black leading-none tabular-nums">{hhmm(a.start_time) || "—"}</div><div className="text-[10px] font-semibold uppercase tracking-wide text-white/80">{a.status}</div></div>
+                  <div className="relative ms-auto flex items-center gap-1">
+                    {a.priority && a.priority !== "Normal" && <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-bold backdrop-blur">{a.priority}</span>}
+                    <span className="flex items-center gap-1 rounded-full bg-black/20 px-2 py-0.5 text-[10px] font-semibold backdrop-blur"><Ch className="h-3 w-3" />{a.source_channel}</span></div>
+                </div>
+                <div className="flex-1 p-3">
+                  <div className="flex items-center gap-1.5 font-bold">{a.patient_name}{a.is_new_patient ? <span className="rounded bg-sky-100 px-1 text-[10px] font-bold text-sky-800">NEW</span> : null}</div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="h-3 w-3" />{a.phone} · <span className="font-mono">{a.booking_ref}</span></div>
+                  <div className="mt-2 flex items-center justify-between text-xs"><span className="font-semibold">{a.doctor_name}</span><span className="text-muted-foreground">{a.payment_channel} · {a.payment_status}</span></div>
+                  <div className="mt-2">{msg(a)}</div>
+                </div>
+                <div className="border-t border-border p-2">{actions(a)}</div>
+              </article>); })}
+          </div>
+        </div>))}
+    </div>
   );
 }
