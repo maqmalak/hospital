@@ -50,7 +50,7 @@ nurse, supervisor, accounts, lab, pathologist, pharmacist, cashier, store, deo, 
 - Web portal redesigned (5 steps, doctor cards with next free day, morning/afternoon/evening slots, sticky summary + hold timer, consent tick box, add-to-calendar).
 - Fixed: times before 10:00 printed as "9:00:" (now hhmm helper everywhere).
 
-## Tests (`hospital_vvs/tests/test_phase1.py`, 22 green; Vitest 10)
+## Tests (`hospital_vvs/tests/test_phase1.py`, 22 green; Vitest 6)
 Identity (MR, customer, CNIC encrypted/masked, duplicate + merge moves visits/invoices/customer, reveal logged, cashier blocked, clinical fields hidden from cashier API) · OPD (POS invoice on OPD profile & income account, branch, GL balanced, token, queue, free follow-up no invoice, panel split) · tax before discount · discounts (limit, approval, self-approval blocked, reason required, unapproved discount blocks the slip) · safety (allergy + Major interaction block, override, immutability, amend v2/Superseded, dose parsing) · appointments (hold race, book, reschedule, cancel, leave hides slots, expired hold released) · WhatsApp bot (Urdu booking for a new household member with payment proof; reception handoff) · messaging (no consent → skipped; WhatsApp failure → SMS fallback) · role-filtered routes.
 
 ## Deferred / known gaps
