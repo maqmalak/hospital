@@ -1,0 +1,283 @@
+{
+ "actions": [],
+ "autoname": "DR-.####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "doctor_name",
+  "doctor_name_ur",
+  "doctor_name_ar",
+  "doctor_type",
+  "specialization",
+  "department",
+  "d1",
+  "user",
+  "branch",
+  "consultation_room",
+  "color",
+  "is_active",
+  "photo",
+  "d2",
+  "default_fee",
+  "follow_up_fee",
+  "d3",
+  "revisit_days",
+  "slot_minutes",
+  "d4",
+  "registration_no",
+  "qualification",
+  "d5",
+  "show_license",
+  "signature",
+  "d6",
+  "schedule"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "global_search": 1,
+   "in_list_view": 1,
+   "label": "Doctor Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "doctor_name_ur",
+   "fieldtype": "Data",
+   "label": "Name (Urdu)"
+  },
+  {
+   "fieldname": "doctor_name_ar",
+   "fieldtype": "Data",
+   "label": "Name (Arabic)"
+  },
+  {
+   "default": "Internal",
+   "fieldname": "doctor_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Doctor Type",
+   "options": "Internal\nVisiting\nExternal Referring"
+  },
+  {
+   "fieldname": "specialization",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Specialization",
+   "options": "Specialization"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Department",
+   "options": "Medical Department"
+  },
+  {
+   "fieldname": "d1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "consultation_room",
+   "fieldtype": "Data",
+   "label": "Consultation Room"
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "photo",
+   "fieldtype": "Attach Image",
+   "label": "Photo"
+  },
+  {
+   "fieldname": "d2",
+   "fieldtype": "Section Break",
+   "label": "Fees"
+  },
+  {
+   "fieldname": "default_fee",
+   "fieldtype": "Currency",
+   "label": "Default Fee"
+  },
+  {
+   "fieldname": "follow_up_fee",
+   "fieldtype": "Currency",
+   "label": "Follow Up Fee"
+  },
+  {
+   "fieldname": "d3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "7",
+   "description": "Prescription follow-up date default",
+   "fieldname": "revisit_days",
+   "fieldtype": "Int",
+   "label": "Revisit Days"
+  },
+  {
+   "description": "Overrides Clinic Settings",
+   "fieldname": "slot_minutes",
+   "fieldtype": "Int",
+   "label": "Slot Minutes"
+  },
+  {
+   "fieldname": "d4",
+   "fieldtype": "Section Break",
+   "label": "Registration (shown on prints)"
+  },
+  {
+   "fieldname": "registration_no",
+   "fieldtype": "Data",
+   "label": "PMDC Registration No."
+  },
+  {
+   "fieldname": "qualification",
+   "fieldtype": "Data",
+   "label": "Qualification"
+  },
+  {
+   "fieldname": "d5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_license",
+   "fieldtype": "Check",
+   "label": "Show License"
+  },
+  {
+   "fieldname": "signature",
+   "fieldtype": "Attach Image",
+   "label": "Signature"
+  },
+  {
+   "fieldname": "d6",
+   "fieldtype": "Section Break",
+   "label": "Availability"
+  },
+  {
+   "fieldname": "schedule",
+   "fieldtype": "Table",
+   "label": "Schedule",
+   "options": "Doctor Schedule"
+  }
+ ],
+ "image_field": "photo",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Doctor",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Lab User"
+  },
+  {
+   "read": 1,
+   "role": "PW Pathologist"
+  },
+  {
+   "read": 1,
+   "role": "PW Pharmacy Cashier"
+  },
+  {
+   "read": 1,
+   "role": "PW Reviewer"
+  },
+  {
+   "read": 1,
+   "role": "PW Dispenser"
+  },
+  {
+   "read": 1,
+   "role": "PW Store Keeper"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  },
+  {
+   "read": 1,
+   "role": "OV Staff"
+  },
+  {
+   "read": 1,
+   "role": "OV Doctor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "doctor_name,specialization",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "doctor_name",
+ "track_changes": 1
+}

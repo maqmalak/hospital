@@ -1,0 +1,252 @@
+{
+ "actions": [],
+ "autoname": "format:{ward}-{bed_no}",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_no",
+  "ward",
+  "branch",
+  "room",
+  "b1",
+  "bed_type",
+  "status",
+  "daily_rate",
+  "has_oxygen",
+  "has_monitor",
+  "b2",
+  "current_patient",
+  "patient_name",
+  "b3",
+  "occupied_since",
+  "expected_discharge",
+  "agreed_rate",
+  "attending_doctor",
+  "reserved_until",
+  "admission_reason",
+  "status_note",
+  "b4",
+  "pos_x",
+  "b5",
+  "pos_y",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bed No.",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ward",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ward",
+   "options": "Ward",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "ward.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "room",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Room"
+  },
+  {
+   "fieldname": "b1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Standard",
+   "fieldname": "bed_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Bed Type",
+   "options": "Standard\nElectric\nICU\nVentilator\nCradle\nCouch\nTrolley"
+  },
+  {
+   "default": "Available",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Available\nOccupied\nReserved\nCleaning\nMaintenance",
+   "read_only": 1
+  },
+  {
+   "description": "Empty = the ward's bed charge",
+   "fieldname": "daily_rate",
+   "fieldtype": "Currency",
+   "label": "Daily Rate"
+  },
+  {
+   "fieldname": "has_oxygen",
+   "fieldtype": "Check",
+   "label": "Has Oxygen"
+  },
+  {
+   "fieldname": "has_monitor",
+   "fieldtype": "Check",
+   "label": "Has Monitor"
+  },
+  {
+   "fieldname": "b2",
+   "fieldtype": "Section Break",
+   "label": "Current"
+  },
+  {
+   "fieldname": "current_patient",
+   "fieldtype": "Link",
+   "label": "Current Patient",
+   "options": "Patient",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "b3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "occupied_since",
+   "fieldtype": "Datetime",
+   "label": "Occupied Since",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expected_discharge",
+   "fieldtype": "Datetime",
+   "label": "Expected Discharge",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agreed_rate",
+   "fieldtype": "Currency",
+   "label": "Agreed Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attending_doctor",
+   "fieldtype": "Link",
+   "label": "Attending Doctor",
+   "options": "Doctor",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reserved_until",
+   "fieldtype": "Datetime",
+   "label": "Reserved Until",
+   "read_only": 1
+  },
+  {
+   "fieldname": "admission_reason",
+   "fieldtype": "Small Text",
+   "label": "Admission Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status_note",
+   "fieldtype": "Small Text",
+   "label": "Status Note",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "b4",
+   "fieldtype": "Section Break",
+   "label": "Map position"
+  },
+  {
+   "description": "0–100 across the ward plan",
+   "fieldname": "pos_x",
+   "fieldtype": "Int",
+   "label": "POS X"
+  },
+  {
+   "fieldname": "b5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "0–100 down the ward plan",
+   "fieldname": "pos_y",
+   "fieldtype": "Int",
+   "label": "POS Y"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 21:41:12.727512",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Hospital Bed",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "bed_no",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "bed_no",
+ "track_changes": 1
+}

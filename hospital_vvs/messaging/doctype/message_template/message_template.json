@@ -1,0 +1,134 @@
+{
+ "actions": [],
+ "autoname": "field:event",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "event",
+  "enabled",
+  "fallback_to_sms",
+  "urgent",
+  "marketing",
+  "mt1",
+  "wa_template_en",
+  "wa_template_ur",
+  "wa_params",
+  "mt2",
+  "sms_text_en",
+  "mt3",
+  "sms_text_ur"
+ ],
+ "fields": [
+  {
+   "fieldname": "event",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Event",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  },
+  {
+   "default": "1",
+   "fieldname": "fallback_to_sms",
+   "fieldtype": "Check",
+   "label": "Fallback To SMS"
+  },
+  {
+   "description": "Ignores quiet hours",
+   "fieldname": "urgent",
+   "fieldtype": "Check",
+   "label": "Urgent"
+  },
+  {
+   "default": "1",
+   "description": "Needs WhatsApp/SMS consent (all business messages here do)",
+   "fieldname": "marketing",
+   "fieldtype": "Check",
+   "label": "Marketing"
+  },
+  {
+   "fieldname": "mt1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wa_template_en",
+   "fieldtype": "Data",
+   "label": "WhatsApp Template (English)"
+  },
+  {
+   "fieldname": "wa_template_ur",
+   "fieldtype": "Data",
+   "label": "WhatsApp Template (Urdu)"
+  },
+  {
+   "description": "Comma separated context keys, in template order",
+   "fieldname": "wa_params",
+   "fieldtype": "Data",
+   "label": "Template Parameters"
+  },
+  {
+   "fieldname": "mt2",
+   "fieldtype": "Section Break",
+   "label": "SMS text"
+  },
+  {
+   "fieldname": "sms_text_en",
+   "fieldtype": "Small Text",
+   "label": "SMS (English)"
+  },
+  {
+   "fieldname": "mt3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sms_text_ur",
+   "fieldtype": "Small Text",
+   "label": "SMS (Urdu)"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Messaging",
+ "name": "Message Template",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Lab User"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

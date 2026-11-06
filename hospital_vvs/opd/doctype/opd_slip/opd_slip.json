@@ -1,0 +1,521 @@
+{
+ "actions": [],
+ "autoname": "OPD-.YYYY.-.######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient",
+  "patient_name",
+  "doctor",
+  "doctor_name",
+  "o1",
+  "branch",
+  "company",
+  "posting_date",
+  "posting_time",
+  "o2",
+  "purpose",
+  "token_no",
+  "appointment",
+  "cc_sec",
+  "chief_complaint",
+  "o3",
+  "notes",
+  "vitals_sec",
+  "bp_systolic",
+  "bp_diastolic",
+  "pulse",
+  "v1",
+  "temperature",
+  "spo2",
+  "rbs",
+  "v2",
+  "weight",
+  "height",
+  "bmi",
+  "bill_sec",
+  "items",
+  "gross_total",
+  "discount_percent",
+  "discount_amount",
+  "discount_reason",
+  "discount_authorization",
+  "o4",
+  "net_total",
+  "payer_type",
+  "payer",
+  "payer_share",
+  "patient_share",
+  "o5",
+  "payment_mode",
+  "cash_tendered",
+  "change_amount",
+  "is_free_follow_up",
+  "links_sec",
+  "sales_invoice",
+  "payer_invoice",
+  "o6",
+  "queue_entry",
+  "pos_opening_entry",
+  "client_ref",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Doctor",
+   "options": "Doctor",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "doctor.doctor_name",
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "label": "Doctor Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "o1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time"
+  },
+  {
+   "fieldname": "o2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Consultation",
+   "fieldname": "purpose",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Purpose",
+   "options": "Consultation\nFollow-up\nProcedure"
+  },
+  {
+   "fieldname": "token_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Token No.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "label": "Appointment",
+   "options": "Appointment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cc_sec",
+   "fieldtype": "Section Break",
+   "label": "Complaint",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "chief_complaint",
+   "fieldtype": "Small Text",
+   "label": "Chief Complaint",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "o3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "vitals_sec",
+   "fieldtype": "Section Break",
+   "label": "Vitals",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "bp_systolic",
+   "fieldtype": "Int",
+   "label": "BP Systolic",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "bp_diastolic",
+   "fieldtype": "Int",
+   "label": "BP Diastolic",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "pulse",
+   "fieldtype": "Int",
+   "label": "Pulse",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "v1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperature",
+   "fieldtype": "Float",
+   "label": "Temperature (°F)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "spo2",
+   "fieldtype": "Int",
+   "label": "SpO2 (%)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "rbs",
+   "fieldtype": "Float",
+   "label": "RBS (mg/dL)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "v2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "label": "Weight (kg)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Float",
+   "label": "Height (cm)",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "bmi",
+   "fieldtype": "Float",
+   "label": "BMI",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bill_sec",
+   "fieldtype": "Section Break",
+   "label": "Bill"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "OPD Slip Item"
+  },
+  {
+   "fieldname": "gross_total",
+   "fieldtype": "Currency",
+   "label": "Gross Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_percent",
+   "fieldtype": "Percent",
+   "label": "Discount Percent"
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount"
+  },
+  {
+   "fieldname": "discount_reason",
+   "fieldtype": "Small Text",
+   "label": "Discount Reason"
+  },
+  {
+   "fieldname": "discount_authorization",
+   "fieldtype": "Link",
+   "label": "Discount Authorization",
+   "options": "Discount Authorization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "o4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "label": "Net Total",
+   "read_only": 1
+  },
+  {
+   "default": "Patient",
+   "fieldname": "payer_type",
+   "fieldtype": "Select",
+   "label": "Payer Type",
+   "options": "Patient\nPanel\nInsurance\nWelfare"
+  },
+  {
+   "description": "Panel / insurance / welfare fund customer",
+   "fieldname": "payer",
+   "fieldtype": "Link",
+   "label": "Payer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "payer_share",
+   "fieldtype": "Currency",
+   "label": "Payer Share",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "patient_share",
+   "fieldtype": "Currency",
+   "label": "Patient Share",
+   "read_only": 1
+  },
+  {
+   "fieldname": "o5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Cash",
+   "fieldname": "payment_mode",
+   "fieldtype": "Select",
+   "label": "Payment Mode",
+   "options": "Cash\nCard\nBank Transfer\nJazzCash\nEasypaisa"
+  },
+  {
+   "fieldname": "cash_tendered",
+   "fieldtype": "Currency",
+   "label": "Cash Tendered"
+  },
+  {
+   "fieldname": "change_amount",
+   "fieldtype": "Currency",
+   "label": "Change Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "is_free_follow_up",
+   "fieldtype": "Check",
+   "label": "Free Follow-up",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "links_sec",
+   "fieldtype": "Section Break",
+   "label": "Links"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payer_invoice",
+   "fieldtype": "Link",
+   "label": "Payer Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "o6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "queue_entry",
+   "fieldtype": "Link",
+   "label": "Queue Entry",
+   "options": "Queue Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_opening_entry",
+   "fieldtype": "Link",
+   "label": "Cashier Shift",
+   "options": "POS Opening Entry",
+   "read_only": 1
+  },
+  {
+   "description": "Idempotency key from the counter",
+   "fieldname": "client_ref",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Client Ref",
+   "no_copy": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "OPD Slip",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-06 21:31:33.303050",
+ "modified_by": "Administrator",
+ "module": "OPD",
+ "name": "OPD Slip",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "role": "PW Receptionist",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "PW Cash Supervisor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

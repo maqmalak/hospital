@@ -1,1 +1,6 @@
 Hospital VVS
+OPD
+Appointments
+Messaging
+Billing
+IPD

@@ -1,0 +1,899 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "general_tab",
+  "clinic_name",
+  "clinic_name_ur",
+  "clinic_name_ar",
+  "logo",
+  "g1",
+  "company",
+  "default_branch",
+  "address",
+  "phone",
+  "clinic_mode",
+  "default_currency",
+  "g2",
+  "default_fee",
+  "follow_up_free_days",
+  "vitals_history_count",
+  "g3",
+  "avg_consultation_minutes",
+  "voice_control",
+  "training_mode",
+  "branch_overrides",
+  "modules_tab",
+  "enable_lab",
+  "enable_medicine",
+  "enable_ward",
+  "enable_mar",
+  "enable_diet",
+  "enable_procedures",
+  "m1",
+  "enable_icu",
+  "enable_consent",
+  "enable_packages",
+  "enable_insurance",
+  "enable_panels",
+  "enable_emergency",
+  "m2",
+  "enable_shifts",
+  "enable_pharmacy_pipeline",
+  "enable_whatsapp",
+  "enable_sms",
+  "enable_online_visit",
+  "m3",
+  "enable_patient_comms",
+  "enable_feedback",
+  "enable_doctor_share",
+  "enable_welfare",
+  "enable_appointments",
+  "printing_tab",
+  "receipt_format",
+  "prescription_format",
+  "patient_card_format",
+  "pr1",
+  "use_print_agent",
+  "printer_map",
+  "pos_tab",
+  "pos_profiles",
+  "w1",
+  "main_store",
+  "pharmacy_retail_warehouse",
+  "ipd_dispensing_warehouse",
+  "w2",
+  "lab_store",
+  "general_store",
+  "quarantine_warehouse",
+  "w3",
+  "consultation_item",
+  "follow_up_item",
+  "w4",
+  "registration_item",
+  "registration_fee",
+  "ipd_tab",
+  "mar_billing_trigger",
+  "stock_deduction_timing",
+  "allow_negative_stock",
+  "i1",
+  "diet_billing_mode",
+  "procedure_invoice_trigger",
+  "discharge_clearance_hold",
+  "appointments_tab",
+  "enable_web_booking",
+  "enable_whatsapp_booking",
+  "walk_in_mode",
+  "slot_window_days",
+  "slot_minutes",
+  "slot_hold_minutes",
+  "no_show_release_minutes",
+  "a1",
+  "auto_confirm",
+  "web_payment_channels",
+  "whatsapp_payment_channels",
+  "reschedule_cutoff_hours",
+  "cancel_cutoff_hours",
+  "a2",
+  "reminder_evening_before",
+  "reminder_evening_time",
+  "reminder_hours_before",
+  "one_booking_per_doctor_per_day",
+  "max_unpaid_pending_per_phone",
+  "otp_minutes",
+  "messaging_tab",
+  "message_mode",
+  "default_country_code",
+  "sender_name",
+  "ms1",
+  "quiet_hours_start",
+  "quiet_hours_end",
+  "max_send_attempts",
+  "billing_tab",
+  "discount_rules",
+  "discount_approvers",
+  "b1",
+  "doctor_share_basis",
+  "security_tab",
+  "enforce_two_factor",
+  "idle_lock_minutes",
+  "s1",
+  "interaction_lookback_days",
+  "show_first_name_on_display",
+  "access_tab",
+  "page_access"
+ ],
+ "fields": [
+  {
+   "fieldname": "general_tab",
+   "fieldtype": "Tab Break",
+   "label": "General"
+  },
+  {
+   "default": "VVS Hospital",
+   "fieldname": "clinic_name",
+   "fieldtype": "Data",
+   "label": "Clinic Name"
+  },
+  {
+   "fieldname": "clinic_name_ur",
+   "fieldtype": "Data",
+   "label": "Clinic Name (Urdu)"
+  },
+  {
+   "fieldname": "clinic_name_ar",
+   "fieldtype": "Data",
+   "label": "Clinic Name (Arabic)"
+  },
+  {
+   "fieldname": "logo",
+   "fieldtype": "Attach Image",
+   "label": "Logo"
+  },
+  {
+   "fieldname": "g1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "default_branch",
+   "fieldtype": "Link",
+   "label": "Default Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "default": "Full Hospital",
+   "fieldname": "clinic_mode",
+   "fieldtype": "Select",
+   "label": "Clinic Mode",
+   "options": "OPD only\nOPD+IPD\nFull Hospital"
+  },
+  {
+   "default": "PKR",
+   "fieldname": "default_currency",
+   "fieldtype": "Link",
+   "label": "Default Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "g2",
+   "fieldtype": "Section Break",
+   "label": "Consultation"
+  },
+  {
+   "default": "1000",
+   "fieldname": "default_fee",
+   "fieldtype": "Currency",
+   "label": "Default Fee"
+  },
+  {
+   "default": "7",
+   "fieldname": "follow_up_free_days",
+   "fieldtype": "Int",
+   "label": "Follow-up Free Window (days)"
+  },
+  {
+   "default": "5",
+   "fieldname": "vitals_history_count",
+   "fieldtype": "Int",
+   "label": "Vitals History Count"
+  },
+  {
+   "fieldname": "g3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "10",
+   "fieldname": "avg_consultation_minutes",
+   "fieldtype": "Int",
+   "label": "Avg Consultation Minutes"
+  },
+  {
+   "fieldname": "voice_control",
+   "fieldtype": "Check",
+   "label": "Voice Control"
+  },
+  {
+   "description": "Shows a red TRAINING banner. Use only on the training site.",
+   "fieldname": "training_mode",
+   "fieldtype": "Check",
+   "label": "Training Mode"
+  },
+  {
+   "fieldname": "branch_overrides",
+   "fieldtype": "Table",
+   "label": "Branch Overrides",
+   "options": "Branch Settings Override"
+  },
+  {
+   "fieldname": "modules_tab",
+   "fieldtype": "Tab Break",
+   "label": "Modules"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_lab",
+   "fieldtype": "Check",
+   "label": "Enable Lab"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_medicine",
+   "fieldtype": "Check",
+   "label": "Enable Medicine"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_ward",
+   "fieldtype": "Check",
+   "label": "Enable Ward"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_mar",
+   "fieldtype": "Check",
+   "label": "Enable Mar"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_diet",
+   "fieldtype": "Check",
+   "label": "Enable Diet"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_procedures",
+   "fieldtype": "Check",
+   "label": "Enable Procedures"
+  },
+  {
+   "fieldname": "m1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_icu",
+   "fieldtype": "Check",
+   "label": "Enable Icu"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_consent",
+   "fieldtype": "Check",
+   "label": "Enable Consent"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_packages",
+   "fieldtype": "Check",
+   "label": "Enable Packages"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_insurance",
+   "fieldtype": "Check",
+   "label": "Enable Insurance"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_panels",
+   "fieldtype": "Check",
+   "label": "Enable Panels"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_emergency",
+   "fieldtype": "Check",
+   "label": "Enable Emergency"
+  },
+  {
+   "fieldname": "m2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_shifts",
+   "fieldtype": "Check",
+   "label": "Enable Shifts"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_pharmacy_pipeline",
+   "fieldtype": "Check",
+   "label": "Enable Pharmacy Pipeline"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_whatsapp",
+   "fieldtype": "Check",
+   "label": "Enable Whatsapp"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_sms",
+   "fieldtype": "Check",
+   "label": "Enable SMS"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_online_visit",
+   "fieldtype": "Check",
+   "label": "Enable Online Visit"
+  },
+  {
+   "fieldname": "m3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_patient_comms",
+   "fieldtype": "Check",
+   "label": "Enable Patient Comms"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_feedback",
+   "fieldtype": "Check",
+   "label": "Enable Feedback"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_doctor_share",
+   "fieldtype": "Check",
+   "label": "Enable Doctor Share"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_welfare",
+   "fieldtype": "Check",
+   "label": "Enable Welfare"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_appointments",
+   "fieldtype": "Check",
+   "label": "Enable Appointments"
+  },
+  {
+   "fieldname": "printing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Printing"
+  },
+  {
+   "default": "Thermal 80 mm",
+   "fieldname": "receipt_format",
+   "fieldtype": "Select",
+   "label": "OPD Slip / Receipt",
+   "options": "Thermal 80 mm\nA4"
+  },
+  {
+   "default": "A4",
+   "fieldname": "prescription_format",
+   "fieldtype": "Select",
+   "label": "Prescription Format",
+   "options": "A4\nA5\nThermal 80 mm"
+  },
+  {
+   "default": "Thermal 80 mm",
+   "fieldname": "patient_card_format",
+   "fieldtype": "Select",
+   "label": "Patient Card Format",
+   "options": "CR80 Card\nThermal 80 mm"
+  },
+  {
+   "fieldname": "pr1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "QZ Tray on counter PCs; browser print otherwise",
+   "fieldname": "use_print_agent",
+   "fieldtype": "Check",
+   "label": "Use Print Agent"
+  },
+  {
+   "fieldname": "printer_map",
+   "fieldtype": "Table",
+   "label": "Printer Map",
+   "options": "Printer Map"
+  },
+  {
+   "fieldname": "pos_tab",
+   "fieldtype": "Tab Break",
+   "label": "POS & Warehouses"
+  },
+  {
+   "fieldname": "pos_profiles",
+   "fieldtype": "Table",
+   "label": "POS Profiles",
+   "options": "Billing Type POS Profile"
+  },
+  {
+   "fieldname": "w1",
+   "fieldtype": "Section Break",
+   "label": "Warehouses (default branch)"
+  },
+  {
+   "fieldname": "main_store",
+   "fieldtype": "Link",
+   "label": "Main Store",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "pharmacy_retail_warehouse",
+   "fieldtype": "Link",
+   "label": "Pharmacy Retail Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "ipd_dispensing_warehouse",
+   "fieldtype": "Link",
+   "label": "IPD Dispensing Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "w2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lab_store",
+   "fieldtype": "Link",
+   "label": "Lab Store",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "general_store",
+   "fieldtype": "Link",
+   "label": "General Store",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "quarantine_warehouse",
+   "fieldtype": "Link",
+   "label": "Quarantine Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "w3",
+   "fieldtype": "Section Break",
+   "label": "Service items"
+  },
+  {
+   "fieldname": "consultation_item",
+   "fieldtype": "Link",
+   "label": "Consultation Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "follow_up_item",
+   "fieldtype": "Link",
+   "label": "Follow Up Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "w4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "registration_item",
+   "fieldtype": "Link",
+   "label": "Registration Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "registration_fee",
+   "fieldtype": "Currency",
+   "label": "Registration Fee"
+  },
+  {
+   "fieldname": "ipd_tab",
+   "fieldtype": "Tab Break",
+   "label": "IPD"
+  },
+  {
+   "default": "On administration",
+   "fieldname": "mar_billing_trigger",
+   "fieldtype": "Select",
+   "label": "Mar Billing Trigger",
+   "options": "On administration\nAt discharge"
+  },
+  {
+   "default": "Immediately",
+   "fieldname": "stock_deduction_timing",
+   "fieldtype": "Select",
+   "label": "Stock Deduction Timing",
+   "options": "Immediately\nAt discharge"
+  },
+  {
+   "fieldname": "allow_negative_stock",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock"
+  },
+  {
+   "fieldname": "i1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Per day",
+   "fieldname": "diet_billing_mode",
+   "fieldtype": "Select",
+   "label": "Diet Billing Mode",
+   "options": "Per meal\nPer day\nIncluded in bed charge"
+  },
+  {
+   "default": "At discharge",
+   "fieldname": "procedure_invoice_trigger",
+   "fieldtype": "Select",
+   "label": "Procedure Invoice Trigger",
+   "options": "On completion\nAt discharge"
+  },
+  {
+   "default": "1",
+   "fieldname": "discharge_clearance_hold",
+   "fieldtype": "Check",
+   "label": "Discharge Clearance Hold"
+  },
+  {
+   "fieldname": "appointments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Appointments"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_web_booking",
+   "fieldtype": "Check",
+   "label": "Enable Web Booking"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_whatsapp_booking",
+   "fieldtype": "Check",
+   "label": "Enable Whatsapp Booking"
+  },
+  {
+   "default": "Token",
+   "fieldname": "walk_in_mode",
+   "fieldtype": "Select",
+   "label": "Walk In Mode",
+   "options": "Token\nSlot"
+  },
+  {
+   "default": "14",
+   "fieldname": "slot_window_days",
+   "fieldtype": "Int",
+   "label": "Slot Window Days"
+  },
+  {
+   "default": "15",
+   "fieldname": "slot_minutes",
+   "fieldtype": "Int",
+   "label": "Slot Minutes"
+  },
+  {
+   "default": "10",
+   "fieldname": "slot_hold_minutes",
+   "fieldtype": "Int",
+   "label": "Slot Hold Minutes"
+  },
+  {
+   "default": "30",
+   "fieldname": "no_show_release_minutes",
+   "fieldtype": "Int",
+   "label": "No. Show Release Minutes"
+  },
+  {
+   "fieldname": "a1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "Off: staff confirm each booking",
+   "fieldname": "auto_confirm",
+   "fieldtype": "Check",
+   "label": "Auto Confirm"
+  },
+  {
+   "default": "At Clinic\nPayment Proof",
+   "description": "One per line: Online, Payment Proof, At Clinic",
+   "fieldname": "web_payment_channels",
+   "fieldtype": "Small Text",
+   "label": "Web Payment Channels"
+  },
+  {
+   "default": "At Clinic\nPayment Proof",
+   "fieldname": "whatsapp_payment_channels",
+   "fieldtype": "Small Text",
+   "label": "Whatsapp Payment Channels"
+  },
+  {
+   "default": "3",
+   "fieldname": "reschedule_cutoff_hours",
+   "fieldtype": "Int",
+   "label": "Reschedule Cutoff Hours"
+  },
+  {
+   "default": "2",
+   "fieldname": "cancel_cutoff_hours",
+   "fieldtype": "Int",
+   "label": "Cancel Cutoff Hours"
+  },
+  {
+   "fieldname": "a2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "reminder_evening_before",
+   "fieldtype": "Check",
+   "label": "Reminder Evening Before"
+  },
+  {
+   "default": "19:00:00",
+   "fieldname": "reminder_evening_time",
+   "fieldtype": "Time",
+   "label": "Reminder Evening Time"
+  },
+  {
+   "default": "3",
+   "fieldname": "reminder_hours_before",
+   "fieldtype": "Int",
+   "label": "Reminder Hours Before"
+  },
+  {
+   "default": "1",
+   "fieldname": "one_booking_per_doctor_per_day",
+   "fieldtype": "Check",
+   "label": "One Booking Per Doctor Per Day"
+  },
+  {
+   "default": "3",
+   "fieldname": "max_unpaid_pending_per_phone",
+   "fieldtype": "Int",
+   "label": "Max Unpaid Pending Per Phone"
+  },
+  {
+   "default": "5",
+   "fieldname": "otp_minutes",
+   "fieldtype": "Int",
+   "label": "OTP Validity (minutes)"
+  },
+  {
+   "fieldname": "messaging_tab",
+   "fieldtype": "Tab Break",
+   "label": "Messaging"
+  },
+  {
+   "default": "Test (no provider)",
+   "description": "Test mode logs messages as Sent without calling any provider. Live reads credentials from site_config.json.",
+   "fieldname": "message_mode",
+   "fieldtype": "Select",
+   "label": "Message Mode",
+   "options": "Test (no provider)\nLive"
+  },
+  {
+   "default": "+92",
+   "fieldname": "default_country_code",
+   "fieldtype": "Data",
+   "label": "Default Country Code"
+  },
+  {
+   "default": "VVS Hospital",
+   "fieldname": "sender_name",
+   "fieldtype": "Data",
+   "label": "Sender Name"
+  },
+  {
+   "fieldname": "ms1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "22:00:00",
+   "fieldname": "quiet_hours_start",
+   "fieldtype": "Time",
+   "label": "Quiet Hours Start"
+  },
+  {
+   "default": "08:00:00",
+   "fieldname": "quiet_hours_end",
+   "fieldtype": "Time",
+   "label": "Quiet Hours End"
+  },
+  {
+   "default": "3",
+   "fieldname": "max_send_attempts",
+   "fieldtype": "Int",
+   "label": "Max Send Attempts"
+  },
+  {
+   "fieldname": "billing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "discount_rules",
+   "fieldtype": "Table",
+   "label": "Discount Rules",
+   "options": "Discount Rule"
+  },
+  {
+   "fieldname": "discount_approvers",
+   "fieldtype": "Table",
+   "label": "Discount Approvers",
+   "options": "Discount Approver"
+  },
+  {
+   "fieldname": "b1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "At invoice",
+   "fieldname": "doctor_share_basis",
+   "fieldtype": "Select",
+   "label": "Doctor Share Basis",
+   "options": "At invoice\nOn payment"
+  },
+  {
+   "fieldname": "security_tab",
+   "fieldtype": "Tab Break",
+   "label": "Security"
+  },
+  {
+   "description": "Two-factor login for PW Admin, Accountant, Cash Supervisor and Pathologist",
+   "fieldname": "enforce_two_factor",
+   "fieldtype": "Check",
+   "label": "Enforce Two Factor"
+  },
+  {
+   "default": "15",
+   "fieldname": "idle_lock_minutes",
+   "fieldtype": "Int",
+   "label": "Idle Lock Minutes"
+  },
+  {
+   "fieldname": "s1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "fieldname": "interaction_lookback_days",
+   "fieldtype": "Int",
+   "label": "Interaction Check: Prescriptions in Last N Days"
+  },
+  {
+   "fieldname": "show_first_name_on_display",
+   "fieldtype": "Check",
+   "label": "Show First Name on Waiting Display"
+  },
+  {
+   "fieldname": "access_tab",
+   "fieldtype": "Tab Break",
+   "label": "Page Access"
+  },
+  {
+   "fieldname": "page_access",
+   "fieldtype": "Table",
+   "label": "Page Access",
+   "options": "Page Access Rule"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Clinic Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Lab User"
+  },
+  {
+   "read": 1,
+   "role": "PW Pathologist"
+  },
+  {
+   "read": 1,
+   "role": "PW Pharmacy Cashier"
+  },
+  {
+   "read": 1,
+   "role": "PW Reviewer"
+  },
+  {
+   "read": 1,
+   "role": "PW Dispenser"
+  },
+  {
+   "read": 1,
+   "role": "PW Store Keeper"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  },
+  {
+   "read": 1,
+   "role": "OV Staff"
+  },
+  {
+   "read": 1,
+   "role": "OV Doctor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

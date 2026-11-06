@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "doctor",
+  "medicines",
+  "diagnoses",
+  "advice"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Name",
+   "reqd": 1
+  },
+  {
+   "description": "Empty = shared",
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Doctor",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "medicines",
+   "fieldtype": "Table",
+   "label": "Medicines",
+   "options": "Prescription Medicine"
+  },
+  {
+   "fieldname": "diagnoses",
+   "fieldtype": "Table",
+   "label": "Diagnoses",
+   "options": "Prescription Diagnosis"
+  },
+  {
+   "fieldname": "advice",
+   "fieldtype": "Text",
+   "label": "Advice"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "OPD",
+ "name": "Prescription Template",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "OV Doctor",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "template_name"
+}

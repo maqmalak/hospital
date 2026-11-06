@@ -1,33 +1,11 @@
-### Hospital VVS
+# Hospital VVS — VVSDesk
 
-VVSDesk hospital management system for Pakistan (OPD, IPD, ER, lab, pharmacy, cash, billing)
+Hospital management for Pakistan on ERPNext v16: OPD, appointments (web + WhatsApp), prescriptions with safety alerts,
+wards & beds, billing — React UI in English, Urdu and Arabic (RTL), ERPNext doing accounting and stock underneath.
 
-### Installation
-
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
-
-```bash
-cd $PATH_TO_YOUR_BENCH
-bench get-app $URL_OF_THIS_REPO --branch main
-bench install-app hospital_vvs
-```
-
-### Contributing
-
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
-
-```bash
-cd apps/hospital_vvs
-pre-commit install
-```
-
-Pre-commit is configured to use the following tools for checking and formatting your code:
-
-- ruff
-- eslint
-- prettier
-- pyupgrade
-
-### License
-
-mit
+- Spec: `docs/CLAUDE.md` + `docs/specs/`; progress `docs/PROGRESS.md`; decisions & open questions `docs/DECISIONS.md`; ops `docs/OPS.md`; API `docs/API.md`.
+- New site: `./setup_hospital.sh` (needs the MariaDB root password), then
+  `bench --site hospital execute hospital_vvs.setup.company.run` and `... hospital_vvs.setup.demo.seed`.
+- Frontend: `cd frontend && npm ci && npm run build` (served at `/hms`), or `npm run dev` → http://hospital.localhost:5183.
+- Tests: `bench --site hospital run-tests --app hospital_vvs`, `cd frontend && npx vitest run`.
+- DocTypes are generated from `hospital_vvs/devtools/schema_*.py`: edit there, run `bench --site hospital execute hospital_vvs.devtools.generate.run`, then `bench migrate`.

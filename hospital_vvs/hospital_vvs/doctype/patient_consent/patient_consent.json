@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "consent_type",
+  "status",
+  "recorded_on",
+  "recorded_by"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "consent_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Consent Type",
+   "options": "WhatsApp messages\nSMS messages\nData processing",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Given\nWithdrawn",
+   "reqd": 1
+  },
+  {
+   "columns": 3,
+   "fieldname": "recorded_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Recorded On"
+  },
+  {
+   "columns": 2,
+   "fieldname": "recorded_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Recorded By",
+   "options": "User"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Patient Consent",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

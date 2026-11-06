@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "autoname": "PML-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "survivor",
+  "duplicate",
+  "merged_by",
+  "merged_on",
+  "moved"
+ ],
+ "fields": [
+  {
+   "fieldname": "survivor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Survivor",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fieldname": "duplicate",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Duplicate",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fieldname": "merged_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Merged By",
+   "options": "User"
+  },
+  {
+   "fieldname": "merged_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Merged On"
+  },
+  {
+   "fieldname": "moved",
+   "fieldtype": "Code",
+   "label": "Moved Records",
+   "options": "JSON"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Patient Merge Log",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "role": "PW Admin"
+  },
+  {
+   "read": 1,
+   "role": "System Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

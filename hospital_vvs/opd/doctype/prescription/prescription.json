@@ -1,0 +1,332 @@
+{
+ "actions": [],
+ "autoname": "RX-.YYYY.-.######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient",
+  "patient_name",
+  "doctor",
+  "doctor_name",
+  "r1",
+  "branch",
+  "prescription_date",
+  "opd_slip",
+  "queue_entry",
+  "r2",
+  "source",
+  "round_no",
+  "version_no",
+  "status",
+  "med_sec",
+  "medicines",
+  "dx_sec",
+  "diagnoses",
+  "r3",
+  "lab_tests",
+  "notes_sec",
+  "examination_notes",
+  "r4",
+  "advice",
+  "follow_up_days",
+  "follow_up_date",
+  "sign_sec",
+  "signed_by",
+  "signed_at",
+  "r5",
+  "amendment_reason",
+  "has_overrides",
+  "pharmacy_review_flag",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Doctor",
+   "options": "Doctor",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "doctor.doctor_name",
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "label": "Doctor Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "prescription_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Prescription Date"
+  },
+  {
+   "fieldname": "opd_slip",
+   "fieldtype": "Link",
+   "label": "OPD Slip",
+   "options": "OPD Slip"
+  },
+  {
+   "fieldname": "queue_entry",
+   "fieldtype": "Link",
+   "label": "Queue Entry",
+   "options": "Queue Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "OPD",
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Source",
+   "options": "OPD\nIPD\nER\nOnline Visit"
+  },
+  {
+   "fieldname": "round_no",
+   "fieldtype": "Int",
+   "label": "Round No. (IPD)"
+  },
+  {
+   "default": "1",
+   "fieldname": "version_no",
+   "fieldtype": "Int",
+   "label": "Version No.",
+   "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nSigned\nSuperseded\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "med_sec",
+   "fieldtype": "Section Break",
+   "label": "Medicines"
+  },
+  {
+   "fieldname": "medicines",
+   "fieldtype": "Table",
+   "label": "Medicines",
+   "options": "Prescription Medicine"
+  },
+  {
+   "fieldname": "dx_sec",
+   "fieldtype": "Section Break",
+   "label": "Diagnosis & tests"
+  },
+  {
+   "fieldname": "diagnoses",
+   "fieldtype": "Table",
+   "label": "Diagnoses",
+   "options": "Prescription Diagnosis"
+  },
+  {
+   "fieldname": "r3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lab_tests",
+   "fieldtype": "Table",
+   "label": "Lab Tests",
+   "options": "Prescription Lab Test"
+  },
+  {
+   "fieldname": "notes_sec",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "examination_notes",
+   "fieldtype": "Text",
+   "label": "Examination Notes"
+  },
+  {
+   "fieldname": "r4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "advice",
+   "fieldtype": "Text",
+   "label": "Advice"
+  },
+  {
+   "fieldname": "follow_up_days",
+   "fieldtype": "Int",
+   "label": "Follow Up Days"
+  },
+  {
+   "fieldname": "follow_up_date",
+   "fieldtype": "Date",
+   "label": "Follow Up Date"
+  },
+  {
+   "fieldname": "sign_sec",
+   "fieldtype": "Section Break",
+   "label": "Signature"
+  },
+  {
+   "fieldname": "signed_by",
+   "fieldtype": "Link",
+   "label": "Signed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signed_at",
+   "fieldtype": "Datetime",
+   "label": "Signed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Required when amending a signed prescription",
+   "fieldname": "amendment_reason",
+   "fieldtype": "Small Text",
+   "label": "Amendment Reason"
+  },
+  {
+   "fieldname": "has_overrides",
+   "fieldtype": "Check",
+   "label": "Has Overrides",
+   "read_only": 1
+  },
+  {
+   "description": "Amended after the medicine invoice was paid",
+   "fieldname": "pharmacy_review_flag",
+   "fieldtype": "Check",
+   "label": "Pharmacy Review Flag",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Prescription",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "OPD",
+ "name": "Prescription",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "role": "OV Doctor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Reviewer"
+  },
+  {
+   "read": 1,
+   "role": "PW Finder"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

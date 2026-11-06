@@ -1,0 +1,55 @@
+# Progress
+
+Status as of **2026-11-06**. Phases from `docs/CLAUDE.md` §8.
+
+| Phase | State |
+|---|---|
+| 0 Foundation | **Done** (see deferred) |
+| 1 Patients + OPD + Messaging | **Done** — 19 automated tests green |
+| Ward map + kiosk (from Phase 3, owner request) | **Done** (masters, live map, allot/extend/transfer/discharge, kiosk) |
+| 2 Pharmacy + Lab + Cash | Next — waiting for review |
+| 3–7 | Not started |
+
+## How to run
+
+```
+cd ~/erpnext-react
+bench --site hospital serve --port 8011                 # desk + built React at http://hospital.localhost:8011/hms
+cd apps/hospital_vvs/frontend && npm run dev            # dev server http://hospital.localhost:5183 (proxy → :8011)
+bench --site hospital execute hospital_vvs.setup.company.run   # company, branches, accounts, POS profiles (re-run safe)
+bench --site hospital execute hospital_vvs.setup.demo.seed     # demo data (re-run safe)
+bench --site hospital run-tests --app hospital_vvs
+```
+Demo logins (`<name>@vvs.demo`, password `Demo@1234` or site_config `hv_demo_password`): admin, reception, reception2, reception.isb (Islamabad only),
+nurse, supervisor, accounts, lab, pathologist, pharmacist, cashier, store, deo, dr.ayesha, dr.usman, dr.sana, dr.farah, dr.imran.
+
+## Phase 0 — built
+- App skeleton, 6 modules (Hospital VVS, OPD, Appointments, Messaging, Billing, IPD); DocTypes generated from `devtools/schema_*.py` (`devtools/generate.py`).
+- 16 roles (install hook), 2FA flags on the four money/verification roles.
+- **Clinic Settings** (single, 11 tabs): general, module switches (22), printing + printer map, POS profiles per billing type & branch, warehouses, IPD, appointments, messaging, billing (discount rules/approvers), security (idle lock), page access (31 routes); per-branch overrides.
+- Company, 2 branches, Branch accounting dimension, 6 income accounts, 5 cost centres, 12 warehouses, 5 modes of payment, **12 POS profiles** (6 billing types × 2 branches), service items.
+- React app (Vite + TS + Tailwind, Restaurant OS UI kit, clinical teal theme, light/dark): login with 2FA step, role-filtered control board, sidebar from Page Access Rules, branch switcher, **English / Urdu / Arabic with full RTL**, idle lock screen, training banner, realtime (socket.io) with polling fallback, print adapter (QZ Tray when running, browser print otherwise), 80 mm / CR80 / A4 templates.
+- Clinical Access Log (append-only), track changes on clinical/financial DocTypes, audit screen.
+- Monitoring endpoint `api.ops.health` + daily health summary to PW Admin; encrypted backup + verify scripts (`docs/OPS.md`).
+
+## Phase 1 — built
+- **Patients**: MR per branch (`MR-LHR-000123`), Customer on insert, encrypted CNIC + hash + mask + logged reveal, live duplicate check (CNIC / phone + fuzzy name / name + age), create-anyway reason, households by phone, consents with history, categories/payer, allergies, conditions, long-term medicines, patient card with MR-only QR, merge tool with preview, typed-MR confirmation and merge log.
+- **Doctors** (schedule, fees, PMDC no., signature), leave & blocked dates (block free slots), departments, specializations, allergies → generics/classes, ICD-10 diagnoses (33 seeded), generics/drug classes, medicines on Item (generic, class, strength, form, max dose, Rx flag).
+- **Appointments**: slot generation, holds with row lock (race test), one booking service for reception / web / WhatsApp, auto- or staff-confirm, reschedule/cancel cut-offs, reminders (evening before + N hours), no-show release, OTP for existing phones, unpaid-booking cap, rate-limited public API. Screens: `/appointments` (channel tabs, actions, booking dialog), public `/book-appointment` (mobile, en/ur/ar, payment proof upload), `/my-appointment/:token`.
+- **Messaging**: Message Template (11 events, en + ur SMS text), Message Log, consent, quiet hours, retry with backoff, SMS fallback, resend, signature-verified webhook, **WhatsApp bot** (language → menu → speciality → doctor → date → slot → household member / new patient → confirm → payment / proof → confirmation; re-prompt; handoff; 30-minute expiry), inbox with 24-hour window and test-mode patient simulator.
+- **OPD**: POS-style counter (doctor tiles with live queue counts, vitals + BMI, services, discount authorization, payer split, payment modes, cash tendered/change, idempotent save, 80 mm slip with big token and QR), free follow-up window, queue with priorities and realtime board, waiting-room TV with chime + English/Urdu voice.
+- **Prescription workspace**: medicine search (brand/generic) + favourites + templates + copy previous, live **allergy / interaction / duplicate-therapy / dose** alerts, override reason stored per line, ICD-10 and lab chips, voice dictation, Ctrl+Enter sign & print (A4/A5), amend with reason → v2 "Amended", v1 Superseded.
+- **History** timeline (visits, prescriptions with versions, overrides, appointments, bed stays) + vitals trend chart; every open logged.
+- **Discount approvals** (realtime), **message log** (resend), **dashboard** (KPIs, 14-day trend, collection by mode, channel mix, demographics, top diagnoses, doctor table), **6 MIS Script Reports** with React viewer + CSV, **settings editor**, **masters editor**.
+
+## Tests (`hospital_vvs/tests/test_phase1.py`, 19 green)
+Identity (MR, customer, CNIC encrypted/masked, duplicate + merge moves visits/invoices/customer, reveal logged, cashier blocked, clinical fields hidden from cashier API) · OPD (POS invoice on OPD profile & income account, branch, GL balanced, token, queue, free follow-up no invoice, panel split) · tax before discount · discounts (limit, approval, self-approval blocked, reason required, unapproved discount blocks the slip) · safety (allergy + Major interaction block, override, immutability, amend v2/Superseded, dose parsing) · appointments (hold race, book, reschedule, cancel, leave hides slots, expired hold released) · WhatsApp bot (Urdu booking for a new household member with payment proof; reception handoff) · messaging (no consent → skipped; WhatsApp failure → SMS fallback) · role-filtered routes.
+
+## Deferred / known gaps
+- **Staging + training sites, restore drill on staging**: need `bench new-site` (MariaDB root password) — scripts and steps in `docs/OPS.md`; decrypt-and-check drill done locally.
+- **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.
+- Playwright E2E not written yet (backend tests cover the workflows); Vitest has one unit file.
+- Sentry/uptime: hooks documented, not wired (needs DSN / monitoring host).
+- Prescription → draft medicine invoice and lab orders: Phase 2 (hook `hv_on_prescription_signed` is in place).
+- Counter display devices with device keys: Phase 2.
+- Urdu/Arabic: navigation, actions and main clinical/billing terms translated; long help texts still English.

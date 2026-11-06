@@ -1,0 +1,32 @@
+# Decisions & open questions
+
+Choices made while building, and questions that need the owner (marked **OPEN**). Newest last.
+
+| # | Date | Decision | Why |
+|---|---|---|---|
+| D-01 | 2026-11-06 | App is **`hospital_vvs`** (spec says `vvsdesk`), site **`hospital`**, desk :8011, React dev `hospital.localhost:5183`, built React served by Frappe at **`/hms/…`**. | Owner named the app. Serving at `/hms` keeps Frappe's `/login`, `/app`, `/api` intact; spec paths keep their names under `/hms` (e.g. `/hms/opd_slip`). |
+| D-02 | 2026-11-06 | **One Company (VVS Hospital) with Branch as an accounting dimension**; branches Lahore Main (LHR) and Islamabad (ISB). Every invoice carries `branch`. | Branches are not separate legal entities in the demo. **OPEN:** confirm with the client. |
+| D-03 | 2026-11-06 | ERPNext v16 POS flow: counters create a submitted **Sales Invoice in POS mode** (`is_pos=1`, POS Profile per billing type and branch). `is_created_using_pos` stays 0 until Phase 2 cashier shifts attach invoices to the collector's POS Opening Entry. | Verified in `apps/erpnext/.../sales_invoice.py`: the open-POS-Opening check runs only when `is_created_using_pos` is set, and POS Settings `invoice_type` defaults to Sales Invoice. One open Opening Entry per POS Profile → Phase 2 needs a POS Profile per counter. |
+| D-04 | 2026-11-06 | **Tax on the original price before discount**: percentage taxes are frozen as Actual amounts on the undiscounted total, then the discount is taken off the net total. | Test showed ERPNext's own "discount on Grand Total" still lowers the tax base (45.24 instead of 50 on 1000 − 100 at 5%). Covered by `test_tax_on_price_before_discount`. |
+| D-05 | 2026-11-06 | Branch settings overrides: **child table `Branch Settings Override` (branch, setting, value)** on Clinic Settings; `utils.setting(field, branch)` reads it. | One place to edit; no second settings DocType. |
+| D-06 | 2026-11-06 | Messaging: own adapter layer (`services/messaging.py`), not `frappe_whatsapp`. **Test mode** (default) sends nothing and marks messages Sent; **Live** reads Meta Cloud API + SMS gateway credentials from `site_config.json` only. | The bench's `whatsapp` app is tied to its own doctypes; the spec wants one adapter with SMS fallback, consent and quiet hours. **OPEN:** SMS provider and its HTTP API; Meta template approval (11 templates × en/ur seeded as Message Templates). |
+| D-07 | 2026-11-06 | WhatsApp booking uses **interactive buttons/lists**, not WhatsApp Flows. Replies also work as option number or title. | Flows need a verified account and Flow approval. Can replace steps later. |
+| D-08 | 2026-11-06 | **No drug-interaction list is shipped.** Demo seeder adds 8 pairs flagged `is_demo=1`, source "DEMO DATA — not a clinical reference". | Spec: the clinic's pharmacist chooses the source list. **OPEN:** which list; import through the data manager (Phase 6) or Masters screen. |
+| D-09 | 2026-11-06 | Discount authorization = one DocType **Discount Authorization** (status Within Limit / Pending / Approved / Rejected / Used) that is both the request and the log. Limits per role in Clinic Settings → Billing (demo: Receptionist 10 % / Rs 1,000; Supervisor 50 %). Approver can also approve at the counter with their own password. | One record per discount; reports read it directly. **OPEN:** real limits per role. |
+| D-10 | 2026-11-06 | Payer split (panel/insurance/welfare): coverage % on the payer **Customer** (`hv_coverage_percent`); the slip makes a patient POS invoice and a credit invoice to the payer, item rates scaled by share (revenue per item stays right). | Phase 6 adds coverage rules per service, price lists and pre-auth. |
+| D-11 | 2026-11-06 | CNIC: Password field (encrypted in `__Auth`), SHA-256 hash **peppered with the site encryption key** for exact search, masked `*****-*******-N`. Reveal only Admin/Receptionist, logged in Clinical Access Log (denied attempts too). | Spec 00. The pepper stops a leaked hash column from being brute-forced offline. |
+| D-12 | 2026-11-06 | Access log DocType is **Clinical Access Log** (Frappe already has "Access Log"). Append-only: no write/delete permission for any role. | Name clash. |
+| D-13 | 2026-11-06 | Ward map, beds and a **ward kiosk display** built early (owner request); interim "Allot bed" stores patient, expected stay, agreed rate and reason on the bed. Phase 3's Bed Allotment (admission → discharge, billing) will drive the same fields. | Owner asked for the Restaurant OS table-map look with Available/Occupied colours, overdue badges and a kiosk. |
+| D-14 | 2026-11-06 | Kiosk/display pages (`/hms/display/queue`, `/hms/display/ward`) run under a **signed-in staff session** for now; patient names shown as initials (first name only when "Show First Name on Waiting Display" is on). | Device keys come with Display Device (Phase 2, pharmacy displays). |
+| D-15 | 2026-11-06 | Two-factor: roles PW Admin, Accountant, Cash Supervisor, Pathologist carry Frappe's role 2FA flag; it takes effect when System Settings → Enable Two Factor Auth is on (`Clinic Settings → Security → enforce_two_factor` reminder). Left **off on this dev site**. | Turning it on needs an authenticator per user. **OPEN:** turn on before go-live. |
+| D-16 | 2026-11-06 | Backups: Frappe backups with **System Settings → Encrypt Backups = on** (gpg), `scripts/backup.sh` (hourly DB / daily full, rsync or S3 off-site), `scripts/verify_backup.sh` (decrypt + check). | The encryption key lives in `site_config.json` → it must also be kept off the server. |
+| D-17 | 2026-11-06 | mm_core on this site: added the CRM Notification type "Email" Property Setter that other sites carry (mm_core's mail notifier needs it; the setup wizard failed without it). | Site-local, no core file changed. |
+
+## Open questions for the owner
+
+1. **Hosting** (on-premise server vs cloud with backup internet) — 09-security-ops.md. Recommendation: on-premise primary for counters/wards + off-site encrypted backups.
+2. **FBR POS integration / provincial sales tax on services** — not built; waits for the tax advisor (07).
+3. **Pakistani data-protection obligations** — check with the clinic's legal advisor; consent records are kept, messages carry no medical data.
+4. SMS gateway provider; WhatsApp Business account and template approval.
+5. Drug-interaction reference list (D-08); real discount limits (D-09); one company vs company per branch (D-02).
+6. Zakat/welfare eligibility rules (Phase 6) — the system only records approvals.

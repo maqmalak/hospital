@@ -1,0 +1,59 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "route",
+  "label",
+  "roles",
+  "module_switch"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "route",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Route",
+   "reqd": 1
+  },
+  {
+   "columns": 3,
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Label"
+  },
+  {
+   "columns": 4,
+   "description": "Comma separated role names",
+   "fieldname": "roles",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Roles"
+  },
+  {
+   "columns": 2,
+   "description": "Clinic Settings module switch that hides this route",
+   "fieldname": "module_switch",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Module Switch"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Page Access Rule",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,164 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "item_name",
+  "generic",
+  "drug_class",
+  "dose",
+  "frequency",
+  "route",
+  "duration",
+  "qty",
+  "instructions",
+  "no_substitution",
+  "alert_sec",
+  "alert_type",
+  "alert_severity",
+  "alert_message",
+  "override_reason",
+  "override_by",
+  "override_at"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Medicine",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "generic",
+   "fieldtype": "Link",
+   "label": "Generic",
+   "options": "Generic Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "drug_class",
+   "fieldtype": "Link",
+   "label": "Drug Class",
+   "options": "Drug Class",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "dose",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dose"
+  },
+  {
+   "columns": 1,
+   "description": "e.g. 1+0+1, TDS",
+   "fieldname": "frequency",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Frequency"
+  },
+  {
+   "columns": 1,
+   "default": "Oral",
+   "fieldname": "route",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Route",
+   "options": "Oral\nIV\nIM\nSC\nTopical\nInhalation\nEye\nEar\nNasal\nRectal\nSublingual"
+  },
+  {
+   "columns": 1,
+   "description": "e.g. 5 days",
+   "fieldname": "duration",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Duration"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "columns": 2,
+   "fieldname": "instructions",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Instructions"
+  },
+  {
+   "fieldname": "no_substitution",
+   "fieldtype": "Check",
+   "label": "No. Substitution"
+  },
+  {
+   "fieldname": "alert_sec",
+   "fieldtype": "Section Break",
+   "label": "Safety alert"
+  },
+  {
+   "fieldname": "alert_type",
+   "fieldtype": "Data",
+   "label": "Alert Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alert_severity",
+   "fieldtype": "Data",
+   "label": "Alert Severity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alert_message",
+   "fieldtype": "Small Text",
+   "label": "Alert Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "override_reason",
+   "fieldtype": "Small Text",
+   "label": "Override Reason"
+  },
+  {
+   "fieldname": "override_by",
+   "fieldtype": "Link",
+   "label": "Override By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "override_at",
+   "fieldtype": "Datetime",
+   "label": "Override At",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "OPD",
+ "name": "Prescription Medicine",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

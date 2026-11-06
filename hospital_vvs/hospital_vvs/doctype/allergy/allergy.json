@@ -1,0 +1,135 @@
+{
+ "actions": [],
+ "autoname": "field:allergy_name",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "allergy_name",
+  "allergy_type",
+  "generics",
+  "drug_classes"
+ ],
+ "fields": [
+  {
+   "fieldname": "allergy_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Allergy Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "Drug",
+   "fieldname": "allergy_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Allergy Type",
+   "options": "Drug\nFood\nOther"
+  },
+  {
+   "fieldname": "generics",
+   "fieldtype": "Table",
+   "label": "Generics",
+   "options": "Allergy Generic"
+  },
+  {
+   "fieldname": "drug_classes",
+   "fieldtype": "Table",
+   "label": "Drug Classes",
+   "options": "Allergy Drug Class"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Allergy",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Reviewer",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Lab User"
+  },
+  {
+   "read": 1,
+   "role": "PW Pathologist"
+  },
+  {
+   "read": 1,
+   "role": "PW Pharmacy Cashier"
+  },
+  {
+   "read": 1,
+   "role": "PW Dispenser"
+  },
+  {
+   "read": 1,
+   "role": "PW Store Keeper"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  },
+  {
+   "read": 1,
+   "role": "OV Staff"
+  },
+  {
+   "read": 1,
+   "role": "OV Doctor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

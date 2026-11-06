@@ -1,0 +1,171 @@
+{
+ "actions": [],
+ "autoname": "field:ward_name",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ward_name",
+  "ward_name_ur",
+  "ward_type",
+  "gender",
+  "w1",
+  "branch",
+  "floor",
+  "nursing_station",
+  "color",
+  "sort_order",
+  "is_active",
+  "w2",
+  "bed_charge_per_day",
+  "w3",
+  "nursing_charge_per_shift",
+  "bed_charge_item"
+ ],
+ "fields": [
+  {
+   "fieldname": "ward_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Ward Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ward_name_ur",
+   "fieldtype": "Data",
+   "label": "Name (Urdu)"
+  },
+  {
+   "default": "General",
+   "fieldname": "ward_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ward Type",
+   "options": "General\nSemi-Private\nPrivate\nICU\nCCU\nNICU\nHDU\nEmergency\nMaternity\nDay Care"
+  },
+  {
+   "default": "Mixed",
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Gender",
+   "options": "Mixed\nMale\nFemale\nChildren"
+  },
+  {
+   "fieldname": "w1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "floor",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Floor"
+  },
+  {
+   "fieldname": "nursing_station",
+   "fieldtype": "Data",
+   "label": "Nursing Station"
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
+  },
+  {
+   "fieldname": "sort_order",
+   "fieldtype": "Int",
+   "label": "Sort Order"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "w2",
+   "fieldtype": "Section Break",
+   "label": "Charges"
+  },
+  {
+   "fieldname": "bed_charge_per_day",
+   "fieldtype": "Currency",
+   "label": "Bed Charge Per Day"
+  },
+  {
+   "fieldname": "w3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nursing_charge_per_shift",
+   "fieldtype": "Currency",
+   "label": "Nursing Charge Per Shift"
+  },
+  {
+   "fieldname": "bed_charge_item",
+   "fieldtype": "Link",
+   "label": "Bed Charge Item",
+   "options": "Item"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Ward",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,41 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm ci
+      - run: npx tsc -p tsconfig.json --noEmit
+      - run: npx vitest run
+  backend:
+    runs-on: ubuntu-24.04
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env: { MARIADB_ROOT_PASSWORD: root }
+        ports: ["3306:3306"]
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: hospital_vvs }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.14" }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - name: Bench + site
+        run: |
+          pip install frappe-bench
+          bench init --frappe-branch version-16 --skip-redis-config-generation bench && cd bench
+          bench get-app --branch version-16 erpnext && bench get-app --branch version-16 hrms && bench get-app ../hospital_vvs
+          bench new-site test.local --db-root-password root --admin-password admin --install-app erpnext --install-app hrms --install-app hospital_vvs
+          bench --site test.local set-config allow_tests true
+          bench --site test.local execute hospital_vvs.setup.company.run
+          bench --site test.local execute hospital_vvs.setup.demo.seed
+      - name: Tests
+        run: cd bench && bench --site test.local run-tests --app hospital_vvs

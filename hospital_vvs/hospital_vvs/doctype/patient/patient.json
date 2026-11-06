@@ -1,0 +1,554 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient_name",
+  "patient_name_ur",
+  "patient_name_ar",
+  "relation_type",
+  "guardian_name",
+  "p1",
+  "gender",
+  "dob",
+  "dob_estimated",
+  "phone",
+  "alt_phone",
+  "preferred_language",
+  "p2",
+  "branch",
+  "category",
+  "photo",
+  "blood_group",
+  "p3",
+  "address",
+  "p4",
+  "city",
+  "id_sec",
+  "cnic",
+  "cnic_masked",
+  "p5",
+  "cnic_hash",
+  "cnic_last4",
+  "legacy_mr_no",
+  "payer_sec",
+  "panel",
+  "employee_id",
+  "panel_relation",
+  "p6",
+  "insurance_provider",
+  "policy_no",
+  "policy_valid_till",
+  "welfare_scheme",
+  "clinical_tab",
+  "allergies",
+  "chronic_conditions",
+  "long_term_medicines",
+  "contacts_tab",
+  "emergency_contacts",
+  "consents",
+  "c1",
+  "whatsapp_consent",
+  "sms_consent",
+  "data_consent",
+  "links_tab",
+  "customer",
+  "household",
+  "l1",
+  "disabled",
+  "merged_into",
+  "duplicate_reason",
+  "registered_by"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "global_search": 1,
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient_name_ur",
+   "fieldtype": "Data",
+   "label": "Name (Urdu)"
+  },
+  {
+   "fieldname": "patient_name_ar",
+   "fieldtype": "Data",
+   "label": "Name (Arabic)"
+  },
+  {
+   "fieldname": "relation_type",
+   "fieldtype": "Select",
+   "label": "Relation Type",
+   "options": "\nS/O\nD/O\nW/O\nC/O"
+  },
+  {
+   "fieldname": "guardian_name",
+   "fieldtype": "Data",
+   "label": "Father / Husband Name"
+  },
+  {
+   "fieldname": "p1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gender",
+   "options": "Male\nFemale\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fieldname": "dob_estimated",
+   "fieldtype": "Check",
+   "label": "DOB Estimated from Age"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Phone",
+   "options": "Phone",
+   "search_index": 1
+  },
+  {
+   "fieldname": "alt_phone",
+   "fieldtype": "Data",
+   "label": "Alternate Phone",
+   "options": "Phone"
+  },
+  {
+   "default": "ur",
+   "fieldname": "preferred_language",
+   "fieldtype": "Select",
+   "label": "Preferred Language",
+   "options": "en\nur\nar"
+  },
+  {
+   "fieldname": "p2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Registered at Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "default": "Normal",
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Normal\nPanel\nInsurance\nStaff\nWelfare"
+  },
+  {
+   "fieldname": "photo",
+   "fieldtype": "Attach Image",
+   "label": "Photo"
+  },
+  {
+   "fieldname": "blood_group",
+   "fieldtype": "Select",
+   "label": "Blood Group",
+   "options": "\nA+\nA-\nB+\nB-\nAB+\nAB-\nO+\nO-",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "p3",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "p4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Lahore",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "City"
+  },
+  {
+   "fieldname": "id_sec",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "description": "Stored encrypted",
+   "fieldname": "cnic",
+   "fieldtype": "Password",
+   "label": "CNIC / B-form"
+  },
+  {
+   "fieldname": "cnic_masked",
+   "fieldtype": "Data",
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "p5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cnic_hash",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "CNIC Hash",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "cnic_last4",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "CNIC Last4",
+   "read_only": 1
+  },
+  {
+   "fieldname": "legacy_mr_no",
+   "fieldtype": "Data",
+   "label": "Legacy MR No.",
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.category!='Normal'",
+   "fieldname": "payer_sec",
+   "fieldtype": "Section Break",
+   "label": "Payer"
+  },
+  {
+   "depends_on": "eval:doc.category=='Panel'",
+   "fieldname": "panel",
+   "fieldtype": "Link",
+   "label": "Panel",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.category=='Panel'",
+   "fieldname": "employee_id",
+   "fieldtype": "Data",
+   "label": "Employee ID"
+  },
+  {
+   "depends_on": "eval:doc.category=='Panel'",
+   "fieldname": "panel_relation",
+   "fieldtype": "Select",
+   "label": "Panel Relation",
+   "options": "\nSelf\nDependent"
+  },
+  {
+   "fieldname": "p6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.category=='Insurance'",
+   "fieldname": "insurance_provider",
+   "fieldtype": "Link",
+   "label": "Insurance Provider",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.category=='Insurance'",
+   "fieldname": "policy_no",
+   "fieldtype": "Data",
+   "label": "Policy No."
+  },
+  {
+   "depends_on": "eval:doc.category=='Insurance'",
+   "fieldname": "policy_valid_till",
+   "fieldtype": "Date",
+   "label": "Policy Valid Till"
+  },
+  {
+   "depends_on": "eval:doc.category=='Welfare'",
+   "fieldname": "welfare_scheme",
+   "fieldtype": "Data",
+   "label": "Welfare Scheme"
+  },
+  {
+   "fieldname": "clinical_tab",
+   "fieldtype": "Tab Break",
+   "label": "Clinical"
+  },
+  {
+   "fieldname": "allergies",
+   "fieldtype": "Table",
+   "label": "Allergies",
+   "options": "Patient Allergy",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "chronic_conditions",
+   "fieldtype": "Table",
+   "label": "Chronic Conditions",
+   "options": "Patient Condition",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "long_term_medicines",
+   "fieldtype": "Table",
+   "label": "Long Term Medicines",
+   "options": "Patient Long Term Medicine",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "contacts_tab",
+   "fieldtype": "Tab Break",
+   "label": "Contacts & Consent"
+  },
+  {
+   "fieldname": "emergency_contacts",
+   "fieldtype": "Table",
+   "label": "Emergency Contacts",
+   "options": "Emergency Contact"
+  },
+  {
+   "fieldname": "consents",
+   "fieldtype": "Table",
+   "label": "Consents",
+   "options": "Patient Consent"
+  },
+  {
+   "fieldname": "c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "whatsapp_consent",
+   "fieldtype": "Check",
+   "label": "Whatsapp Consent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sms_consent",
+   "fieldtype": "Check",
+   "label": "SMS Consent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "data_consent",
+   "fieldtype": "Check",
+   "label": "Data Consent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "links_tab",
+   "fieldtype": "Tab Break",
+   "label": "Links"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "household",
+   "fieldtype": "Link",
+   "label": "Household",
+   "options": "Household",
+   "read_only": 1
+  },
+  {
+   "fieldname": "l1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "merged_into",
+   "fieldtype": "Link",
+   "label": "Merged Into",
+   "options": "Patient",
+   "read_only": 1
+  },
+  {
+   "description": "Why the user created a new record despite a possible duplicate",
+   "fieldname": "duplicate_reason",
+   "fieldtype": "Small Text",
+   "label": "Duplicate Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "registered_by",
+   "fieldtype": "Link",
+   "label": "Registered By",
+   "options": "User",
+   "read_only": 1
+  }
+ ],
+ "image_field": "photo",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Patient",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Reviewer"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Pathologist"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "OV Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Pharmacy Cashier"
+  },
+  {
+   "read": 1,
+   "role": "PW Dispenser"
+  },
+  {
+   "read": 1,
+   "role": "PW Lab User"
+  },
+  {
+   "read": 1,
+   "role": "PW Pathologist"
+  },
+  {
+   "read": 1,
+   "role": "PW Reviewer"
+  },
+  {
+   "read": 1,
+   "role": "PW Finder"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "OV Staff"
+  },
+  {
+   "read": 1,
+   "role": "OV Doctor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "patient_name,phone,legacy_mr_no",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

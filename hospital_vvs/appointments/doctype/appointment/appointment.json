@@ -1,0 +1,312 @@
+{
+ "actions": [],
+ "autoname": "APT-.YYYY.-.######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient",
+  "patient_name",
+  "phone",
+  "doctor",
+  "doctor_name",
+  "ap1",
+  "branch",
+  "appointment_date",
+  "start_time",
+  "time_slot",
+  "ap2",
+  "status",
+  "source_channel",
+  "booking_ref",
+  "pay_sec",
+  "fee",
+  "payment_channel",
+  "payment_status",
+  "ap3",
+  "payment_proof",
+  "refund_amount",
+  "refund_reference",
+  "misc_sec",
+  "manage_token",
+  "reminder_evening_sent",
+  "reminder_hours_sent",
+  "arrived_at",
+  "ap4",
+  "opd_slip",
+  "cancel_reason",
+  "is_new_patient",
+  "new_patient_age",
+  "new_patient_gender"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Doctor",
+   "options": "Doctor",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "doctor.doctor_name",
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "label": "Doctor Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ap1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "appointment_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Appointment Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Start Time"
+  },
+  {
+   "fieldname": "time_slot",
+   "fieldtype": "Link",
+   "label": "Time Slot",
+   "options": "Time Slot",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ap2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nConfirmed\nArrived\nCompleted\nRejected\nCancelled\nNo-show"
+  },
+  {
+   "default": "Reception",
+   "fieldname": "source_channel",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Source Channel",
+   "options": "Reception\nWeb\nWhatsApp"
+  },
+  {
+   "fieldname": "booking_ref",
+   "fieldtype": "Data",
+   "label": "Booking Ref",
+   "read_only": 1,
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "pay_sec",
+   "fieldtype": "Section Break",
+   "label": "Fee & payment"
+  },
+  {
+   "fieldname": "fee",
+   "fieldtype": "Currency",
+   "label": "Fee",
+   "read_only": 1
+  },
+  {
+   "default": "At Clinic",
+   "fieldname": "payment_channel",
+   "fieldtype": "Select",
+   "label": "Payment Channel",
+   "options": "At Clinic\nPayment Proof\nOnline"
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Payment Status",
+   "options": "Unpaid\nProof Submitted\nPaid\nRefunded"
+  },
+  {
+   "fieldname": "ap3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_proof",
+   "fieldtype": "Attach",
+   "label": "Payment Proof"
+  },
+  {
+   "fieldname": "refund_amount",
+   "fieldtype": "Currency",
+   "label": "Refund Amount"
+  },
+  {
+   "fieldname": "refund_reference",
+   "fieldtype": "Data",
+   "label": "Refund Reference"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "misc_sec",
+   "fieldtype": "Section Break",
+   "label": "Tracking"
+  },
+  {
+   "fieldname": "manage_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Manage Token",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "reminder_evening_sent",
+   "fieldtype": "Check",
+   "label": "Reminder Evening Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reminder_hours_sent",
+   "fieldtype": "Check",
+   "label": "Reminder Hours Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "arrived_at",
+   "fieldtype": "Datetime",
+   "label": "Arrived At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ap4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "opd_slip",
+   "fieldtype": "Link",
+   "label": "OPD Slip",
+   "options": "OPD Slip",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancel_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancel Reason"
+  },
+  {
+   "fieldname": "is_new_patient",
+   "fieldtype": "Check",
+   "label": "Is New Patient",
+   "read_only": 1
+  },
+  {
+   "fieldname": "new_patient_age",
+   "fieldtype": "Int",
+   "label": "New Patient Age"
+  },
+  {
+   "fieldname": "new_patient_gender",
+   "fieldtype": "Select",
+   "label": "New Patient Gender",
+   "options": "\nMale\nFemale\nOther"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Appointments",
+ "name": "Appointment",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

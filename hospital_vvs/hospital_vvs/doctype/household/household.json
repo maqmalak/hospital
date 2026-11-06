@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "autoname": "HH-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "household_name",
+  "phone",
+  "head",
+  "members"
+ ],
+ "fields": [
+  {
+   "fieldname": "household_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Household Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Phone",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Head",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "members",
+   "fieldtype": "Table",
+   "label": "Members",
+   "options": "Household Member"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Household",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

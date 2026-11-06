@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "device",
+  "receipt_printer",
+  "label_printer",
+  "a4_printer"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "columns": 2,
+   "description": "Counter or PC name",
+   "fieldname": "device",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Device",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "receipt_printer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Receipt Printer"
+  },
+  {
+   "columns": 2,
+   "fieldname": "label_printer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Label Printer"
+  },
+  {
+   "columns": 2,
+   "fieldname": "a4_printer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "A4 Printer"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Printer Map",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CureDesk — Demo Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#071929;--navy2:#0A2342;
+  --blue:#2c7be5;--blue2:#1a68d1;--blue3:#e8f1fd;
+  --teal:#0d9488;--teal2:#0f766e;--teal3:#ccfbf1;
+  --green:#00b383;--red:#e63757;--amber:#f59e0b;--purple:#7c3aed;
+  --text:#12263f;--muted:#6b7a90;--border:#e3e8ef;--bg:#f0f4f8;
+  --card:#ffffff;
+  --sidebar-w:260px;--top-h:58px;
+  --radius:12px;--shadow:0 2px 12px rgba(7,25,41,.08);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);font-size:14px;line-height:1.6;padding-top:var(--top-h);}
+
+/* ── TOP BAR ── */
+.cd-topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--top-h);z-index:300;
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 55%,#1565C0 100%);
+  display:flex;align-items:center;padding:0 20px;gap:14px;
+  box-shadow:0 2px 20px rgba(7,25,41,.4);
+}
+.cd-brand{display:flex;align-items:center;gap:9px;text-decoration:none;}
+.cd-brand-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.cd-brand-name{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.cd-brand-tag{font-size:10px;font-weight:700;background:rgba(44,123,229,.4);color:#93c5fd;padding:2px 8px;border-radius:20px;margin-left:2px;}
+.cd-topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.cd-topbar-pill{font-size:11px;font-weight:600;color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:4px 11px;border-radius:20px;white-space:nowrap;}
+.cd-topbar-pill strong{color:#fff;}
+.cd-menu-btn{display:none;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:7px;padding:6px 9px;cursor:pointer;color:#fff;font-size:16px;line-height:1;}
+
+/* ── LAYOUT ── */
+.cd-wrap{
+  display:flex;
+  min-height:calc(100vh - var(--top-h));
+}
+.cd-sidebar{
+  width:var(--sidebar-w);
+  flex-shrink:0;
+  position:sticky;
+  top:var(--top-h);
+  height:calc(100vh - var(--top-h));
+  background:var(--navy2);
+  overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;
+  z-index:100;
+}
+.cd-sidebar::-webkit-scrollbar{width:3px;}
+.cd-sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);}
+
+.cd-main{
+  flex:1;
+  min-width:0;
+  padding:32px 40px 80px;
+}
+
+/* ── SIDEBAR NAV ── */
+.cd-nav-section{padding:18px 10px 4px;}
+.cd-nav-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;padding:0 9px;margin-bottom:4px;}
+.cd-nav-group{margin-bottom:1px;}
+.cd-nav-group-hdr{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:7px;cursor:pointer;color:rgba(255,255,255,.58);font-size:12.5px;font-weight:600;user-select:none;transition:.15s;}
+.cd-nav-group-hdr:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9);}
+.cd-nav-group-hdr .hdr-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0;}
+.cd-nav-group-hdr .hdr-chev{margin-left:auto;font-size:10px;transition:transform .2s;}
+.cd-nav-group.open .hdr-chev{transform:rotate(90deg);}
+.cd-nav-group.open .cd-nav-group-hdr{color:#fff;background:rgba(255,255,255,.06);}
+.cd-nav-children{display:none;padding:1px 0 2px 10px;}
+.cd-nav-group.open .cd-nav-children{display:block;}
+.cd-nav-link{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:6px;color:rgba(255,255,255,.52);font-size:12px;font-weight:500;text-decoration:none;transition:.15s;margin-bottom:1px;}
+.cd-nav-link:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9);}
+.cd-nav-link.active{background:rgba(44,123,229,.22);color:#93c5fd;border-left:2px solid var(--blue);padding-left:8px;}
+.cd-nav-link .nl-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.22);flex-shrink:0;}
+.cd-nav-link.active .nl-dot{background:var(--blue);}
+.cd-nav-direct{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:7px;color:rgba(255,255,255,.58);font-size:12.5px;font-weight:600;text-decoration:none;transition:.15s;margin-bottom:2px;}
+.cd-nav-direct:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9);}
+.cd-nav-direct.active{background:rgba(44,123,229,.2);color:#93c5fd;}
+.cd-nav-direct .nd-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0;}
+
+/* ── SECTIONS ── */
+.cd-section{margin-bottom:52px;scroll-margin-top:calc(var(--top-h) + 18px);}
+.cd-section-header{display:flex;align-items:center;gap:14px;margin-bottom:22px;padding-bottom:14px;border-bottom:2px solid var(--border);}
+.cd-section-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.cd-section-icon.blue{background:var(--blue3);color:var(--blue);}
+.cd-section-icon.teal{background:var(--teal3);color:var(--teal);}
+.cd-section-icon.navy{background:#dbeafe;color:var(--navy2);}
+.cd-section-icon.green{background:#d1fae5;color:#065f46;}
+.cd-section-icon.amber{background:#fef3c7;color:#b45309;}
+.cd-section-icon.purple{background:#ede9fe;color:var(--purple);}
+.cd-section-icon.red{background:#fee2e2;color:var(--red);}
+.cd-section-title{font-size:21px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.cd-section-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+
+/* ── HERO ── */
+.cd-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 55%,#1565C0 100%);border-radius:16px;padding:36px 40px;color:#fff;margin-bottom:44px;position:relative;overflow:hidden;}
+.cd-hero::after{content:'';position:absolute;right:-30px;top:-30px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none;}
+.cd-hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;background:rgba(44,123,229,.3);color:#93c5fd;padding:3px 11px;border-radius:20px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px;}
+.cd-hero-title{font-size:28px;font-weight:800;letter-spacing:-.4px;line-height:1.2;margin-bottom:10px;}
+.cd-hero-desc{font-size:14px;color:rgba(255,255,255,.75);max-width:540px;line-height:1.7;}
+.cd-hero-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px;}
+.cd-hero-chip{font-size:11px;font-weight:600;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.82);padding:4px 11px;border-radius:20px;}
+
+/* ── CARDS ── */
+.cd-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:14px;}
+.cd-card-title{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.cd-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.cd-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+/* ── FEATURE LIST ── */
+.cd-feat-list{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.cd-feat-list li{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;color:var(--text);}
+.cd-feat-list li::before{content:'✓';color:var(--blue);font-weight:700;flex-shrink:0;margin-top:1px;}
+
+/* ── WORKFLOW ── */
+.cd-wf-step{display:flex;gap:14px;padding-bottom:22px;}
+.cd-wf-step:last-child{padding-bottom:0;}
+.cd-wf-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.cd-wf-num{width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cd-wf-line{flex:1;width:2px;background:var(--border);margin-top:4px;min-height:12px;}
+.cd-wf-step:last-child .cd-wf-line{display:none;}
+.cd-wf-content{flex:1;padding-top:4px;}
+.cd-wf-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.cd-wf-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.cd-wf-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.cd-wf-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;}
+.cd-wf-tag.blue{background:var(--blue3);color:var(--blue2);}
+.cd-wf-tag.teal{background:var(--teal3);color:var(--teal2);}
+.cd-wf-tag.green{background:#d1fae5;color:#065f46;}
+.cd-wf-tag.amber{background:#fef3c7;color:#92400e;}
+.cd-wf-tag.purple{background:#ede9fe;color:#5b21b6;}
+
+/* ── PILLS ── */
+.pill{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.pill-blue{background:var(--blue3);color:var(--blue2);}
+.pill-teal{background:var(--teal3);color:var(--teal2);}
+.pill-green{background:#d1fae5;color:#065f46;}
+.pill-amber{background:#fef3c7;color:#92400e;}
+.pill-purple{background:#ede9fe;color:#5b21b6;}
+.pill-red{background:#fee2e2;color:#991b1b;}
+.pill-gray{background:#f1f5f9;color:#64748b;}
+.pill-navy{background:#dbeafe;color:var(--navy2);}
+
+/* ── TABLE ── */
+.cd-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.cd-table th{text-align:left;padding:9px 13px;background:#f8fafc;color:var(--muted);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid var(--border);}
+.cd-table td{padding:9px 13px;border-bottom:1px solid var(--border);vertical-align:top;}
+.cd-table tr:last-child td{border-bottom:none;}
+.cd-table tr:hover td{background:#fafbfc;}
+
+/* ── STATS ── */
+.cd-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.cd-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.cd-stat-num{font-size:26px;font-weight:800;color:var(--blue);line-height:1;}
+.cd-stat-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500;}
+
+/* ── PORTAL CARD ── */
+.cd-portal-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px;}
+.cd-portal-header{padding:13px 18px;display:flex;align-items:center;gap:10px;}
+.cd-portal-header.blue{background:linear-gradient(135deg,var(--navy),var(--navy2));}
+.cd-portal-header.teal{background:linear-gradient(135deg,#022c22,#065f46);}
+.cd-portal-header.purple{background:linear-gradient(135deg,#2e1065,#4c1d95);}
+.cd-portal-icon{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.cd-portal-title{font-size:13.5px;font-weight:700;color:#fff;}
+.cd-portal-url{font-size:11px;color:rgba(255,255,255,.6);font-family:monospace;}
+.cd-portal-body{padding:16px 18px;}
+
+/* ── CALLOUT ── */
+.cd-callout{display:flex;gap:11px;padding:13px 16px;border-radius:9px;margin-bottom:14px;font-size:13px;}
+.cd-callout.info{background:#eff6ff;border-left:4px solid var(--blue);}
+.cd-callout.tip{background:#f0fdf4;border-left:4px solid var(--green);}
+.cd-callout.warn{background:#fffbeb;border-left:4px solid var(--amber);}
+.cd-callout-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.cd-callout-text strong{font-weight:600;}
+
+/* ── MISC ── */
+.cd-divider{height:1px;background:var(--border);margin:16px 0;}
+h3.cd-sub{font-size:14.5px;font-weight:700;color:var(--text);margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+h4.cd-sub2{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px;}
+code{background:#f1f5f9;border:1px solid var(--border);padding:1px 5px;border-radius:4px;font-size:11.5px;font-family:monospace;color:var(--blue2);}
+
+/* ── OVERLAY (mobile) ── */
+.cd-overlay{display:none;position:fixed;inset:0;background:rgba(7,25,41,.5);z-index:150;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:920px){
+  .cd-wrap{display:block;}
+  .cd-sidebar{
+    position:fixed;left:0;top:var(--top-h);
+    height:calc(100vh - var(--top-h));
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    z-index:200;
+  }
+  .cd-sidebar.open{transform:translateX(0);}
+  .cd-overlay.show{display:block;}
+  .cd-main{padding:20px 18px 60px;}
+  .cd-menu-btn{display:flex;align-items:center;}
+  .cd-stat-grid{grid-template-columns:1fr 1fr;}
+  .cd-grid-2,.cd-grid-3{grid-template-columns:1fr;}
+  .cd-hero{padding:26px 22px;}
+  .cd-hero-title{font-size:22px;}
+  .cd-topbar-pill{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- OVERLAY (mobile) -->
+<div class="cd-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- TOP BAR -->
+<header class="cd-topbar">
+  <a class="cd-brand" href="#">
+    <div class="cd-brand-icon">🏥</div>
+    <span class="cd-brand-name">CureDesk</span>
+    <span class="cd-brand-tag">Demo Docs</span>
+  </a>
+  <div class="cd-topbar-right">
+    <button class="cd-menu-btn" onclick="openSidebar()">☰</button>
+  </div>
+</header>
+
+<div class="cd-wrap">
+<!-- SIDEBAR -->
+<nav class="cd-sidebar" id="sidebar">
+
+  <div class="cd-nav-section">
+    <div class="cd-nav-label">Getting Started</div>
+    <a class="cd-nav-direct" href="#overview"><span class="nd-icon">🗺️</span>Overview</a>
+    <a class="cd-nav-direct" href="#architecture"><span class="nd-icon">🧱</span>System Architecture</a>
+    <a class="cd-nav-direct" href="#roles"><span class="nd-icon">👥</span>User Roles &amp; Access</a>
+  </div>
+
+  <div class="cd-nav-section">
+    <div class="cd-nav-label">Core Modules</div>
+
+    <div class="cd-nav-group open">
+      <div class="cd-nav-group-hdr" onclick="toggleGroup(this)">
+        <span class="hdr-icon">🩺</span>OPD Management<span class="hdr-chev">›</span>
+      </div>
+      <div class="cd-nav-children">
+        <a class="cd-nav-link" href="#opd-registration"><span class="nl-dot"></span>Patient Registration</a>
+        <a class="cd-nav-link" href="#opd-doctors"><span class="nl-dot"></span>Doctor Setup</a>
+        <a class="cd-nav-link" href="#opd-appointments"><span class="nl-dot"></span>Appointments &amp; Slots</a>
+        <a class="cd-nav-link" href="#opd-queue"><span class="nl-dot"></span>Physician Queue</a>
+        <a class="cd-nav-link" href="#opd-slip"><span class="nl-dot"></span>OPD Slip &amp; Billing</a>
+        <a class="cd-nav-link" href="#opd-prescription"><span class="nl-dot"></span>Prescription Writing</a>
+        <a class="cd-nav-link" href="#opd-history"><span class="nl-dot"></span>Patient History</a>
+      </div>
+    </div>
+
+    <div class="cd-nav-group">
+      <div class="cd-nav-group-hdr" onclick="toggleGroup(this)">
+        <span class="hdr-icon">🛏️</span>IPD Management<span class="hdr-chev">›</span>
+      </div>
+      <div class="cd-nav-children">
+        <a class="cd-nav-link" href="#ipd-setup"><span class="nl-dot"></span>Ward &amp; Bed Setup</a>
+        <a class="cd-nav-link" href="#ipd-admission"><span class="nl-dot"></span>Admission &amp; Allotment</a>
+        <a class="cd-nav-link" href="#ipd-rounds"><span class="nl-dot"></span>Ward Rounds &amp; Notes</a>
+        <a class="cd-nav-link" href="#ipd-mar"><span class="nl-dot"></span>MAR – Medication Record</a>
+        <a class="cd-nav-link" href="#ipd-diet"><span class="nl-dot"></span>Diet Orders</a>
+        <a class="cd-nav-link" href="#ipd-procedures"><span class="nl-dot"></span>Procedures</a>
+        <a class="cd-nav-link" href="#ipd-billing"><span class="nl-dot"></span>IPD Billing</a>
+        <a class="cd-nav-link" href="#ipd-discharge"><span class="nl-dot"></span>Discharge Process</a>
+      </div>
+    </div>
+
+    <div class="cd-nav-group">
+      <div class="cd-nav-group-hdr" onclick="toggleGroup(this)">
+        <span class="hdr-icon">🔬</span>Laboratory<span class="hdr-chev">›</span>
+      </div>
+      <div class="cd-nav-children">
+        <a class="cd-nav-link" href="#lab-orders"><span class="nl-dot"></span>Test Orders</a>
+        <a class="cd-nav-link" href="#lab-results"><span class="nl-dot"></span>Result Entry</a>
+        <a class="cd-nav-link" href="#lab-billing"><span class="nl-dot"></span>Lab Billing</a>
+      </div>
+    </div>
+
+    <div class="cd-nav-group">
+      <div class="cd-nav-group-hdr" onclick="toggleGroup(this)">
+        <span class="hdr-icon">💊</span>Pharmacy &amp; POS<span class="hdr-chev">›</span>
+      </div>
+      <div class="cd-nav-children">
+        <a class="cd-nav-link" href="#pharma-stock"><span class="nl-dot"></span>Medicine Stock</a>
+        <a class="cd-nav-link" href="#pharma-pos"><span class="nl-dot"></span>POS Session</a>
+        <a class="cd-nav-link" href="#pharma-invoice"><span class="nl-dot"></span>Medicine Invoice</a>
+      </div>
+    </div>
+
+    <div class="cd-nav-group">
+      <div class="cd-nav-group-hdr" onclick="toggleGroup(this)">
+        <span class="hdr-icon">💰</span>Billing &amp; Finance<span class="hdr-chev">›</span>
+      </div>
+      <div class="cd-nav-children">
+        <a class="cd-nav-link" href="#billing-pos"><span class="nl-dot"></span>POS Profiles</a>
+        <a class="cd-nav-link" href="#billing-invoices"><span class="nl-dot"></span>Invoice Types</a>
+        <a class="cd-nav-link" href="#billing-expenses"><span class="nl-dot"></span>Expense Management</a>
+        <a class="cd-nav-link" href="#billing-purchase"><span class="nl-dot"></span>Purchase Management</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cd-nav-section">
+    <div class="cd-nav-label">Custom Apps</div>
+
+    <div class="cd-nav-group">
+      <div class="cd-nav-group-hdr" onclick="toggleGroup(this)">
+        <span class="hdr-icon">📹</span>Online Visit<span class="hdr-chev">›</span>
+      </div>
+      <div class="cd-nav-children">
+        <a class="cd-nav-link" href="#ov-patient"><span class="nl-dot"></span>Patient Portal</a>
+        <a class="cd-nav-link" href="#ov-staff"><span class="nl-dot"></span>Staff Dashboard</a>
+        <a class="cd-nav-link" href="#ov-workflow"><span class="nl-dot"></span>Consultation Workflow</a>
+      </div>
+    </div>
+
+    <div class="cd-nav-group">
+      <div class="cd-nav-group-hdr" onclick="toggleGroup(this)">
+        <span class="hdr-icon">📡</span>Patient Communications<span class="hdr-chev">›</span>
+      </div>
+      <div class="cd-nav-children">
+        <a class="cd-nav-link" href="#pc-nursing"><span class="nl-dot"></span>Nursing Station</a>
+        <a class="cd-nav-link" href="#pc-patient"><span class="nl-dot"></span>Patient Room Portal</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cd-nav-section">
+    <div class="cd-nav-label">Reference</div>
+    <a class="cd-nav-direct" href="#portal-pages"><span class="nd-icon">🌐</span>Portal Pages</a>
+    <a class="cd-nav-direct" href="#settings"><span class="nd-icon">⚙️</span>Configuration</a>
+    <a class="cd-nav-direct" href="#erpnext"><span class="nd-icon">🔗</span>ERPNext Integration</a>
+  </div>
+
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="cd-main">
+
+<!-- HERO -->
+<div class="cd-hero">
+  <div class="cd-hero-badge">🏥 Hospital Management System</div>
+  <div class="cd-hero-title">CureDesk — Complete Clinic &amp; Hospital Platform</div>
+  <div class="cd-hero-desc">A fully integrated hospital management system built on ERPNext / Frappe, combining outpatient, inpatient, laboratory, pharmacy, billing, telemedicine, and nursing communication into one unified platform.</div>
+  <div class="cd-hero-chips">
+    <span class="cd-hero-chip">OPD &amp; IPD Management</span>
+    <span class="cd-hero-chip">Telemedicine Portal</span>
+    <span class="cd-hero-chip">Lab &amp; Pharmacy</span>
+    <span class="cd-hero-chip">POS Billing</span>
+    <span class="cd-hero-chip">Nursing Communications</span>
+    <span class="cd-hero-chip">ERPNext Accounts &amp; Inventory</span>
+    <span class="cd-hero-chip">Insurance / TPA Billing</span>
+    <span class="cd-hero-chip">Print Designer</span>
+  </div>
+</div>
+
+<!-- ════════════════════ OVERVIEW ════════════════════ -->
+<section class="cd-section" id="overview">
+  <div class="cd-section-header">
+    <div class="cd-section-icon blue">🗺️</div>
+    <div><div class="cd-section-title">System Overview</div><div class="cd-section-sub">What CureDesk does and who it's for</div></div>
+  </div>
+  <div class="cd-stat-grid">
+    <div class="cd-stat"><div class="cd-stat-num">3</div><div class="cd-stat-label">Custom Apps</div></div>
+    <div class="cd-stat"><div class="cd-stat-num">30+</div><div class="cd-stat-label">Portal Pages</div></div>
+    <div class="cd-stat"><div class="cd-stat-num">8</div><div class="cd-stat-label">User Roles</div></div>
+    <div class="cd-stat"><div class="cd-stat-num">6</div><div class="cd-stat-label">POS Profiles</div></div>
+  </div>
+  <div class="cd-grid-3">
+    <div class="cd-card">
+      <div class="cd-card-title">💊 Prescription Writter</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Core hospital app — OPD, IPD, Lab, Pharmacy, and all clinical billing.</p>
+      <ul class="cd-feat-list">
+        <li>Complete OPD patient flow</li>
+        <li>Full IPD bed-to-discharge</li>
+        <li>Lab order &amp; result management</li>
+        <li>Medicine POS &amp; dispensing</li>
+        <li>Insurance &amp; package billing</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">📹 Online Visit</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Telemedicine portal for remote consultations.</p>
+      <ul class="cd-feat-list">
+        <li>Patient self-service booking</li>
+        <li>Multi-language (Urdu/English)</li>
+        <li>Video call link integration</li>
+        <li>Online payment &amp; refunds</li>
+        <li>Prescription delivery</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">📡 Patient Communications</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Real-time IPD messaging between patients and nursing stations.</p>
+      <ul class="cd-feat-list">
+        <li>Browser-based voice-to-text</li>
+        <li>Real-time messaging</li>
+        <li>Multiple nursing stations</li>
+        <li>Patient assignment management</li>
+        <li>Bed-allotment triggered setup</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ ARCHITECTURE ════════════════════ -->
+<section class="cd-section" id="architecture">
+  <div class="cd-section-header">
+    <div class="cd-section-icon navy">🧱</div>
+    <div><div class="cd-section-title">System Architecture</div><div class="cd-section-sub">Technology stack and app dependencies</div></div>
+  </div>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">📦 Technology Stack</div>
+      <table class="cd-table">
+        <tr><td><strong>Framework</strong></td><td><span class="pill pill-blue">Frappe v15</span></td></tr>
+        <tr><td><strong>ERP Base</strong></td><td><span class="pill pill-navy">ERPNext v15.103</span></td></tr>
+        <tr><td><strong>Database</strong></td><td>MariaDB</td></tr>
+        <tr><td><strong>Reports</strong></td><td>Frappe Query Report + Print Designer</td></tr>
+        <tr><td><strong>Payments</strong></td><td>Frappe Payments App</td></tr>
+      </table>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">🔗 App Dependencies</div>
+      <table class="cd-table">
+        <tr><td><strong>Prescription Writter</strong></td><td>ERPNext (Customers, Invoices, Stock, POS)</td></tr>
+        <tr><td><strong>Online Visit</strong></td><td>Prescription Writter (settings, roles)</td></tr>
+        <tr><td><strong>Patient Comms</strong></td><td>Prescription Writter (Bed Allotments)</td></tr>
+        <tr><td><strong>Print Designer</strong></td><td>Prescription &amp; slip print formats</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="cd-callout info">
+    <div class="cd-callout-icon">ℹ️</div>
+    <div class="cd-callout-text"><strong>ERPNext as the accounting backbone:</strong> All patient invoices are generated as ERPNext Sales Invoices through POS Profiles — giving full accounting visibility in AR, P&amp;L, and Balance Sheet without double-entry.</div>
+  </div>
+</section>
+
+<!-- ════════════════════ ROLES ════════════════════ -->
+<section class="cd-section" id="roles">
+  <div class="cd-section-header">
+    <div class="cd-section-icon purple">👥</div>
+    <div><div class="cd-section-title">User Roles &amp; Access</div><div class="cd-section-sub">Who can access what in CureDesk</div></div>
+  </div>
+  <div class="cd-card" style="padding:0;overflow:hidden;">
+    <table class="cd-table">
+      <thead><tr><th>Role</th><th>OPD</th><th>IPD</th><th>Lab</th><th>Pharmacy</th><th>Finance</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill pill-navy">PW Admin</span></td><td>✅ Full</td><td>✅ Full</td><td>✅ Full</td><td>✅ Full</td><td>✅ Full</td><td style="font-size:11.5px;">Full system access — configuration and all modules</td></tr>
+        <tr><td><span class="pill pill-blue">PW Doctor</span></td><td>✅ Full</td><td>✅ Full</td><td>✅ View</td><td>⚠️ View</td><td>⚠️ Limited</td><td style="font-size:11.5px;">Prescriptions, ward rounds, MAR review, IPD notes</td></tr>
+        <tr><td><span class="pill pill-teal">PW Receptionist</span></td><td>✅ Full</td><td>⚠️ Limited</td><td>⚠️ Order</td><td>⚠️ Invoice</td><td>✅ Billing</td><td style="font-size:11.5px;">Registration, appointments, OPD billing</td></tr>
+        <tr><td><span class="pill pill-green">PW Lab User</span></td><td>⚠️ View</td><td>⚠️ View</td><td>✅ Full</td><td>❌</td><td>⚠️ Lab only</td><td style="font-size:11.5px;">Lab test result entry and lab invoicing</td></tr>
+        <tr><td><span class="pill pill-amber">PW Dispenser</span></td><td>⚠️ View</td><td>⚠️ View</td><td>❌</td><td>✅ Full</td><td>⚠️ Medicine</td><td style="font-size:11.5px;">Medicine dispensing, pharmacy POS</td></tr>
+        <tr><td><span class="pill pill-gray">PW DEO</span></td><td>✅ Entry</td><td>✅ Entry</td><td>✅ Entry</td><td>⚠️ View</td><td>⚠️ Limited</td><td style="font-size:11.5px;">Data entry operator across all clinical modules</td></tr>
+        <tr><td><span class="pill pill-teal">OV Staff</span></td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>⚠️ OV fees</td><td style="font-size:11.5px;">Manages telemedicine request queue</td></tr>
+        <tr><td><span class="pill pill-blue">OV Doctor</span></td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td style="font-size:11.5px;">Online Visit doctors — accepts consultations</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════ OPD ════════════════════ -->
+<section class="cd-section" id="opd-registration">
+  <div class="cd-section-header">
+    <div class="cd-section-icon blue">🩺</div>
+    <div><div class="cd-section-title">OPD Management</div><div class="cd-section-sub">Complete outpatient department workflow — registration to prescription</div></div>
+  </div>
+
+  <h3 class="cd-sub">👤 Patient Registration</h3>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">Registration Methods</div>
+      <ul class="cd-feat-list">
+        <li>Walk-in registration at reception desk</li>
+        <li>Online self-registration via patient portal</li>
+        <li>Auto-creates ERPNext Customer on registration</li>
+        <li>Unique patient ID generated automatically</li>
+        <li>Profile: name, phone, age, gender, allergies</li>
+        <li>Emergency contacts &amp; family members</li>
+        <li>Insurance &amp; panel details captured</li>
+        <li>Multi-language: English, Urdu, Arabic names</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Patient Profile</div>
+      <ul class="cd-feat-list">
+        <li>Basic info: name, phone, age, gender</li>
+        <li>Allergies (custom allergy list)</li>
+        <li>Emergency contacts</li>
+        <li>Family members (linked visits)</li>
+        <li>Insurance provider &amp; policy number</li>
+        <li>Visit &amp; prescription history</li>
+        <li>Panel / corporate details</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="opd-doctors">👨‍⚕️ Doctor Setup</h3>
+  <div class="cd-card">
+    <div class="cd-card-title">Doctor Configuration</div>
+    <div class="cd-grid-2" style="margin-top:0;">
+      <ul class="cd-feat-list">
+        <li>Doctor name in English, Urdu, Arabic</li>
+        <li>Specialization (Cardiology, Pediatrics, etc.)</li>
+        <li>Default consultation fee per doctor</li>
+        <li>Color tag for queue identification</li>
+        <li>Linked user account for portal login</li>
+      </ul>
+      <ul class="cd-feat-list">
+        <li>Availability schedule (days &amp; time windows)</li>
+        <li>Time slot management (auto-generated)</li>
+        <li>Doctor leave periods (blocks slot booking)</li>
+        <li>License &amp; qualification display on prescription</li>
+        <li>Doctor photo on prescription header</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="opd-appointments">📅 Appointments &amp; Time Slot Management</h3>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">Appointment Features</div>
+      <ul class="cd-feat-list">
+        <li>Online booking via patient portal (<code>/book-appointment</code>)</li>
+        <li>Walk-in via queue or direct OPD slip</li>
+        <li>Status: Pending → Confirmed → Completed / Rejected</li>
+        <li>Payment channels configurable (cash, card, online)</li>
+        <li>Payment proof screenshot upload</li>
+        <li>Refund management for cancellations</li>
+        <li>Booking reference generated for patient</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Time Slot Management</div>
+      <ul class="cd-feat-list">
+        <li>Auto-generate slots days ahead (configurable window)</li>
+        <li>Slot blocking by admin or doctor</li>
+        <li>Auto-release no-show slots after N minutes</li>
+        <li>Blocked date management (clinic holidays)</li>
+        <li>Walk-in handling mode configurable</li>
+        <li>Time display: 12h or 24h format</li>
+        <li>Per-doctor slot configuration override</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="opd-queue">🚶 Physician Queue</h3>
+  <div class="cd-card">
+    <div class="cd-card-title">Live Patient Queue <span class="pill pill-blue" style="margin-left:8px;">Portal: /physician-queue</span></div>
+    <div class="cd-grid-2" style="margin-top:0;">
+      <ul class="cd-feat-list">
+        <li>Real-time queue visible to all clinic staff</li>
+        <li>Auto-add to queue on consultation payment</li>
+        <li>Queue organized per doctor</li>
+        <li>Token number displayed on OPD slip</li>
+        <li>Shows chief complaint &amp; patient name</li>
+      </ul>
+      <ul class="cd-feat-list">
+        <li>Doctor marks patient as called / done</li>
+        <li>Waiting count visible at reception</li>
+        <li>Can be shown on a waiting room screen</li>
+        <li>Follow-up patients flagged separately</li>
+        <li>Emergency / priority override available</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="opd-slip">🧾 OPD Slip &amp; Billing</h3>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">OPD Slip Fields</div>
+      <ul class="cd-feat-list">
+        <li>Patient, doctor, date &amp; time</li>
+        <li>Purpose: Consultation / Follow-up / Procedure</li>
+        <li>Chief complaint &amp; clinical notes</li>
+        <li>Vitals: BP, pulse, temp, weight, SpO₂</li>
+        <li>Line items with service codes &amp; fees</li>
+        <li>Discount &amp; payment method</li>
+        <li>Cash change calculation</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Billing Options</div>
+      <ul class="cd-feat-list">
+        <li>Auto-invoice on slip creation (configurable)</li>
+        <li>Skip invoice for zero-fee patients</li>
+        <li>POS Profile for OPD (configurable)</li>
+        <li>Follow-up free within configurable days</li>
+        <li>Multiple payment modes: Cash, Card, Online</li>
+        <li>Auto-add to physician queue after payment</li>
+        <li>Refund via credit note</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="opd-prescription">📋 Prescription Writing</h3>
+  <div class="cd-callout tip">
+    <div class="cd-callout-icon">💡</div>
+    <div class="cd-callout-text"><strong>Doctor Portal (<code>/pw-prescription</code>):</strong> Full-featured prescription writing interface designed for clinical speed — voice control, auto-complete medicines with structured dosing, and instant printing.</div>
+  </div>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">Prescription Components</div>
+      <ul class="cd-feat-list">
+        <li><strong>Medicines</strong> — name, dose, frequency, duration, instructions</li>
+        <li><strong>Diagnoses</strong> — categorized ICD-supported diagnosis list</li>
+        <li><strong>Lab Tests</strong> — ordered directly from prescription</li>
+        <li><strong>Instructions</strong> — free-text clinical notes</li>
+        <li><strong>Examination Notes</strong> — clinical findings</li>
+        <li><strong>Follow-up date</strong> — auto-calculated from revisit days</li>
+        <li>Round number for IPD ward round prescriptions</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Prescription Features</div>
+      <ul class="cd-feat-list">
+        <li>Voice control for hands-free entry</li>
+        <li>Generic name display toggle</li>
+        <li>Simple vs detailed dosing format</li>
+        <li>Header / footer / stamp configurable per clinic</li>
+        <li>Print via browser or thermal printer</li>
+        <li>Multi-language prescription output</li>
+        <li>Auto-create medicine invoice from prescription</li>
+        <li>Show / hide license on printed prescription</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="opd-history">📁 Patient History</h3>
+  <div class="cd-card">
+    <div class="cd-card-title">Patient History Portal <span class="pill pill-blue" style="margin-left:8px;">Portal: /pw-history</span></div>
+    <ul class="cd-feat-list">
+      <li>Full visit timeline with dates and attending doctors</li>
+      <li>All previous prescriptions with medicine details</li>
+      <li>Diagnosis history across all visits</li>
+      <li>Vitals history chart (configurable entry count)</li>
+      <li>Lab test results history</li>
+      <li>IPD admission history</li>
+      <li>Payment and invoice history</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════════════════ IPD ════════════════════ -->
+<section class="cd-section" id="ipd-setup">
+  <div class="cd-section-header">
+    <div class="cd-section-icon teal">🛏️</div>
+    <div><div class="cd-section-title">IPD Management</div><div class="cd-section-sub">Inpatient department — admission to discharge</div></div>
+  </div>
+
+  <h3 class="cd-sub">🏗️ Ward &amp; Bed Setup</h3>
+  <div class="cd-grid-3">
+    <div class="cd-card">
+      <div class="cd-card-title">Wards</div>
+      <ul class="cd-feat-list">
+        <li>Ward name, code &amp; type</li>
+        <li>Types: General, Maternity, ICU, Pediatric…</li>
+        <li>Color coding per ward</li>
+        <li>Head doctor assignment</li>
+        <li>Max patients per nurse ratio</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Rooms &amp; Floors</div>
+      <ul class="cd-feat-list">
+        <li>Multi-floor structure</li>
+        <li>Room types: Private, Semi-private, General</li>
+        <li>Bed count per room</li>
+        <li>ICU / Special Unit designation</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Beds</div>
+      <ul class="cd-feat-list">
+        <li>Status: Available / Occupied / Reserved</li>
+        <li>Current allotment linked</li>
+        <li>Notes per bed</li>
+        <li>Visual bed map on IPD portal</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="ipd-admission">🏥 Admission &amp; Bed Allotment</h3>
+  <div class="cd-card">
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">1</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Create Bed Allotment</div><div class="cd-wf-desc">Select patient, doctor, bed / room / floor. Enter admission date &amp; time, reason for admission, planned days.</div><div class="cd-wf-tags"><span class="cd-wf-tag blue">Receptionist</span><span class="cd-wf-tag blue">Admin</span></div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">2</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Configure Billing Mode</div><div class="cd-wf-desc">Set daily bed rate, fee mode, insurance provider &amp; policy, service package (if any), nursing charges per shift.</div><div class="cd-wf-tags"><span class="cd-wf-tag amber">Finance</span><span class="cd-wf-tag blue">Insurance / TPA</span></div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">3</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Clinical Activities</div><div class="cd-wf-desc">Doctor performs ward rounds, writes IPD prescriptions, orders lab tests and procedures. Nurses record MAR, diet, vitals, consumables.</div><div class="cd-wf-tags"><span class="cd-wf-tag teal">Ward Rounds</span><span class="cd-wf-tag teal">MAR</span><span class="cd-wf-tag teal">Lab Orders</span><span class="cd-wf-tag teal">Procedures</span></div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">4</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Charge Aggregation</div><div class="cd-wf-desc">All bed charges, nursing charges, medicines administered, procedures, lab orders, and ad-hoc services auto-aggregate at discharge.</div><div class="cd-wf-tags"><span class="cd-wf-tag amber">Billing</span><span class="cd-wf-tag amber">Package Billing</span></div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">5</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Discharge</div><div class="cd-wf-desc">Discharge summary written. Clearance checked. Final invoice generated. Bed status returns to Available.</div><div class="cd-wf-tags"><span class="cd-wf-tag green">Discharge Summary</span><span class="cd-wf-tag green">Bed Released</span></div></div>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="ipd-rounds">📝 Ward Rounds &amp; Progress Notes</h3>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">IPD Prescription (Ward Round)</div>
+      <ul class="cd-feat-list">
+        <li>Linked to bed allotment</li>
+        <li>Round number tracked per admission</li>
+        <li>Full prescription: medicines, diagnoses, tests</li>
+        <li>Configurable note types per clinic</li>
+        <li>Progress notes with timestamps</li>
+        <li>Attending doctor per round</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">IPD Portal <span class="pill pill-teal" style="margin-left:6px;">Portal: /ward</span></div>
+      <ul class="cd-feat-list">
+        <li>Live bed map showing ward occupancy</li>
+        <li>Per-patient timeline view</li>
+        <li>Quick prescription from bed card</li>
+        <li>IPD report generation</li>
+        <li>IPD slip printing</li>
+        <li>Re-admission tracking &amp; history</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="ipd-mar">💉 MAR – Medication Administration Record</h3>
+  <div class="cd-card">
+    <div class="cd-grid-2" style="margin-top:0;">
+      <ul class="cd-feat-list">
+        <li>Records every medicine administration event</li>
+        <li>Nurse marks medicine administered with timestamp</li>
+        <li>Two MAR modes: Simple or Detailed</li>
+        <li>Auto-deduct stock from IPD dispensing warehouse</li>
+        <li>Allow negative stock on MAR issue (configurable)</li>
+      </ul>
+      <ul class="cd-feat-list">
+        <li>Bill administered medicines to patient account</li>
+        <li>MAR billing trigger: on administration or at discharge</li>
+        <li>Stock deduction timing: immediate or discharge</li>
+        <li>Oxygen &amp; consumables recording</li>
+        <li>MAR medicines gate: approve before administration</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="ipd-diet">🍽️ Diet Orders</h3>
+  <div class="cd-card">
+    <ul class="cd-feat-list">
+      <li>Doctor orders diet type per patient per day</li>
+      <li>Types: Regular, Soft, Liquid, Diabetic, etc. (configurable)</li>
+      <li>Diet billing modes: per-day flat charge or per-meal</li>
+      <li>Configurable diet charge and billing item</li>
+      <li>Diet charges aggregated into IPD bill at discharge</li>
+    </ul>
+  </div>
+
+  <h3 class="cd-sub" id="ipd-procedures">🔧 Procedures</h3>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">Procedure Scheduling</div>
+      <ul class="cd-feat-list">
+        <li>IPD procedure scheduling from admission record</li>
+        <li>Procedure team members logged</li>
+        <li>Procedure room types assigned</li>
+        <li>Invoice trigger: on schedule or on completion</li>
+        <li>Auto-submit procedure invoice option</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Billing</div>
+      <ul class="cd-feat-list">
+        <li>Procedures billed via IPD billing gate</li>
+        <li>Ad-hoc services gate for unplanned services</li>
+        <li>Package billing: procedures included in package price</li>
+        <li>Auto-aggregate unpaid charges at discharge</li>
+        <li>Insurance claim support for procedures</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="ipd-billing">💳 IPD Billing</h3>
+  <div class="cd-card">
+    <div class="cd-card-title">Charge Types Included in IPD Invoice</div>
+    <div class="cd-grid-3" style="margin-top:8px;">
+      <div>
+        <h4 class="cd-sub2">Bed &amp; Stay</h4>
+        <ul class="cd-feat-list"><li>Daily bed rate</li><li>ICU / Special bed surcharge</li><li>Room type differential</li></ul>
+      </div>
+      <div>
+        <h4 class="cd-sub2">Clinical</h4>
+        <ul class="cd-feat-list"><li>MAR medicines administered</li><li>Procedures performed</li><li>Lab orders from IPD</li><li>Consumables used</li></ul>
+      </div>
+      <div>
+        <h4 class="cd-sub2">Support</h4>
+        <ul class="cd-feat-list"><li>Per-shift nursing charges</li><li>Diet &amp; meals</li><li>Oxygen charges</li><li>Ad-hoc services</li></ul>
+      </div>
+    </div>
+    <div class="cd-divider"></div>
+    <div class="cd-grid-2">
+      <ul class="cd-feat-list">
+        <li><strong>Service Packages</strong> — bundle bed + procedures + nursing at fixed price</li>
+        <li><strong>Insurance / TPA Billing</strong> — link to provider, policy, claim number</li>
+      </ul>
+      <ul class="cd-feat-list">
+        <li><strong>Create paid invoice for IPD</strong> (configurable)</li>
+        <li><strong>Discharge hold</strong> — require clearance before final invoice</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="ipd-discharge">🚪 Discharge Process</h3>
+  <div class="cd-card">
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">1</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Discharge Summary</div><div class="cd-wf-desc">Doctor writes final diagnosis, treatment summary, discharge medicines, and follow-up plan.</div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">2</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Patient Clearance</div><div class="cd-wf-desc">All pending charges reviewed. Insurance approval obtained. Final invoice generated from aggregated charges.</div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">3</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Consent &amp; Documentation</div><div class="cd-wf-desc">Consent forms tracked (configurable mode). Discharge notes and instructions given to patient.</div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">4</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Bed Release</div><div class="cd-wf-desc">Bed status updated to Available. Allotment record closed with actual release date. Re-admission window starts.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ LAB ════════════════════ -->
+<section class="cd-section" id="lab-orders">
+  <div class="cd-section-header">
+    <div class="cd-section-icon green">🔬</div>
+    <div><div class="cd-section-title">Laboratory Module</div><div class="cd-section-sub">Lab test ordering, result entry, and billing</div></div>
+  </div>
+  <div class="cd-grid-2">
+    <div>
+      <h3 class="cd-sub">📋 Test Orders</h3>
+      <div class="cd-card">
+        <ul class="cd-feat-list">
+          <li>Ordered from OPD prescription or IPD ward round</li>
+          <li>Test Invoice groups multiple tests per visit</li>
+          <li>Linked to prescription, OPD slip, or IPD admission</li>
+          <li>Referring physician tracked</li>
+          <li>Patient demographics auto-filled</li>
+          <li>Lab POS Invoice auto-generated</li>
+        </ul>
+      </div>
+      <h3 class="cd-sub" id="lab-billing">💳 Lab Billing</h3>
+      <div class="cd-card">
+        <ul class="cd-feat-list">
+          <li>Separate POS Profile for Lab Invoices</li>
+          <li>ERPNext Sales Invoice created via POS</li>
+          <li>Multiple tests on one invoice</li>
+          <li>Insurance billing support</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <h3 class="cd-sub" id="lab-results">🧪 Result Entry</h3>
+      <div class="cd-card">
+        <div class="cd-card-title">Test Result Types</div>
+        <ul class="cd-feat-list">
+          <li><strong>Numeric Values</strong> — reference range, units, abnormal flags</li>
+          <li><strong>Text Report</strong> — free-text narrative report</li>
+          <li>Result entry by Lab User role</li>
+          <li>Result date &amp; entered-by logged</li>
+          <li>Status: Pending → In Progress → Completed</li>
+          <li>Printable lab report</li>
+          <li>Results visible in patient history</li>
+          <li>Critical value flagging</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ PHARMACY ════════════════════ -->
+<section class="cd-section" id="pharma-stock">
+  <div class="cd-section-header">
+    <div class="cd-section-icon amber">💊</div>
+    <div><div class="cd-section-title">Pharmacy &amp; Medicine POS</div><div class="cd-section-sub">Medicine dispensing, stock management, and POS billing</div></div>
+  </div>
+  <div class="cd-grid-2">
+    <div>
+      <h3 class="cd-sub">📦 Medicine Stock</h3>
+      <div class="cd-card">
+        <ul class="cd-feat-list">
+          <li>ERPNext Item master for all medicines</li>
+          <li>Medicine categories and pharma companies</li>
+          <li>Default source warehouse for dispensing</li>
+          <li>Separate IPD dispensing warehouse</li>
+          <li>Stock updates on medicine invoice submission</li>
+          <li>Allow negative stock option (configurable)</li>
+          <li>Material issue from IPD dispensing warehouse</li>
+          <li>Generic name display in prescriptions</li>
+        </ul>
+      </div>
+      <h3 class="cd-sub" id="pharma-pos">🖥️ POS Session Management</h3>
+      <div class="cd-card">
+        <ul class="cd-feat-list">
+          <li>POS Opening at shift start (<code>/pos-opening</code>)</li>
+          <li>Opening balance entry per payment mode</li>
+          <li>POS Closing at shift end (<code>/pos-closing</code>)</li>
+          <li>Closing summary: cash, card, online totals</li>
+          <li>6 separate POS Profiles configurable</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <h3 class="cd-sub" id="pharma-invoice">🧾 Medicine Invoice (POS)</h3>
+      <div class="cd-card">
+        <div class="cd-card-title">Medicine POS Features <span class="pill pill-amber" style="margin-left:6px;">Portal: /medicine_invoice</span></div>
+        <ul class="cd-feat-list">
+          <li>Auto-populate from prescription</li>
+          <li>Manual medicine selection with search</li>
+          <li>Quantity &amp; dose info displayed</li>
+          <li>ERPNext POS Invoice generated</li>
+          <li>Stock deducted from source warehouse</li>
+          <li>Linked to patient OPD visit</li>
+          <li>Medicine bill printout</li>
+        </ul>
+      </div>
+      <div class="cd-callout tip">
+        <div class="cd-callout-icon">💡</div>
+        <div class="cd-callout-text"><strong>Auto-invoice from prescription:</strong> When enabled, a medicine invoice is created automatically when doctor saves the prescription — dispenser just confirms quantities and collects payment.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ BILLING ════════════════════ -->
+<section class="cd-section" id="billing-pos">
+  <div class="cd-section-header">
+    <div class="cd-section-icon amber">💰</div>
+    <div><div class="cd-section-title">Billing &amp; Finance</div><div class="cd-section-sub">POS management, invoice types, expenses, and purchasing</div></div>
+  </div>
+
+  <h3 class="cd-sub">🖥️ POS Profiles</h3>
+  <div class="cd-card" style="padding:0;overflow:hidden;">
+    <table class="cd-table">
+      <thead><tr><th>POS Profile</th><th>Used For</th><th>Income Account</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill pill-blue">Fee Invoices</span></td><td>OPD consultation fees, follow-up charges</td><td>OPD Income Account</td></tr>
+        <tr><td><span class="pill pill-green">Medicine Invoices</span></td><td>Pharmacy dispensing, retail medicine sales</td><td>Medicine Income + Stock</td></tr>
+        <tr><td><span class="pill pill-teal">Lab Invoices</span></td><td>Laboratory test billing</td><td>Lab Income Account</td></tr>
+        <tr><td><span class="pill pill-amber">General Invoices</span></td><td>General services, procedures, miscellaneous</td><td>General Services Income</td></tr>
+        <tr><td><span class="pill pill-purple">OPD Slips</span></td><td>OPD slip billing (separate profile)</td><td>OPD Income Account</td></tr>
+        <tr><td><span class="pill pill-navy">IPD Slips</span></td><td>IPD consolidated billing &amp; discharge invoices</td><td>Ward Income Account</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="cd-sub" id="billing-invoices">📄 Invoice Types</h3>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">Patient-Facing Invoices</div>
+      <ul class="cd-feat-list">
+        <li><strong>OPD Slip</strong> — consultation fee receipt with vitals</li>
+        <li><strong>Medicine Invoice</strong> — pharmacy billing via POS</li>
+        <li><strong>Lab Invoice</strong> — laboratory test billing</li>
+        <li><strong>General Invoice</strong> — procedures, special services</li>
+        <li><strong>IPD Invoice</strong> — consolidated inpatient bill</li>
+        <li><strong>Payment Entry</strong> — advance &amp; partial payments</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Tax &amp; Discount</div>
+      <ul class="cd-feat-list">
+        <li>Tax calculated on original price before discount</li>
+        <li>Configurable discount on OPD slips</li>
+        <li>Panel / corporate discount by customer group</li>
+        <li>Insurance claim deductibles supported</li>
+        <li>Package billing flat-price override</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="billing-expenses">💸 Expense Management</h3>
+  <div class="cd-card">
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">1</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Submit Expense</div><div class="cd-wf-desc">Staff enters: category, amount, vendor/payee, payment method, receipt attachment. Recurring templates supported.</div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">2</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Approval</div><div class="cd-wf-desc">Multi-level approval workflow (configurable approver levels). Approver adds remarks and approval date.</div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">3</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Journal Entry</div><div class="cd-wf-desc">Approved expenses auto-post to ERPNext as Journal Entry against configured expense accounts and cost centers.</div></div>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="billing-purchase">🛒 Purchase Management</h3>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">Purchase Order <span class="pill pill-gray" style="margin-left:6px;">Portal: /purchase_order</span></div>
+      <ul class="cd-feat-list">
+        <li>Linked to ERPNext Purchase Order</li>
+        <li>Supplier, items, quantities, rates</li>
+        <li>Approval workflow before issuing to supplier</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Purchase Invoice <span class="pill pill-gray" style="margin-left:6px;">Portal: /purchase_invoice</span></div>
+      <ul class="cd-feat-list">
+        <li>Linked to ERPNext Purchase Invoice</li>
+        <li>Accounts Payable tracking</li>
+        <li>Medicine stock receipt and valuation</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ ONLINE VISIT ════════════════════ -->
+<section class="cd-section" id="ov-patient">
+  <div class="cd-section-header">
+    <div class="cd-section-icon teal">📹</div>
+    <div><div class="cd-section-title">Online Visit — Telemedicine</div><div class="cd-section-sub">Patient portal for remote consultations with doctors</div></div>
+  </div>
+  <div class="cd-callout info">
+    <div class="cd-callout-icon">ℹ️</div>
+    <div class="cd-callout-text"><strong>Online Visit</strong> is a standalone telemedicine module. Patients access it publicly at <strong>/online-visit</strong>. Staff manage requests at <strong>/ov-staff</strong>. No ERPNext account required for patients.</div>
+  </div>
+  <div class="cd-grid-2">
+    <div>
+      <h3 class="cd-sub">🌐 Patient Portal <span class="pill pill-green" style="font-size:10px;">Public</span></h3>
+      <div class="cd-portal-card">
+        <div class="cd-portal-header teal">
+          <div class="cd-portal-icon">📱</div>
+          <div><div class="cd-portal-title">Online Visit Patient Portal</div><div class="cd-portal-url">/online-visit</div></div>
+        </div>
+        <div class="cd-portal-body">
+          <ul class="cd-feat-list">
+            <li>Multi-step form with progress indicator</li>
+            <li>Step 1: Name, phone, age, gender</li>
+            <li>Step 2: Language &amp; location selection</li>
+            <li>Step 3: Complaint, symptoms, duration</li>
+            <li>Existing conditions &amp; current medications</li>
+            <li>Photo upload (wound, rash, report)</li>
+            <li>Step 4: Fee display &amp; payment method</li>
+            <li>Payment proof screenshot upload</li>
+            <li>Access token for status tracking</li>
+            <li>Urdu &amp; English interface</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 class="cd-sub" id="ov-staff">👩‍💼 Staff Dashboard <span class="pill pill-navy" style="font-size:10px;">Staff Only</span></h3>
+      <div class="cd-portal-card">
+        <div class="cd-portal-header blue">
+          <div class="cd-portal-icon">🖥️</div>
+          <div><div class="cd-portal-title">OV Staff Dashboard</div><div class="cd-portal-url">/ov-staff</div></div>
+        </div>
+        <div class="cd-portal-body">
+          <ul class="cd-feat-list">
+            <li>Live queue of all online visit requests</li>
+            <li>Filter by status: Pending / Accepted / Completed</li>
+            <li>View full patient details and medical info</li>
+            <li>Accept or reject request with reason</li>
+            <li>Assign to OV Doctor</li>
+            <li>Share video call link with patient</li>
+            <li>Record fee collection &amp; payment reference</li>
+            <li>Enter prescription summary post-consultation</li>
+            <li>Manage refunds with reference &amp; notes</li>
+            <li>Mark consultation as completed</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="cd-sub" id="ov-workflow">🔄 Consultation Workflow</h3>
+  <div class="cd-card">
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">1</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Patient Submits Request</div><div class="cd-wf-desc">Patient fills multi-step form at /online-visit. Receives access token to track status.</div><div class="cd-wf-tags"><span class="cd-wf-tag teal">Public Portal</span></div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">2</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Staff Reviews &amp; Accepts</div><div class="cd-wf-desc">OV Staff reviews request, verifies payment proof, accepts. Doctor assigned.</div><div class="cd-wf-tags"><span class="cd-wf-tag blue">OV Staff</span></div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">3</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Video Call Link Sent</div><div class="cd-wf-desc">Staff shares video call link. Doctor joins using OV Doctor account.</div><div class="cd-wf-tags"><span class="cd-wf-tag blue">OV Doctor</span></div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">4</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Consultation &amp; Prescription</div><div class="cd-wf-desc">Doctor consults. Staff enters prescription summary, follow-up instructions, and doctor notes.</div><div class="cd-wf-tags"><span class="cd-wf-tag teal">Prescription Summary</span><span class="cd-wf-tag teal">Follow-up</span></div></div>
+    </div>
+    <div class="cd-wf-step">
+      <div class="cd-wf-left"><div class="cd-wf-num">5</div><div class="cd-wf-line"></div></div>
+      <div class="cd-wf-content"><div class="cd-wf-title">Completion</div><div class="cd-wf-desc">Request marked Completed. Patient receives prescription summary. Refund processed if cancelled.</div><div class="cd-wf-tags"><span class="cd-wf-tag green">Completed</span><span class="cd-wf-tag amber">Refund if Cancelled</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ PATIENT COMMS ════════════════════ -->
+<section class="cd-section" id="pc-nursing">
+  <div class="cd-section-header">
+    <div class="cd-section-icon purple">📡</div>
+    <div><div class="cd-section-title">Patient Communications</div><div class="cd-section-sub">Real-time IPD messaging between patients and nursing stations</div></div>
+  </div>
+  <div class="cd-callout info">
+    <div class="cd-callout-icon">ℹ️</div>
+    <div class="cd-callout-text"><strong>Patient Communications</strong> connects admitted patients in their rooms to nursing stations. When a bed is allotted, the patient profile is created and linked to the nearest nursing station automatically.</div>
+  </div>
+  <div class="cd-grid-2">
+    <div>
+      <h3 class="cd-sub">🖥️ Nursing Station Portal</h3>
+      <div class="cd-portal-card">
+        <div class="cd-portal-header blue">
+          <div class="cd-portal-icon">👩‍⚕️</div>
+          <div><div class="cd-portal-title">Nursing Station Dashboard</div><div class="cd-portal-url">/ns/&lt;station&gt;</div></div>
+        </div>
+        <div class="cd-portal-body">
+          <ul class="cd-feat-list">
+            <li>Real-time message feed from assigned patients</li>
+            <li>Patient list with bed numbers visible</li>
+            <li>Unread message count per patient</li>
+            <li>Two-way messaging with patients</li>
+            <li>Broadcast message to all patients</li>
+            <li>Voice-to-text message entry (browser mic)</li>
+            <li>Multiple nursing stations per ward</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 class="cd-sub" id="pc-patient">🛏️ Patient Room Portal</h3>
+      <div class="cd-portal-card">
+        <div class="cd-portal-header purple">
+          <div class="cd-portal-icon">🤝</div>
+          <div><div class="cd-portal-title">Patient Communication Portal</div><div class="cd-portal-url">/patient/&lt;token&gt;</div></div>
+        </div>
+        <div class="cd-portal-body">
+          <ul class="cd-feat-list">
+            <li>Simple interface for admitted patients</li>
+            <li>Voice-to-text message input (browser)</li>
+            <li>Text message typing option</li>
+            <li>Routed to assigned nursing station</li>
+            <li>Replies visible in real-time</li>
+            <li>Works on any device (tablet, phone, bedside)</li>
+            <li>Token-based access (shared via QR / URL)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ PORTAL PAGES ════════════════════ -->
+<section class="cd-section" id="portal-pages">
+  <div class="cd-section-header">
+    <div class="cd-section-icon navy">🌐</div>
+    <div><div class="cd-section-title">Portal Pages Reference</div><div class="cd-section-sub">All web portal pages accessible at pw.cx:8003</div></div>
+  </div>
+
+  <h3 class="cd-sub">🏥 Prescription Writter Portals</h3>
+  <div class="cd-card" style="padding:0;overflow:hidden;">
+    <table class="cd-table">
+      <thead><tr><th>URL</th><th>Portal</th><th>Role Access</th></tr></thead>
+      <tbody>
+        <tr><td><code>/</code> · <code>/pw-home</code></td><td>Control Board — Main Hub (all modules)</td><td><span class="pill pill-navy">All PW Roles</span></td></tr>
+        <tr><td><code>/pw-dashboard</code></td><td>Analytics Dashboard</td><td><span class="pill pill-navy">Admin, Doctor</span></td></tr>
+        <tr><td><code>/registration</code></td><td>Patient Registration</td><td><span class="pill pill-blue">Receptionist</span></td></tr>
+        <tr><td><code>/book-appointment</code></td><td>Online Appointment Booking</td><td><span class="pill pill-green">Public</span></td></tr>
+        <tr><td><code>/appointments</code></td><td>Appointment Management</td><td><span class="pill pill-blue">Receptionist, Admin</span></td></tr>
+        <tr><td><code>/physician-queue</code></td><td>Live Patient Queue Display</td><td><span class="pill pill-navy">All PW Roles</span></td></tr>
+        <tr><td><code>/pw-prescription</code></td><td>Prescription Writing — Doctor Portal</td><td><span class="pill pill-blue">PW Doctor</span></td></tr>
+        <tr><td><code>/pw-history</code></td><td>Patient History Viewer</td><td><span class="pill pill-navy">Doctor, Admin</span></td></tr>
+        <tr><td><code>/ward</code> · <code>/ipd</code></td><td>IPD Bed Map &amp; Management</td><td><span class="pill pill-navy">Doctor, Admin, Nurse</span></td></tr>
+        <tr><td><code>/ipd_report</code></td><td>IPD Reporting Dashboard</td><td><span class="pill pill-navy">Admin, Doctor</span></td></tr>
+        <tr><td><code>/ipd_slip</code></td><td>IPD Slip &amp; Invoice</td><td><span class="pill pill-blue">Receptionist, Admin</span></td></tr>
+        <tr><td><code>/opd_slip</code></td><td>OPD Slip Printing</td><td><span class="pill pill-blue">Receptionist</span></td></tr>
+        <tr><td><code>/tests</code></td><td>Lab Test Orders &amp; Results</td><td><span class="pill pill-teal">PW Lab User</span></td></tr>
+        <tr><td><code>/medicine_invoice</code></td><td>Medicine POS Billing</td><td><span class="pill pill-amber">PW Dispenser</span></td></tr>
+        <tr><td><code>/general_invoice</code></td><td>General Service Invoicing</td><td><span class="pill pill-blue">Receptionist</span></td></tr>
+        <tr><td><code>/payment_entry</code></td><td>Patient Payment Entry</td><td><span class="pill pill-blue">Receptionist, Admin</span></td></tr>
+        <tr><td><code>/pos-opening</code></td><td>POS Session Opening</td><td><span class="pill pill-navy">All Billing Roles</span></td></tr>
+        <tr><td><code>/pos-closing</code></td><td>POS Session Closing</td><td><span class="pill pill-navy">All Billing Roles</span></td></tr>
+        <tr><td><code>/pw-pos-setup</code></td><td>POS Configuration</td><td><span class="pill pill-navy">Admin</span></td></tr>
+        <tr><td><code>/expenses</code></td><td>Expense Entry &amp; Approval</td><td><span class="pill pill-navy">Admin, Finance</span></td></tr>
+        <tr><td><code>/purchase_order</code></td><td>Purchase Order Management</td><td><span class="pill pill-navy">Admin</span></td></tr>
+        <tr><td><code>/purchase_invoice</code></td><td>Purchase Invoice Entry</td><td><span class="pill pill-navy">Admin</span></td></tr>
+        <tr><td><code>/pw-data-manager</code></td><td>Data Import &amp; Management</td><td><span class="pill pill-navy">Admin</span></td></tr>
+        <tr><td><code>/pw-print-previsit</code></td><td>Pre-visit Token Print</td><td><span class="pill pill-blue">Receptionist</span></td></tr>
+        <tr><td><code>/pw-login</code></td><td>CureDesk Login Page</td><td><span class="pill pill-green">Public</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="cd-sub" style="margin-top:22px;">📹 Online Visit &amp; Patient Comms Portals</h3>
+  <div class="cd-card" style="padding:0;overflow:hidden;">
+    <table class="cd-table">
+      <thead><tr><th>URL</th><th>Portal</th><th>Role Access</th></tr></thead>
+      <tbody>
+        <tr><td><code>/online-visit</code></td><td>Patient Telemedicine Request Portal</td><td><span class="pill pill-green">Public</span></td></tr>
+        <tr><td><code>/ov-staff</code></td><td>Staff Telemedicine Management Dashboard</td><td><span class="pill pill-teal">OV Staff, OV Doctor</span></td></tr>
+        <tr><td><code>/ns/&lt;station&gt;</code></td><td>Nursing Station Real-time Dashboard</td><td><span class="pill pill-purple">Nursing Staff</span></td></tr>
+        <tr><td><code>/patient/&lt;token&gt;</code></td><td>Patient Room Communication Portal</td><td><span class="pill pill-green">Patient (token-based)</span></td></tr>
+        <tr><td><code>/pc-assign</code></td><td>Patient-to-Station Assignment</td><td><span class="pill pill-navy">Admin, Nursing</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════ SETTINGS ════════════════════ -->
+<section class="cd-section" id="settings">
+  <div class="cd-section-header">
+    <div class="cd-section-icon red">⚙️</div>
+    <div><div class="cd-section-title">Configuration &amp; Settings</div><div class="cd-section-sub">Clinic settings, POS profiles, and system configuration</div></div>
+  </div>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">Clinic Settings — Key Options</div>
+      <ul class="cd-feat-list">
+        <li>Clinic name (English, Urdu, Arabic)</li>
+        <li>Clinic mode: OPD only / OPD+IPD / Full Hospital</li>
+        <li>Default consultation fee &amp; currency</li>
+        <li>Follow-up extent (free revisit window in days)</li>
+        <li>Vitals history count in history view</li>
+        <li>Average consultation time (slot spacing)</li>
+        <li>Voice control enable / disable</li>
+        <li>Printer type per invoice type</li>
+        <li>Module switches: Lab, Medicine, Ward, MAR, Diet, Procedures, ICU, Consent, Packages, Insurance, Shifts</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Online Visit &amp; Appointment Settings</div>
+      <ul class="cd-feat-list">
+        <li>Online appointment enable / disable</li>
+        <li>Walk-in handling mode</li>
+        <li>Slot auto-generation window (days ahead)</li>
+        <li>Auto-release no-show slots (minutes after slot)</li>
+        <li>Blocked dates management</li>
+        <li>Appointment payment channels</li>
+      </ul>
+      <div class="cd-divider"></div>
+      <div class="cd-card-title">Page Access Control</div>
+      <ul class="cd-feat-list">
+        <li>Per-role portal page access configurable</li>
+        <li>Extra allowed roles per page</li>
+        <li>Restrict any portal page to specific role profiles</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ ERPNEXT ════════════════════ -->
+<section class="cd-section" id="erpnext">
+  <div class="cd-section-header">
+    <div class="cd-section-icon blue">🔗</div>
+    <div><div class="cd-section-title">ERPNext Integration</div><div class="cd-section-sub">How CureDesk connects to the ERPNext accounting and inventory backbone</div></div>
+  </div>
+  <div class="cd-grid-2">
+    <div class="cd-card">
+      <div class="cd-card-title">Accounts Integration</div>
+      <ul class="cd-feat-list">
+        <li>All patient invoices → ERPNext Sales Invoice via POS</li>
+        <li>OPD, Lab, Medicine, General — separate POS Profiles</li>
+        <li>Income accounts configurable per billing type</li>
+        <li>Cost centers mapped to departments</li>
+        <li>AR aging &amp; collection via ERPNext</li>
+        <li>Expense entries → ERPNext Journal Entry</li>
+        <li>Purchase invoices → ERPNext Accounts Payable</li>
+        <li>Full P&amp;L and Balance Sheet in ERPNext</li>
+      </ul>
+    </div>
+    <div class="cd-card">
+      <div class="cd-card-title">Inventory Integration</div>
+      <ul class="cd-feat-list">
+        <li>Medicines managed as ERPNext Items</li>
+        <li>Stock deducted from source warehouse on medicine invoice</li>
+        <li>IPD dispensing warehouse separate from retail</li>
+        <li>Material issues for IPD internal consumption</li>
+        <li>Negative stock allowed option</li>
+        <li>Stock valuation via ERPNext (FIFO / Moving Average)</li>
+        <li>Purchase receipts via ERPNext PO → Receipt flow</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cd-card">
+    <div class="cd-card-title">Patient as ERPNext Customer</div>
+    <ul class="cd-feat-list">
+      <li>Each patient is auto-created as an ERPNext Customer on registration</li>
+      <li>All invoices linked to customer — full AR visibility</li>
+      <li>Panel / corporate patients use corporate customer groups for pricing</li>
+      <li>Insurance / TPA patients linked to insurance provider customer</li>
+      <li>Outstanding balance visible from customer record in ERPNext</li>
+    </ul>
+  </div>
+  <div class="cd-callout tip">
+    <div class="cd-callout-icon">✅</div>
+    <div class="cd-callout-text"><strong>No double-entry needed:</strong> Clinical staff use CureDesk portal pages exclusively. ERPNext handles accounting and inventory in the background automatically — no ERPNext knowledge required from clinic staff.</div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function toggleGroup(hdr) {
+  hdr.parentElement.classList.toggle('open');
+}
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// Close sidebar on mobile nav click
+document.querySelectorAll('.cd-nav-link, .cd-nav-direct').forEach(function(el) {
+  el.addEventListener('click', function() {
+    if (window.innerWidth <= 920) closeSidebar();
+  });
+});
+
+// Highlight active nav item on scroll
+var allSections = document.querySelectorAll('.cd-section');
+var allLinks = document.querySelectorAll('.cd-nav-link, .cd-nav-direct');
+
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      var id = e.target.id;
+      allLinks.forEach(function(l) {
+        l.classList.remove('active');
+        if (l.getAttribute('href') === '#' + id) {
+          l.classList.add('active');
+          // auto-open parent group
+          var group = l.closest('.cd-nav-group');
+          if (group) group.classList.add('open');
+        }
+      });
+    }
+  });
+}, { rootMargin: '-58px 0px -65% 0px', threshold: 0 });
+
+allSections.forEach(function(s) { observer.observe(s); });
+</script>
+</div><!-- /.cd-wrap -->
+</body>
+</html>
