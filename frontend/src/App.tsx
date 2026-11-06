@@ -30,6 +30,7 @@ const ReportsPage = lazy(() => import("@/modules/reports/ReportsPage"));
 const AuditPage = lazy(() => import("@/modules/admin/AuditPage"));
 const SettingsPage = lazy(() => import("@/modules/admin/SettingsPage"));
 const MastersPage = lazy(() => import("@/modules/admin/MastersPage"));
+const DoctorsPage = lazy(() => import("@/modules/admin/DoctorsPage"));
 const ComingPage = lazy(() => import("@/modules/home/ComingPage"));
 
 function Loading() {
@@ -87,7 +88,7 @@ export default function App() {
         <Route path="/settings" element={g("/settings", <SettingsPage />)} />
         <Route path="/masters" element={g("/masters", <MastersPage />)} />
         <Route path="/masters/:kind" element={g("/masters", <MastersPage />)} />
-        <Route path="/doctors" element={g("/doctors", <MastersPage fixed="doctors" />)} />
+        <Route path="/doctors" element={g("/doctors", <DoctorsPage />)} />
         <Route path="/er" element={g("/er", <ComingPage title="Emergency" phase={3} />)} />
         <Route path="*" element={g("/pw-home", <ComingPage title="This screen" phase={2} />)} />
       </Routes>

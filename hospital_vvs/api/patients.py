@@ -174,7 +174,8 @@ def reveal_cnic(name):
 	"""Full CNIC for Admin / Receptionist only; every reveal is written to the access log."""
 	if not has_any_role(*R.CNIC_REVEAL):
 		log_access("CNIC reveal denied", patient=name, reference_doctype="Patient", reference_name=name)
-		frappe.db.commit()
+		if not frappe.in_test:
+			frappe.db.commit()  # keep the denied attempt even though the request fails
 		frappe.throw(_("You are not permitted to see the full CNIC."), frappe.PermissionError)
 	from frappe.utils.password import get_decrypted_password
 
@@ -290,3 +291,41 @@ def merge(survivor, duplicate, confirm_mr):
 	log = frappe.get_doc({"doctype": "Patient Merge Log", "survivor": survivor, "duplicate": duplicate, "merged_by": frappe.session.user,
 		"merged_on": now_datetime(), "moved": json.dumps(moved, indent=1)}).insert(ignore_permissions=True)
 	return {"log": log.name, "moved": moved}
+
+
+@frappe.whitelist()
+def board(q=None, category=None, gender=None, branch=None, sort="recent", start=0, limit=24):
+	"""Patients screen: a page of patients with visit counts, last visit, allergy flag and upcoming booking, plus totals."""
+	require_roles(*REGISTER_ROLES)
+	cond, args = ["p.disabled=0"], {}
+	for field, val in (("category", category), ("gender", gender), ("branch", branch)):
+		if val:
+			cond.append(f"p.{field}=%({field})s")
+			args[field] = val
+	if q:
+		cond.append("(p.patient_name like %(q)s or p.patient_name_ur like %(q)s or p.name like %(q)s or p.phone like %(q)s or p.legacy_mr_no=%(qe)s)")
+		args.update(q=f"%{q.strip()}%", qe=q.strip())
+	where = " and ".join(cond)
+	order = {"recent": "p.creation desc", "name": "p.patient_name asc", "visit": "last_visit is null, last_visit desc", "visits": "visits desc"}.get(sort, "p.creation desc")
+	args.update(start=cint(start), limit=min(cint(limit) or 24, 100))
+	rows = frappe.db.sql(f"""select p.name, p.patient_name, p.patient_name_ur, p.gender, p.dob, p.phone, p.city, p.category, p.photo, p.branch,
+		p.blood_group, p.cnic_masked, p.creation, p.panel, p.insurance_provider, p.whatsapp_consent,
+		(select count(*) from `tabOPD Slip` s where s.patient=p.name and s.docstatus=1) visits,
+		(select max(s.posting_date) from `tabOPD Slip` s where s.patient=p.name and s.docstatus=1) last_visit,
+		(select count(*) from `tabPatient Allergy` a where a.parent=p.name and a.parenttype='Patient') allergies,
+		(select min(ap.appointment_date) from tabAppointment ap where ap.patient=p.name and ap.status in ('Pending','Confirmed')
+			and ap.appointment_date >= curdate()) next_appointment,
+		(select b.bed_no from `tabHospital Bed` b where b.current_patient=p.name and b.status='Occupied' limit 1) bed
+		from tabPatient p where {where} order by {order} limit %(start)s, %(limit)s""", args, as_dict=True)
+	clinical = can_see_clinical()
+	for r in rows:
+		r["age"] = age_of(r.dob)
+		if not clinical:
+			r["allergies"] = None
+			r["blood_group"] = None
+	total = frappe.db.sql(f"select count(*) from tabPatient p where {where}", args)[0][0]
+	stats = frappe.db.sql("""select count(*) total, sum(category in ('Panel','Insurance')) payer, sum(category='Welfare') welfare,
+		sum(creation >= curdate() - interval 30 day) new30, sum(gender='Female') female, sum(gender='Male') male from tabPatient where disabled=0""", as_dict=True)[0]
+	stats["admitted"] = frappe.db.count("Hospital Bed", {"status": "Occupied"})
+	stats["seen_today"] = frappe.db.sql("select count(distinct patient) from `tabOPD Slip` where docstatus=1 and posting_date=curdate()")[0][0]
+	return {"rows": rows, "total": total, "stats": stats}

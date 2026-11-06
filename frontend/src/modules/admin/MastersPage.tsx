@@ -87,7 +87,7 @@ function MasterList({ kind }: { kind: Kind }) {
   );
 }
 
-function Editor({ kind, name, onClose, onSaved }: { kind: Kind; name: string; onClose: () => void; onSaved: () => void }) {
+export function Editor({ kind, name, onClose, onSaved }: { kind: Kind; name: string; onClose: () => void; onSaved: () => void }) {
   const { hasRole } = useAuth();
   const [doc, setDoc] = useState<Record<string, unknown> | null>(null);
   const [busy, setBusy] = useState(false);

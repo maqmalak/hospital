@@ -52,6 +52,12 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 |---|---|---|---|---|
 | `summary` | branch, date, days |  | DOCTOR, ACCOUNTANT, CASH_SUPERVISOR |  |
 
+## doctors
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `board` | branch |  | RECEPTIONIST, DOCTOR, NURSE, DEO |  |
+
 ## messaging
 
 | Method | Params | Flags | Roles | Summary |
@@ -101,6 +107,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `history` | name |  | DOCTOR, NURSE, OV_DOCTOR, DEO | Timeline across branches (02-opd.md). Every open is written to the access log. |
 | `merge_preview` | survivor, duplicate |  | ADMIN |  |
 | `merge` | survivor, duplicate, confirm_mr | POST | ADMIN | Move every linked record and the Customer to the survivor; disable the duplicate. Cannot be undone automatically. |
+| `board` | q, category, gender, branch, sort, start, limit |  | REGISTER_ROLES | Patients screen: a page of patients with visit counts, last visit, allergy flag and upcoming booking, plus totals. |
 
 ## prescription
 
