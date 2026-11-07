@@ -1,0 +1,229 @@
+{
+ "actions": [],
+ "autoname": "field:test_name",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_name",
+  "test_code",
+  "department",
+  "t1",
+  "sample_type",
+  "container",
+  "volume",
+  "t2",
+  "tat_hours",
+  "price",
+  "item",
+  "is_active",
+  "t3",
+  "result_type",
+  "method",
+  "parameters",
+  "text_template",
+  "t4",
+  "outsourced",
+  "reference_lab",
+  "outsource_cost",
+  "t5",
+  "auto_verify",
+  "consumables"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Test Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "test_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Test Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Department",
+   "options": "Hematology\nChemistry\nSerology\nImmunology\nHormones\nMicrobiology\nUrine & Stool\nHistopathology\nOther"
+  },
+  {
+   "fieldname": "t1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sample_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sample Type",
+   "options": "Blood (EDTA)\nSerum\nPlasma (Citrate)\nPlasma (Fluoride)\nUrine\nStool\nSwab\nSputum\nCSF\nOther"
+  },
+  {
+   "fieldname": "container",
+   "fieldtype": "Select",
+   "label": "Container",
+   "options": "Purple top (EDTA)\nYellow/Red top (Serum)\nBlue top (Citrate)\nGrey top (Fluoride)\nUrine cup\nStool container\nSwab tube\nSterile container\nOther"
+  },
+  {
+   "fieldname": "volume",
+   "fieldtype": "Data",
+   "label": "Volume"
+  },
+  {
+   "fieldname": "t2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "24",
+   "fieldname": "tat_hours",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Turnaround (hours)"
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price"
+  },
+  {
+   "description": "Created automatically from the code",
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "t3",
+   "fieldtype": "Section Break",
+   "label": "Result"
+  },
+  {
+   "default": "Numeric",
+   "fieldname": "result_type",
+   "fieldtype": "Select",
+   "label": "Result Type",
+   "options": "Numeric\nText\nBoth"
+  },
+  {
+   "fieldname": "method",
+   "fieldtype": "Data",
+   "label": "Method"
+  },
+  {
+   "fieldname": "parameters",
+   "fieldtype": "Table",
+   "label": "Parameters",
+   "options": "Lab Test Parameter"
+  },
+  {
+   "description": "Starting text for text reports",
+   "fieldname": "text_template",
+   "fieldtype": "Text",
+   "label": "Text Template"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "t4",
+   "fieldtype": "Section Break",
+   "label": "Outsourcing & automation"
+  },
+  {
+   "fieldname": "outsourced",
+   "fieldtype": "Check",
+   "label": "Outsourced"
+  },
+  {
+   "fieldname": "reference_lab",
+   "fieldtype": "Link",
+   "label": "Reference Lab",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "outsource_cost",
+   "fieldtype": "Currency",
+   "label": "Outsource Cost"
+  },
+  {
+   "fieldname": "t5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "May auto-verify when every value is normal (setting)",
+   "fieldname": "auto_verify",
+   "fieldtype": "Check",
+   "label": "Auto Verify"
+  },
+  {
+   "fieldname": "consumables",
+   "fieldtype": "Table",
+   "label": "Consumables",
+   "options": "Lab Template Consumable"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Lab",
+ "name": "Lab Test Template",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Pathologist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Lab User"
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "test_code,department",
+ "sort_field": "test_name",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

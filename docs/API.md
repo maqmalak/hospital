@@ -51,6 +51,21 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `decide` | name, approve, note | POST |  |  |
 | `approve_with_pin` | name, approver, password | POST |  | Supervisor approves at the counter by entering their own login and password. |
 
+## cash
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `my_shift` |  |  | CASH_ROLES |  |
+| `open_shift` | counter, balances | POST | CASH_ROLES |  |
+| `movement` | movement_type, amount, reason, account | POST | CASH_ROLES |  |
+| `refund` | invoice, reason, payment_mode | POST | RECEPTIONIST, LAB_USER, PHARMACY_CASHIER, DISPENSER | Full refund of a counter bill from the current shift (credit note against the original). |
+| `close` | counts, other_modes, explanation | POST | CASH_ROLES |  |
+| `closing_view` | name |  | CASH_SUPERVISOR, ACCOUNTANT |  |
+| `approvals` | branch |  | CASH_SUPERVISOR |  |
+| `decide` | name, action, note | POST |  |  |
+| `confirm_drop` | name, accept, note | POST |  |  |
+| `report` | from_date, to_date, branch |  | CASH_SUPERVISOR, ACCOUNTANT | Shift history, day-end position per counter and mode, excess/short per cashier, open shifts, pending drops. |
+
 ## dashboard
 
 | Method | Params | Flags | Roles | Summary |
@@ -62,6 +77,40 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | Method | Params | Flags | Roles | Summary |
 |---|---|---|---|---|
 | `board` | branch |  | RECEPTIONIST, DOCTOR, NURSE, DEO |  |
+
+## lab
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `context` |  |  | ORDERING, PATHOLOGIST |  |
+| `create_order` | data | POST | ORDERING |  |
+| `pay` | name, payment_mode, cash_tendered, discount_amount, discount_authorization | POST | LAB_USER, RECEPTIONIST |  |
+| `request_discount` | name, amount, reason | POST | LAB_USER, RECEPTIONIST |  |
+| `orders` | date, status, q, branch |  | ORDERING, PATHOLOGIST, NURSE |  |
+| `order` | name |  |  |  |
+| `samples` | status, branch |  | LAB_STAFF, NURSE |  |
+| `sample_action` | name, action, reason, note | POST | LAB_STAFF, NURSE |  |
+| `scan` | code |  | LAB_STAFF | Barcode scan anywhere in the lab: sample, order or patient MR. |
+| `labels` | samples |  | LAB_STAFF, NURSE |  |
+| `worklist` | status, department, branch |  | LAB_STAFF |  |
+| `result_form` | invoice_item |  | LAB_STAFF, DOCTOR |  |
+| `save_result` | invoice_item, values, text_result, attachment | POST | LAB_STAFF |  |
+| `critical_log` | result, notified_person, method, read_back, note, parameter | POST | LAB_STAFF |  |
+| `verify_list` | branch |  | PATHOLOGIST |  |
+| `verify` | result, interpretation | POST |  |  |
+| `send_back` | result, reason | POST |  |  |
+| `amend` | result, reason | POST |  |  |
+| `release` | name, partial | POST | LAB_STAFF |  |
+| `resend_link` | name | POST | LAB_STAFF |  |
+| `revoke` | name | POST | LAB_STAFF |  |
+| `report_preview` | name |  | LAB_STAFF, DOCTOR, NURSE | Staff view of the full report (HTML), logged. |
+| `outsourced` | branch |  | LAB_STAFF |  |
+| `dispatch` | samples, reference_lab, courier, expected_back | POST | LAB_STAFF |  |
+| `receive_outsourced` | invoice_item, attachment, values, text_result | POST | LAB_STAFF |  |
+| `dashboard` | branch |  | LAB_STAFF |  |
+| `report_open` | token | guest |  |  |
+| `report_verify` | token, answer | guest POST |  |  |
+| `report_pdf` | token | guest |  |  |
 
 ## messaging
 
@@ -115,6 +164,27 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `board` | q, category, gender, branch, sort, start, limit |  | REGISTER_ROLES | Patients screen: a page of patients with visit counts, last visit, allergy flag and upcoming booking, plus totals. |
 | `file` | name |  | REGISTER_ROLES, ACCOUNTANT, CASH_SUPERVISOR | Patient file: reception visits (with appointment + check-up status), invoices, payments, treatment costs, amount owed, |
 
+## pharmacy
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `pos_context` | counter |  | POS_ROLES, REVIEWER |  |
+| `search` | q, counter |  | POS_ROLES, REVIEWER, STORE_KEEPER |  |
+| `quote` | lines, counter, prescription | POST | POS_ROLES, REVIEWER |  |
+| `substitutes` | item_code, counter |  | POS_ROLES, REVIEWER |  |
+| `prescription` | code |  | POS_ROLES, REVIEWER | Load a signed prescription by Rx number or patient MR (latest). |
+| `request_discount` | gross, amount, reason, counter | POST | POS_ROLES |  |
+| `checkout` | data | POST | POS_ROLES |  |
+| `receipt` | name |  |  |  |
+| `display_push` | state, counter | POST | POS_ROLES | The POS mirrors its cart to the counter's customer display. |
+| `recent` | counter, limit |  | POS_ROLES, REVIEWER |  |
+| `refund` | invoice, reason, items | POST | POS_ROLES |  |
+| `tickets` | stage, branch |  | PIPE |  |
+| `ticket` | name |  | PIPE |  |
+| `action` | name, action | POST | roles[action] | One endpoint for pipeline stage changes (row-locked in the service). |
+| `dashboard` | branch |  | PIPE, ADMIN |  |
+| `display` | key | guest |  |  |
+
 ## prescription
 
 | Method | Params | Flags | Roles | Summary |
@@ -137,6 +207,27 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `boot` |  |  |  |  |
 | `unlock` | password | POST |  | Idle lock screen: re-check the signed-in user's password without a new login. |
 | `set_language` | language | POST |  |  |
+
+## store
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `context` | branch |  | STORE, PHARMACY_CASHIER |  |
+| `stock` | warehouse, q, only_flags |  | STORE, PHARMACY_CASHIER | Batch-wise stock in packs / strips / units with expiry flags. |
+| `receive` | supplier, warehouse, lines, bill_no, branch | POST | STORE_KEEPER |  |
+| `requests` | branch |  | STORE, NURSE, LAB_USER |  |
+| `create_request` | target, items, source | POST | STORE, NURSE, LAB_USER, PHARMACY_CASHIER | Pharmacy / IPD / lab ask the store for stock. items: [{item_code, qty (units)}]. |
+| `transfer` | material_request | POST | STORE_KEEPER | Issue a request from the store by batch, earliest expiry first. |
+| `expiry` | branch, window |  | STORE |  |
+| `quarantine` | branch | POST | STORE_KEEPER |  |
+| `supplier_return` | batch_no, qty, warehouse, reason | POST | STORE_KEEPER |  |
+| `write_off` | batch_no, qty, warehouse, reason | POST | ADMIN | Expired / damaged stock written off (Material Issue) — Admin approval. |
+| `counts` | branch |  | STORE_KEEPER, ADMIN |  |
+| `count_sheet` | name |  | STORE_KEEPER, ADMIN | Blind sheet: system quantities are hidden until the count is submitted. |
+| `count_create` | warehouse, scope, rack, category, branch | POST | STORE_KEEPER |  |
+| `count_submit` | name, counts | POST | STORE_KEEPER |  |
+| `count_approve` | name, approve, note | POST |  |  |
+| `reports` | kind, branch, from_date, to_date |  | STORE_KEEPER, REVIEWER, ADMIN, ACCOUNTANT | Pharmacy reports: controlled register, substitutions, sales & margin, slow-moving, reorder, returns. |
 
 ## ward
 

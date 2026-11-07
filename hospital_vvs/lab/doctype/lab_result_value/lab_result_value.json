@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parameter",
+  "value",
+  "unit",
+  "normal_range",
+  "flag",
+  "normal_low",
+  "normal_high",
+  "critical_low",
+  "critical_high",
+  "normal_text",
+  "previous_value",
+  "previous_date"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "parameter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Parameter"
+  },
+  {
+   "columns": 1,
+   "fieldname": "value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Value"
+  },
+  {
+   "columns": 1,
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Unit"
+  },
+  {
+   "columns": 2,
+   "fieldname": "normal_range",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Normal Range",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "flag",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Flag",
+   "read_only": 1
+  },
+  {
+   "fieldname": "normal_low",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Normal Low"
+  },
+  {
+   "fieldname": "normal_high",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Normal High"
+  },
+  {
+   "fieldname": "critical_low",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Critical Low"
+  },
+  {
+   "fieldname": "critical_high",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Critical High"
+  },
+  {
+   "fieldname": "normal_text",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Normal Text"
+  },
+  {
+   "columns": 1,
+   "fieldname": "previous_value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Previous Value",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "previous_date",
+   "fieldtype": "Date",
+   "label": "Previous Date",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Lab",
+ "name": "Lab Result Value",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

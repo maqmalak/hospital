@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_invoice",
+  "patient",
+  "token_hash",
+  "version",
+  "tk1",
+  "expires_at",
+  "max_downloads",
+  "download_count",
+  "failed_attempts",
+  "locked_until",
+  "tk2",
+  "verified",
+  "revoked",
+  "created_by",
+  "last_accessed_at",
+  "last_ip",
+  "access_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Test Invoice",
+   "options": "Test Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "token_hash",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Token Hash",
+   "search_index": 1
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Int",
+   "label": "Version"
+  },
+  {
+   "fieldname": "tk1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expires_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Expires At"
+  },
+  {
+   "fieldname": "max_downloads",
+   "fieldtype": "Int",
+   "label": "Max Downloads"
+  },
+  {
+   "fieldname": "download_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Download Count"
+  },
+  {
+   "fieldname": "failed_attempts",
+   "fieldtype": "Int",
+   "label": "Failed Attempts"
+  },
+  {
+   "fieldname": "locked_until",
+   "fieldtype": "Datetime",
+   "label": "Locked Until"
+  },
+  {
+   "fieldname": "tk2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "verified",
+   "fieldtype": "Check",
+   "label": "Verified"
+  },
+  {
+   "fieldname": "revoked",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Revoked"
+  },
+  {
+   "fieldname": "created_by",
+   "fieldtype": "Link",
+   "label": "Created By",
+   "options": "User"
+  },
+  {
+   "fieldname": "last_accessed_at",
+   "fieldtype": "Datetime",
+   "label": "Last Accessed At"
+  },
+  {
+   "fieldname": "last_ip",
+   "fieldtype": "Data",
+   "label": "Last Ip"
+  },
+  {
+   "fieldname": "access_log",
+   "fieldtype": "Small Text",
+   "label": "Access Log"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Lab",
+ "name": "Lab Report Access Token",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Admin"
+  },
+  {
+   "read": 1,
+   "role": "PW Lab User"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

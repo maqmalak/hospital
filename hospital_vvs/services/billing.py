@@ -10,7 +10,7 @@ tax base): percentage taxes are frozen as Actual amounts on the undiscounted tot
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, today
 
 from hospital_vvs.utils import branch_company, settings
 
@@ -42,7 +42,12 @@ def create_invoice(*, customer, patient, lines, billing_type, branch, reference_
 	if existing:
 		return existing
 	profile_name = pos_profile_for(billing_type, branch)
-	profile = frappe.get_cached_doc("POS Profile", profile_name)
+	profile = frappe.get_cached_doc("POS Profile", profile_name)  # income account / cost center of the billing type
+	shift = None
+	if pos:
+		from hospital_vvs.services.shifts import billing_shift
+
+		shift = billing_shift(branch, posting_date)
 	si = frappe.new_doc("Sales Invoice")
 	si.update({
 		"customer": customer, "company": profile.company or branch_company(branch), "posting_date": posting_date or frappe.utils.today(),
@@ -55,7 +60,10 @@ def create_invoice(*, customer, patient, lines, billing_type, branch, reference_
 		si.taxes_and_charges = profile.taxes_and_charges
 	if pos:
 		si.is_pos = 1
-		si.pos_profile = profile_name
+		si.pos_profile = shift.pos_profile if shift else profile_name
+		if shift:
+			si.is_created_using_pos = 1  # joins the collector's shift → their POS Closing Entry
+			si.hv_counter = shift.hv_counter
 	for l in lines:
 		si.append("items", {
 			"item_code": l["item_code"], "qty": flt(l.get("qty") or 1), "rate": flt(l["rate"]),
@@ -68,6 +76,9 @@ def create_invoice(*, customer, patient, lines, billing_type, branch, reference_
 		item.discount_percentage = 0
 		item.income_account = profile.income_account or item.income_account
 		item.cost_center = profile.cost_center or item.cost_center
+	# the billing type's tax template wins over whatever the counter's POS Profile brought in
+	si.taxes_and_charges = profile.taxes_and_charges
+	si.set("taxes", [])
 	if si.taxes_and_charges:
 		si.set_taxes()
 	si.calculate_taxes_and_totals()
@@ -83,8 +94,9 @@ def create_invoice(*, customer, patient, lines, billing_type, branch, reference_
 		si.calculate_taxes_and_totals()
 	if pos:
 		si.set("payments", [])
-		mop = next((p for p in profile.payments if p.mode_of_payment == payment_mode), None) or next(
-			(p for p in profile.payments if p.default), None) or (profile.payments[0] if profile.payments else None)
+		pay_profile = frappe.get_cached_doc("POS Profile", si.pos_profile)
+		mop = next((p for p in pay_profile.payments if p.mode_of_payment == payment_mode), None) or next(
+			(p for p in pay_profile.payments if p.default), None) or (pay_profile.payments[0] if pay_profile.payments else None)
 		if not mop:
 			frappe.throw(_("POS Profile {0} has no payment methods.").format(profile_name))
 		amount = flt(si.rounded_total or si.grand_total)
@@ -116,3 +128,38 @@ def on_invoice_cancel(doc, method=None):
 		if src == 1:
 			frappe.throw(_("This invoice belongs to {0} {1}. Cancel it from there, or issue a refund.")
 				.format(doc.hv_reference_doctype, doc.hv_reference_name))
+
+
+def refund_invoice(name, reason, items=None, payment_mode=None):
+	"""Return invoice (credit note) against a counter invoice, paid back from the current shift.
+	items: optional {item_code: qty} for a partial refund; default = everything."""
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+	from hospital_vvs.services.shifts import billing_shift
+
+	src = frappe.get_doc("Sales Invoice", name)
+	if src.docstatus != 1 or src.is_return:
+		frappe.throw(_("Only a submitted sale can be refunded."))
+	if not (reason or "").strip():
+		frappe.throw(_("Enter the refund reason."))
+	shift = billing_shift(src.branch, today())
+	ret = make_sales_return(src.name)
+	if items:
+		ret.items = [i for i in ret.items if i.item_code in items]
+		for i in ret.items:
+			i.qty = -abs(flt(items[i.item_code]))
+	if shift:
+		ret.pos_profile = shift.pos_profile
+		ret.is_created_using_pos = 1
+		ret.hv_counter = shift.hv_counter
+	ret.posting_date = today()
+	ret.set_posting_time = 0
+	ret.remarks = f"Refund: {reason}"
+	ret.calculate_taxes_and_totals()
+	if ret.is_pos:
+		mode = payment_mode or (src.payments[0].mode_of_payment if src.payments else "Cash")
+		ret.set("payments", [{"mode_of_payment": mode, "amount": flt(ret.rounded_total or ret.grand_total)}])
+		ret.calculate_taxes_and_totals()
+	ret.flags.ignore_permissions = True
+	ret.insert()
+	ret.submit()
+	return ret.name

@@ -1,8 +1,8 @@
 """bench --site hospital execute hospital_vvs.devtools.generate.run  → writes DocType JSON, then run `bench migrate`."""
 
-from hospital_vvs.devtools import dt, schema_core, schema_ipd, schema_phase1
+from hospital_vvs.devtools import dt, schema_core, schema_ipd, schema_phase1, schema_phase2
 
-SCHEMAS = [schema_core, schema_phase1, schema_ipd]
+SCHEMAS = [schema_core, schema_phase1, schema_ipd, schema_phase2]
 
 
 def run():

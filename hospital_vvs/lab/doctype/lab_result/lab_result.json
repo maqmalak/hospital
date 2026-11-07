@@ -1,0 +1,307 @@
+{
+ "actions": [],
+ "autoname": "LR-.YYYY.-.######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_invoice",
+  "invoice_item",
+  "template",
+  "test_name",
+  "department",
+  "lr1",
+  "patient",
+  "patient_name",
+  "gender",
+  "age",
+  "sample",
+  "branch",
+  "lr2",
+  "status",
+  "version_no",
+  "has_critical",
+  "critical_logged",
+  "lr3",
+  "result_type",
+  "values",
+  "text_result",
+  "attachment",
+  "lr4",
+  "entered_by",
+  "entered_at",
+  "lr5",
+  "verified_by",
+  "verified_at",
+  "interpretation",
+  "send_back_reason",
+  "amendment_reason",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Test Invoice",
+   "options": "Test Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "invoice_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Invoice Item"
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Template",
+   "options": "Lab Test Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "test_name",
+   "fieldtype": "Data",
+   "label": "Test Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lr1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Data",
+   "label": "Gender",
+   "read_only": 1
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Float",
+   "label": "Age",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sample",
+   "fieldtype": "Link",
+   "label": "Sample",
+   "options": "Lab Sample"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "lr2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nResult Entered\nSent Back\nVerified\nSuperseded\nCancelled",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "version_no",
+   "fieldtype": "Int",
+   "label": "Version No.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "has_critical",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Has Critical",
+   "read_only": 1
+  },
+  {
+   "fieldname": "critical_logged",
+   "fieldtype": "Check",
+   "label": "Critical Logged",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lr3",
+   "fieldtype": "Section Break",
+   "label": "Result"
+  },
+  {
+   "fieldname": "result_type",
+   "fieldtype": "Data",
+   "label": "Result Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "values",
+   "fieldtype": "Table",
+   "label": "Values",
+   "options": "Lab Result Value"
+  },
+  {
+   "fieldname": "text_result",
+   "fieldtype": "Text Editor",
+   "label": "Text Result"
+  },
+  {
+   "description": "Outsourced report PDF",
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
+  },
+  {
+   "fieldname": "lr4",
+   "fieldtype": "Section Break",
+   "label": "Sign-off"
+  },
+  {
+   "fieldname": "entered_by",
+   "fieldtype": "Link",
+   "label": "Entered By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "entered_at",
+   "fieldtype": "Datetime",
+   "label": "Entered At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lr5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "verified_by",
+   "fieldtype": "Link",
+   "label": "Verified By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "verified_at",
+   "fieldtype": "Datetime",
+   "label": "Verified At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "interpretation",
+   "fieldtype": "Small Text",
+   "label": "Interpretation"
+  },
+  {
+   "fieldname": "send_back_reason",
+   "fieldtype": "Small Text",
+   "label": "Send Back Reason"
+  },
+  {
+   "fieldname": "amendment_reason",
+   "fieldtype": "Small Text",
+   "label": "Amendment Reason"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Lab Result",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Lab",
+ "name": "Lab Result",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Lab User",
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "PW Pathologist",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "test_name",
+ "track_changes": 1
+}

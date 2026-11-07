@@ -1,0 +1,235 @@
+{
+ "actions": [],
+ "autoname": "S.YY.MM.DD.####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_invoice",
+  "patient",
+  "patient_name",
+  "branch",
+  "ls1",
+  "sample_type",
+  "container",
+  "status",
+  "tests",
+  "ls2",
+  "collected_by",
+  "collected_at",
+  "ls3",
+  "received_by",
+  "received_at",
+  "location",
+  "ls4",
+  "rejection_reason",
+  "rejection_note",
+  "ls5",
+  "recollect_of",
+  "recollect_sample",
+  "dispatch"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Test Invoice",
+   "options": "Test Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "ls1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sample_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sample Type"
+  },
+  {
+   "fieldname": "container",
+   "fieldtype": "Data",
+   "label": "Container"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nCollected\nReceived\nRejected\nDispatched"
+  },
+  {
+   "fieldname": "tests",
+   "fieldtype": "Table",
+   "label": "Tests",
+   "options": "Lab Sample Test"
+  },
+  {
+   "fieldname": "ls2",
+   "fieldtype": "Section Break",
+   "label": "Tracking"
+  },
+  {
+   "fieldname": "collected_by",
+   "fieldtype": "Link",
+   "label": "Collected By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "collected_at",
+   "fieldtype": "Datetime",
+   "label": "Collected At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ls3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "received_by",
+   "fieldtype": "Link",
+   "label": "Received By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_at",
+   "fieldtype": "Datetime",
+   "label": "Received At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
+  },
+  {
+   "fieldname": "ls4",
+   "fieldtype": "Section Break",
+   "label": "Rejection"
+  },
+  {
+   "fieldname": "rejection_reason",
+   "fieldtype": "Select",
+   "label": "Rejection Reason",
+   "options": "\nHemolysed\nClotted\nInsufficient\nWrong container\nUnlabeled\nOther"
+  },
+  {
+   "fieldname": "rejection_note",
+   "fieldtype": "Small Text",
+   "label": "Rejection Note"
+  },
+  {
+   "fieldname": "ls5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recollect_of",
+   "fieldtype": "Link",
+   "label": "Recollect Of",
+   "options": "Lab Sample",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recollect_sample",
+   "fieldtype": "Link",
+   "label": "Recollect Sample",
+   "options": "Lab Sample",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispatch",
+   "fieldtype": "Link",
+   "label": "Dispatch",
+   "options": "Outsourced Dispatch",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Lab",
+ "name": "Lab Sample",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Lab User",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Pathologist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

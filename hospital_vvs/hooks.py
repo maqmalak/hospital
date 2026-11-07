@@ -16,9 +16,20 @@ website_route_rules = [
 	{"from_route": "/hms/<path:app_path>", "to_route": "hms"},
 ]
 
+# called by Prescription.on_submit (signed): lab order and draft medicine invoice
+hv_on_prescription_signed = [
+	"hospital_vvs.services.lab.on_prescription_signed",
+	"hospital_vvs.services.pharmacy.on_prescription_signed",
+]
+
 doc_events = {
 	"Sales Invoice": {
+		"validate": "hospital_vvs.services.pharmacy.validate_invoice",
+		"on_submit": "hospital_vvs.services.pharmacy.on_invoice_submit",
 		"on_cancel": "hospital_vvs.services.billing.on_invoice_cancel",
+	},
+	"Item": {
+		"validate": "hospital_vvs.services.pharmacy.item_validate",
 	},
 }
 

@@ -1,6 +1,7 @@
 """Core module (Hospital VVS): Clinic Settings, patients, doctors, clinical masters, audit."""
 
 from hospital_vvs.devtools.dt import cb, doctype, f, p, sb, tab
+from hospital_vvs.devtools.schema_phase2 import SETTINGS_FIELDS as PHASE2_SETTINGS
 from hospital_vvs.roles import (
 	ACCOUNTANT, ADMIN, CASH_SUPERVISOR, CLINICAL, DEO, DISPENSER, DOCTOR, FINDER, LAB_USER, NURSE, OV_DOCTOR, OV_STAFF,
 	PATHOLOGIST, PHARMACY_CASHIER, RECEPTIONIST, REVIEWER, STORE_KEEPER,
@@ -132,6 +133,8 @@ SETTINGS = doctype("Clinic Settings", M, [
 	tab("billing_tab", "Billing"),
 	f("discount_rules", "Table", "Discount Rule"), f("discount_approvers", "Table", "Discount Approver"),
 	cb("b1"), f("doctor_share_basis", "Select", ["At invoice", "On payment"], default="At invoice"),
+
+	*PHASE2_SETTINGS,
 
 	tab("security_tab", "Security"),
 	f("enforce_two_factor", "Check", description="Two-factor login for PW Admin, Accountant, Cash Supervisor and Pathologist"),

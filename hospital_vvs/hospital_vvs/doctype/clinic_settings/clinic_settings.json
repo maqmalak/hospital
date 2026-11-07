@@ -118,6 +118,50 @@
   "discount_approvers",
   "b1",
   "doctor_share_basis",
+  "lab_tab",
+  "lab_send_thank_you",
+  "lab_send_report_ready",
+  "report_link_hours",
+  "report_max_downloads",
+  "lb1",
+  "report_require_verification",
+  "report_verification_method",
+  "lab_auto_verify",
+  "lab_allow_partial_release",
+  "lb2",
+  "critical_notify_message",
+  "lab_open_time",
+  "lab_close_time",
+  "label_size",
+  "pharmacy_tab",
+  "near_expiry_days",
+  "block_near_expiry",
+  "loose_rounding",
+  "allow_rx_override",
+  "ph1",
+  "token_prefix",
+  "skip_review_otc",
+  "recall_limit",
+  "collect_payment_at",
+  "ph2",
+  "carry_over_drafts",
+  "cycle_variance_threshold",
+  "auto_medicine_invoice",
+  "auto_lab_order",
+  "cash_tab",
+  "require_shift_for_billing",
+  "denominations",
+  "blind_count",
+  "cash_tolerance",
+  "cs1",
+  "max_cash_in_drawer",
+  "cash_over_account",
+  "cash_short_account",
+  "cs2",
+  "staff_receivable_account",
+  "safe_account",
+  "petty_expense_account",
+  "float_source_account",
   "security_tab",
   "enforce_two_factor",
   "idle_lock_minutes",
@@ -785,6 +829,254 @@
    "options": "At invoice\nOn payment"
   },
   {
+   "fieldname": "lab_tab",
+   "fieldtype": "Tab Break",
+   "label": "Lab"
+  },
+  {
+   "default": "1",
+   "fieldname": "lab_send_thank_you",
+   "fieldtype": "Check",
+   "label": "Lab Send Thank You"
+  },
+  {
+   "default": "1",
+   "fieldname": "lab_send_report_ready",
+   "fieldtype": "Check",
+   "label": "Lab Send Report Ready"
+  },
+  {
+   "default": "72",
+   "fieldname": "report_link_hours",
+   "fieldtype": "Int",
+   "label": "Report Link Expiry (hours)"
+  },
+  {
+   "default": "5",
+   "fieldname": "report_max_downloads",
+   "fieldtype": "Int",
+   "label": "Report Max Downloads"
+  },
+  {
+   "fieldname": "lb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "report_require_verification",
+   "fieldtype": "Check",
+   "label": "Report Require Verification"
+  },
+  {
+   "default": "Last 4 digits of phone",
+   "fieldname": "report_verification_method",
+   "fieldtype": "Select",
+   "label": "Report Verification Method",
+   "options": "Last 4 digits of phone\nYear of birth"
+  },
+  {
+   "fieldname": "lab_auto_verify",
+   "fieldtype": "Check",
+   "label": "Lab Auto Verify"
+  },
+  {
+   "fieldname": "lab_allow_partial_release",
+   "fieldtype": "Check",
+   "label": "Lab Allow Partial Release"
+  },
+  {
+   "fieldname": "lb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "critical_notify_message",
+   "fieldtype": "Check",
+   "label": "Critical Values: Also Message the Doctor"
+  },
+  {
+   "default": "08:00:00",
+   "fieldname": "lab_open_time",
+   "fieldtype": "Time",
+   "label": "Lab Open Time"
+  },
+  {
+   "default": "22:00:00",
+   "fieldname": "lab_close_time",
+   "fieldtype": "Time",
+   "label": "Lab Close Time"
+  },
+  {
+   "default": "50x25 mm",
+   "fieldname": "label_size",
+   "fieldtype": "Data",
+   "label": "Label Size"
+  },
+  {
+   "fieldname": "pharmacy_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pharmacy"
+  },
+  {
+   "default": "90",
+   "fieldname": "near_expiry_days",
+   "fieldtype": "Int",
+   "label": "Near Expiry Days"
+  },
+  {
+   "fieldname": "block_near_expiry",
+   "fieldtype": "Check",
+   "label": "Block Near Expiry"
+  },
+  {
+   "default": "Nearest 1",
+   "fieldname": "loose_rounding",
+   "fieldtype": "Select",
+   "label": "Loose / Strip Price Rounding",
+   "options": "None\nNearest 1\nNearest 5"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_rx_override",
+   "fieldtype": "Check",
+   "label": "Admin May Override Prescription Requirement"
+  },
+  {
+   "fieldname": "ph1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "P",
+   "fieldname": "token_prefix",
+   "fieldtype": "Data",
+   "label": "Token Prefix"
+  },
+  {
+   "fieldname": "skip_review_otc",
+   "fieldtype": "Check",
+   "label": "Skip Review for OTC-only Tickets"
+  },
+  {
+   "default": "3",
+   "fieldname": "recall_limit",
+   "fieldtype": "Int",
+   "label": "Recall Limit"
+  },
+  {
+   "default": "Billing counter",
+   "fieldname": "collect_payment_at",
+   "fieldtype": "Select",
+   "label": "Collect Payment At",
+   "options": "Billing counter\nHandover counter"
+  },
+  {
+   "fieldname": "ph2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "carry_over_drafts",
+   "fieldtype": "Check",
+   "label": "Carry Over Drafts"
+  },
+  {
+   "default": "1000",
+   "fieldname": "cycle_variance_threshold",
+   "fieldtype": "Currency",
+   "label": "Cycle Variance Threshold"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_medicine_invoice",
+   "fieldtype": "Check",
+   "label": "Signed Prescription Creates a Draft Medicine Invoice"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_lab_order",
+   "fieldtype": "Check",
+   "label": "Signed Prescription Creates a Lab Order"
+  },
+  {
+   "fieldname": "cash_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cash"
+  },
+  {
+   "default": "1",
+   "description": "No money without an open cashier shift",
+   "fieldname": "require_shift_for_billing",
+   "fieldtype": "Check",
+   "label": "Require Shift For Billing"
+  },
+  {
+   "default": "5000,1000,500,100,50,20,10,5,2,1",
+   "fieldname": "denominations",
+   "fieldtype": "Data",
+   "label": "Denominations"
+  },
+  {
+   "default": "1",
+   "fieldname": "blind_count",
+   "fieldtype": "Check",
+   "label": "Blind Count"
+  },
+  {
+   "default": "50",
+   "fieldname": "cash_tolerance",
+   "fieldtype": "Currency",
+   "label": "Cash Tolerance"
+  },
+  {
+   "fieldname": "cs1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "50000",
+   "fieldname": "max_cash_in_drawer",
+   "fieldtype": "Currency",
+   "label": "Max Cash In Drawer"
+  },
+  {
+   "fieldname": "cash_over_account",
+   "fieldtype": "Link",
+   "label": "Cash Over Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cash_short_account",
+   "fieldtype": "Link",
+   "label": "Cash Short Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cs2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "staff_receivable_account",
+   "fieldtype": "Link",
+   "label": "Staff Receivable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "safe_account",
+   "fieldtype": "Link",
+   "label": "Safe Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "petty_expense_account",
+   "fieldtype": "Link",
+   "label": "Petty Expense Account",
+   "options": "Account"
+  },
+  {
+   "description": "Pay In comes from here (default: the safe)",
+   "fieldname": "float_source_account",
+   "fieldtype": "Link",
+   "label": "Float Source Account",
+   "options": "Account"
+  },
+  {
    "fieldname": "security_tab",
    "fieldtype": "Tab Break",
    "label": "Security"
@@ -831,7 +1123,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-07 03:01:09.089988",
+ "modified": "2026-11-07 18:53:06.810170",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

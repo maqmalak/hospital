@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parameter",
+  "unit",
+  "gender",
+  "age_from",
+  "age_to",
+  "normal_low",
+  "normal_high",
+  "critical_low",
+  "critical_high",
+  "normal_text",
+  "decimals",
+  "analyzer_code"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "parameter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Parameter",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Unit"
+  },
+  {
+   "columns": 1,
+   "default": "All",
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Gender",
+   "options": "All\nMale\nFemale"
+  },
+  {
+   "columns": 1,
+   "fieldname": "age_from",
+   "fieldtype": "Float",
+   "label": "Age From"
+  },
+  {
+   "columns": 1,
+   "fieldname": "age_to",
+   "fieldtype": "Float",
+   "label": "Age To"
+  },
+  {
+   "columns": 1,
+   "fieldname": "normal_low",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Normal Low"
+  },
+  {
+   "columns": 1,
+   "fieldname": "normal_high",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Normal High"
+  },
+  {
+   "columns": 1,
+   "fieldname": "critical_low",
+   "fieldtype": "Float",
+   "label": "Critical Low"
+  },
+  {
+   "columns": 1,
+   "fieldname": "critical_high",
+   "fieldtype": "Float",
+   "label": "Critical High"
+  },
+  {
+   "columns": 1,
+   "fieldname": "normal_text",
+   "fieldtype": "Data",
+   "label": "Normal Text"
+  },
+  {
+   "default": "1",
+   "fieldname": "decimals",
+   "fieldtype": "Int",
+   "label": "Decimals"
+  },
+  {
+   "fieldname": "analyzer_code",
+   "fieldtype": "Data",
+   "label": "Analyzer Code"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Lab",
+ "name": "Lab Test Parameter",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

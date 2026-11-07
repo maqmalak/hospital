@@ -4,3 +4,6 @@ Appointments
 Messaging
 Billing
 IPD
+Cash
+Lab
+Pharmacy

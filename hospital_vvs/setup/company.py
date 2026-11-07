@@ -50,6 +50,8 @@ def run():
 		for bt, (income, cc, wh_key) in BILLING_TYPES.items():
 			profiles[(bt, branch)] = ensure_pos_profile(company, branch, code, bt, f"{income} - {ABBR}", f"{cc} - {ABBR}", whs[wh_key])
 	fill_settings(company, profiles)
+	ensure_cash_accounts(company)
+	ensure_counters()
 	frappe.db.commit()
 	print("Hospital setup done:", company, len(profiles), "POS profiles")
 
@@ -212,3 +214,47 @@ def fill_settings(company, profiles):
 			s.append("discount_approvers", {"role": role})
 	s.flags.ignore_permissions = True
 	s.save()
+
+
+COUNTERS = [
+	# name, branch, type, billing type, number
+	("Reception 1", "Lahore Main", "Reception", "OPD Slip", 1), ("Reception 2", "Lahore Main", "Reception", "OPD Slip", 2),
+	("Lab Counter", "Lahore Main", "Lab", "Lab", 4), ("Pharmacy 1", "Lahore Main", "Pharmacy Billing", "Medicine", 1),
+	("Pharmacy 2", "Lahore Main", "Pharmacy Billing", "Medicine", 2), ("Handover 3", "Lahore Main", "Pharmacy Handover", "Medicine", 3),
+	("IPD Desk", "Lahore Main", "IPD Desk", "IPD Slip", 5),
+	("Reception ISB", "Islamabad", "Reception", "OPD Slip", 1), ("Lab ISB", "Islamabad", "Lab", "Lab", 2), ("Pharmacy ISB", "Islamabad", "Pharmacy Billing", "Medicine", 1),
+]
+
+
+def ensure_cash_accounts(company):
+	def group(name):
+		return frappe.db.get_value("Account", {"company": company, "account_name": name, "is_group": 1})
+	income = group("Indirect Income")
+	expense = group("Indirect Expenses")
+	cash_group = group("Cash In Hand") or frappe.db.get_value("Account", {"company": company, "account_type": "Cash", "is_group": 1})
+	asset = group("Loans and Advances (Assets)") or group("Current Assets")
+	accts = {
+		"cash_over_account": _account(company, "Cash Over", income, root_type="Income", report_type="Profit and Loss"),
+		"cash_short_account": _account(company, "Cash Short", expense, root_type="Expense", report_type="Profit and Loss"),
+		"petty_expense_account": _account(company, "Petty Expenses", expense, root_type="Expense", report_type="Profit and Loss"),
+		"safe_account": _account(company, "Cash Safe", cash_group, account_type="Cash"),
+		"staff_receivable_account": _account(company, "Cashier Shortage Receivable", asset),
+	}
+	s = frappe.get_single("Clinic Settings")
+	for k, v in accts.items():
+		if not s.get(k):
+			s.set(k, v)
+	if not s.float_source_account:
+		s.float_source_account = accts["safe_account"]
+	s.flags.ignore_permissions = True
+	s.save()
+
+
+def ensure_counters():
+	from hospital_vvs.services.shifts import ensure_counter_profile
+
+	for name, branch, ctype, bt, number in COUNTERS:
+		if not frappe.db.exists("Counter", name):
+			frappe.get_doc({"doctype": "Counter", "counter_name": name, "branch": branch, "counter_type": ctype, "billing_type": bt,
+				"number": number, "is_active": 1}).insert(ignore_permissions=True)
+		ensure_counter_profile(name)

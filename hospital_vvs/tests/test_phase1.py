@@ -82,7 +82,19 @@ class TestIdentity(IntegrationTestCase):
 		frappe.set_user("Administrator")
 
 
+def admin_shift():
+	"""Billing needs an open cashier shift (Phase 2): Administrator works at a free reception counter."""
+	from hospital_vvs.services import shifts
+
+	frappe.set_user("Administrator")
+	if shifts.current_shift():
+		return
+	free = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main", "open_shift": ["is", "not set"]}, pluck="name")
+	shifts.open_shift(free[0], {"Cash": 0})
+
+
 def make_slip(patient, doctor=None, **kw):
+	admin_shift()
 	frappe.set_user("Administrator")
 	slip = frappe.get_doc(dict({"doctype": "OPD Slip", "patient": patient, "doctor": doctor or demo_doctor(), "branch": "Lahore Main",
 		"posting_date": today(), "payment_mode": "Cash"}, **kw))
@@ -100,7 +112,8 @@ class TestOPD(IntegrationTestCase):
 		si = frappe.get_doc("Sales Invoice", slip.sales_invoice)
 		self.assertEqual(si.docstatus, 1)
 		self.assertEqual(si.is_pos, 1)
-		self.assertEqual(si.pos_profile, "OPD Slip - LHR")
+		self.assertEqual(si.is_created_using_pos, 1)  # collected inside the cashier's shift
+		self.assertTrue(slip.pos_opening_entry)
 		self.assertEqual(si.items[0].income_account, "OPD Income - VVSH")
 		self.assertEqual(si.branch, "Lahore Main")
 		self.assertTrue(slip.token_no >= 1)
@@ -138,6 +151,7 @@ class TestOPD(IntegrationTestCase):
 			"title": "Test 5pc", "company": company, "taxes": [{"charge_type": "On Net Total", "account_head": tax_acct, "rate": 5, "description": "Tax"}]}).insert().name
 		frappe.db.set_value("POS Profile", "General - LHR", "taxes_and_charges", tpl)
 		frappe.clear_document_cache("POS Profile", "General - LHR")
+		admin_shift()
 		try:
 			p = new_patient()
 			si = frappe.get_doc("Sales Invoice", billing.create_invoice(customer=p.customer or frappe.db.get_value("Patient", p.name, "customer"),

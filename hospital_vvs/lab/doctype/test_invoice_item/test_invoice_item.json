@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "template",
+  "test_code",
+  "sample_type",
+  "price",
+  "status",
+  "sample",
+  "result",
+  "outsourced",
+  "tat_hours"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Template",
+   "options": "Lab Test Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "test_code",
+   "fieldtype": "Data",
+   "label": "Test Code",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "sample_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sample Type",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price"
+  },
+  {
+   "columns": 2,
+   "default": "Ordered",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Ordered\nCollected\nReceived\nResult Entered\nVerified\nReleased\nRejected\nCancelled\nDispatched\nReport Received"
+  },
+  {
+   "fieldname": "sample",
+   "fieldtype": "Link",
+   "label": "Sample",
+   "options": "Lab Sample",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "result",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Result",
+   "options": "Lab Result",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outsourced",
+   "fieldtype": "Check",
+   "label": "Outsourced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tat_hours",
+   "fieldtype": "Float",
+   "label": "TAT Hours",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Lab",
+ "name": "Test Invoice Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

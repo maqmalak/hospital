@@ -104,6 +104,7 @@ class OPDSlip(Document):
 				discount_amount=flt(self.discount_amount) * fraction, payment_mode=self.payment_mode,
 				posting_date=self.posting_date)
 			self.db_set("sales_invoice", si)
+			self.db_set("pos_opening_entry", shift_of(si))
 		if flt(self.payer_share):
 			payer_si = billing.create_invoice(customer=self.payer, patient=self.patient,
 				lines=billing.split_lines(lines, 1 - fraction), billing_type="OPD Slip", branch=self.branch,
@@ -147,3 +148,11 @@ def next_token(doctor, branch, date):
 def appt_priority(appointment):
 	p = frappe.db.get_value("Appointment", appointment, "priority") if appointment else None
 	return p if p in ("Urgent", "Elderly", "Disabled") else None
+
+
+def shift_of(invoice):
+	"""The cashier shift (POS Opening Entry) an invoice was collected in, if any."""
+	inv = frappe.db.get_value("Sales Invoice", invoice, ["pos_profile", "owner", "is_created_using_pos"], as_dict=True)
+	if not inv or not inv.is_created_using_pos:
+		return None
+	return frappe.db.get_value("POS Opening Entry", {"pos_profile": inv.pos_profile, "user": inv.owner, "status": "Open", "docstatus": 1})

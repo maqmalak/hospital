@@ -1,0 +1,359 @@
+{
+ "actions": [],
+ "autoname": "LAB-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient",
+  "patient_name",
+  "branch",
+  "company",
+  "ti1",
+  "posting_date",
+  "referring_doctor",
+  "external_referrer",
+  "priority",
+  "ti2",
+  "status",
+  "prescription",
+  "opd_slip",
+  "expected_at",
+  "ti3",
+  "items",
+  "ti4",
+  "gross_total",
+  "discount_amount",
+  "discount_authorization",
+  "net_total",
+  "ti5",
+  "payer_type",
+  "payer",
+  "payer_share",
+  "patient_share",
+  "ti6",
+  "payment_mode",
+  "cash_tendered",
+  "sales_invoice",
+  "payer_invoice",
+  "pos_opening_entry",
+  "ti7",
+  "whatsapp_opt_in",
+  "whatsapp_number",
+  "ti8",
+  "released_at",
+  "report_version",
+  "client_ref"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ti1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "referring_doctor",
+   "fieldtype": "Link",
+   "label": "Referring Doctor",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "external_referrer",
+   "fieldtype": "Data",
+   "label": "External Referrer"
+  },
+  {
+   "default": "Routine",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Priority",
+   "options": "Routine\nUrgent"
+  },
+  {
+   "fieldname": "ti2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nOrdered\nPaid\nIn Progress\nPartially Released\nReleased\nCancelled"
+  },
+  {
+   "fieldname": "prescription",
+   "fieldtype": "Link",
+   "label": "Prescription",
+   "options": "Prescription"
+  },
+  {
+   "fieldname": "opd_slip",
+   "fieldtype": "Link",
+   "label": "OPD Slip",
+   "options": "OPD Slip"
+  },
+  {
+   "fieldname": "expected_at",
+   "fieldtype": "Datetime",
+   "label": "Expected At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ti3",
+   "fieldtype": "Section Break",
+   "label": "Tests"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Test Invoice Item"
+  },
+  {
+   "fieldname": "ti4",
+   "fieldtype": "Section Break",
+   "label": "Bill"
+  },
+  {
+   "fieldname": "gross_total",
+   "fieldtype": "Currency",
+   "label": "Gross Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount"
+  },
+  {
+   "fieldname": "discount_authorization",
+   "fieldtype": "Link",
+   "label": "Discount Authorization",
+   "options": "Discount Authorization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "label": "Net Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ti5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Patient",
+   "fieldname": "payer_type",
+   "fieldtype": "Select",
+   "label": "Payer Type",
+   "options": "Patient\nPanel\nInsurance\nWelfare"
+  },
+  {
+   "fieldname": "payer",
+   "fieldtype": "Link",
+   "label": "Payer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "payer_share",
+   "fieldtype": "Currency",
+   "label": "Payer Share",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_share",
+   "fieldtype": "Currency",
+   "label": "Patient Share",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ti6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Cash",
+   "fieldname": "payment_mode",
+   "fieldtype": "Select",
+   "label": "Payment Mode",
+   "options": "Cash\nCard\nBank Transfer\nJazzCash\nEasypaisa"
+  },
+  {
+   "fieldname": "cash_tendered",
+   "fieldtype": "Currency",
+   "label": "Cash Tendered"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payer_invoice",
+   "fieldtype": "Link",
+   "label": "Payer Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_opening_entry",
+   "fieldtype": "Link",
+   "label": "Cashier Shift",
+   "options": "POS Opening Entry",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "ti7",
+   "fieldtype": "Section Break",
+   "label": "Report"
+  },
+  {
+   "default": "1",
+   "fieldname": "whatsapp_opt_in",
+   "fieldtype": "Check",
+   "label": "Whatsapp Opt In"
+  },
+  {
+   "fieldname": "whatsapp_number",
+   "fieldtype": "Data",
+   "label": "Whatsapp Number"
+  },
+  {
+   "fieldname": "ti8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "released_at",
+   "fieldtype": "Datetime",
+   "label": "Released At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "report_version",
+   "fieldtype": "Int",
+   "label": "Report Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "client_ref",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Client Ref",
+   "no_copy": 1,
+   "unique": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Lab",
+ "name": "Test Invoice",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Lab User",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Pathologist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "PW Accountant"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

@@ -1,0 +1,160 @@
+{
+ "actions": [],
+ "autoname": "field:counter_name",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "counter_name",
+  "branch",
+  "counter_type",
+  "billing_type",
+  "c1",
+  "pos_profile",
+  "display_device",
+  "number",
+  "is_active",
+  "current_user",
+  "open_shift"
+ ],
+ "fields": [
+  {
+   "fieldname": "counter_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Counter Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "counter_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Counter Type",
+   "options": "Reception\nLab\nPharmacy Billing\nPharmacy Handover\nIPD Desk\nGeneral",
+   "reqd": 1
+  },
+  {
+   "description": "Main billing type (income account of the counter's POS Profile)",
+   "fieldname": "billing_type",
+   "fieldtype": "Select",
+   "label": "Billing Type",
+   "options": "OPD Slip\nFee\nLab\nMedicine\nGeneral\nIPD Slip"
+  },
+  {
+   "fieldname": "c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Created automatically — one open shift per counter",
+   "fieldname": "pos_profile",
+   "fieldtype": "Link",
+   "label": "POS Profile",
+   "options": "POS Profile",
+   "read_only": 1
+  },
+  {
+   "fieldname": "display_device",
+   "fieldtype": "Link",
+   "label": "Display Device",
+   "options": "Display Device"
+  },
+  {
+   "description": "Shown on queue displays: 'counter 3'",
+   "fieldname": "number",
+   "fieldtype": "Int",
+   "label": "Number"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "current_user",
+   "fieldtype": "Link",
+   "label": "Current User",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "open_shift",
+   "fieldtype": "Link",
+   "label": "Open Shift",
+   "options": "POS Opening Entry",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Cash",
+ "name": "Counter",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Lab User"
+  },
+  {
+   "read": 1,
+   "role": "PW Pharmacy Cashier"
+  },
+  {
+   "read": 1,
+   "role": "PW Dispenser"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Finder"
+  },
+  {
+   "read": 1,
+   "role": "PW Reviewer"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "counter_name",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

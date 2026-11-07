@@ -25,6 +25,43 @@ CUSTOM_FIELDS = {
 			"depends_on": "hv_is_medicine"},
 		{"fieldname": "hv_billing_type", "fieldtype": "Select", "label": "Billing Type",
 			"options": "\nFee\nMedicine\nLab\nGeneral\nOPD Slip\nIPD Slip", "insert_after": "item_group"},
+		{"fieldname": "hv_col2", "fieldtype": "Column Break", "insert_after": "hv_prescription_required"},
+		{"fieldname": "hv_units_per_strip", "fieldtype": "Int", "label": "Units per Strip", "insert_after": "hv_col2", "depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_strips_per_pack", "fieldtype": "Int", "label": "Strips per Pack", "insert_after": "hv_units_per_strip", "depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_units_per_pack", "fieldtype": "Int", "label": "Units per Pack", "insert_after": "hv_strips_per_pack", "read_only": 1,
+			"depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_allow_loose_sale", "fieldtype": "Check", "label": "Allow Loose (Unit) Sale", "insert_after": "hv_units_per_pack", "depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_allow_strip_sale", "fieldtype": "Check", "label": "Allow Strip Sale", "insert_after": "hv_allow_loose_sale", "depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_col3", "fieldtype": "Column Break", "insert_after": "hv_allow_strip_sale"},
+		{"fieldname": "hv_route", "fieldtype": "Select", "label": "Route", "insert_after": "hv_col3", "depends_on": "hv_is_medicine",
+			"options": "\nOral\nIV\nIM\nSC\nTopical\nInhalation\nRectal\nOphthalmic\nOtic\nNasal"},
+		{"fieldname": "hv_manufacturer", "fieldtype": "Link", "options": "Pharma Company", "label": "Manufacturer", "insert_after": "hv_route", "depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_medicine_category", "fieldtype": "Link", "options": "Medicine Category", "label": "Medicine Category", "insert_after": "hv_manufacturer",
+			"depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_controlled_drug", "fieldtype": "Check", "label": "Controlled Drug", "insert_after": "hv_medicine_category", "depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_rack_location", "fieldtype": "Data", "label": "Rack Location", "insert_after": "hv_controlled_drug", "depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_storage", "fieldtype": "Select", "label": "Storage", "insert_after": "hv_rack_location", "depends_on": "hv_is_medicine",
+			"options": "\nRoom temperature\nRefrigerated 2-8 °C\nFrozen\nProtect from light"},
+		{"fieldname": "hv_drap_reg_no", "fieldtype": "Data", "label": "DRAP Reg. No.", "insert_after": "hv_storage", "depends_on": "hv_is_medicine"},
+		{"fieldname": "hv_near_expiry_days", "fieldtype": "Int", "label": "Near-expiry Window (days)", "insert_after": "hv_drap_reg_no", "depends_on": "hv_is_medicine"},
+	],
+	"Batch": [
+		{"fieldname": "hv_mrp_per_pack", "fieldtype": "Currency", "label": "MRP per Pack", "insert_after": "expiry_date"},
+		{"fieldname": "hv_purchase_rate_per_pack", "fieldtype": "Currency", "label": "Purchase Rate per Pack", "insert_after": "hv_mrp_per_pack"},
+		{"fieldname": "hv_units_per_strip", "fieldtype": "Int", "label": "Units per Strip", "insert_after": "hv_purchase_rate_per_pack"},
+		{"fieldname": "hv_strips_per_pack", "fieldtype": "Int", "label": "Strips per Pack", "insert_after": "hv_units_per_strip"},
+	],
+	"Sales Invoice Item": [
+		{"fieldname": "hv_original_item", "fieldtype": "Link", "options": "Item", "label": "Substitute for", "insert_after": "item_name", "read_only": 1},
+		{"fieldname": "hv_substitute_approved_by", "fieldtype": "Link", "options": "User", "label": "Substitution Approved by",
+			"insert_after": "hv_original_item", "read_only": 1},
+	],
+	"POS Opening Entry": [
+		{"fieldname": "hv_counter", "fieldtype": "Link", "options": "Counter", "label": "Counter", "insert_after": "pos_profile", "read_only": 1},
+		{"fieldname": "hv_branch", "fieldtype": "Link", "options": "Branch", "label": "Branch", "insert_after": "hv_counter", "read_only": 1},
+	],
+	"Payment Entry": [
+		{"fieldname": "hv_shift", "fieldtype": "Link", "options": "POS Opening Entry", "label": "Cashier Shift", "insert_after": "mode_of_payment", "read_only": 1},
 	],
 	"Branch": [
 		{"fieldname": "hv_branch_code", "fieldtype": "Data", "label": "Branch Code", "insert_after": "branch",
@@ -50,6 +87,11 @@ CUSTOM_FIELDS = {
 		{"fieldname": "hv_payer_share_of", "fieldtype": "Link", "options": "Sales Invoice", "label": "Payer Share of Invoice",
 			"insert_after": "hv_reference_name", "read_only": 1},
 		{"fieldname": "hv_is_payer_share", "fieldtype": "Check", "label": "Is Payer Share", "insert_after": "hv_payer_share_of",
+			"read_only": 1},
+		{"fieldname": "hv_prescription", "fieldtype": "Link", "options": "Prescription", "label": "Prescription", "insert_after": "hv_is_payer_share"},
+		{"fieldname": "hv_counter", "fieldtype": "Link", "options": "Counter", "label": "Counter", "insert_after": "hv_prescription", "read_only": 1},
+		{"fieldname": "hv_token", "fieldtype": "Data", "label": "Pharmacy Token", "insert_after": "hv_counter", "read_only": 1},
+		{"fieldname": "hv_dispense_ticket", "fieldtype": "Link", "options": "Dispense Ticket", "label": "Dispense Ticket", "insert_after": "hv_token",
 			"read_only": 1},
 	],
 }
@@ -77,6 +119,55 @@ def ensure_page_access():
 		settings.save()
 
 
+READ_FOR_MONEY = ["Account", "Cost Center", "Customer", "Customer Group", "Territory", "Item", "Item Group", "Item Price", "Price List",
+	"Mode of Payment", "POS Profile", "Warehouse", "Company", "Branch", "Batch", "UOM", "Currency", "Sales Taxes and Charges Template",
+	"Serial and Batch Bundle", "Bin", "Supplier"]
+# doctype: {role: rights}; created through Custom DocPerm (core DocPerms untouched)
+EXTRA_PERMS = {
+	"Sales Invoice": {r: ["read", "create", "write", "submit", "print"] for r in roles.MONEY + [roles.ADMIN]},
+	"POS Opening Entry": {r: ["read", "create", "write", "submit"] for r in roles.MONEY + [roles.ADMIN, roles.CASH_SUPERVISOR]},
+	"POS Closing Entry": {r: ["read", "create", "write", "submit"] for r in roles.MONEY + [roles.ADMIN, roles.CASH_SUPERVISOR]},
+	"Journal Entry": {roles.CASH_SUPERVISOR: ["read"], roles.ACCOUNTANT: ["read"]},
+	"Serial and Batch Bundle": {r: ["read", "create", "write", "submit"] for r in roles.MONEY + [roles.ADMIN, roles.STORE_KEEPER, roles.REVIEWER,
+		roles.NURSE, roles.LAB_USER, roles.CASH_SUPERVISOR]},
+	"Stock Entry": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN, roles.LAB_USER, roles.NURSE)},
+	"Material Request": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN, roles.REVIEWER, roles.NURSE, roles.LAB_USER)},
+	"Purchase Receipt": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN)},
+	"Purchase Invoice": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN, roles.ACCOUNTANT)},
+	"Stock Reconciliation": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN)},
+}
+
+
+def ensure_erpnext_permissions():
+	from frappe.permissions import add_permission, update_permission_property
+
+	readers = set(roles.MONEY + [roles.ADMIN, roles.FINDER, roles.REVIEWER, roles.STORE_KEEPER, roles.DOCTOR, roles.NURSE, roles.PATHOLOGIST, roles.DEO])
+	for dt in READ_FOR_MONEY:
+		if not frappe.db.exists("DocType", dt):
+			continue
+		for role in readers:
+			if not frappe.db.exists("Custom DocPerm", {"parent": dt, "role": role, "permlevel": 0}):
+				add_permission(dt, role, 0)
+	for dt, by_role in EXTRA_PERMS.items():
+		for role, rights in by_role.items():
+			if not frappe.db.exists("Custom DocPerm", {"parent": dt, "role": role, "permlevel": 0}):
+				add_permission(dt, role, 0)
+			for right in rights:
+				update_permission_property(dt, role, 0, right, 1, validate=False)
+
+
+def fill_settings_defaults():
+	"""New Clinic Settings fields get their default on existing sites (single DocTypes don't do this by themselves)."""
+	meta = frappe.get_meta("Clinic Settings")
+	for f in meta.fields:
+		if f.default is None or f.fieldtype in ("Table", "Section Break", "Column Break", "Tab Break"):
+			continue
+		stored = frappe.db.sql("select value from tabSingles where doctype='Clinic Settings' and field=%s", f.fieldname)
+		if not stored or stored[0][0] in (None, ""):
+			frappe.db.set_single_value("Clinic Settings", f.fieldname, f.default)
+	frappe.clear_document_cache("Clinic Settings")
+
+
 def before_migrate():
 	ensure_roles()
 
@@ -100,6 +191,8 @@ def ensure_mm_core_compat():
 def after_migrate():
 	ensure_roles()
 	ensure_mm_core_compat()
+	ensure_erpnext_permissions()
+	fill_settings_defaults()
 	create_custom_fields(CUSTOM_FIELDS, update=True)
 	ensure_page_access()
 	from hospital_vvs.messaging.templates import ensure_templates
