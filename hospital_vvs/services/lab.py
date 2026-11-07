@@ -504,7 +504,7 @@ def report_html(d):
 		table = f"<table><tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference range</th><th>Previous</th></tr>{rows}</table>" if rows else ""
 		parts.append(f"<div class='t'><h3>{esc(t['test_name'])} <span class='muted'>{esc(t.get('department') or '')}</span>"
 			f"{' · <b style=\"color:#b91c1c\">AMENDED v' + str(t['version']) + '</b>' if t.get('amended') else ''}</h3>{table}"
-			f"{('<div class=\"txt\">' + (t.get('text_result') or '') + '</div>') if t.get('text_result') else ''}"
+			f"{('<div class=\"txt\">' + esc(t.get('text_result') or '').replace(chr(10), '<br>') + '</div>') if t.get('text_result') else ''}"
 			f"{('<p><b>Interpretation:</b> ' + esc(t['interpretation']) + '</p>') if t.get('interpretation') else ''}"
 			f"<p class='muted'>Verified by {esc(t.get('verified_by') or '')} · {esc(t.get('verified_at')[:16])}</p></div>")
 	p, c = d["patient"], d["clinic"]

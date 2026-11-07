@@ -53,11 +53,24 @@ nurse, supervisor, accounts, lab, pathologist, pharmacist, cashier, store, deo, 
 ## Tests (`hospital_vvs/tests/test_phase1.py`, 22 green; Vitest 6)
 Identity (MR, customer, CNIC encrypted/masked, duplicate + merge moves visits/invoices/customer, reveal logged, cashier blocked, clinical fields hidden from cashier API) · OPD (POS invoice on OPD profile & income account, branch, GL balanced, token, queue, free follow-up no invoice, panel split) · tax before discount · discounts (limit, approval, self-approval blocked, reason required, unapproved discount blocks the slip) · safety (allergy + Major interaction block, override, immutability, amend v2/Superseded, dose parsing) · appointments (hold race, book, reschedule, cancel, leave hides slots, expired hold released) · WhatsApp bot (Urdu booking for a new household member with payment proof; reception handoff) · messaging (no consent → skipped; WhatsApp failure → SMS fallback) · role-filtered routes.
 
+## Phase 2 — built (2026-11-07)
+- **Cash** (`/cash/shift`, `/cash/close`, `/cash/approvals`, `/cash/reports`): counter shifts on POS Opening Entry (one per counter), opening float per mode, live expected cash, pay in / pay out / cash drop (supervisor confirms), refunds as credit notes, **blind count by denomination**, tolerance → auto close or supervisor approve / recount / cashier liability, POS Closing Entry + Over/Short journal, reports (day-end by counter × mode, excess/short per cashier, open/stale shifts, pending drops, uncollected drafts). Billing is refused outside an open shift.
+- **Laboratory** (`/lab/orders`, `/lab/samples`, `/tests`, `/lab/verify`, `/lab/outsourced`): 14 test templates with age/gender ranges and critical limits, order + payment, samples per container with 50×25 mm QR labels, scan to collect/receive, reject → recollection, result entry with live flags and previous values, **critical value alert + mandatory notification log**, pathologist verify / send back / amend (versioned), partial release, outsourced dispatch with purchase bill and report upload, TAT tracking.
+- **Public lab report** `/hms/lab-report/<token>` (verification, view, PDF with download limit, revoke / resend).
+- **Pharmacy POS** `/medicine_invoice` (Restaurant style): scan / search, Pack-Strip-Unit pricing from batch MRP, FEFO batch split shown per line, near-expiry and Rx / controlled checks, waiting prescriptions, same-generic substitutes, discount with approval, 5 payment modes, cash tendered / change, customer display mirror, 80 mm receipt with collection token, F2/F4/F9 keys.
+- **Dispensing pipeline**: `/pharmacy/pick` (rack-ordered pick list, scan item/batch, wrong item/batch refused, not-found → exception), `/pharmacy/review` (prescription side by side, count check, substitute swap, send back), `/pharmacy/dispense` (call / recall, collect payment at handover, scan receipt, hand over), `/pharmacy/tickets` board with stage times. Controlled Drug Register written on every sale/return.
+- **Store**: `/store/receive` (purchase receipt by batch, expired refused), `/store/transfers` (requests issued earliest-expiry-first), `/store/returns` (expiry watch, quarantine, supplier return, admin write-off), `/store/cycle-count` (blind count, variance approval → Stock Reconciliation), `/pharmacy/items` (batch stock in pk/strip/units), `/pharmacy/reports` (sales & margin, controlled register, substitutions, slow-moving, returns, CSV).
+- **Display devices**: customer display, pharmacy token board with chime, OPD waiting TV, ward bed board — device-key links, managed at `/display/devices`.
+- Prescription workspace lab chips now come from the active lab templates, with an urgent toggle.
+
+## Tests — Phase 2 (`tests/test_phase2.py`, 10; full suite 32 green)
+Pharmacy packs + FEFO + expired blocked + Rx rule + return; pipeline race (two finders) + wrong batch refused; pay at handover; controlled register · store transfer, cycle count, quarantine, supplier return · lab order → samples → results → critical log → verify → release → token link (verify, lock, expiry) · outsourced dispatch → purchase bill → report · cash shift open/close blind count, tolerance, approval, liability · W1 prescription → lab order + draft medicine invoice · display page keeps the signed-in session.
+
 ## Deferred / known gaps
 - **Staging + training sites, restore drill on staging**: need `bench new-site` (MariaDB root password) — scripts and steps in `docs/OPS.md`; decrypt-and-check drill done locally.
 - **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.
 - Playwright E2E not written yet (backend tests cover the workflows); Vitest has one unit file.
 - Sentry/uptime: hooks documented, not wired (needs DSN / monitoring host).
-- Prescription → draft medicine invoice and lab orders: Phase 2 (hook `hv_on_prescription_signed` is in place).
-- Counter display devices with device keys: Phase 2.
+- Lab template editor screen (`/lab/templates`) not built yet — templates are edited in the desk for now.
+- Thermal label / receipt printing tested through the browser print dialog only (QZ Tray silent print untested on real printers).
 - Urdu/Arabic: navigation, actions and main clinical/billing terms translated; long help texts still English.

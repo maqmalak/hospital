@@ -344,3 +344,21 @@ class TestW1Full(IntegrationTestCase):
 		self.assertTrue(frappe.db.exists("Sales Invoice", {"hv_prescription": rx.name, "docstatus": 0}))
 		lines = pharmacy.prescription_lines(rx.name)["lines"]
 		self.assertEqual((lines[0]["uom"], lines[0]["qty"]), ("Strip", 2))
+
+
+class TestDisplays(IntegrationTestCase):
+	def test_display_keeps_session(self):
+		"""Opening a public display from a signed-in browser must not replace the session id."""
+		from hospital_vvs.api.pharmacy import display
+
+		key = frappe.db.get_value("Display Device", {"device_type": "Ward Display", "is_active": 1}, "device_key")
+		if not key:
+			self.skipTest("no ward display")
+		frappe.local.session.sid = "test-sid-123"
+		frappe.local.form_dict = frappe._dict(key=key)
+		out = display(key)
+		self.assertIn("ward", out)
+		self.assertEqual(frappe.local.session.sid, "test-sid-123")
+		self.assertEqual(frappe.local.form_dict.get("key"), key)
+		for b in out["ward"]["beds"]:
+			self.assertNotIn("current_patient", b)

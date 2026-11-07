@@ -31,6 +31,29 @@ const AuditPage = lazy(() => import("@/modules/admin/AuditPage"));
 const SettingsPage = lazy(() => import("@/modules/admin/SettingsPage"));
 const MastersPage = lazy(() => import("@/modules/admin/MastersPage"));
 const DoctorsPage = lazy(() => import("@/modules/admin/DoctorsPage"));
+const CashShiftPage = lazy(() => import("@/modules/cash/ShiftPage"));
+const CashClosePage = lazy(() => import("@/modules/cash/ClosePage"));
+const CashApprovalsPage = lazy(() => import("@/modules/cash/ApprovalsPage"));
+const CashReportsPage = lazy(() => import("@/modules/cash/ReportsPage"));
+const LabOrdersPage = lazy(() => import("@/modules/lab/OrdersPage"));
+const LabSamplesPage = lazy(() => import("@/modules/lab/SamplesPage"));
+const LabTestsPage = lazy(() => import("@/modules/lab/TestsPage"));
+const LabVerifyPage = lazy(() => import("@/modules/lab/VerifyPage"));
+const LabOutsourcedPage = lazy(() => import("@/modules/lab/OutsourcedPage"));
+const LabReportPage = lazy(() => import("@/modules/public/LabReportPage"));
+const PosPage = lazy(() => import("@/modules/pharmacy/PosPage"));
+const PickPage = lazy(() => import("@/modules/pharmacy/PipelinePages").then((m) => ({ default: m.PickPage })));
+const ReviewPage = lazy(() => import("@/modules/pharmacy/PipelinePages").then((m) => ({ default: m.ReviewPage })));
+const DispensePage = lazy(() => import("@/modules/pharmacy/PipelinePages").then((m) => ({ default: m.DispensePage })));
+const TicketsPage = lazy(() => import("@/modules/pharmacy/PipelinePages").then((m) => ({ default: m.TicketsPage })));
+const ItemsPage = lazy(() => import("@/modules/pharmacy/StorePages").then((m) => ({ default: m.ItemsPage })));
+const ReceivePage = lazy(() => import("@/modules/pharmacy/StorePages").then((m) => ({ default: m.ReceivePage })));
+const TransfersPage = lazy(() => import("@/modules/pharmacy/StorePages").then((m) => ({ default: m.TransfersPage })));
+const ReturnsPage = lazy(() => import("@/modules/pharmacy/StorePages").then((m) => ({ default: m.ReturnsPage })));
+const CycleCountPage = lazy(() => import("@/modules/pharmacy/StorePages").then((m) => ({ default: m.CycleCountPage })));
+const PharmacyReportsPage = lazy(() => import("@/modules/pharmacy/StorePages").then((m) => ({ default: m.PharmacyReportsPage })));
+const DevicePage = lazy(() => import("@/modules/display/DevicePage"));
+const DevicesPage = lazy(() => import("@/modules/display/DevicesPage"));
 const ComingPage = lazy(() => import("@/modules/home/ComingPage"));
 
 function Loading() {
@@ -62,6 +85,11 @@ export default function App() {
         <Route path="/pw-login" element={<Navigate to="/login" replace />} />
         <Route path="/book-appointment" element={<BookPage />} />
         <Route path="/my-appointment/:token" element={<ManagePage />} />
+        <Route path="/lab-report/:token" element={<LabReportPage />} />
+        <Route path="/display/counter/:key" element={<DevicePage />} />
+        <Route path="/display/pharmacy/:key" element={<DevicePage />} />
+        <Route path="/display/waiting/:key" element={<DevicePage />} />
+        <Route path="/display/beds/:key" element={<DevicePage />} />
         <Route path="/" element={loading ? <Loading /> : <Navigate to={boot ? "/pw-home" : "/login"} replace />} />
         <Route path="/pw-home" element={g("/pw-home", <HomePage />)} />
         <Route path="/pw-dashboard" element={g("/pw-dashboard", <DashboardPage />)} />
@@ -89,6 +117,27 @@ export default function App() {
         <Route path="/masters" element={g("/masters", <MastersPage />)} />
         <Route path="/masters/:kind" element={g("/masters", <MastersPage />)} />
         <Route path="/doctors" element={g("/doctors", <DoctorsPage />)} />
+        <Route path="/cash/shift" element={g("/cash/shift", <CashShiftPage />)} />
+        <Route path="/cash/close" element={g("/cash/close", <CashClosePage />)} />
+        <Route path="/cash/approvals" element={g("/cash/approvals", <CashApprovalsPage />)} />
+        <Route path="/cash/reports" element={g("/cash/reports", <CashReportsPage />)} />
+        <Route path="/lab/orders" element={g("/lab/orders", <LabOrdersPage />)} />
+        <Route path="/lab/samples" element={g("/lab/samples", <LabSamplesPage />)} />
+        <Route path="/tests" element={g("/tests", <LabTestsPage />)} />
+        <Route path="/lab/verify" element={g("/lab/verify", <LabVerifyPage />)} />
+        <Route path="/lab/outsourced" element={g("/lab/outsourced", <LabOutsourcedPage />)} />
+        <Route path="/medicine_invoice" element={g("/medicine_invoice", <PosPage />)} />
+        <Route path="/pharmacy/pick" element={g("/pharmacy/pick", <PickPage />)} />
+        <Route path="/pharmacy/review" element={g("/pharmacy/review", <ReviewPage />)} />
+        <Route path="/pharmacy/dispense" element={g("/pharmacy/dispense", <DispensePage />)} />
+        <Route path="/pharmacy/tickets" element={g("/pharmacy/tickets", <TicketsPage />)} />
+        <Route path="/pharmacy/items" element={g("/pharmacy/items", <ItemsPage />)} />
+        <Route path="/pharmacy/reports" element={g("/pharmacy/reports", <PharmacyReportsPage />)} />
+        <Route path="/store/receive" element={g("/store/receive", <ReceivePage />)} />
+        <Route path="/store/transfers" element={g("/store/transfers", <TransfersPage />)} />
+        <Route path="/store/returns" element={g("/store/returns", <ReturnsPage />)} />
+        <Route path="/store/cycle-count" element={g("/store/cycle-count", <CycleCountPage />)} />
+        <Route path="/display/devices" element={g("/display/devices", <DevicesPage />)} />
         <Route path="/er" element={g("/er", <ComingPage title="Emergency" phase={3} />)} />
         <Route path="*" element={g("/pw-home", <ComingPage title="This screen" phase={2} />)} />
       </Routes>

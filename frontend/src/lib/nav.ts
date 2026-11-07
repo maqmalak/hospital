@@ -1,4 +1,6 @@
 import {
+  Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
+  ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
   Activity, BarChart3, BedDouble, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
   MessageCircle, MessagesSquare, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
   type LucideIcon,
@@ -21,6 +23,33 @@ export const NAV: NavGroup[] = [
     { route: "/pw-history", label: "Patient history", icon: History, color: "from-fuchsia-500 to-purple-600", desc: "Visits, vitals, prescriptions" },
     { route: "/masters", label: "Clinical masters", icon: Pill, color: "from-lime-500 to-green-600", desc: "Medicines, allergies, ICD-10, interactions" },
   ] },
+  { label: "Laboratory", items: [
+    { route: "/lab/orders", label: "Lab orders", icon: Beaker, color: "from-cyan-500 to-sky-600", desc: "Order, bill and track tests" },
+    { route: "/lab/samples", label: "Lab samples", icon: Barcode, color: "from-sky-500 to-indigo-500", desc: "Collect, label, receive, reject" },
+    { route: "/tests", label: "Lab results", icon: FlaskConical, color: "from-indigo-500 to-violet-600", desc: "Result entry and release" },
+    { route: "/lab/verify", label: "Lab verification", icon: Microscope, color: "from-violet-500 to-purple-600", desc: "Pathologist sign-off" },
+    { route: "/lab/outsourced", label: "Outsourced tests", icon: Send, color: "from-slate-500 to-slate-700", desc: "Reference lab dispatch" },
+  ] },
+  { label: "Pharmacy", items: [
+    { route: "/medicine_invoice", label: "Pharmacy POS", icon: ShoppingCart, color: "from-emerald-500 to-teal-600", desc: "Bill medicines with FEFO batches" },
+    { route: "/pharmacy/pick", label: "Pharmacy pick", icon: ScanLine, color: "from-amber-500 to-orange-500", desc: "Pick by rack, scan batches" },
+    { route: "/pharmacy/review", label: "Pharmacy review", icon: ClipboardCheck, color: "from-rose-500 to-pink-600", desc: "Pharmacist check and count" },
+    { route: "/pharmacy/dispense", label: "Pharmacy handover", icon: PackageCheck, color: "from-green-500 to-emerald-600", desc: "Call, collect, hand over" },
+    { route: "/pharmacy/tickets", label: "Pharmacy pipeline", icon: ListChecks, color: "from-teal-600 to-cyan-700", desc: "All tickets and stage times" },
+    { route: "/pharmacy/items", label: "Medicine master", icon: PackageSearch, color: "from-lime-500 to-green-600", desc: "Stock by batch and expiry" },
+  ] },
+  { label: "Store", items: [
+    { route: "/store/receive", label: "Receive stock", icon: Truck, color: "from-sky-600 to-blue-700", desc: "Purchase receipt by batch" },
+    { route: "/store/transfers", label: "Store transfers", icon: Boxes, color: "from-indigo-500 to-blue-600", desc: "Requests and FEFO transfers" },
+    { route: "/store/cycle-count", label: "Cycle count", icon: PackageOpen, color: "from-amber-600 to-orange-700", desc: "Blind counts, variances" },
+    { route: "/store/returns", label: "Expiry & returns", icon: Undo2, color: "from-rose-600 to-red-700", desc: "Near expiry, quarantine, returns" },
+  ] },
+  { label: "Cash", items: [
+    { route: "/cash/shift", label: "Cashier shift", icon: Wallet, color: "from-emerald-600 to-green-700", desc: "Open shift, movements, live totals" },
+    { route: "/cash/close", label: "Close shift", icon: LockIcon, color: "from-slate-600 to-slate-800", desc: "Blind count and close" },
+    { route: "/cash/approvals", label: "Cash approvals", icon: HandCoins, color: "from-amber-500 to-yellow-600", desc: "Closings and cash drops" },
+    { route: "/cash/reports", label: "Cash reports", icon: ScrollText, color: "from-blue-600 to-indigo-700", desc: "Shifts, day-end, excess/short" },
+  ] },
   { label: "Inpatient", items: [
     { route: "/ward", label: "Wards & beds", icon: BedDouble, color: "from-emerald-500 to-teal-600", desc: "Live bed map" },
     { route: "/display/ward", label: "Ward kiosk display", icon: MonitorPlay, color: "from-cyan-600 to-blue-700", desc: "Full-screen bed status" },
@@ -39,6 +68,7 @@ export const NAV: NavGroup[] = [
     { route: "/patients/merge", label: "Merge patients", icon: Merge, color: "from-stone-500 to-stone-700", desc: "Merge duplicate records" },
     { route: "/audit", label: "Audit log", icon: ShieldCheck, color: "from-zinc-600 to-zinc-800", desc: "Who saw what, and changes" },
     { route: "/settings", label: "Clinic settings", icon: Settings, color: "from-gray-500 to-gray-700", desc: "Modules, billing, messaging" },
+    { route: "/display/devices", label: "Display devices", icon: MonitorSmartphone, color: "from-cyan-600 to-teal-700", desc: "Counter and queue screens" },
   ] },
 ];
 

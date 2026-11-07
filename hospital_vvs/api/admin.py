@@ -83,3 +83,45 @@ def audit(user=None, patient=None, doctype=None, from_date=None, to_date=None, k
 		r["added"] = len(d.get("added") or [])
 		r["removed"] = len(d.get("removed") or [])
 	return {"rows": rows, "summary": []}
+
+
+# ------------------------------------------------------------------ display devices (/display/devices)
+DEVICE_PATH = {"Customer Display": "/display/counter/", "Queue Display": "/display/pharmacy/", "Kiosk": "/display/pharmacy/",
+	"Waiting Display": "/display/waiting/", "Ward Display": "/display/beds/"}
+
+
+@frappe.whitelist()
+def devices():
+	require_roles(R.ADMIN)
+	rows = frappe.get_all("Display Device", fields=["name", "device_name", "device_type", "counter", "branch", "device_key", "location", "last_seen", "is_active"],
+		order_by="branch, device_type, device_name")
+	for r in rows:
+		r["path"] = f"/hms{DEVICE_PATH.get(r.device_type, '/display/pharmacy/')}{r.device_key}"
+	return {"devices": rows, "types": list(DEVICE_PATH), "branches": frappe.get_all("Branch", pluck="name"),
+		"counters": frappe.get_all("Counter", filters={"is_active": 1}, fields=["name", "branch", "counter_type"])}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_device(data):
+	require_roles(R.ADMIN)
+	d = frappe.parse_json(data)
+	doc = frappe.get_doc("Display Device", d["name"]) if d.get("name") else frappe.new_doc("Display Device")
+	for k in ("device_name", "device_type", "counter", "branch", "location"):
+		if k in d:
+			doc.set(k, d[k] or None)
+	doc.is_active = cint(d.get("is_active", 1))
+	if not doc.device_key:
+		doc.device_key = frappe.generate_hash(length=24)
+	doc.save(ignore_permissions=True)
+	if doc.counter and doc.device_type == "Customer Display":
+		frappe.db.set_value("Counter", doc.counter, "display_device", doc.name)
+	return doc.name
+
+
+@frappe.whitelist(methods=["POST"])
+def rotate_device_key(name):
+	"""A lost or stolen screen: the old link stops working at once."""
+	require_roles(R.ADMIN)
+	key = frappe.generate_hash(length=24)
+	frappe.db.set_value("Display Device", name, "device_key", key)
+	return key

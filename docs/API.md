@@ -10,6 +10,9 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `get_settings` |  |  | ADMIN |  |
 | `save_settings` | data | POST | ADMIN |  |
 | `audit` | user, patient, doctype, from_date, to_date, kind, limit, start |  | ADMIN |  |
+| `devices` |  |  | ADMIN |  |
+| `save_device` | data | POST | ADMIN |  |
+| `rotate_device_key` | name | POST | ADMIN | A lost or stolen screen: the old link stops working at once. |
 
 ## appointments
 

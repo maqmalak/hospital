@@ -203,9 +203,15 @@ def display(key):
 
 def _as_guest(fn, branch):
 	"""Run a staff read endpoint for a display device (as Administrator, branch fixed by the device)."""
-	user = frappe.session.user
+	# frappe.set_user also overwrites the session id, form_dict and session data; put them back afterwards,
+	# otherwise a signed-in browser that opens a display page gets logged out
+	sess = frappe.local.session
+	saved = {"user": sess.user, "sid": sess.sid, "data": sess.data}
+	form_dict = frappe.local.form_dict
 	frappe.set_user("Administrator")
 	try:
 		return fn(branch)
 	finally:
-		frappe.set_user(user)
+		frappe.set_user(saved["user"])
+		sess.sid, sess.data = saved["sid"], saved["data"]
+		frappe.local.form_dict = form_dict

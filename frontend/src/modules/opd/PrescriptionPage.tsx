@@ -26,7 +26,8 @@ interface WS {
 }
 const FREQS = ["1+0+1", "1+1+1", "1+0+0", "0+0+1", "0+1+0", "1+1+1+1", "SOS", "STAT"];
 const ROUTES = ["Oral", "IV", "IM", "SC", "Topical", "Inhalation", "Eye", "Ear", "Nasal", "Rectal", "Sublingual"];
-const LABS = ["CBC", "LFT", "RFT", "Blood sugar (fasting)", "HbA1c", "Lipid profile", "Urine R/E", "Chest X-ray", "ECG", "Typhidot", "Dengue NS1", "Malaria parasite", "TSH", "Ultrasound abdomen"];
+const LABS = ["CBC", "LFT", "RFT", "Blood sugar (fasting)", "HbA1c", "Lipid profile", "Urine R/E", "Typhidot", "Dengue NS1", "Malaria parasite", "TSH"];
+const IMAGING = ["Chest X-ray", "ECG", "Ultrasound abdomen"];
 
 export default function PrescriptionPage() {
   const [params, setParams] = useSearchParams();
@@ -50,6 +51,9 @@ function Workspace({ queue, rx, patient }: { queue?: string; rx?: string; patien
   const [alerts, setAlerts] = useState<{ alerts: Alert[]; blocking: boolean }[]>([]);
   const [dx, setDx] = useState<{ diagnosis: string; diagnosis_name: string }[]>([]);
   const [labs, setLabs] = useState<{ test_name: string; urgent?: number }[]>([]);
+  // chips come from the lab's active test templates (signing turns them into a lab order)
+  const { data: labCtx } = useApi<{ templates: { name: string; test_code: string; price: number }[] }>("lab.context", undefined, { retry: false, staleTime: 300_000 });
+  const labChoices = [...(labCtx?.templates.map((x) => x.name) ?? LABS), ...IMAGING];
   const [notes, setNotes] = useState("");
   const [advice, setAdvice] = useState("");
   const [fuDays, setFuDays] = useState<string>("");
@@ -208,8 +212,9 @@ function Workspace({ queue, rx, patient }: { queue?: string; rx?: string; patien
               {!signed && <button onClick={() => setDx((x) => x.filter((y) => y.diagnosis !== d.diagnosis))}><X className="h-3 w-3" /></button>}</span>)}</div>
           </Section>
           <Section title={t("Lab tests")}>
-            {!signed && <div className="flex flex-wrap gap-1.5">{LABS.filter((l) => !labs.some((x) => x.test_name === l)).map((l) => <button key={l} onClick={() => setLabs((x) => [...x, { test_name: l }])} className="rounded-full border border-dashed border-border px-2.5 py-1 text-xs hover:border-primary hover:text-primary">+ {l}</button>)}</div>}
-            <div className="mt-2 flex flex-wrap gap-1.5">{labs.map((l) => <span key={l.test_name} className="flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-800 dark:bg-sky-500/15 dark:text-sky-200">{l.test_name}
+            {!signed && <div className="flex flex-wrap gap-1.5">{labChoices.filter((l) => !labs.some((x) => x.test_name === l)).map((l) => <button key={l} onClick={() => setLabs((x) => [...x, { test_name: l }])} className="rounded-full border border-dashed border-border px-2.5 py-1 text-xs hover:border-primary hover:text-primary">+ {l}</button>)}</div>}
+            <div className="mt-2 flex flex-wrap gap-1.5">{labs.map((l) => <span key={l.test_name} className={cn("flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold", l.urgent ? "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-200" : "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-200")}>{l.test_name}
+              {!signed && <button title="Urgent" onClick={() => setLabs((x) => x.map((y) => (y.test_name === l.test_name ? { ...y, urgent: y.urgent ? 0 : 1 } : y)))} className="rounded px-1 text-[10px] font-bold">{l.urgent ? "URGENT" : "routine"}</button>}
               {!signed && <button onClick={() => setLabs((x) => x.filter((y) => y.test_name !== l.test_name))}><X className="h-3 w-3" /></button>}</span>)}</div>
           </Section>
         </div>
