@@ -138,7 +138,6 @@ def stock():
 	from hospital_vvs.services import pharmacy
 
 	main, retail = f"Main Store LHR - {ABBR}", f"Pharmacy Retail LHR - {ABBR}"
-	isb = f"Pharmacy Retail ISB - {ABBR}"
 	if frappe.db.count("Batch", {"hv_mrp_per_pack": [">", 0]}) > 20:
 		return
 	rnd = random.Random(11)
@@ -155,7 +154,6 @@ def stock():
 	# move to the pharmacy shelf by FEFO: 6 packs of each item
 	moves = [{"item_code": it.name, "qty": 6 * (cint(it.hv_units_per_strip) or 1) * (cint(it.hv_strips_per_pack) or 1)} for it in items]
 	pharmacy.fefo_transfer(main, retail, moves, remarks="Opening shelf stock")
-	pharmacy.fefo_transfer(main, isb, [dict(m, qty=m["qty"] // 2) for m in moves[:12]], remarks="Islamabad opening stock")
 	# one expired batch on the shelf (received earlier, now past expiry) for the quarantine demo
 	it = items[0]
 	b = f"{it.name.split('-')[0][:6]}-X001"

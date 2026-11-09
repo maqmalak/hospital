@@ -142,3 +142,6 @@ Commission rules, ledger earned as bills are paid, reversals on refunds / cancel
 ## Phase 5 — patient comms + feedback (2026-11-10) — D-44
 Built: Nursing Station, Comms Message, Station Broadcast, Patient Feedback; bedside page `/patient/:token` (quick buttons, text, Urdu/English voice-to-text, live replies, broadcasts), nursing station `/ns` and `/ns/:station` (urgent first, unread, waiting time vs target, thread, quick replies, broadcast, on-duty nurses, chime), `/pc-assign`, `/pc-report`; feedback job (OPD / discharge / pharmacy, delay, gap, link expiry), public `/feedback/:token`, WhatsApp 1–5 reply, admin `/feedback` with follow-ups and report; desk section *Patient Comms & Feedback*. Tests: W6 and W16 plus token, branch and gap cases — full suite 72 green. Browser: bedside "I am in pain" → station urgent → reply answered in 17 s.
 Pending / owner: Meta approval of `visit_feedback` (EN/UR); bedside tablets per room; which wards' stations to staff.
+
+## Islamabad branch removed (2026-11-10) — D-45
+Single branch (Lahore Main). Everything Islamabad deleted or moved to Lahore; stock reversed to Main Store LHR; all users on Lahore Main. Tests: 72 green.

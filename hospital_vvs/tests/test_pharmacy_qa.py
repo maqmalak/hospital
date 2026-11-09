@@ -336,7 +336,7 @@ class TestCounterAccess(IntegrationTestCase):
 		self.assertEqual(user_branches(), ["Lahore Main"])
 		self.assertEqual([c.name for c in shifts.counters_for()], ["Pharmacy 1"])
 		retire_stale_shift(CASHIER)
-		for other in ("Pharmacy 2", "Pharmacy ISB", "Handover 3", "Reception 1"):
+		for other in ("Pharmacy 2", "Handover 3", "Reception 1"):
 			self.assertFalse(shifts.can_use_counter(other))
 			with self.assertRaises(frappe.PermissionError):
 				shifts.open_shift(other, {"Cash": 0})
@@ -354,7 +354,7 @@ class TestCounterAccess(IntegrationTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			api.pos_context(counter="Pharmacy 2")
 		with self.assertRaises(frappe.PermissionError):
-			pharmacy.checkout("Pharmacy ISB", [{"item_code": "X", "uom": "Nos", "qty": 1}])
+			pharmacy.checkout("Pharmacy 2", [{"item_code": "X", "uom": "Nos", "qty": 1}])
 
 	def test_user_without_branch_gets_none_and_admin_all(self):
 		from hospital_vvs.utils import user_branches
@@ -364,7 +364,7 @@ class TestCounterAccess(IntegrationTestCase):
 		self.assertEqual(user_branches(), [])
 		self.assertEqual(shifts.counters_for(), [])
 		as_user("Administrator")
-		self.assertIn("Islamabad", user_branches())
+		self.assertIn("Lahore Main", user_branches())
 
 
 class TestPaperPrescription(IntegrationTestCase):

@@ -12,7 +12,7 @@ from hospital_vvs.setup.company import ABBR
 from hospital_vvs.setup.demo import _user
 
 WARD_RATES = {"General Ward (Male)": (500, 0), "General Ward (Female)": (500, 0), "Private Rooms": (900, 0), "ICU": (1500, 8000),
-	"Children Ward": (500, 0), "Emergency Bay": (600, 0), "General Ward ISB": (450, 0)}
+	"Children Ward": (500, 0), "Emergency Bay": (600, 0)}
 DIETS = [("Normal", "عام", 250, 700), ("Diabetic", "شوگر", 300, 850), ("Soft", "نرم", 220, 600), ("Liquid", "مائع", 180, 500),
 	("High Protein", "زیادہ پروٹین", 350, 1000), ("NPO (nil by mouth)", "کچھ نہیں", 0, 0)]
 PROCEDURES = [  # name, category, fee, theatre, anesthesia, consent, preauth

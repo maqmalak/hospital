@@ -11,8 +11,7 @@ from hospital_vvs import roles as R
 
 COMPANY = "VVS Hospital"
 ABBR = "VVSH"
-BRANCHES = [("Lahore Main", "LHR", "12-B Main Boulevard, Gulberg III, Lahore", "+92 42 3500 0000"),
-	("Islamabad", "ISB", "Plot 5, Blue Area, Islamabad", "+92 51 2800 000")]
+BRANCHES = [("Lahore Main", "LHR", "12-B Main Boulevard, Gulberg III, Lahore", "+92 42 3500 0000")]
 BILLING_TYPES = {
 	# billing type: (income account, cost center, warehouse key)
 	"Fee": ("Consultation Fee Income", "OPD", "General Store"),
@@ -229,7 +228,6 @@ COUNTERS = [
 	("Lab Counter", "Lahore Main", "Lab", "Lab", 4), ("Pharmacy 1", "Lahore Main", "Pharmacy Billing", "Medicine", 1),
 	("Pharmacy 2", "Lahore Main", "Pharmacy Billing", "Medicine", 2), ("Handover 3", "Lahore Main", "Pharmacy Handover", "Medicine", 3),
 	("IPD Desk", "Lahore Main", "IPD Desk", "IPD Slip", 5),
-	("Reception ISB", "Islamabad", "Reception", "OPD Slip", 1), ("Lab ISB", "Islamabad", "Lab", "Lab", 2), ("Pharmacy ISB", "Islamabad", "Pharmacy Billing", "Medicine", 1),
 ]
 
 

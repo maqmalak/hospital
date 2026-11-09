@@ -66,10 +66,13 @@ class TestNursingComms(IntegrationTestCase):
 			svc.patient_send(token, "Water")
 
 	def test_other_branch_station_hidden(self):
+		if not frappe.db.exists("Branch", "QA Branch"):
+			frappe.get_doc({"doctype": "Branch", "branch": "QA Branch"}).insert()
+		frappe.get_doc({"doctype": "Nursing Station", "station_name": "NS-QA-Other", "branch": "QA Branch"}).insert()
 		frappe.set_user("nurse@vvs.demo")  # Lahore Main only (D-41)
-		self.assertNotIn("NS-General (ISB)", [s.name for s in api.stations()])
+		self.assertNotIn("NS-QA-Other", [s.name for s in api.stations()])
 		with self.assertRaises(frappe.PermissionError):
-			api.board("NS-General (ISB)")
+			api.board("NS-QA-Other")
 
 
 class TestFeedback(IntegrationTestCase):

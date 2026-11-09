@@ -8,7 +8,7 @@ import frappe
 
 from hospital_vvs.utils import is_admin
 
-BRANCH = {"reception.isb@vvs.demo": ["Islamabad"]}
+BRANCH = {}  # one branch since 2026-11-10 (Islamabad removed): everyone on Lahore Main
 DEFAULT_BRANCH = "Lahore Main"
 STAFF = {
 	"Pharmacy 1": ["cashier@vvs.demo"],
@@ -18,9 +18,6 @@ STAFF = {
 	"Reception 2": ["reception2@vvs.demo"],
 	"IPD Desk": ["reception@vvs.demo", "reception2@vvs.demo"],
 	"Lab Counter": ["lab@vvs.demo"],
-	"Reception ISB": ["reception.isb@vvs.demo"],
-	"Lab ISB": [],
-	"Pharmacy ISB": [],
 }
 
 

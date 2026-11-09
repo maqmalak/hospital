@@ -29,7 +29,7 @@ DOCTORS = [
 	("Dr. Bilal Ahmed", "ڈاکٹر بلال احمد", "Orthopaedic Surgeon", 2500, 1200, "OPD-5", "#2563eb", "Lahore Main", "Mon Wed Sat", "15:00", "19:00", None),
 	("Dr. Hina Raza", "ڈاکٹر حنا رضا", "ENT Specialist", 2000, 1000, "OPD-6", "#7c3aed", "Lahore Main", "Tue Thu", "17:00", "21:00", None),
 	("Dr. Kamran Shah", "ڈاکٹر کامران شاہ", "Dermatologist", 2200, 1100, "OPD-7", "#ea580c", "Lahore Main", "Mon Thu Sat", "12:00", "16:00", None),
-	("Dr. Imran Qureshi", "ڈاکٹر عمران قریشی", "General Physician", 1200, 600, "ISB-1", "#0891b2", "Islamabad", "Mon Tue Wed Thu Fri", "09:00", "13:00", "dr.imran"),
+	("Dr. Imran Qureshi", "ڈاکٹر عمران قریشی", "General Physician", 1200, 600, "Room 8", "#0891b2", "Lahore Main", "Mon Tue Wed Thu Fri", "09:00", "13:00", "dr.imran"),
 ]
 DAY = {"Mon": "Monday", "Tue": "Tuesday", "Wed": "Wednesday", "Thu": "Thursday", "Fri": "Friday", "Sat": "Saturday", "Sun": "Sunday"}
 CLASSES = [("Penicillins", 1), ("Cephalosporins", 1), ("Macrolides", 1), ("Fluoroquinolones", 1), ("NSAIDs", 1), ("Analgesics", 0),
@@ -93,8 +93,7 @@ WARDS = [("General Ward (Male)", "جنرل وارڈ (مرد)", "General", "Male"
 	("Private Rooms", "پرائیویٹ کمرے", "Private", "Mixed", "First", 12000, 8, "Lahore Main", "#7c3aed"),
 	("ICU", "آئی سی یو", "ICU", "Mixed", "First", 25000, 6, "Lahore Main", "#dc2626"),
 	("Children Ward", "بچوں کا وارڈ", "General", "Children", "Second", 4000, 10, "Lahore Main", "#f59e0b"),
-	("Emergency Bay", "ایمرجنسی", "Emergency", "Mixed", "Ground", 5000, 8, "Lahore Main", "#b91c1c"),
-	("General Ward ISB", "جنرل وارڈ", "General", "Mixed", "Ground", 3000, 10, "Islamabad", "#0891b2")]
+	("Emergency Bay", "ایمرجنسی", "Emergency", "Mixed", "Ground", 5000, 8, "Lahore Main", "#b91c1c")]
 FIRST_M = ["Muhammad", "Ali", "Ahmed", "Hassan", "Usman", "Bilal", "Hamza", "Imran", "Zubair", "Kashif", "Tariq", "Faisal", "Asad", "Shahid", "Naveed"]
 FIRST_F = ["Ayesha", "Fatima", "Zainab", "Maryam", "Sana", "Hina", "Rabia", "Amna", "Nida", "Saima", "Sadia", "Iqra", "Mehwish", "Kiran", "Bushra"]
 LAST = ["Khan", "Ahmed", "Malik", "Butt", "Chaudhry", "Sheikh", "Qureshi", "Raza", "Hussain", "Iqbal", "Mirza", "Javed", "Aslam", "Akhtar"]
@@ -196,7 +195,7 @@ def _user(login, full_name, roles, branch=None):
 
 def users():
 	for login, name, roles in STAFF:
-		_user(login, name, roles, "Islamabad" if login.endswith(".isb") else None)
+		_user(login, name, roles, None)  # single branch since 2026-11-10 (Islamabad removed)
 	for (name, *_rest, user) in DOCTORS:
 		if user:
 			email = _user(user, name, [R.DOCTOR])
@@ -250,7 +249,7 @@ def make_patients(rnd, n=60):
 		p = frappe.get_doc({"doctype": "Patient", "patient_name": f"{first} {last}", "patient_name_ur": f"{UR.get(first, '')} {UR.get(last, '')}".strip() or None,
 			"gender": "Female" if female else "Male", "dob": add_days(today(), -int(age * 365.25) - rnd.randint(0, 300)), "phone": phone,
 			"relation_type": "D/O" if female else "S/O", "guardian_name": f"{rnd.choice(FIRST_M)} {last}", "city": "Islamabad" if i % 8 == 0 else "Lahore",
-			"branch": "Islamabad" if i % 8 == 0 else "Lahore Main", "category": category, "preferred_language": "ur" if i % 3 else "en",
+			"branch": "Lahore Main", "category": category, "preferred_language": "ur" if i % 3 else "en",
 			"panel": "Pakistan Telecom Panel" if category == "Panel" else None, "employee_id": f"PTCL-{1000 + i}" if category == "Panel" else None,
 			"panel_relation": "Self" if category == "Panel" else None, "insurance_provider": "State Life Insurance" if category == "Insurance" else None,
 			"policy_no": f"SLIC-{50000 + i}" if category == "Insurance" else None, "blood_group": rnd.choice(["A+", "B+", "O+", "AB+", "O-", "B-"]),
