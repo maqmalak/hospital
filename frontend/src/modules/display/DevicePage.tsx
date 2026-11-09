@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { BedDouble, Clock, Pill, ShoppingBag, Volume2 } from "lucide-react";
+import { BedDouble, Clock, Volume2 } from "lucide-react";
 import { getCall, humanizeError } from "@/services/frappe";
 import { cn } from "@/utils/cn";
+import { CustomerFacing, type CfState } from "./CustomerFacing";
 
 /** Public screens keyed by a device key only (no login). Read-only, polled every few seconds. */
 interface Base { type: string; name: string; branch: string; clinic: string; clinic_ur?: string }
-interface CustomerD extends Base { counter: { counter_name?: string; number?: number }; state: { state: string; lines?: { name: string; qty: number; uom: string; amount: number }[]; total?: number; discount?: number; net?: number; token?: string; change?: number } }
+interface CustomerD extends Base { counter: { counter_name?: string; number?: number }; state: { state: string; lines?: { name: string; qty: number; uom: string; amount: number }[]; total?: number; discount?: number; net?: number; token?: string; change?: number; paid?: number; at?: string } }
 interface QueueD extends Base { preparing: { token: string; status: string }[]; ready: { token: string; counter: string | number; called_at: string }[] }
 interface WaitD extends Base { opd: { doctors: { doctor: string; room?: string; now: null | { token: number; name?: string; status: string }; next: { token: number; name?: string }[]; waiting: number }[] } }
 interface WardD extends Base { ward: { wards: { name: string; ward_name: string; ward_name_ur?: string; color?: string }[]; beds: { name: string; bed_no: string; ward: string; status: string; label?: string | null }[]; totals: Record<string, number> } }
 type D = CustomerD & QueueD & WaitD & WardD;
-const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
 
 function useClock() { const [n, setN] = useState(new Date()); useEffect(() => { const t = setInterval(() => setN(new Date()), 15_000); return () => clearInterval(t); }, []); return n; }
 
@@ -53,17 +53,13 @@ export default function DevicePage() {
 
   if (d.type === "Customer Display") {
     const s = d.state;
-    return shell(
-      s.state === "done" ? <div className="flex h-full flex-col items-center justify-center text-center"><div className="text-3xl text-white/70">Thank you!</div>
-        {s.token && <><div className="mt-6 text-2xl uppercase tracking-[0.4em] text-white/60">Your token</div><div className="text-[12rem] font-black leading-none tracking-wider">{s.token}</div></>}
-        <div className="mt-6 text-4xl font-bold">{rs(s.total)}{s.change ? <span className="ms-6 text-emerald-300">Change {rs(s.change)}</span> : null}</div></div>
-      : s.state === "cart" && s.lines?.length ? <div className="grid h-full grid-cols-[1fr_420px] gap-6">
-        <div className="overflow-hidden rounded-3xl bg-white/5 p-6"><div className="mb-3 flex items-center gap-2 text-xl text-white/70"><ShoppingBag className="h-6 w-6" />{d.counter?.counter_name}</div>
-          <div className="space-y-2 overflow-y-auto">{s.lines.map((l, i) => <div key={i} className="flex items-center justify-between rounded-2xl bg-white/5 px-5 py-3 text-2xl"><span>{l.name} <span className="text-lg text-white/60">× {l.qty} {l.uom}</span></span><span className="font-bold tabular-nums">{rs(l.amount)}</span></div>)}</div></div>
-        <div className="flex flex-col justify-end rounded-3xl bg-gradient-to-br from-sky-600 to-emerald-600 p-8"><div className="text-2xl text-white/80">Items {rs(s.total)}</div>{s.discount ? <div className="text-2xl text-white/80">Discount -{rs(s.discount)}</div> : null}
-          <div className="mt-4 text-xl uppercase tracking-widest text-white/70">To pay</div><div className="text-8xl font-black tabular-nums">{rs(s.net)}</div></div></div>
-      : <div className="flex h-full flex-col items-center justify-center text-center"><Pill className="h-24 w-24 text-white/30" /><div className="mt-6 text-5xl font-bold">Welcome</div><div className="urdu mt-2 text-4xl text-white/70">خوش آمدید</div><div className="mt-4 text-xl text-white/50">{d.counter?.counter_name}</div></div>,
-      "bg-gradient-to-br from-[#062a3a] via-slate-950 to-[#04281f]");
+    const state: CfState = s.state === "cart" && s.lines?.length
+      ? { kind: "cart", lines: s.lines.map((l) => ({ name: l.name, qty: l.qty, uom: l.uom, amount: l.amount })), subtotal: s.total ?? 0, discount: s.discount, total: s.net ?? s.total ?? 0 }
+      : s.state === "pay" ? { kind: "pay", total: s.net ?? s.total ?? 0, paid: s.paid ?? 0, change: s.change ?? 0 }
+      : s.state === "done" ? { kind: "done", total: s.total ?? 0, change: s.change ?? 0, at: s.at ? Date.parse(s.at) : Date.now(), tokens: s.token ? [{ token: s.token }] : undefined }
+      : { kind: "idle" };
+    return <CustomerFacing state={state} clinic={d.clinic} clinicUr={d.clinic_ur} place={d.counter?.counter_name}
+      banner={err ? <div className="absolute inset-x-0 bottom-0 z-30 bg-rose-600 px-4 py-1 text-center text-sm">Connection lost — retrying…</div> : undefined} />;
   }
 
   if (d.type === "Queue Display" || d.type === "Kiosk") return shell(

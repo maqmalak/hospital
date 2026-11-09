@@ -138,6 +138,7 @@
   "block_near_expiry",
   "loose_rounding",
   "allow_rx_override",
+  "paper_prescription",
   "ph1",
   "token_prefix",
   "skip_review_otc",
@@ -980,6 +981,14 @@
    "label": "Admin May Override Prescription Requirement"
   },
   {
+   "default": "Prescription items only",
+   "description": "Counter may sell prescription items against a paper / outside prescription (doctor's name recorded; pharmacist review still applies)",
+   "fieldname": "paper_prescription",
+   "fieldtype": "Select",
+   "label": "Walk-in With a Paper Prescription",
+   "options": "Prescription items only\nPrescription and controlled\nNot allowed"
+  },
+  {
    "fieldname": "ph1",
    "fieldtype": "Column Break"
   },
@@ -1402,7 +1411,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 00:13:53.385592",
+ "modified": "2026-11-10 00:30:29.853723",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

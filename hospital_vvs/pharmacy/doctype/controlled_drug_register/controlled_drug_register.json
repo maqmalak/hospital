@@ -9,6 +9,8 @@
   "patient",
   "prescription",
   "prescriber",
+  "outside_prescriber",
+  "outside_reg_no",
   "cd1",
   "item_code",
   "batch_no",
@@ -46,6 +48,16 @@
    "in_list_view": 1,
    "label": "Prescriber",
    "options": "Doctor"
+  },
+  {
+   "fieldname": "outside_prescriber",
+   "fieldtype": "Data",
+   "label": "Outside Prescriber (paper Rx)"
+  },
+  {
+   "fieldname": "outside_reg_no",
+   "fieldtype": "Data",
+   "label": "Prescriber Reg. No."
   },
   {
    "fieldname": "cd1",
@@ -104,7 +116,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-10 00:30:29.860081",
  "modified_by": "Administrator",
  "module": "Pharmacy",
  "name": "Controlled Drug Register",

@@ -365,3 +365,58 @@ class TestCounterAccess(IntegrationTestCase):
 		self.assertEqual(shifts.counters_for(), [])
 		as_user("Administrator")
 		self.assertIn("Islamabad", user_branches())
+
+
+class TestPaperPrescription(IntegrationTestCase):
+	"""D-42: a walk-in brings a paper / outside prescription; the counter records the doctor and sells; controlled drugs per setting."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		p = patch.object(frappe.db, "commit", lambda *a, **k: None)
+		p.start()
+		self.addCleanup(p.stop)
+		self.addCleanup(as_user, "Administrator")
+		frappe.db.set_single_value("Clinic Settings", {"collect_payment_at": "Cashier chooses (both)", "enable_pharmacy_pipeline": 1,
+			"paper_prescription": "Prescription items only"})
+		frappe.clear_document_cache("Clinic Settings")
+		from hospital_vvs.setup.access import set_staff
+
+		set_staff("Pharmacy 1", [CASHIER])
+		self.rx = make_item(f"QA-AZI-{random.randint(1000, 9999)}", generic="QA Azithromycin", rx=1, rack="C2-01")
+		self.ctrl = make_item(f"QA-ALP-{random.randint(1000, 9999)}", generic="QA Alprazolam", rx=1, controlled=1, rack="Z9-01")
+		stock(self.rx)
+		stock(self.ctrl)
+
+	def sell(self, code, paper=None):
+		as_user(CASHIER)
+		return api.checkout(frappe.as_json({"counter": "Pharmacy 1", "lines": [{"item_code": code, "uom": "Strip", "qty": 1}], "pay_at": "handover", "paper_rx": paper}))
+
+	def test_walk_in_with_paper_prescription(self):
+		with self.assertRaises(frappe.ValidationError):
+			self.sell(self.rx)  # no prescription at all
+		with self.assertRaises(frappe.ValidationError):
+			self.sell(self.rx, {"doctor": " "})  # doctor's name is required
+		r = self.sell(self.rx, {"doctor": "Dr. Kashif (City Clinic)", "reg_no": "12345-P", "rx_date": today(), "patient_name": "Walk-in Bilal"})
+		si = frappe.get_doc("Sales Invoice", r["name"])
+		self.assertEqual((si.hv_paper_rx, si.hv_paper_rx_doctor, si.hv_paper_rx_reg), (1, "Dr. Kashif (City Clinic)", "12345-P"))
+		self.assertIn("Paper Rx", si.remarks)
+		self.assertEqual(r["paper_rx"]["doctor"], "Dr. Kashif (City Clinic)")
+		# the prescription item still goes through the pharmacist's review
+		self.assertNotEqual(frappe.db.get_value("Dispense Ticket", si.hv_dispense_ticket, "status"), "Ready")
+
+	def test_controlled_needs_setting_and_details(self):
+		paper = {"doctor": "Dr. Kashif", "patient_name": "Walk-in Bilal"}
+		with self.assertRaises(frappe.ValidationError):
+			self.sell(self.ctrl, {**paper, "reg_no": "12345-P"})  # default policy: controlled drugs need a hospital prescription
+		frappe.db.set_single_value("Clinic Settings", "paper_prescription", "Prescription and controlled")
+		frappe.clear_document_cache("Clinic Settings")
+		with self.assertRaises(frappe.ValidationError):
+			self.sell(self.ctrl, paper)  # registration number required for a controlled drug
+		r = self.sell(self.ctrl, {**paper, "reg_no": "12345-P"})
+		self.assertEqual(frappe.db.get_value("Sales Invoice", r["name"], "hv_paper_rx_reg"), "12345-P")
+
+	def test_policy_not_allowed(self):
+		frappe.db.set_single_value("Clinic Settings", "paper_prescription", "Not allowed")
+		frappe.clear_document_cache("Clinic Settings")
+		with self.assertRaises(frappe.ValidationError):
+			self.sell(self.rx, {"doctor": "Dr. Kashif"})

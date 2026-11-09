@@ -1,43 +1,50 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  AlertTriangle, Banknote, BookUser, CheckCircle2, ClipboardList, CloudOff, CreditCard, Delete, FileText, History, Keyboard, LayoutGrid, List, Lock, Minus, Monitor,
-  PauseCircle, Percent, Plus, Printer, ReceiptText, RefreshCw, Replace, ScanLine, Search, ShieldAlert, Smartphone, Trash2, Undo2, UserRound, Wallet, Wifi, X,
+  AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Banknote, BookUser, Camera, CheckCircle2, ClipboardList, CloudOff, Coins, CreditCard, Delete, Eye, FileText, History, Keyboard,
+  LayoutGrid, List, Lock, Maximize2, Minimize2, Minus, Monitor, PanelLeftClose, PanelLeftOpen, PauseCircle, Percent, PiggyBank, Plus, Printer, ReceiptText, RefreshCw, Replace,
+  ScanLine, Search, ShieldAlert, Smartphone, Stethoscope, Trash2, TrendingUp, Undo2, UserRound, Wallet, Wifi, X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { call, getCall, humanizeError, useApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { printDoc } from "@/lib/print";
+import { setShell, toggleBrowserFullscreen, useShell } from "@/lib/shell";
+import { uploadFile } from "@/services/frappe";
 import { Empty, inputCls } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn";
+import { postDisplay } from "./display-channel";
 import { isNetworkError, kvGet, kvSet, loadBundle, refreshBundle, usePharmacySync, type Queued } from "./offline";
 import { type Receipt, receiptHtml, rs, type Split, stockText, usePharmacyLive } from "./shared";
 
 interface Ctx { counter: { name: string; counter_name: string; branch: string } | null; shift: string | null; shift_counter: string | null; warehouse: string | null; collect_payment_at: string;
   pipeline: number; near_expiry_days: number; display_key?: string; counters: { name: string; counter_type: string; number?: number }[];
   waiting_prescriptions: { name: string; prescription: string; patient: string; customer_name: string; creation: string; doctor_name?: string }[]; modes: string[];
-  discount: { max_percent: number; max_amount: number | null; policy: string }; categories: string[]; pay_choice: string; credit_customers: number }
+  discount: { max_percent: number; max_amount: number | null; policy: string }; categories: string[]; pay_choice: string; credit_customers: number; paper_rx?: string }
 interface Hit { item_code: string; item_name: string; generic?: string; strength?: string; form?: string; rack?: string; rx: number; controlled: number; stock: Split; upp: number; ups: number; spp: number;
   uoms: string[]; stock_uom: string; prices: Record<string, number>; next_expiry?: string; near_expiry: boolean; category?: string; batch?: string }
 interface Line { key: string; item_code: string; item_name: string; uom: string; qty: number; uoms: string[]; prices: Record<string, number>; original_item?: string; rx?: number; controlled?: number;
   generic?: string; strength?: string; no_substitution?: number; dose?: string; frequency?: string; duration?: string; batch?: string; expiry?: string; rack?: string }
 interface QLine { item_code: string; item_name: string; uom: string; qty: number; batch_no: string; expiry: string; near_expiry: boolean; days_left: number; rate: number; amount: number; rack?: string; original_item?: string }
-interface Quote { lines: QLine[]; errors: string[]; warnings: string[]; rx_missing: string[]; total: number }
+interface Quote { lines: QLine[]; errors: string[]; warnings: string[]; rx_missing: string[]; controlled_missing?: string[]; total: number }
+interface PaperRx { doctor: string; reg_no?: string; rx_date?: string; patient_name?: string; image?: string }
 interface Sub { item_code: string; item_name: string; stock: Split; price: number; rx: number }
 interface PatientRow { name: string; patient_name: string; patient_name_ur?: string; phone?: string; gender?: string; age?: number; category?: string; customer?: string; cnic_masked?: string; credit?: number }
 interface CreditRow { name: string; customer_name: string; mobile_no?: string; balance: number; credit_limit: number }
 type Cust = { kind: "walkin" } | { kind: "patient"; p: PatientRow } | { kind: "credit"; c: CreditRow };
 interface Bundle { items: Hit[]; patients: PatientRow[]; credit: CreditRow[]; categories: string[]; modes: string[]; counter: string; generated_at: string }
-interface Held { id: string; at: string; lines: Line[]; cust: Cust; rx: { prescription: string; doctor?: string } | null; priority: string }
+interface Held { id: string; at: string; lines: Line[]; cust: Cust; rx: { prescription: string; doctor?: string } | null; priority: string; paper?: PaperRx | null }
 interface Tender { mode_of_payment: string; amount: number; reference_no?: string }
 
 const MODE_ICON: Record<string, typeof Banknote> = { Cash: Banknote, Card: CreditCard, JazzCash: Smartphone, Easypaisa: Smartphone, "Bank Transfer": CreditCard, "On account": BookUser };
 const FORM_EMOJI: Record<string, string> = { Tablet: "💊", Capsule: "💊", Syrup: "🧴", Suspension: "🧴", Injection: "💉", Drops: "💧", Cream: "🧴", Ointment: "🧴", Inhaler: "🌬️", Sachet: "🧂" };
 const PRIO: Record<string, string> = { Normal: "border-slate-600 bg-slate-600", Elderly: "border-amber-500 bg-amber-500", Disabled: "border-sky-600 bg-sky-600", Urgent: "border-rose-600 bg-rose-600" };
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
+const drName = (n: string) => (/^dr\.?\s/i.test(n.trim()) ? n.trim() : `Dr ${n.trim()}`);
+const localDay = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
 const custLabel = (c: Cust) => (c.kind === "walkin" ? "Walk-in customer" : c.kind === "patient" ? c.p.patient_name : c.c.customer_name);
 
 export default function PosPage() {
@@ -67,7 +74,10 @@ export default function PosPage() {
   const [priority, setPriority] = useState("Normal");
   const [payAt, setPayAt] = useState<"now" | "handover">("now");
   const [discount, setDiscount] = useState<{ amount: number; auth: string; status: string } | null>(null);
-  const [dlg, setDlg] = useState<null | "rx" | "pay" | "held" | "invoices" | "shift" | "keys" | "returns">(null);
+  const [dlg, setDlg] = useState<null | "rx" | "pay" | "held" | "invoices" | "shift" | "keys" | "returns" | "paper" | "cash">(null);
+  const [paper, setPaper] = useState<PaperRx | null>(null);
+  const shell = useShell();
+  const justDone = useRef(false);
   const [subFor, setSubFor] = useState<Line | null>(null);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const [held, setHeld] = useState<Held[]>([]);
@@ -114,6 +124,13 @@ export default function PosPage() {
   const noShift = !payLater && !credit && !ctx?.shift;
 
   useEffect(() => {
+    if (lines.length) {
+      justDone.current = false;
+      postDisplay({ kind: "cart", customer: custLabel(cust), lines: (quote?.lines ?? []).map((l) => ({ name: l.item_name, qty: l.qty, uom: l.uom === "Nos" ? "unit" : l.uom, amount: l.amount, sub: l.expiry ? `Exp ${l.expiry.slice(0, 7)}` : undefined })),
+        subtotal: gross, discount: disc || undefined, total: net });
+    } else if (!justDone.current) postDisplay({ kind: "idle" });
+  }, [quote, disc, cust]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
     if (offline) return;
     const h = window.setTimeout(() => void call("pharmacy.display_push", { state: lines.length ? { state: "cart", lines: (quote?.lines ?? []).map((l) => ({ name: l.item_name, qty: l.qty, uom: l.uom, amount: l.amount })), total: gross, discount: disc, net } : { state: "idle" } }).catch(() => undefined), 400);
     return () => window.clearTimeout(h);
@@ -144,24 +161,31 @@ export default function PosPage() {
     } catch (e) { toast.error(humanizeError(e)); }
   };
 
-  const reset = () => { setLines([]); setCust({ kind: "walkin" }); setRx(null); setDiscount(null); setPriority("Normal"); setRef(uid()); if (ctx?.pay_choice?.startsWith("Cashier")) setPayAt("now"); searchRef.current?.focus(); };
+  const reset = () => { setLines([]); setCust({ kind: "walkin" }); setRx(null); setPaper(null); setDiscount(null); setPriority("Normal"); setRef(uid()); if (ctx?.pay_choice?.startsWith("Cashier")) setPayAt("now"); searchRef.current?.focus(); };
   const hold = async () => {
     if (!lines.length) return;
-    const h = [{ id: uid(), at: new Date().toISOString(), lines, cust, rx, priority }, ...held].slice(0, 30);
+    const h = [{ id: uid(), at: new Date().toISOString(), lines, cust, rx, priority, paper }, ...held].slice(0, 30);
     setHeld(h); await kvSet("held", h); reset(); toast.success("Held — resume from Drafts (F8)");
   };
   const resume = async (h: Held) => {
     if (lines.length) await hold();
-    setLines(h.lines); setCust(h.cust); setRx(h.rx); setPriority(h.priority);
+    setLines(h.lines); setCust(h.cust); setRx(h.rx); setPriority(h.priority); setPaper(h.paper ?? null);
     const left = held.filter((x) => x.id !== h.id); setHeld(left); await kvSet("held", left); setDlg(null);
   };
 
   const payload = (extra: Record<string, unknown> = {}) => ({ lines: lines.map((l) => ({ item_code: l.item_code, uom: l.uom, qty: l.qty, original_item: l.original_item })),
     patient: cust.kind === "patient" ? cust.p.name : undefined, customer: cust.kind === "credit" ? cust.c.name : undefined, prescription: rx?.prescription,
-    discount_amount: disc || undefined, discount_authorization: disc ? discount?.auth : undefined, priority, client_ref: ref, counter, ...extra });
+    discount_amount: disc || undefined, discount_authorization: disc ? discount?.auth : undefined, priority, client_ref: ref, counter,
+    paper_rx: !rx && paper && quote?.rx_missing.length ? paper : undefined, ...extra });
   const send = async (extra: Record<string, unknown>) => {
     setBusy(true);
-    try { const r = await call<Receipt>("pharmacy.checkout", { data: payload(extra) }); setReceipt(r); reset(); setDlg(null); void refetchCtx(); }
+    try {
+      const r = await call<Receipt>("pharmacy.checkout", { data: payload(extra) });
+      justDone.current = true;
+      postDisplay({ kind: "done", customer: r.customer, total: r.grand_total, change: r.change, tokens: r.token ? [{ label: "Your token", token: r.token, sub: r.docstatus === 0 ? "Pay and collect at the handover counter" : "Collect at the handover counter" }] : undefined,
+        note: r.docstatus === 0 ? "Please wait for your token to be called" : undefined });
+      setReceipt(r); reset(); setDlg(null); void refetchCtx();
+    }
     catch (e) {
       if (isNetworkError(e) || offline) await sellOffline(extra);
       else toast.error(humanizeError(e), { duration: 8000 });
@@ -172,11 +196,13 @@ export default function PosPage() {
     const data = { ...payload(extra), pay_at: "now" };
     const tenders = (extra.payments as Tender[] | undefined) ?? [];
     const paid = tenders.reduce((s, t) => s + t.amount, 0);
-    const local: Receipt = { name: `OFF-${ref.slice(0, 8).toUpperCase()}`, docstatus: 1, posting_date: new Date().toISOString().slice(0, 10), posting_time: new Date().toTimeString().slice(0, 5),
+    const local: Receipt = { name: `OFF-${ref.slice(0, 8).toUpperCase()}`, docstatus: 1, posting_date: localDay(), posting_time: new Date().toTimeString().slice(0, 5),
       customer: custLabel(cust), cashier: boot?.full_name ?? "", counter, pending_sync: true, items: (quote?.lines ?? []).map((l) => ({ item_name: l.item_name, qty: l.qty, uom: l.uom, rate: l.rate, amount: l.amount, batch_no: l.batch_no, expiry: l.expiry })),
       total: gross, discount: 0, grand_total: net, paid, tendered: paid, change: Math.max(paid - net, 0), mode: tenders.map((t) => t.mode_of_payment).join(" + "), clinic: { name: "Contract pharmacy" } };
     const qd: Queued = { client_ref: ref, created: new Date().toISOString(), total: net, customer: custLabel(cust), status: "pending", attempts: 0, data, receipt: local };
     await sync.enqueue(qd);
+    justDone.current = true;
+    postDisplay({ kind: "done", customer: custLabel(cust), total: net, change: Math.max(paid - net, 0) });
     toast("Saved offline — posts when the connection returns", { icon: "📴" });
     setReceipt(local); reset(); setDlg(null);
   };
@@ -193,6 +219,7 @@ export default function PosPage() {
       else if (e.key === "F3") { e.preventDefault(); (document.querySelector("[data-cust-search]") as HTMLInputElement | null)?.focus(); }
       else if (e.key === "F4") { e.preventDefault(); setDlg("rx"); }
       else if (e.key === "F7") { e.preventDefault(); setDlg("returns"); }
+      else if (e.key === "F6") { e.preventDefault(); setDlg("cash"); }
       else if (e.key === "F8") { e.preventDefault(); if (lines.length) void hold(); else setDlg("held"); }
       else if (e.key === "F9") { e.preventDefault(); checkout(); }
       else if (e.key === "F10") { e.preventDefault(); setDlg("invoices"); }
@@ -207,25 +234,46 @@ export default function PosPage() {
   const byLine = (l: Line) => (quote?.lines ?? []).filter((x) => x.item_code === l.item_code && (x.original_item ?? undefined) === (l.original_item ?? undefined));
   const cats = offline ? bundle?.categories ?? [] : ctx.categories ?? [];
   const lim = ctx.discount;
-  const ctaLabel = credit ? `Charge to account ${rs(net)}` : payLater ? `Send to dispensing ${rs(net)}` : `Pay ${rs(net)}`;
+  const ctaLabel = credit ? "Charge to account" : payLater ? "Send to dispensing" : "Pay";
+  const rxNeed = !!quote?.rx_missing.length && !rx;
+  const ctrlNeed = !!quote?.controlled_missing?.length && !rx;
+  const paperPolicy = ctx.paper_rx ?? "Prescription items only";
+  const paperOk = !!paper && paperPolicy !== "Not allowed" && (!ctrlNeed || (paperPolicy === "Prescription and controlled" && !!paper.reg_no && !!paper.patient_name));
+  const rxBlocked = rxNeed && (offline || !paperOk);
+  const openDisplay = () => window.open("/hms/medicine_invoice/display", "hv-pharmacy-display", "popup=yes,width=1280,height=800");
 
   return (
-    <div className="-mt-3 flex h-[calc(100vh-4.25rem)] min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-sky-50 via-background to-emerald-50 dark:from-sky-950/30 dark:to-emerald-950/20 sm:-mt-4">
+    <div className={cn("flex min-h-0 flex-col overflow-hidden bg-gradient-to-br from-sky-50 via-background to-emerald-50 dark:from-sky-950/30 dark:to-emerald-950/20",
+      shell.full ? "h-screen" : "-mt-3 h-[calc(100vh-4.25rem)] rounded-2xl border border-border sm:-mt-4")}>
       {/* top bar (Restaurant OS) */}
-      <div className="flex flex-wrap items-center gap-2 bg-gradient-to-r from-[#08304a] to-[#06302c] px-3 py-2 text-white">
-        <span className="flex items-center gap-2 font-extrabold"><ReceiptText className="h-5 w-5 text-emerald-300" />{ctx.counter?.counter_name ?? "Pharmacy"}</span>
-        <span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-bold", ctx.shift ? "bg-emerald-500/25 text-emerald-100" : "bg-rose-500 text-white")}>{ctx.shift ? "SHIFT OPEN" : "NO SHIFT"}</span>
-        <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold">{chooser ? "Pay now or at handover" : ctx.pay_choice === "Handover counter" ? "Pay at handover" : "Pay at billing"}</span>
-        <Clock />
-        <button onClick={() => (offline ? void sync.sync() : setDlg("invoices"))} className={cn("flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold", offline ? "bg-amber-400 text-amber-950" : sync.queue.length ? "bg-sky-400 text-sky-950" : "bg-emerald-500/20 text-emerald-100")}>
-          {offline ? <CloudOff className="h-3.5 w-3.5" /> : <Wifi className="h-3.5 w-3.5" />}{offline ? "Offline" : "Online"}{sync.queue.length ? ` · ${sync.queue.length} to sync` : ""}{sync.syncing && <RefreshCw className="h-3 w-3 animate-spin" />}</button>
-        <div className="ms-auto flex flex-wrap gap-1">
+      <div className="relative flex flex-wrap items-center gap-2 bg-gradient-to-r from-[#072a40] via-[#08304a] to-[#063a33] px-3 py-2 text-white shadow-lg">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent" />
+        <div className="flex items-center gap-1">
+          <TopIcon icon={shell.nav && !shell.full ? PanelLeftClose : PanelLeftOpen} title={shell.nav && !shell.full ? "Hide menu" : "Show menu"} onClick={() => (shell.full ? setShell({ full: false, nav: true }) : setShell({ nav: !shell.nav }))} />
+          <TopIcon icon={shell.full ? Minimize2 : Maximize2} title={shell.full ? "Exit full page" : "Full page"} onClick={() => { const f = !shell.full; setShell({ full: f }); if (f !== !!document.fullscreenElement) void toggleBrowserFullscreen(); }} />
+        </div>
+        <div className="flex items-center gap-2.5 ps-1">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-sky-500 text-[#06302c] shadow-lg shadow-emerald-500/20"><ReceiptText className="h-5 w-5" /></span>
+          <div className="leading-tight"><div className="text-sm font-extrabold">{ctx.counter?.counter_name ?? "Pharmacy"}</div>
+            <div className="text-[10px] uppercase tracking-widest text-white/55">{ctx.counter?.branch ?? ""} · {boot?.full_name}</div></div>
+        </div>
+        <div className="hidden items-center gap-1.5 md:flex">
+          <Chip tone={ctx.shift ? "ok" : "bad"}>{ctx.shift ? "Shift open" : "No shift"}</Chip>
+          <Chip>{chooser ? "Pay now or at handover" : ctx.pay_choice === "Handover counter" ? "Pay at handover" : "Pay at billing"}</Chip>
+          <Clock />
+          <button onClick={() => (offline ? void sync.sync() : setDlg("invoices"))} className={cn("flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset", offline ? "bg-amber-400 text-amber-950 ring-amber-300" : sync.queue.length ? "bg-sky-400 text-sky-950 ring-sky-300" : "bg-emerald-400/15 text-emerald-100 ring-emerald-300/30")}>
+            {offline ? <CloudOff className="h-3.5 w-3.5" /> : <Wifi className="h-3.5 w-3.5" />}{offline ? "Offline" : "Online"}{sync.queue.length ? ` · ${sync.queue.length} to sync` : ""}{sync.syncing && <RefreshCw className="h-3 w-3 animate-spin" />}</button>
+        </div>
+        <div className="ms-auto flex flex-wrap items-center gap-1 rounded-2xl bg-white/5 p-1 ring-1 ring-inset ring-white/10">
           <Top icon={FileText} label="Prescription" k="F4" onClick={() => setDlg("rx")} />
-          <Top icon={PauseCircle} label={`Drafts${held.length ? ` (${held.length})` : ""}`} k="F8" onClick={() => setDlg("held")} />
-          <Top icon={Undo2} label="Return" k="F7" onClick={() => setDlg("returns")} />
+          <Top icon={PauseCircle} label="Drafts" k="F8" badge={held.length} onClick={() => setDlg("held")} />
           <Top icon={History} label="Invoices" k="F10" onClick={() => setDlg("invoices")} />
+          <Top icon={Undo2} label="Return" k="F7" onClick={() => setDlg("returns")} />
+          <span className="mx-0.5 h-6 w-px bg-white/15" />
+          <Top icon={Coins} label="Cash in/out" k="F6" onClick={() => setDlg("cash")} />
           <Top icon={Wallet} label="Shift" k="F11" onClick={() => setDlg("shift")} />
-          {ctx.display_key && <a href={`/hms/display/counter/${ctx.display_key}`} target="_blank" rel="noreferrer"><Top icon={Monitor} label="Display" onClick={() => undefined} /></a>}
+          <span className="mx-0.5 h-6 w-px bg-white/15" />
+          <Top icon={Monitor} label="Display" onClick={openDisplay} />
           <Top icon={Keyboard} label="Keys" onClick={() => setDlg("keys")} />
           <Top icon={Lock} label="Lock" k="F12" onClick={() => window.dispatchEvent(new Event("hv-lock"))} />
         </div>
@@ -257,35 +305,51 @@ export default function PosPage() {
         </section>
 
         {/* cart */}
-        <aside className="flex min-h-0 w-full flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-xl lg:w-[440px]">
+        <aside className="flex min-h-0 w-full flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-sky-900/10 ring-1 ring-black/[0.02] lg:w-[450px]">
           <CustomerBox cust={cust} setCust={(c) => { setCust(c); if (c.kind !== "patient") setRx(null); }} offline={offline} bundle={bundle} creditEnabled={ctx.credit_customers > 0} />
           {rx && <div className="flex items-center gap-2 border-b border-border bg-sky-50 px-4 py-1.5 text-xs dark:bg-sky-500/10"><FileText className="h-3.5 w-3.5 text-sky-600" />Rx <b>{rx.prescription}</b> · {rx.doctor}<button className="ms-auto font-semibold text-sky-700 underline" onClick={() => setRx(null)}>remove</button></div>}
+          {!rx && paper && <div className="flex items-center gap-2 border-b border-border bg-violet-50 px-4 py-1.5 text-xs dark:bg-violet-500/10"><Stethoscope className="h-3.5 w-3.5 text-violet-600" />
+            Paper Rx · <b className="truncate">{drName(paper.doctor)}</b>{paper.reg_no ? ` · ${paper.reg_no}` : ""}{paper.image ? <Camera className="h-3.5 w-3.5 text-violet-600" /> : null}
+            <button className="ms-auto font-semibold text-violet-700 underline" onClick={() => setDlg("paper")}>edit</button><button className="font-semibold text-violet-700 underline" onClick={() => setPaper(null)}>remove</button></div>}
           {noShift && !offline && <Link to="/cash/shift" className="flex items-center gap-2 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 dark:bg-rose-500/10 dark:text-rose-200"><ShieldAlert className="h-4 w-4" />Open your cash shift to take money →</Link>}
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
             {lines.map((l) => <CartLine key={l.key} l={l} ql={byLine(l)} onChange={(p) => setLine(l.key, p)} onSub={() => setSubFor(l)} offline={offline} />)}
             {!lines.length && <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground"><div className="text-5xl">🛒</div><div className="mt-2 text-sm">Scan or tap a medicine · load a prescription with F4</div></div>}
             {quote?.errors.map((e, i) => <div key={i} className="flex gap-2 rounded-xl bg-rose-50 p-2 text-xs font-semibold text-rose-700 dark:bg-rose-500/10 dark:text-rose-200"><AlertTriangle className="h-4 w-4 shrink-0" />{e}</div>)}
-            {(quote?.rx_missing.length ?? 0) > 0 && <div className="rounded-xl bg-sky-50 p-2 text-xs font-semibold text-sky-800 dark:bg-sky-500/10 dark:text-sky-200">Prescription needed for {quote!.rx_missing.join(", ")} — load it with F4.</div>}
+            {rxNeed && !paperOk && <div className="rounded-2xl border border-sky-200 bg-sky-50 p-3 text-xs text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100">
+              <div className="flex items-center gap-1.5 font-bold"><ShieldAlert className="h-4 w-4" />Prescription needed</div>
+              <div className="mt-0.5">{quote!.rx_missing.join(", ")}</div>
+              {ctrlNeed && paperPolicy !== "Prescription and controlled" && <div className="mt-1 font-semibold text-rose-700 dark:text-rose-300">Controlled drug: only a hospital prescription is accepted.</div>}
+              <div className="mt-2 flex gap-2"><Button size="sm" variant="save" onClick={() => setDlg("rx")}><FileText className="h-3.5 w-3.5" />Hospital Rx (F4)</Button>
+                {paperPolicy !== "Not allowed" && !offline && <Button size="sm" variant="neutral" onClick={() => setDlg("paper")}><Stethoscope className="h-3.5 w-3.5" />Paper prescription</Button>}</div>
+              {offline && <div className="mt-1 text-[11px]">Offline: prescription items need the server.</div>}</div>}
             {quote?.warnings.map((w, i) => <div key={i} className="rounded-xl bg-amber-50 p-2 text-[11px] text-amber-800 dark:bg-amber-500/10 dark:text-amber-200">{w}</div>)}
           </div>
-          <div className="space-y-2 border-t border-border p-3">
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Items ({lines.reduce((s, l) => s + l.qty, 0)})</span><span className="tabular-nums">{rs(gross)}</span></div>
-            <DiscountBox gross={gross} limit={lim} value={discount} onChange={setDiscount} disabled={offline || !gross} />
-            <div className="flex items-end justify-between"><span className="text-sm font-semibold">{credit ? "To account" : payLater ? "Due at handover" : "Net payable"}</span><span className="text-3xl font-black tabular-nums text-sky-800 dark:text-sky-200">{rs(net)}</span></div>
-            {chooser && !credit && !offline && <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">{([["now", "Pay now"], ["handover", "Pay at handover"]] as const).map(([k, l]) => (
-              <button key={k} onClick={() => setPayAt(k)} className={cn("rounded-lg py-1.5 text-xs font-bold", payAt === k ? "bg-card text-sky-800 shadow dark:text-sky-200" : "text-muted-foreground")}>{l}</button>))}</div>}
-            {ctx.pipeline ? <div className="flex gap-1">{["Normal", "Elderly", "Disabled", "Urgent"].map((p) => <button key={p} onClick={() => setPriority(p)} className={cn("flex-1 rounded-lg border py-1 text-[11px] font-semibold",
-              priority === p ? `${PRIO[p]} text-white` : "border-border text-muted-foreground")}>{p}</button>)}</div> : null}
-            <div className="flex gap-2"><Button variant="neutral" className="h-12" onClick={() => void hold()} disabled={!lines.length} title="Hold (F8)"><PauseCircle className="h-4 w-4" /></Button>
-              <Button variant="neutral" className="h-12" onClick={reset} disabled={!lines.length} title="Clear"><Trash2 className="h-4 w-4" /></Button>
-              <Button variant="submit" className="h-12 flex-1 text-base" disabled={!lines.length || !!quote?.errors.length || (noShift && !offline) || discount?.status === "Pending" || (!!quote?.rx_missing.length && offline)} loading={busy} onClick={checkout}>
-                {ctaLabel} <kbd className="ms-1 rounded bg-white/20 px-1 text-[10px]">F9</kbd></Button></div>
+          <div className="space-y-2 border-t border-border bg-gradient-to-b from-muted/40 to-card p-3">
+            <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Items · {lines.reduce((s, l) => s + l.qty, 0)}</span><span className="tabular-nums">{rs(gross)}</span></div>
+              <DiscountBox gross={gross} limit={lim} value={discount} onChange={setDiscount} disabled={offline || !gross} />
+              <div className="mt-1 flex items-end justify-between border-t border-dashed border-border pt-2"><span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{credit ? "To account" : payLater ? "Due at handover" : "Net payable"}</span>
+                <span className="bg-gradient-to-r from-sky-700 to-emerald-600 bg-clip-text text-4xl font-black tabular-nums text-transparent dark:from-sky-300 dark:to-emerald-300">{rs(net)}</span></div>
+            </div>
+            {chooser && !credit && !offline && <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">{([["now", "Pay now", Banknote], ["handover", "Pay at handover", ClipboardList]] as const).map(([k, l, I]) => (
+              <button key={k} onClick={() => setPayAt(k)} className={cn("flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold transition-all", payAt === k ? "bg-card text-sky-800 shadow ring-1 ring-sky-500/30 dark:text-sky-200" : "text-muted-foreground")}><I className="h-3.5 w-3.5" />{l}</button>))}</div>}
+            {ctx.pipeline ? <div className="flex gap-1">{["Normal", "Elderly", "Disabled", "Urgent"].map((p) => <button key={p} onClick={() => setPriority(p)} className={cn("flex-1 rounded-lg border py-1 text-[11px] font-semibold transition-all",
+              priority === p ? `${PRIO[p]} text-white shadow` : "border-border text-muted-foreground hover:border-foreground/30")}>{p}</button>)}</div> : null}
+            <div className="flex gap-2"><Button variant="neutral" className="h-14 w-14" onClick={() => void hold()} disabled={!lines.length} title="Hold (F8)"><PauseCircle className="h-5 w-5" /></Button>
+              <Button variant="neutral" className="h-14 w-14" onClick={reset} disabled={!lines.length} title="Clear"><Trash2 className="h-5 w-5" /></Button>
+              <button disabled={!lines.length || !!quote?.errors.length || (noShift && !offline) || discount?.status === "Pending" || rxBlocked || busy} onClick={checkout}
+                className="group relative flex h-14 flex-1 items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 text-white shadow-lg shadow-emerald-600/25 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:from-slate-400 disabled:to-slate-400 disabled:shadow-none">
+                <span className="flex items-center gap-2 whitespace-nowrap text-sm font-bold sm:text-base">{busy ? <RefreshCw className="h-5 w-5 animate-spin" /> : credit ? <BookUser className="h-5 w-5" /> : payLater ? <ClipboardList className="h-5 w-5" /> : <Banknote className="h-5 w-5" />}{ctaLabel}</span>
+                <span className="flex items-center gap-2 whitespace-nowrap"><span className="text-lg font-black tabular-nums">{rs(net)}</span><kbd className="rounded bg-white/20 px-1.5 text-[10px]">F9</kbd></span></button></div>
           </div>
         </aside>
       </div>
 
+      {dlg === "paper" && <PaperRxDialog value={paper} needControlled={ctrlNeed} policy={paperPolicy} patientName={cust.kind === "patient" ? cust.p.patient_name : ""} onClose={() => setDlg(null)} onSave={(p) => { setPaper(p); setDlg(null); }} />}
+      {dlg === "cash" && <CashDialog offline={offline} onClose={() => setDlg(null)} />}
       {dlg === "rx" && <RxDialog onClose={() => setDlg(null)} onLoad={(c) => void loadRx(c)} />}
-      {dlg === "pay" && <PayDialog total={net} modes={offline ? bundle?.modes ?? ["Cash"] : ctx.modes} busy={busy} onClose={() => setDlg(null)} onPay={(payments) => void send({ pay_at: "now", payments, payment_mode: payments[0]?.mode_of_payment })} />}
+      {dlg === "pay" && <PayDialog customer={custLabel(cust)} total={net} modes={offline ? bundle?.modes ?? ["Cash"] : ctx.modes} busy={busy} onClose={() => setDlg(null)} onPay={(payments) => void send({ pay_at: "now", payments, payment_mode: payments[0]?.mode_of_payment })} />}
       {dlg === "held" && <Dialog open onClose={() => setDlg(null)} title="Drafts on hold" description="Kept on this PC" size="md"><div className="space-y-2">{held.map((h) => (
         <div key={h.id} className="flex items-center gap-2 rounded-xl border border-border p-3"><div className="min-w-0 flex-1"><div className="font-semibold">{custLabel(h.cust)}{h.rx ? ` · ${h.rx.prescription}` : ""}</div>
           <div className="truncate text-xs text-muted-foreground">{new Date(h.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · {h.lines.map((l) => `${l.qty} ${l.uom} ${l.item_name}`).join(", ")}</div></div>
@@ -295,7 +359,7 @@ export default function PosPage() {
       {(dlg === "invoices" || dlg === "returns") && <InvoicesDialog initialScope={dlg === "returns" ? "today" : "shift"} returnMode={dlg === "returns"} sync={sync} offline={offline} agent={!!boot} onClose={() => setDlg(null)} />}
       {dlg === "shift" && <ShiftDialog onClose={() => setDlg(null)} offline={offline} />}
       {dlg === "keys" && <Dialog open onClose={() => setDlg(null)} title="Keyboard shortcuts" size="sm"><div className="grid grid-cols-[70px_1fr] gap-2 text-sm">
-        {[["F2", "Search medicine / scan"], ["F3", "Find customer"], ["F4", "Load prescription"], ["F7", "Return"], ["F8", "Hold / drafts"], ["F9", "Pay · send · charge"], ["F10", "Invoices"], ["F11", "Shift summary"], ["F12", "Lock"], ["Enter", "Add the scanned item"]]
+        {[["F2", "Search medicine / scan"], ["F3", "Find customer"], ["F4", "Load prescription"], ["F6", "Cash in / out"], ["F7", "Return"], ["F8", "Hold / drafts"], ["F9", "Pay · send · charge"], ["F10", "Invoices"], ["F11", "Shift summary"], ["F12", "Lock"], ["Enter", "Add the scanned item"]]
           .flatMap(([k, v]) => [<kbd key={k} className="rounded-md border border-border bg-muted px-2 py-0.5 text-center font-mono font-bold">{k}</kbd>, <span key={`${k}t`}>{v}</span>])}</div></Dialog>}
       {subFor && <SubDialog line={subFor} onClose={() => setSubFor(null)} onPick={(s) => { setLines((ls) => ls.map((l) => (l.key === subFor.key ? { ...l, item_code: s.item_code, item_name: s.item_name, original_item: l.original_item ?? l.item_code } : l))); setSubFor(null); }} />}
       {receipt && <ReceiptDialog r={receipt} agent={!!boot} onClose={() => { setReceipt(null); searchRef.current?.focus(); }} />}
@@ -303,13 +367,24 @@ export default function PosPage() {
   );
 }
 
-function Top({ icon: I, label, k, onClick }: { icon: typeof Lock; label: string; k?: string; onClick: () => void }) {
-  return <button onClick={onClick} className="flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1.5 text-xs font-semibold hover:bg-white/20"><I className="h-4 w-4" /><span className="hidden xl:inline">{label}</span>{k && <kbd className="rounded bg-white/15 px-1 font-mono text-[10px]">{k}</kbd>}</button>;
+function Top({ icon: I, label, k, onClick, badge }: { icon: typeof Lock; label: string; k?: string; onClick: () => void; badge?: number }) {
+  return (
+    <button onClick={onClick} title={k ? `${label} (${k})` : label} className="group relative flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-white/85 transition-all hover:bg-white/15 hover:text-white">
+      <I className="h-4 w-4" /><span className="hidden 2xl:inline">{label}</span>{k && <kbd className="hidden rounded bg-white/10 px-1 font-mono text-[9px] text-white/60 lg:inline">{k}</kbd>}
+      {badge ? <span className="absolute -end-1 -top-1 min-w-4 rounded-full bg-amber-400 px-1 text-center text-[9px] font-black text-amber-950">{badge}</span> : null}
+    </button>
+  );
+}
+function TopIcon({ icon: I, title, onClick }: { icon: typeof Lock; title: string; onClick: () => void }) {
+  return <button onClick={onClick} title={title} aria-label={title} className="rounded-lg p-1.5 text-white/70 hover:bg-white/15 hover:text-white"><I className="h-4 w-4" /></button>;
+}
+function Chip({ children, tone }: { children: React.ReactNode; tone?: "ok" | "bad" }) {
+  return <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset", tone === "ok" ? "bg-emerald-400/15 text-emerald-100 ring-emerald-300/30" : tone === "bad" ? "bg-rose-500 text-white ring-rose-400" : "bg-white/10 text-white/85 ring-white/15")}>{children}</span>;
 }
 function Clock() {
   const [n, setN] = useState(new Date());
   useEffect(() => { const t = setInterval(() => setN(new Date()), 15_000); return () => clearInterval(t); }, []);
-  return <span className="rounded-full bg-white/10 px-2.5 py-0.5 font-mono text-[11px]">{n.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>;
+  return <span className="rounded-full bg-white/10 px-2.5 py-1 font-mono text-[11px] ring-1 ring-inset ring-white/15">{n.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>;
 }
 
 function ItemCard({ h, onAdd }: { h: Hit; onAdd: (h: Hit, u?: string) => void }) {
@@ -459,7 +534,7 @@ function DiscountBox({ gross, limit, value, onChange, disabled }: { gross: numbe
 }
 
 /** Split tender keypad (Restaurant OS): cash / card / wallet / bank, transaction IDs, change only from cash. */
-function PayDialog({ total, modes, busy, onClose, onPay }: { total: number; modes: string[]; busy: boolean; onClose: () => void; onPay: (p: Tender[]) => void }) {
+function PayDialog({ customer, total, modes, busy, onClose, onPay }: { customer: string; total: number; modes: string[]; busy: boolean; onClose: () => void; onPay: (p: Tender[]) => void }) {
   const [tenders, setTenders] = useState<Tender[]>([]);
   const [mode, setMode] = useState(modes.includes("Cash") ? "Cash" : modes[0]);
   const [entry, setEntry] = useState(String(Math.round(total)));
@@ -467,6 +542,7 @@ function PayDialog({ total, modes, busy, onClose, onPay }: { total: number; mode
   const paid = tenders.reduce((s, t) => s + t.amount, 0);
   const due = Math.max(Math.round(total) - paid, 0);
   const change = Math.max(paid - Math.round(total), 0);
+  useEffect(() => { postDisplay({ kind: "pay", customer, total: Math.round(total), paid, change }); }, [paid]); // eslint-disable-line react-hooks/exhaustive-deps
   const add = (amt?: number) => {
     const v = Math.round(amt ?? (Number(entry) || 0));
     if (v <= 0) return;
@@ -570,35 +646,125 @@ function ReceiptDialog({ r, onClose, agent }: { r: Receipt; onClose: () => void;
 
 // ------------------------------------------------------------------ invoice management, returns, offline queue
 interface InvRow { name: string; customer_name: string; hv_patient?: string; grand_total: number; rounded_total: number; outstanding_amount: number; docstatus: number; is_return: number; is_pos: number;
-  hv_token?: string; posting_date: string; posting_time: string; hv_prescription?: string; return_against?: string; modes: string; returned: number; status: string }
-const SCOPES = [["shift", "My shift"], ["today", "Today"], ["drafts", "At handover"], ["credit", "On account"], ["returns", "Returns"]] as const;
+  hv_token?: string; posting_date: string; posting_time: string; hv_prescription?: string; return_against?: string; modes: string; returned: number; status: string; discount_amount?: number;
+  hv_paper_rx?: number; hv_paper_rx_doctor?: string; item_count?: number; item_names?: string; cashier?: string; hv_counter?: string }
+const SCOPES = [["shift", "My shift", Wallet, "bg-emerald-500"], ["today", "Today", History, "bg-sky-500"], ["drafts", "At handover", ClipboardList, "bg-indigo-500"],
+  ["credit", "On account", BookUser, "bg-amber-500"], ["returns", "Returns", Undo2, "bg-rose-500"]] as const;
+const VIEW_KEY = "hv.pharmacy.invoices.view";
+function invState(r: InvRow) {
+  if (r.docstatus === 0) return { label: "At handover", pill: "bg-indigo-500/15 text-indigo-700 ring-indigo-500/30 dark:text-indigo-300", tint: "from-indigo-500/10", bar: "from-indigo-400 to-violet-500" };
+  if (r.is_return) return { label: "Return", pill: "bg-rose-500/15 text-rose-700 ring-rose-500/30 dark:text-rose-300", tint: "from-rose-500/10", bar: "from-rose-400 to-red-500" };
+  if (r.outstanding_amount > 0.01) return { label: r.is_pos ? "Unpaid" : "On account", pill: "bg-amber-500/15 text-amber-700 ring-amber-500/30 dark:text-amber-300", tint: "from-amber-500/10", bar: "from-amber-400 to-orange-500" };
+  if (r.returned) return { label: "Part returned", pill: "bg-orange-500/15 text-orange-700 ring-orange-500/30 dark:text-orange-300", tint: "from-orange-500/10", bar: "from-orange-400 to-amber-500" };
+  return { label: "Paid", pill: "bg-emerald-500/15 text-emerald-700 ring-emerald-500/30 dark:text-emerald-300", tint: "from-emerald-500/10", bar: "from-emerald-400 to-green-500" };
+}
 function InvoicesDialog({ initialScope, returnMode, sync, offline, agent, onClose }: { initialScope: string; returnMode: boolean; sync: ReturnType<typeof usePharmacySync>; offline: boolean; agent: boolean; onClose: () => void }) {
   const [scope, setScope] = useState(initialScope);
   const [q, setQ] = useState("");
-  const { data: rows, refetch } = useApi<InvRow[]>("pharmacy.invoices", { scope, q }, { enabled: !offline });
+  const [view, setView] = useState<"cards" | "list">(() => { try { return localStorage.getItem(VIEW_KEY) === "list" ? "list" : "cards"; } catch { return "cards"; } });
+  useEffect(() => { try { localStorage.setItem(VIEW_KEY, view); } catch { /* private mode */ } }, [view]);
+  const { data: rows, refetch, isFetching } = useApi<InvRow[]>("pharmacy.invoices", { scope, q }, { enabled: !offline });
   const [open, setOpen] = useState<string | null>(null);
+  const [ret, setRet] = useState(returnMode);
+  const sum = useMemo(() => {
+    const r = rows ?? [];
+    const sales = r.filter((x) => !x.is_return && x.docstatus === 1);
+    return { count: r.length, gross: sales.reduce((a, x) => a + (x.rounded_total || x.grand_total), 0), returns: r.filter((x) => x.is_return).reduce((a, x) => a + Math.abs(x.grand_total), 0) + sales.reduce((a, x) => a + (x.returned || 0), 0),
+      discount: r.reduce((a, x) => a + (x.discount_amount || 0), 0), due: sales.reduce((a, x) => a + (x.outstanding_amount || 0), 0), handover: r.filter((x) => x.docstatus === 0).reduce((a, x) => a + (x.rounded_total || x.grand_total), 0) };
+  }, [rows]);
+  const reprint = async (name: string) => { try { const r = await getCall<Receipt>("hospital_vvs.api.pharmacy.receipt", { name }); void printDoc(receiptHtml(r), "receipt", { agent }); } catch (e) { toast.error(humanizeError(e)); } };
+  const actions = (r: InvRow) => (
+    <div className="flex items-center justify-end gap-1">
+      <IconAct tone="slate" icon={Eye} label="View" onClick={() => { setRet(false); setOpen(r.name); }} />
+      {r.docstatus === 1 && <IconAct tone="teal" icon={Printer} label="Receipt" onClick={() => void reprint(r.name)} />}
+      {r.docstatus === 1 && !r.is_return && <IconAct tone="rose" icon={Undo2} label="Return" onClick={() => { setRet(true); setOpen(r.name); }} />}
+    </div>
+  );
   return (
-    <Dialog open onClose={onClose} size="xl" title={returnMode ? "Return medicines" : "Invoices"} description={returnMode ? "Find the invoice (number, token, customer, MR) and choose what comes back. The refund is paid from your shift." : undefined}>
-      {open ? <InvoiceView name={open} agent={agent} returnMode={returnMode} onBack={() => { setOpen(null); void refetch(); }} /> : <div className="space-y-3">
+    <Dialog open onClose={onClose} size="xl" className="max-w-6xl">
+      <div className="-mx-5 -mt-5 mb-4 border-b border-border bg-gradient-to-r from-sky-500/10 via-transparent to-emerald-500/10 px-5 py-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sky-600 to-emerald-600 text-white shadow-lg shadow-sky-600/25 ring-1 ring-inset ring-white/20"><ReceiptText className="h-5 w-5" /></span>
+          <div className="min-w-0 flex-1"><h2 className="text-lg font-semibold leading-tight">{returnMode ? "Return medicines" : "Invoice management"}</h2>
+            <p className="text-xs text-muted-foreground">{returnMode ? "Find the invoice and choose what comes back — refund from your shift, stock back to the same batch" : "Reprint, return, follow bills waiting at handover and credit sales"}</p></div>
+          {!open && <div className="flex rounded-lg bg-muted/70 p-0.5">{([["cards", LayoutGrid, "Cards"], ["list", List, "List"]] as const).map(([k, I, l]) => (
+            <button key={k} onClick={() => setView(k)} className={cn("inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all", view === k ? "bg-gradient-to-r from-sky-600 to-emerald-600 text-white shadow" : "text-muted-foreground hover:text-foreground")}><I className="h-3.5 w-3.5" />{l}</button>))}</div>}
+          {!open && <Button variant="outline" size="sm" onClick={() => void refetch()} disabled={offline}><RefreshCw className={cn("h-3.5 w-3.5", isFetching && "animate-spin")} />Refresh</Button>}
+          <button onClick={onClose} className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Close"><X className="h-4 w-4" /></button>
+        </div>
+      </div>
+      {open ? <InvoiceView name={open} agent={agent} returnMode={ret} onBack={() => { setOpen(null); void refetch(); }} /> : <div className="space-y-4">
         {sync.queue.length > 0 && <div className="rounded-2xl border border-amber-300 bg-amber-50 p-3 dark:bg-amber-500/10"><div className="mb-1 flex items-center gap-2 text-sm font-bold"><CloudOff className="h-4 w-4" />Offline sales waiting ({sync.queue.length})
           <Button size="xs" variant="menu" className="ms-auto" disabled={sync.syncing} onClick={() => void sync.sync()}><RefreshCw className={cn("h-3 w-3", sync.syncing && "animate-spin")} />Sync now</Button></div>
           {sync.queue.map((x) => <div key={x.client_ref} className="flex items-center gap-2 border-t border-amber-200 py-1.5 text-sm"><span className="flex-1">{x.customer} · {x.created.slice(11, 16)}{x.error && <span className="block text-xs text-rose-700">{x.error}</span>}</span>
             <b className="tabular-nums">{rs(x.total)}</b>{x.status === "failed" && <button className="text-xs font-semibold text-rose-700 underline" onClick={() => void sync.discard(x.client_ref)}>Discard</button>}</div>)}</div>}
-        <div className="flex flex-wrap gap-2"><input className={inputCls + " min-w-60 flex-1"} placeholder="Invoice, token, customer or MR (any day)" value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
-          <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">{SCOPES.map(([k, l]) => <button key={k} onClick={() => setScope(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", scope === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div></div>
-        <div className="max-h-[55vh] overflow-y-auto rounded-xl border border-border"><table className="w-full text-sm"><thead className="sticky top-0 bg-muted/90 text-[11px] uppercase text-muted-foreground"><tr>
-          <th className="px-3 py-2 text-start">Invoice</th><th className="px-2 py-2 text-start">Customer</th><th className="px-2 py-2 text-start">Paid by</th><th className="px-2 py-2 text-end">Amount</th><th className="px-2 py-2 text-start">Status</th></tr></thead>
-          <tbody>{(rows ?? []).map((r) => (
-            <tr key={r.name} onClick={() => setOpen(r.name)} className="cursor-pointer border-t border-border hover:bg-sky-50/60 dark:hover:bg-sky-500/5">
-              <td className="px-3 py-2"><div className="font-mono text-xs font-semibold">{r.name}</div><div className="text-[11px] text-muted-foreground">{r.posting_time?.slice(0, 5)}{r.hv_token ? ` · ${r.hv_token}` : ""}{r.hv_prescription ? ` · ${r.hv_prescription}` : ""}</div></td>
-              <td className="px-2 py-2">{r.customer_name}<div className="text-[11px] text-muted-foreground">{r.hv_patient}</div></td><td className="px-2 py-2 text-xs">{r.modes}</td>
-              <td className={cn("px-2 py-2 text-end font-bold tabular-nums", r.is_return && "text-rose-600")}>{rs(r.rounded_total || r.grand_total)}{r.returned ? <div className="text-[10px] font-normal text-rose-600">returned {rs(r.returned)}</div> : null}</td>
-              <td className="px-2 py-2"><span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", r.docstatus === 0 ? "bg-sky-100 text-sky-800" : r.is_return ? "bg-rose-100 text-rose-700" : r.outstanding_amount > 0 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800")}>
-                {r.docstatus === 0 ? "At handover" : r.is_return ? "Return" : r.outstanding_amount > 0 ? "Unpaid" : "Paid"}</span></td></tr>))}</tbody></table>
-          {rows && !rows.length && <div className="p-6 text-center text-sm text-muted-foreground">Nothing here.</div>}{offline && <div className="p-6 text-center text-sm text-muted-foreground">Invoices need the server.</div>}</div>
+        {offline ? <p className="flex items-center gap-2 py-10 text-sm text-muted-foreground"><CloudOff className="h-4 w-4" />The invoice list needs the server.</p> : <>
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted/60 p-1 sm:grid-cols-5">{SCOPES.map(([k, l, I, badge]) => (
+            <button key={k} onClick={() => setScope(k)} className={cn("flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-bold uppercase tracking-wide transition-all",
+              scope === k ? "bg-card text-foreground shadow ring-1 ring-sky-500/40" : "text-foreground/65 hover:bg-card/60 hover:text-foreground")}><I className="h-3.5 w-3.5" />{l}
+              {scope === k && rows && <span className={cn("min-w-5 rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums text-white", badge)}>{rows.length}</span>}</button>))}</div>
+          <div className="relative"><Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input className={inputCls + " h-10 ps-9"} placeholder="Search invoice, token, customer or MR (any day)" value={q} onChange={(e) => setQ(e.target.value)} autoFocus /></div>
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-6">
+            <Tile label="Invoices" value={String(sum.count)} hint="In this view" tint="from-sky-500/15 to-blue-500/5 border-sky-500/20" icon={ReceiptText} tone="text-sky-600" />
+            <Tile label="Sales" value={rs(sum.gross)} hint="Posted bills" tint="from-violet-500/15 to-indigo-500/5 border-violet-500/20" icon={TrendingUp} tone="text-violet-600" />
+            <Tile label="Returns" value={rs(sum.returns)} hint="Refunded" tint="from-rose-500/15 to-pink-500/5 border-rose-500/20" icon={Undo2} tone="text-rose-600" />
+            <Tile label="Discounts" value={rs(sum.discount)} hint="Bill discounts" tint="from-orange-500/15 to-amber-500/5 border-orange-500/20" icon={Percent} tone="text-orange-600" />
+            <Tile label="Outstanding" value={rs(sum.due)} hint="Credit / unpaid" tint="from-amber-500/15 to-yellow-500/5 border-amber-500/20" icon={Wallet} tone="text-amber-600" />
+            <Tile label="At handover" value={rs(sum.handover)} hint="Not paid yet" tint="from-indigo-500/15 to-sky-500/5 border-indigo-500/20" icon={ClipboardList} tone="text-indigo-600" />
+          </div>
+          <div className="max-h-[52vh] overflow-y-auto pe-1">
+            {!rows ? <div className="flex h-40 items-center justify-center"><Spinner /></div>
+              : !rows.length ? <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border py-14 text-sm text-muted-foreground"><ReceiptText className="h-8 w-8 opacity-50" />No invoices here.</div>
+              : view === "cards" ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{rows.map((r) => { const st = invState(r); const total = r.rounded_total || r.grand_total; return (
+                <div key={r.name} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                  <span aria-hidden className={cn("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", st.bar)} />
+                  <button onClick={() => { setRet(false); setOpen(r.name); }} className={cn("bg-gradient-to-b to-transparent p-4 pb-3 text-start", st.tint)}>
+                    <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="truncate font-mono text-[13px] font-bold">{r.name}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1"><span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset", st.pill)}>{st.label}</span>
+                        {r.hv_token && <span className="rounded-full bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-700 ring-1 ring-inset ring-sky-500/20 dark:text-sky-300">{r.hv_token}</span>}
+                        {r.hv_prescription && <span className="rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px] font-semibold text-teal-700 ring-1 ring-inset ring-teal-500/20 dark:text-teal-300">Rx</span>}
+                        {r.hv_paper_rx ? <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-700 ring-1 ring-inset ring-violet-500/20 dark:text-violet-300">Paper Rx</span> : null}</div></div>
+                      <div className="shrink-0 text-end"><div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Total</div><div className={cn("text-lg font-bold leading-tight tabular-nums", r.is_return && "text-rose-600")}>{rs(total)}</div></div></div>
+                    <div className="mt-2 flex items-center gap-1.5 truncate text-xs text-muted-foreground"><UserRound className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{r.customer_name}{r.hv_patient ? ` · ${r.hv_patient}` : ""}</span></div>
+                  </button>
+                  <div className="grid grid-cols-2 gap-px border-y border-border bg-border/60 text-[11px]">
+                    <Cell label="Posted" value={`${r.posting_date.slice(5)} · ${String(r.posting_time).slice(0, 5)}`} />
+                    <Cell label="Paid by" value={r.modes || "—"} />
+                    <Cell label="Discount" value={r.discount_amount ? rs(r.discount_amount) : "—"} tone={r.discount_amount ? "text-amber-600 dark:text-amber-400" : undefined} />
+                    <Cell label={r.returned ? "Returned" : "Outstanding"} value={r.returned ? rs(r.returned) : r.outstanding_amount > 0.01 ? rs(r.outstanding_amount) : "—"} tone={r.returned || r.outstanding_amount > 0.01 ? "text-rose-600 dark:text-rose-400" : undefined} />
+                  </div>
+                  <div className="px-3 pt-2 text-[11px] text-muted-foreground" title={r.item_names}><span className="line-clamp-1">{r.item_count ?? 0} item{r.item_count === 1 ? "" : "s"} · {r.item_names}</span></div>
+                  <div className="flex items-center justify-between gap-2 px-3 py-2"><span className="min-w-0 truncate text-[10px] text-muted-foreground">{r.cashier}</span>{actions(r)}</div>
+                </div>); })}</div>
+              : <div className="overflow-hidden rounded-xl border border-border"><table className="w-full text-sm"><thead className="sticky top-0 z-10 bg-muted text-[11px] font-semibold uppercase tracking-wider text-foreground/70"><tr>
+                <th className="px-3 py-2 text-start">Invoice</th><th className="text-start">Customer</th><th className="text-start">Posted</th><th className="text-start">Items</th><th className="text-start">Paid by</th><th className="text-end">Total</th><th className="text-end">Due</th><th className="px-3 text-start">Status</th><th /></tr></thead>
+                <tbody>{rows.map((r, i) => { const st = invState(r); return (
+                  <tr key={r.name} className={cn("border-t border-border transition-colors hover:bg-sky-500/10", i % 2 ? "bg-muted/40" : "bg-card")}>
+                    <td className="px-3 py-2.5"><button className="font-mono text-[13px] font-semibold hover:text-sky-700 hover:underline" onClick={() => { setRet(false); setOpen(r.name); }}>{r.name}</button><div className="text-[11px] text-muted-foreground">{r.hv_token}{r.hv_paper_rx ? " · Paper Rx" : r.hv_prescription ? ` · ${r.hv_prescription}` : ""}</div></td>
+                    <td className="max-w-[180px] truncate text-[13px] font-medium">{r.customer_name}<div className="text-[11px] font-normal text-muted-foreground">{r.hv_patient}</div></td>
+                    <td className="whitespace-nowrap text-[13px] text-foreground/75">{r.posting_date.slice(5)} {String(r.posting_time).slice(0, 5)}</td>
+                    <td className="max-w-[200px] truncate text-[12px] text-foreground/75" title={r.item_names}>{r.item_count} · {r.item_names}</td>
+                    <td className="max-w-[120px] truncate text-[13px] text-foreground/75">{r.modes || "—"}</td>
+                    <td className={cn("text-end font-semibold tabular-nums", r.is_return && "text-rose-600")}>{rs(r.rounded_total || r.grand_total)}</td>
+                    <td className={cn("text-end tabular-nums", r.outstanding_amount > 0.01 ? "font-semibold text-rose-600" : "text-muted-foreground")}>{r.outstanding_amount > 0.01 ? rs(r.outstanding_amount) : "—"}</td>
+                    <td className="px-3"><span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset", st.pill)}>{st.label}</span></td>
+                    <td className="whitespace-nowrap px-2">{actions(r)}</td></tr>); })}</tbody></table></div>}
+          </div></>}
       </div>}
     </Dialog>
   );
+}
+function Tile({ label, value, hint, tint, icon: I, tone }: { label: string; value: string; hint: string; tint: string; icon: typeof Wifi; tone: string }) {
+  return <div className={cn("rounded-2xl border bg-gradient-to-br p-3", tint)}><div className="flex items-center justify-between"><span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span><I className={cn("h-4 w-4", tone)} /></div>
+    <div className="mt-1 text-lg font-bold tabular-nums">{value}</div><div className="text-[10px] text-muted-foreground">{hint}</div></div>;
+}
+function Cell({ label, value, tone }: { label: string; value: string; tone?: string }) {
+  return <div className="bg-card px-3 py-1.5"><div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div><div className={cn("truncate font-semibold tabular-nums", tone)}>{value}</div></div>;
+}
+const ACT = { slate: "text-slate-600 hover:bg-slate-500/10", teal: "text-teal-600 hover:bg-teal-500/10", rose: "text-rose-600 hover:bg-rose-500/10" };
+function IconAct({ tone, icon: I, label, onClick }: { tone: keyof typeof ACT; icon: typeof Wifi; label: string; onClick: () => void }) {
+  return <button onClick={onClick} title={label} aria-label={label} className={cn("rounded-lg p-1.5 transition-colors", ACT[tone])}><I className="h-4 w-4" /></button>;
 }
 
 function InvoiceView({ name, agent, returnMode, onBack }: { name: string; agent: boolean; returnMode: boolean; onBack: () => void }) {
@@ -652,6 +818,93 @@ function ShiftDialog({ onClose, offline }: { onClose: () => void; offline: boole
               <td className="text-end text-xs tabular-nums text-muted-foreground">{m.pay_in || m.pay_out || m.cash_drop ? `+${rs(m.pay_in)} / −${rs(m.pay_out)} / −${rs(m.cash_drop)}` : "–"}</td><td className="text-end font-bold tabular-nums">{rs(m.expected)}</td></tr>)}
               <tr className="border-t-2 border-foreground/40"><td className="py-1.5 font-bold">Total</td><td colSpan={3} /><td className="text-end text-lg font-black tabular-nums">{rs(s.total_expected)}</td></tr></tbody></table>
           <div className="flex gap-2"><Link to="/cash/shift" className="flex-1"><Button variant="neutral" className="w-full">Cash in / out</Button></Link><Link to="/cash/close" className="flex-1"><Button variant="danger" className="w-full"><Lock className="h-4 w-4" />Close shift</Button></Link></div>
+        </div>)}
+    </Dialog>
+  );
+}
+
+/** Walk-in with a paper / outside prescription (D-42): the doctor is recorded on the bill; the pharmacist still reviews. */
+function PaperRxDialog({ value, needControlled, policy, patientName, onClose, onSave }: { value: PaperRx | null; needControlled: boolean; policy: string; patientName: string; onClose: () => void; onSave: (p: PaperRx) => void }) {
+  const [p, setP] = useState<PaperRx>(value ?? { doctor: "", rx_date: localDay(), patient_name: patientName });
+  const [busy, setBusy] = useState(false);
+  const blockedCtrl = needControlled && policy !== "Prescription and controlled";
+  const need = needControlled && !blockedCtrl;
+  const ok = !!p.doctor.trim() && (!need || (!!p.reg_no?.trim() && !!p.patient_name?.trim())) && !blockedCtrl;
+  const upload = async (f?: File) => {
+    if (!f) return;
+    setBusy(true);
+    try { const r = await uploadFile(f, { isPrivate: true }); setP((x) => ({ ...x, image: r.file_url })); toast.success("Photo attached"); } catch (e) { toast.error(humanizeError(e)); } finally { setBusy(false); }
+  };
+  return (
+    <Dialog open onClose={onClose} size="md" title={<span className="flex items-center gap-2"><Stethoscope className="h-5 w-5 text-violet-600" />Paper prescription</span>}
+      description="Walk-in customer with a prescription from an outside doctor. The doctor is printed on the bill and the pharmacist checks it before handover.">
+      <div className="space-y-3">
+        {blockedCtrl && <div className="rounded-xl bg-rose-50 p-2 text-xs font-semibold text-rose-700 dark:bg-rose-500/10 dark:text-rose-200">Controlled drugs in the cart need a hospital prescription. Remove them to sell on a paper prescription.</div>}
+        <label className="block text-xs font-semibold">Doctor's name *<input className={inputCls + " mt-1"} autoFocus value={p.doctor} onChange={(e) => setP({ ...p, doctor: e.target.value })} placeholder="Dr. … (clinic / hospital)" /></label>
+        <div className="grid grid-cols-2 gap-2">
+          <label className="block text-xs font-semibold">Reg. no. (PMDC){need ? " *" : ""}<input className={inputCls + " mt-1"} value={p.reg_no ?? ""} onChange={(e) => setP({ ...p, reg_no: e.target.value })} placeholder="12345-P" /></label>
+          <label className="block text-xs font-semibold">Prescription date<input type="date" className={inputCls + " mt-1"} max={localDay()} value={p.rx_date ?? ""} onChange={(e) => setP({ ...p, rx_date: e.target.value })} /></label>
+        </div>
+        <label className="block text-xs font-semibold">Patient's name on the prescription{need ? " *" : ""}<input className={inputCls + " mt-1"} value={p.patient_name ?? ""} onChange={(e) => setP({ ...p, patient_name: e.target.value })} /></label>
+        <label className={cn("flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed p-3 text-sm", p.image ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10" : "border-border hover:border-violet-400")}>
+          <Camera className="h-5 w-5 text-violet-600" /><span className="flex-1">{p.image ? "Photo attached — tap to replace" : "Photo of the prescription (optional)"}</span>{busy && <Spinner />}
+          <input type="file" accept="image/*,application/pdf" capture="environment" className="hidden" onChange={(e) => void upload(e.target.files?.[0])} /></label>
+        <div className="flex gap-2"><Button variant="neutral" className="flex-1" onClick={onClose}>Cancel</Button><Button variant="save" className="flex-1" disabled={!ok || busy} onClick={() => onSave({ ...p, doctor: p.doctor.trim() })}><CheckCircle2 className="h-4 w-4" />Use this prescription</Button></div>
+      </div>
+    </Dialog>
+  );
+}
+
+/** Cash in / out from the POS (Restaurant OS): float top-up, petty pay-out, cash drop to the safe — all in the open shift. */
+interface MyShift { shift: { modes: { mode_of_payment: string; expected: number }[] } | null; movements?: { name: string; movement_type: string; amount: number; reason: string; status: string; creation: string }[] }
+const MV = [["Pay In", "Cash in", ArrowDownToLine, "Float top-up from the safe", "from-emerald-500 to-teal-600"], ["Pay Out", "Cash out", ArrowUpFromLine, "Petty expense or cash refund — keep the receipt", "from-amber-500 to-orange-600"],
+  ["Cash Drop", "Cash drop", PiggyBank, "Excess cash to the safe; the supervisor confirms", "from-sky-500 to-indigo-600"]] as const;
+const REASONS: Record<string, string[]> = { "Pay In": ["Opening float top-up", "Change from safe"], "Pay Out": ["Tea / refreshment", "Courier", "Stationery", "Cleaning"], "Cash Drop": ["Drawer limit reached", "End of rush", "Supervisor request"] };
+function CashDialog({ offline, onClose }: { offline: boolean; onClose: () => void }) {
+  const { data, refetch } = useApi<MyShift>("cash.my_shift", undefined, { enabled: !offline });
+  const [type, setType] = useState<"Pay In" | "Pay Out" | "Cash Drop">("Pay In");
+  const [amount, setAmount] = useState("");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const cash = data?.shift?.modes.find((m) => m.mode_of_payment === "Cash")?.expected ?? 0;
+  const cur = MV.find((m) => m[0] === type)!;
+  const key = (k: string) => setAmount((v) => (k === "C" ? "" : k === "⌫" ? v.slice(0, -1) : (v === "0" ? "" : v) + k));
+  const save = async () => {
+    setBusy(true);
+    try { await call("cash.movement", { movement_type: type, amount: Number(amount), reason }); toast.success(`${cur[1]} ${rs(Number(amount))} recorded`); setAmount(""); setReason(""); void refetch(); }
+    catch (e) { toast.error(humanizeError(e)); } finally { setBusy(false); }
+  };
+  return (
+    <Dialog open onClose={onClose} size="xl" title={<span className="flex items-center gap-2"><Coins className="h-5 w-5 text-emerald-600" />Cash in / out</span>}>
+      {offline ? <div className="py-8 text-center text-sm text-muted-foreground">Cash movements need the server.</div> : !data ? <div className="flex h-40 items-center justify-center"><Spinner /></div>
+        : !data.shift ? <div className="py-8 text-center">No open shift. <Link className="font-semibold text-sky-700 underline" to="/cash/shift">Open one</Link></div> : (
+        <div className="grid gap-4 md:grid-cols-[1fr_300px]">
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-2">{MV.map(([k, l, I, , g]) => (
+              <button key={k} onClick={() => setType(k)} className={cn("flex flex-col items-center gap-1 rounded-2xl border-2 p-3 text-sm font-bold transition-all", type === k ? `border-transparent bg-gradient-to-br ${g} text-white shadow-lg` : "border-border hover:border-foreground/30")}>
+                <I className="h-6 w-6" />{l}</button>))}</div>
+            <div className="text-xs text-muted-foreground">{cur[3]}</div>
+            <input className={inputCls + " h-14 text-end text-3xl font-black tabular-nums"} inputMode="numeric" placeholder="Rs 0" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))} autoFocus />
+            <div className="grid grid-cols-4 gap-2">{["1", "2", "3", "C", "4", "5", "6", "⌫", "7", "8", "9", "00", "0"].map((k) => (
+              <button key={k} onClick={() => key(k)} className={cn("h-11 rounded-xl border border-border text-lg font-bold hover:bg-muted", k === "0" && "col-span-2", (k === "C" || k === "⌫") && "text-rose-600")}>{k === "⌫" ? <Delete className="mx-auto h-5 w-5" /> : k}</button>))}
+              {type !== "Pay In" && <button onClick={() => setAmount(String(Math.floor(cash)))} className="col-span-2 h-11 rounded-xl bg-sky-600 text-sm font-bold text-white">All cash {rs(cash)}</button>}</div>
+            <div className="flex flex-wrap gap-1.5">{REASONS[type].map((r) => <button key={r} onClick={() => setReason(r)} className={cn("rounded-full border px-3 py-1 text-xs font-semibold", reason === r ? "border-emerald-600 bg-emerald-600 text-white" : "border-border hover:border-emerald-400")}>{r}</button>)}</div>
+            <input className={inputCls} placeholder="Reason (required)" value={reason} onChange={(e) => setReason(e.target.value)} />
+            <Button variant="submit" size="lg" className="h-12 w-full" disabled={!Number(amount) || !reason.trim() || (type !== "Pay In" && Number(amount) > cash)} loading={busy} onClick={() => void save()}>
+              <CheckCircle2 className="h-5 w-5" />Record {cur[1].toLowerCase()} {Number(amount) ? rs(Number(amount)) : ""}</Button>
+          </div>
+          <div className="space-y-2">
+            <div className="rounded-2xl bg-gradient-to-br from-sky-800 to-emerald-800 p-4 text-white"><div className="text-[10px] uppercase tracking-widest text-white/60">Cash in drawer now</div><div className="text-4xl font-black tabular-nums">{rs(cash)}</div>
+              <div className="mt-1 text-[11px] text-white/70">Expected, after sales, refunds and movements</div></div>
+            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">This shift</div>
+            <div className="max-h-64 space-y-1.5 overflow-y-auto">{(data.movements ?? []).map((m) => (
+              <div key={m.name} className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm">
+                {m.movement_type === "Pay In" ? <ArrowDownToLine className="h-4 w-4 text-emerald-600" /> : m.movement_type === "Pay Out" ? <ArrowUpFromLine className="h-4 w-4 text-amber-600" /> : <PiggyBank className="h-4 w-4 text-sky-600" />}
+                <span className="min-w-0 flex-1"><span className="block truncate font-semibold">{m.reason}</span><span className="text-[11px] text-muted-foreground">{m.creation.slice(11, 16)} · {m.status}</span></span>
+                <b className="tabular-nums">{rs(m.amount)}</b></div>))}
+              {!data.movements?.length && <div className="rounded-xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">No cash movements yet.</div>}</div>
+            <Link to="/cash/close"><Button variant="danger" className="mt-2 w-full"><Lock className="h-4 w-4" />Close shift</Button></Link>
+          </div>
         </div>)}
     </Dialog>
   );

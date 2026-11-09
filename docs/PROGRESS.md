@@ -130,3 +130,6 @@ Billing at handover is now on (Collect payment at = Handover counter). Full jour
 
 ## Branch and counter lock (2026-11-10) — D-41
 Users locked to their branch (strict) and to counters whose POS Profile lists them (Applicable for Users); shift page, open shift, pharmacy POS and checkout enforce it. Setup `hospital_vvs.setup.access.run`. Tests: 59 green (3 new access cases).
+
+## POS polish (2026-11-10) — D-42
+Paper prescription for walk-ins; cash in / out (F6) inside the POS; Restaurant OS style top bar, cart panel, invoice management (cards / list, status tiles, view / reprint / return) and customer display (`/medicine_invoice/display`, same design for the reception counter and display devices); hide / show left menu on every page and full-page POS. Invoice list now limited to the user's branches. Tests: 62 green.

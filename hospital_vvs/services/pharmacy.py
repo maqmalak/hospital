@@ -225,8 +225,28 @@ def quote(lines, warehouse, prescription=None, exclude_invoice=None):
 		if remaining > 0:
 			errors.append(_("{0}: only {1} {2} in stock.").format(p.item_name, int(need - remaining), p.stock_uom))
 	rx_missing = [l["item_name"] for l in out if (l["rx"] or l["controlled"]) and not prescription]
+	controlled_missing = [l["item_name"] for l in out if l["controlled"] and not prescription]
 	total = sum(l["amount"] for l in out)
-	return {"lines": out, "errors": errors, "warnings": sorted(set(warnings)), "rx_missing": sorted(set(rx_missing)), "total": total}
+	return {"lines": out, "errors": errors, "warnings": sorted(set(warnings)), "rx_missing": sorted(set(rx_missing)),
+		"controlled_missing": sorted(set(controlled_missing)), "total": total}
+
+
+def check_paper_rx(paper_rx, q):
+	"""A walk-in's paper / outside prescription (D-42). Returns the cleaned record or throws."""
+	policy = setting("paper_prescription") or "Prescription items only"
+	if policy == "Not allowed":
+		frappe.throw(_("Paper prescriptions are not accepted at this counter (Clinic Settings → Pharmacy)."), title=_("Prescription required"))
+	p = frappe._dict(frappe.parse_json(paper_rx) if isinstance(paper_rx, str) else paper_rx)
+	if not (p.get("doctor") or "").strip():
+		frappe.throw(_("Enter the prescribing doctor's name from the paper prescription."))
+	if q["controlled_missing"]:
+		if policy != "Prescription and controlled":
+			frappe.throw(_("Controlled drugs need a hospital prescription: {0}").format(", ".join(q["controlled_missing"])), title=_("Prescription required"))
+		if not (p.get("reg_no") or "").strip() or not (p.get("patient_name") or "").strip():
+			frappe.throw(_("Controlled drug on a paper prescription: the doctor's registration number and the patient's name are required."))
+	if p.get("rx_date") and getdate(p.rx_date) > getdate(today()):
+		frappe.throw(_("The prescription date cannot be in the future."))
+	return p
 
 
 # ------------------------------------------------------------------ checkout
@@ -290,8 +310,8 @@ def pay_mode_for(pay_at=None, credit=False):
 
 
 def checkout(counter, lines, patient=None, prescription=None, payment_mode="Cash", cash_tendered=None, discount_amount=0,
-	discount_authorization=None, rx_override_reason=None, priority="Normal", client_ref=None, customer=None, pay_at=None, payments=None):
-	"""payment_mode "On account" = credit sale to a pharmacy credit customer (no money now). pay_at: "now" / "handover" (setting permitting)."""
+	discount_authorization=None, rx_override_reason=None, priority="Normal", client_ref=None, customer=None, pay_at=None, payments=None, paper_rx=None):
+	"""paper_rx: walk-in's paper prescription {doctor, reg_no, rx_date, patient_name, image} (D-42). payment_mode "On account" = credit sale to a pharmacy credit customer (no money now). pay_at: "now" / "handover" (setting permitting)."""
 	if not counter:
 		frappe.throw(_("You are not on the staff of any pharmacy counter. Ask the admin to add you."), frappe.PermissionError)
 	from hospital_vvs.services.shifts import check_counter
@@ -311,7 +331,11 @@ def checkout(counter, lines, patient=None, prescription=None, payment_mode="Cash
 	q = quote(lines, warehouse, prescription)
 	if q["errors"]:
 		frappe.throw("<br>".join(q["errors"]), title=_("Cannot bill"))
-	if q["rx_missing"]:
+	paper = None
+	if q["rx_missing"] and paper_rx and not prescription:
+		paper = check_paper_rx(paper_rx, q)
+		rx_override_reason = rx_override_reason or f"Paper Rx · {paper.doctor}"
+	elif q["rx_missing"]:
 		if not (rx_override_reason and cint(setting("allow_rx_override")) and has_any_role(R.ADMIN)):
 			frappe.throw(_("Prescription required for: {0}").format(", ".join(q["rx_missing"])), title=_("Prescription required"))
 	shift = None
@@ -327,7 +351,12 @@ def checkout(counter, lines, patient=None, prescription=None, payment_mode="Cash
 		"is_pos": 0 if credit else 1, "pos_profile": profile_name, "update_stock": 1, "set_warehouse": warehouse, "selling_price_list": base_profile.selling_price_list,
 		"hv_patient": patient, "hv_billing_type": "Medicine", "hv_prescription": prescription, "hv_counter": c.name, "apply_discount_on": "Net Total",
 		"ignore_pricing_rule": 1, "cost_center": base_profile.cost_center,
-		"remarks": f"Pharmacy {c.counter_name}" + (f" [{client_ref}]" if client_ref else "") + (f" · Rx override: {rx_override_reason}" if rx_override_reason and q["rx_missing"] else "")})
+		"remarks": f"Pharmacy {c.counter_name}" + (f" [{client_ref}]" if client_ref else "") + (f" · Rx override: {rx_override_reason}" if rx_override_reason and q["rx_missing"] and not paper else "")
+			+ (f" · Paper Rx: {paper.doctor}" if paper else "")})
+	if paper:
+		si.update({"hv_paper_rx": 1, "hv_paper_rx_doctor": paper.doctor.strip(), "hv_paper_rx_reg": (paper.get("reg_no") or "").strip() or None,
+			"hv_paper_rx_date": paper.get("rx_date") or None, "hv_paper_rx_patient": (paper.get("patient_name") or "").strip() or None,
+			"hv_paper_rx_image": paper.get("image") or None})
 	if shift:
 		si.is_created_using_pos = 1
 	for l in q["lines"]:
@@ -398,6 +427,8 @@ def receipt(si_name, cash_tendered=None):
 		"posting_time": str(si.posting_time)[:5], "customer": si.customer_name, "patient": si.hv_patient, "prescription": si.hv_prescription,
 		"counter": si.hv_counter, "cashier": frappe.db.get_value("User", si.owner, "full_name"),
 		"is_return": si.is_return, "return_against": si.return_against, "company": si.company,
+		"paper_rx": {"doctor": si.get("hv_paper_rx_doctor"), "reg_no": si.get("hv_paper_rx_reg"), "rx_date": str(si.get("hv_paper_rx_date") or ""),
+			"patient_name": si.get("hv_paper_rx_patient"), "image": si.get("hv_paper_rx_image")} if si.get("hv_paper_rx") else None,
 		"items": [{"item_code": i.item_code, "item_name": i.item_name, "generic": frappe.get_cached_value("Item", i.item_code, "hv_generic"), "qty": i.qty, "uom": i.uom,
 			"rate": i.rate, "amount": i.amount, "batch_no": i.batch_no, "expiry": str(frappe.db.get_value("Batch", i.batch_no, "expiry_date") or "") if i.batch_no else "",
 			"substitute_for": frappe.get_cached_value("Item", i.hv_original_item, "item_name") if i.hv_original_item else None} for i in si.items],
@@ -425,7 +456,7 @@ def validate_invoice(doc, method=None):
 			frappe.throw(_("Row {0}: batch {1} of {2} expired on {3}.").format(i.idx, i.batch_no, i.item_name, exp), title=_("Expired batch"))
 		if exp and block_near and date_diff(exp, doc.posting_date or today()) <= window:
 			frappe.throw(_("Row {0}: batch {1} is inside the near-expiry window.").format(i.idx, i.batch_no))
-	if not doc.get("hv_prescription") and not doc.flags.hv_rx_override:
+	if not doc.get("hv_prescription") and not doc.flags.hv_rx_override and not doc.get("hv_paper_rx"):
 		need = [i.item_name for i in doc.items if frappe.get_cached_value("Item", i.item_code, "hv_prescription_required")
 			or frappe.get_cached_value("Item", i.item_code, "hv_controlled_drug")]
 		if need:
@@ -443,7 +474,7 @@ def on_invoice_submit(doc, method=None):
 			continue
 		balance = sum(flt(b.get("qty")) for b in (get_batch_qty(warehouse=i.warehouse, item_code=i.item_code) or []))
 		frappe.get_doc({"doctype": "Controlled Drug Register", "posting_date": doc.posting_date, "patient": doc.hv_patient, "prescription": doc.hv_prescription,
-			"prescriber": rx.doctor if rx else None, "item_code": i.item_code, "batch_no": i.batch_no, "qty": (-1 if doc.is_return else 1) * abs(flt(i.stock_qty)),
+			"prescriber": rx.doctor if rx else None, "outside_prescriber": doc.get("hv_paper_rx_doctor"), "outside_reg_no": doc.get("hv_paper_rx_reg"), "item_code": i.item_code, "batch_no": i.batch_no, "qty": (-1 if doc.is_return else 1) * abs(flt(i.stock_qty)),
 			"balance": balance, "sales_invoice": doc.name, "branch": doc.branch, "dispensed_by": frappe.session.user}).insert(ignore_permissions=True)
 
 

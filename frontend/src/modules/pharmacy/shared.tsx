@@ -39,7 +39,7 @@ export function PriorityBadge({ p }: { p?: string }) {
 }
 
 export interface Receipt { name: string; docstatus: number; token?: string; ticket?: string; posting_date: string; posting_time: string; customer: string; patient?: string; prescription?: string;
-  counter?: string; cashier: string; is_return?: number; return_against?: string; company?: string; pending_sync?: boolean; items: { item_code?: string; item_name: string; generic?: string; qty: number; uom: string; rate: number; amount: number; batch_no?: string; expiry?: string; substitute_for?: string | null }[];
+  counter?: string; cashier: string; is_return?: number; return_against?: string; company?: string; pending_sync?: boolean; paper_rx?: { doctor: string; reg_no?: string; rx_date?: string; patient_name?: string; image?: string } | null; items: { item_code?: string; item_name: string; generic?: string; qty: number; uom: string; rate: number; amount: number; batch_no?: string; expiry?: string; substitute_for?: string | null }[];
   total: number; discount: number; grand_total: number; paid: number; tendered: number; change: number; mode: string; clinic: { name: string; name_ur?: string; address?: string; phone?: string } }
 
 /** 80 mm thermal receipt with the big collection token. */
@@ -51,7 +51,7 @@ export function receiptHtml(r: Receipt) {
   <div class="c m">${esc(r.clinic.address ?? "")} ${esc(r.clinic.phone ?? "")}</div><hr>
   ${r.token ? `<div class="c m">Collection token</div><div class="c tk">${esc(r.token)}</div>` : ""}
   <div class="m">${esc(r.name)} · ${esc(r.posting_date)} ${esc(r.posting_time)} · ${esc(r.counter ?? "")}</div>
-  <div class="m">${esc(r.customer)}${r.patient ? ` · ${esc(r.patient)}` : ""}${r.prescription ? ` · Rx ${esc(r.prescription)}` : ""}</div><hr>
+  <div class="m">${esc(r.customer)}${r.patient ? ` · ${esc(r.patient)}` : ""}${r.prescription ? ` · Rx ${esc(r.prescription)}` : ""}</div>${r.paper_rx ? `<div class="m">Prescribed by ${/^dr\.?\s/i.test(r.paper_rx.doctor) ? "" : "Dr "}${esc(r.paper_rx.doctor)}${r.paper_rx.reg_no ? ` (${esc(r.paper_rx.reg_no)})` : ""}${r.paper_rx.rx_date ? ` · ${esc(r.paper_rx.rx_date)}` : ""}</div>` : ""}<hr>
   <table>${r.items.map((i) => `<tr><td><b>${esc(i.item_name)}</b>${i.substitute_for ? `<div class="m">substitute for ${esc(i.substitute_for)}</div>` : ""}<div class="m">${esc(i.qty)} ${esc(i.uom)} × ${Math.round(i.rate)} · B ${esc(i.batch_no ?? "")} · Exp ${esc((i.expiry ?? "").slice(0, 7))}</div></td><td class="r">${Math.round(i.amount).toLocaleString()}</td></tr>`).join("")}</table><hr>
   <table><tr><td>Total</td><td class="r">${Math.round(r.total).toLocaleString()}</td></tr>${r.discount ? `<tr><td>Discount</td><td class="r">-${Math.round(r.discount).toLocaleString()}</td></tr>` : ""}
   <tr class="b"><td style="font-size:13pt">Net payable</td><td class="r" style="font-size:13pt">Rs ${Math.round(r.grand_total).toLocaleString()}</td></tr>

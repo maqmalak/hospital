@@ -66,6 +66,7 @@ const RosterPage = lazy(() => import("@/modules/ipd/RosterPage"));
 const ErBoardPage = lazy(() => import("@/modules/er/ErBoardPage"));
 const CounterPage = lazy(() => import("@/modules/counter/CounterPage"));
 const CounterDisplayPage = lazy(() => import("@/modules/counter/DisplayPage"));
+const PharmacyDisplayPage = lazy(() => import("@/modules/pharmacy/DisplayPage"));
 const OnlineVisitPage = lazy(() => import("@/modules/public/OnlineVisitPage"));
 const OnlineVisitStatusPage = lazy(() => import("@/modules/public/OnlineVisitStatusPage"));
 const OvStaffPage = lazy(() => import("@/modules/ov/OvStaffPage"));
@@ -117,6 +118,7 @@ export default function App() {
         <Route path="/opd_slip" element={g("/opd_slip", <OpdSlipPage />)} />
         <Route path="/counter" element={g("/counter", <CounterPage />)} />
         <Route path="/counter/display" element={g("/counter", <CounterDisplayPage />, true)} />
+        <Route path="/medicine_invoice/display" element={g("/medicine_invoice", <PharmacyDisplayPage />, true)} />
         <Route path="/physician-queue" element={g("/physician-queue", <QueuePage />)} />
         <Route path="/display/queue" element={g("/physician-queue", <QueueDisplayPage />, true)} />
         <Route path="/pw-prescription" element={g("/pw-prescription", <PrescriptionPage />)} />

@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Building2, ChevronDown, Languages, LayoutGrid, LogOut, Menu, Moon, Sun, X } from "lucide-react";
+import { Building2, ChevronDown, Languages, LayoutGrid, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { setShell, useShell } from "@/lib/shell";
 import { NAV } from "@/lib/nav";
 import { LANGUAGES } from "@/i18n";
 import { cn } from "@/utils/cn";
@@ -14,7 +15,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const loc = useLocation();
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+  const shell = useShell();
   useEffect(() => setOpen(false), [loc.pathname]);
+  useEffect(() => { if (shell.full) setShell({ full: false }); }, [loc.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const toggleTheme = () => {
     const next = !dark;
     document.documentElement.classList.toggle("dark", next);
@@ -63,12 +66,14 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex h-full flex-col">
       {boot.training ? <div className="no-print bg-red-600 py-1 text-center text-xs font-bold tracking-widest text-white">{t("TRAINING")} — demo data, resets nightly</div> : null}
       <div className="flex min-h-0 flex-1">
-        <aside className="no-print hidden w-64 shrink-0 lg:block">{sidebar}</aside>
+        {shell.nav && !shell.full && <aside className="no-print hidden w-64 shrink-0 lg:block">{sidebar}</aside>}
         {open && <div className="fixed inset-0 z-40 lg:hidden"><div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
           <aside className="absolute inset-y-0 start-0 w-72">{sidebar}</aside></div>}
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="no-print flex h-14 shrink-0 items-center gap-2 border-b border-border bg-card/80 px-3 backdrop-blur sm:px-5">
+          {!shell.full && <header className="no-print flex h-14 shrink-0 items-center gap-2 border-b border-border bg-card/80 px-3 backdrop-blur sm:px-5">
             <button className="rounded-md p-2 hover:bg-muted lg:hidden" onClick={() => setOpen(true)} aria-label="Menu">{open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button>
+            <button className="hidden rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground lg:block" onClick={() => setShell({ nav: !shell.nav })}
+              title={shell.nav ? "Hide menu" : "Show menu"} aria-label={shell.nav ? "Hide menu" : "Show menu"}>{shell.nav ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}</button>
             <div className="flex-1" />
             {boot.branches.length > 1 ? (
               <label className="flex items-center gap-1 rounded-lg border border-border px-2 text-sm">
@@ -91,8 +96,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button onClick={() => void logout()} className="flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs font-semibold hover:bg-muted">
               <LogOut className="h-4 w-4" /><span className="hidden sm:inline">{t("Sign out")}</span><ChevronDown className="hidden h-3 w-3" />
             </button>
-          </header>
-          <main className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-5">{children}</main>
+          </header>}
+          <main className={cn("min-h-0 flex-1 overflow-y-auto", shell.full ? "p-0" : "p-3 sm:p-5")}>{children}</main>
         </div>
       </div>
       <IdleLock minutes={boot.idle_lock_minutes} />

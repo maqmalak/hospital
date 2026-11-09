@@ -54,7 +54,7 @@ def pos_context(counter=None):
 		"waiting_prescriptions": waiting, "modes": _modes(counter),
 		"discount": dict(zip(("max_percent", "max_amount"), discounts.limits_for(frappe.session.user, "Medicine")), policy=setting("pharmacy_discount_over_limit") or "Ask the supervisor"),
 		"categories": frappe.get_all("Medicine Category", pluck="name", order_by="name"), "pay_choice": setting("collect_payment_at") or "Billing counter",
-		"credit_customers": frappe.db.count("Customer", {"hv_pharmacy_credit": 1, "disabled": 0}), "user": frappe.session.user}
+		"paper_rx": setting("paper_prescription") or "Prescription items only", "credit_customers": frappe.db.count("Customer", {"hv_pharmacy_credit": 1, "disabled": 0}), "user": frappe.session.user}
 
 
 def _modes(counter):
@@ -245,7 +245,7 @@ def _checkout(d):
 	return pharmacy.checkout(_counter(d.get("counter")), d["lines"], patient=d.get("patient"), prescription=d.get("prescription"),
 		payment_mode=d.get("payment_mode") or "Cash", cash_tendered=d.get("cash_tendered"), discount_amount=flt(d.get("discount_amount")),
 		discount_authorization=d.get("discount_authorization"), rx_override_reason=d.get("rx_override_reason"), priority=d.get("priority") or "Normal",
-		client_ref=d.get("client_ref"), customer=d.get("customer"), pay_at=d.get("pay_at"), payments=d.get("payments"))
+		client_ref=d.get("client_ref"), customer=d.get("customer"), pay_at=d.get("pay_at"), payments=d.get("payments"), paper_rx=d.get("paper_rx"))
 
 
 @frappe.whitelist()
@@ -347,7 +347,9 @@ def offline_bundle(counter=None):
 def invoices(scope="shift", q=None, limit=80):
 	"""Invoice management: this shift / today / waiting at handover / on account / returns; search by invoice, token, customer, MR."""
 	require_roles(*POS_ROLES, R.REVIEWER)
-	filters = {"hv_billing_type": "Medicine"}
+	from hospital_vvs.utils import user_branches
+
+	filters = {"hv_billing_type": "Medicine", "branch": ["in", user_branches() or [""]]}
 	shift = shifts.current_shift()
 	if scope == "drafts":
 		filters.update(docstatus=0, hv_dispense_ticket=["is", "set"])
@@ -364,11 +366,22 @@ def invoices(scope="shift", q=None, limit=80):
 		filters.pop("posting_date", None)
 	rows = frappe.get_all("Sales Invoice", filters=filters, or_filters=or_filters, fields=["name", "customer", "customer_name", "hv_patient", "grand_total",
 		"rounded_total", "outstanding_amount", "docstatus", "is_return", "is_pos", "hv_token", "posting_date", "posting_time", "hv_prescription", "return_against",
-		"hv_dispense_ticket", "status", "owner"], order_by="creation desc", limit=cint(limit) or 80)
+		"hv_dispense_ticket", "status", "owner", "hv_paper_rx", "hv_paper_rx_doctor", "hv_counter", "discount_amount"], order_by="creation desc", limit=cint(limit) or 80)
+	names = [r.name for r in rows] or [""]
+	modes, items, returned = {}, {}, {}
+	for p in frappe.get_all("Sales Invoice Payment", filters={"parent": ["in", names], "parenttype": "Sales Invoice"}, fields=["parent", "mode_of_payment"]):
+		modes.setdefault(p.parent, []).append(p.mode_of_payment)
+	for r in frappe.db.sql("select parent, count(*) n, group_concat(item_name order by idx separator ', ') names from `tabSales Invoice Item` where parent in %s group by parent", [names], as_dict=True):
+		items[r.parent] = r
+	for r in frappe.db.sql("select return_against, -sum(grand_total) amt from `tabSales Invoice` where return_against in %s and docstatus=1 group by return_against", [names], as_dict=True):
+		returned[r.return_against] = flt(r.amt)
+	cashiers = {u.name: u.full_name for u in frappe.get_all("User", filters={"name": ["in", list({r.owner for r in rows}) or [""]]}, fields=["name", "full_name"])}
 	for r in rows:
-		r["modes"] = " + ".join(frappe.get_all("Sales Invoice Payment", filters={"parent": r.name}, pluck="mode_of_payment")) or (
-			"On account" if not r.is_pos and r.docstatus == 1 else "Pay at handover" if r.docstatus == 0 else "")
-		r["returned"] = flt(frappe.db.sql("select -sum(grand_total) from `tabSales Invoice` where return_against=%s and docstatus=1", r.name)[0][0])
+		r["modes"] = " + ".join(modes.get(r.name, [])) or ("On account" if not r.is_pos and r.docstatus == 1 else "Pay at handover" if r.docstatus == 0 else "")
+		r["returned"] = returned.get(r.name, 0)
+		r["item_count"] = items[r.name].n if r.name in items else 0
+		r["item_names"] = (items[r.name].names or "")[:120] if r.name in items else ""
+		r["cashier"] = cashiers.get(r.owner, r.owner)
 	return rows
 
 
