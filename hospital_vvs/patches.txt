@@ -5,3 +5,5 @@
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
 hospital_vvs.patches.v0_2.phase2_settings_defaults
+hospital_vvs.patches.v0_3.phase3_settings
+hospital_vvs.patches.v0_3.adopt_occupied_beds

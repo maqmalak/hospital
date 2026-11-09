@@ -20,6 +20,7 @@
   "bed_charge_per_day",
   "w3",
   "nursing_charge_per_shift",
+  "icu_surcharge_per_day",
   "bed_charge_item"
  ],
  "fields": [
@@ -112,6 +113,12 @@
    "label": "Nursing Charge Per Shift"
   },
   {
+   "description": "Added to the bed charge for every day in this ward",
+   "fieldname": "icu_surcharge_per_day",
+   "fieldtype": "Currency",
+   "label": "ICU Surcharge per Day"
+  },
+  {
    "fieldname": "bed_charge_item",
    "fieldtype": "Link",
    "label": "Bed Charge Item",
@@ -120,7 +127,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-09 18:00:57.200144",
  "modified_by": "Administrator",
  "module": "IPD",
  "name": "Ward",

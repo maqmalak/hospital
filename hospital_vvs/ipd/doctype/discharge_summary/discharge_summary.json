@@ -1,0 +1,268 @@
+{
+ "actions": [],
+ "autoname": "DS-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_allotment",
+  "patient",
+  "patient_name",
+  "branch",
+  "ds1",
+  "discharge_type",
+  "doctor",
+  "signed_at",
+  "ds2",
+  "final_diagnosis",
+  "treatment_summary",
+  "procedures_done",
+  "condition_at_discharge",
+  "ds3",
+  "medicines",
+  "ds4",
+  "follow_up_plan",
+  "ds5",
+  "follow_up_date",
+  "referred_to",
+  "ds6",
+  "lama_form",
+  "death_datetime",
+  "ds7",
+  "cause_of_death",
+  "death_certificate_no",
+  "amendment_reason",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Admission",
+   "options": "Bed Allotment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "ds1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Normal",
+   "fieldname": "discharge_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Discharge Type",
+   "options": "Normal\nLAMA\nReferred\nExpired",
+   "reqd": 1
+  },
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "label": "Doctor",
+   "options": "Doctor",
+   "reqd": 1
+  },
+  {
+   "fieldname": "signed_at",
+   "fieldtype": "Datetime",
+   "label": "Signed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ds2",
+   "fieldtype": "Section Break",
+   "label": "Clinical"
+  },
+  {
+   "fieldname": "final_diagnosis",
+   "fieldtype": "Small Text",
+   "label": "Final Diagnosis",
+   "reqd": 1
+  },
+  {
+   "fieldname": "treatment_summary",
+   "fieldtype": "Text",
+   "label": "Treatment Summary"
+  },
+  {
+   "fieldname": "procedures_done",
+   "fieldtype": "Small Text",
+   "label": "Procedures Done"
+  },
+  {
+   "default": "Improved",
+   "fieldname": "condition_at_discharge",
+   "fieldtype": "Select",
+   "label": "Condition At Discharge",
+   "options": "Improved\nStable\nUnchanged\nDeteriorated\nExpired"
+  },
+  {
+   "fieldname": "ds3",
+   "fieldtype": "Section Break",
+   "label": "Discharge medicines"
+  },
+  {
+   "fieldname": "medicines",
+   "fieldtype": "Table",
+   "label": "Medicines",
+   "options": "Discharge Medicine"
+  },
+  {
+   "fieldname": "ds4",
+   "fieldtype": "Section Break",
+   "label": "Follow-up"
+  },
+  {
+   "fieldname": "follow_up_plan",
+   "fieldtype": "Small Text",
+   "label": "Follow Up Plan"
+  },
+  {
+   "fieldname": "ds5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "follow_up_date",
+   "fieldtype": "Date",
+   "label": "Follow Up Date"
+  },
+  {
+   "fieldname": "referred_to",
+   "fieldtype": "Data",
+   "label": "Referred To"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "ds6",
+   "fieldtype": "Section Break",
+   "label": "LAMA / death"
+  },
+  {
+   "fieldname": "lama_form",
+   "fieldtype": "Attach",
+   "label": "Signed LAMA Form"
+  },
+  {
+   "fieldname": "death_datetime",
+   "fieldtype": "Datetime",
+   "label": "Death Datetime"
+  },
+  {
+   "fieldname": "ds7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cause_of_death",
+   "fieldtype": "Small Text",
+   "label": "Cause Of Death"
+  },
+  {
+   "fieldname": "death_certificate_no",
+   "fieldtype": "Data",
+   "label": "Death Certificate No."
+  },
+  {
+   "fieldname": "amendment_reason",
+   "fieldtype": "Small Text",
+   "label": "Amendment Reason"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Discharge Summary",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Discharge Summary",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

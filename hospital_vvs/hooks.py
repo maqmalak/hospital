@@ -47,3 +47,6 @@ scheduler_events = {
 		"hospital_vvs.api.ops.daily_health_summary",
 	],
 }
+
+# Patient merge also moves admission and ER records (api/patients._extra_links)
+hv_patient_links = ["hospital_vvs.services.ipd.patient_links"]

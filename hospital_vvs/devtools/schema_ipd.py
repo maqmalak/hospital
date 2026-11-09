@@ -15,6 +15,7 @@ WARD = doctype("Ward", IPD, [
 	f("branch", "Link", "Branch", reqd=1, list=1, filter=1), f("floor", "Data", list=1), f("nursing_station", "Data"),
 	f("color", "Color"), f("sort_order", "Int"), f("is_active", "Check", default="1"),
 	sb("w2", "Charges"), f("bed_charge_per_day", "Currency"), cb("w3"), f("nursing_charge_per_shift", "Currency"),
+	f("icu_surcharge_per_day", "Currency", label="ICU Surcharge per Day", description="Added to the bed charge for every day in this ward"),
 	f("bed_charge_item", "Link", "Item"),
 ], [p("System Manager", "rwcd"), p(ADMIN, "rwcdR"), p(NURSE, "r"), p(DOCTOR, "r"), p(RECEPTIONIST, "r"), p(ACCOUNTANT, "r"), p(DEO, "r")],
 	autoname="field:ward_name", track_changes=1)

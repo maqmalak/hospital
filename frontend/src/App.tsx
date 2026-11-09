@@ -55,6 +55,15 @@ const PharmacyReportsPage = lazy(() => import("@/modules/pharmacy/StorePages").t
 const DevicePage = lazy(() => import("@/modules/display/DevicePage"));
 const DevicesPage = lazy(() => import("@/modules/display/DevicesPage"));
 const ComingPage = lazy(() => import("@/modules/home/ComingPage"));
+const AdmissionsPage = lazy(() => import("@/modules/ipd/AdmissionsPage"));
+const ChartPage = lazy(() => import("@/modules/ipd/ChartPage"));
+const MarPage = lazy(() => import("@/modules/ipd/MarPage"));
+const IpdBillPage = lazy(() => import("@/modules/ipd/BillPage"));
+const KitchenPage = lazy(() => import("@/modules/ipd/MorePages").then((m) => ({ default: m.KitchenPage })));
+const PreAuthPage = lazy(() => import("@/modules/ipd/MorePages").then((m) => ({ default: m.PreAuthPage })));
+const IpdReportPage = lazy(() => import("@/modules/ipd/MorePages").then((m) => ({ default: m.ReportPage })));
+const RosterPage = lazy(() => import("@/modules/ipd/RosterPage"));
+const ErBoardPage = lazy(() => import("@/modules/er/ErBoardPage"));
 
 function Loading() {
   return <div className="flex h-full min-h-[50vh] items-center justify-center"><Spinner size={28} /></div>;
@@ -106,7 +115,14 @@ export default function App() {
         <Route path="/appointments" element={g("/appointments", <AppointmentsPage />)} />
         <Route path="/appointments/inbox" element={g("/appointments/inbox", <InboxPage />)} />
         <Route path="/ward" element={g("/ward", <WardPage />)} />
-        <Route path="/ipd" element={<Navigate to="/ward" replace />} />
+        <Route path="/ipd" element={g("/ipd", <AdmissionsPage />)} />
+        <Route path="/ipd/mar" element={g("/ipd/mar", <MarPage />)} />
+        <Route path="/ipd/kitchen" element={g("/ipd/kitchen", <KitchenPage />)} />
+        <Route path="/ipd/pre-auth" element={g("/ipd/pre-auth", <PreAuthPage />)} />
+        <Route path="/ipd/:name" element={g("/ipd", <ChartPage />)} />
+        <Route path="/ipd_slip" element={g("/ipd_slip", <IpdBillPage />)} />
+        <Route path="/ipd_report" element={g("/ipd_report", <IpdReportPage />)} />
+        <Route path="/roster" element={g("/roster", <RosterPage />)} />
         <Route path="/display/ward" element={g("/display/ward", <WardKioskPage />, true)} />
         <Route path="/billing/discount-approvals" element={g("/billing/discount-approvals", <DiscountApprovalsPage />)} />
         <Route path="/messages" element={g("/messages", <MessagesPage />)} />
@@ -138,8 +154,8 @@ export default function App() {
         <Route path="/store/returns" element={g("/store/returns", <ReturnsPage />)} />
         <Route path="/store/cycle-count" element={g("/store/cycle-count", <CycleCountPage />)} />
         <Route path="/display/devices" element={g("/display/devices", <DevicesPage />)} />
-        <Route path="/er" element={g("/er", <ComingPage title="Emergency" phase={3} />)} />
-        <Route path="*" element={g("/pw-home", <ComingPage title="This screen" phase={2} />)} />
+        <Route path="/er" element={g("/er", <ErBoardPage />)} />
+        <Route path="*" element={g("/pw-home", <ComingPage title="This screen" phase={4} />)} />
       </Routes>
     </Suspense>
   );

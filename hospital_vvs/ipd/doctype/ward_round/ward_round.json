@@ -1,0 +1,174 @@
+{
+ "actions": [],
+ "autoname": "WR-.YYYY.-.######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_allotment",
+  "patient",
+  "patient_name",
+  "branch",
+  "r1",
+  "round_no",
+  "doctor",
+  "round_at",
+  "r2",
+  "findings",
+  "plan",
+  "orders",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "r1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "round_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Round No.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Doctor",
+   "options": "Doctor",
+   "reqd": 1
+  },
+  {
+   "fieldname": "round_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Round At"
+  },
+  {
+   "fieldname": "r2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "findings",
+   "fieldtype": "Text",
+   "label": "Findings"
+  },
+  {
+   "fieldname": "plan",
+   "fieldtype": "Text",
+   "label": "Plan"
+  },
+  {
+   "description": "New orders written on this round",
+   "fieldname": "orders",
+   "fieldtype": "Small Text",
+   "label": "Orders"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Ward Round",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Ward Round",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

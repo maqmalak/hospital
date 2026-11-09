@@ -113,6 +113,8 @@ LAB_DT = [
 		f("sales_invoice", "Link", "Sales Invoice", ro=1), f("payer_invoice", "Link", "Sales Invoice", ro=1), f("pos_opening_entry", "Link", "POS Opening Entry", ro=1, label="Cashier Shift"),
 		sb("ti7", "Report", collapsible=1), f("whatsapp_opt_in", "Check", default="1"), f("whatsapp_number", "Data"), cb("ti8"),
 		f("released_at", "Datetime", ro=1), f("report_version", "Int", ro=1), f("client_ref", "Data", hidden=1, unique=1, no_copy=1),
+		sb("ti9", "Admission", collapsible=1), f("bed_allotment", "Link", "Bed Allotment", label="Admission"), cb("ti10"), f("er_visit", "Link", "ER Visit"),
+		f("bill_to_admission", "Check", ro=1, description="Charged on the admission / ER running bill, not at the lab counter"),
 	], _lab_perm + [p(CASH_SUPERVISOR, "r"), p(ACCOUNTANT, "rR")], autoname="LAB-.YYYY.-.#####", track_changes=1, title_field="patient_name"),
 	doctype("Lab Sample Test", LAB, [
 		f("template", "Link", "Lab Test Template", list=1, columns=4), f("test_code", "Data", list=1, columns=2), f("invoice_item", "Data", hidden=1),

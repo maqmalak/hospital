@@ -1,0 +1,256 @@
+{
+ "actions": [],
+ "autoname": "PROC-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_allotment",
+  "er_visit",
+  "patient",
+  "patient_name",
+  "branch",
+  "pr1",
+  "procedure_type",
+  "scheduled_at",
+  "theatre",
+  "anesthesia",
+  "pr2",
+  "status",
+  "consent",
+  "pre_auth",
+  "completed_at",
+  "pr3",
+  "team",
+  "pr4",
+  "procedure_fee",
+  "theatre_charge",
+  "pr5",
+  "anesthesia_charge",
+  "ipd_charge",
+  "pr6",
+  "notes",
+  "cancel_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "er_visit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "ER Visit",
+   "options": "ER Visit"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "pr1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "procedure_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Procedure Type",
+   "options": "Procedure Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "scheduled_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Scheduled At"
+  },
+  {
+   "default": "Minor OT",
+   "fieldname": "theatre",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Theatre",
+   "options": "Major OT\nMinor OT\nProcedure Room\nBedside\nLabour Room\nCath Lab"
+  },
+  {
+   "default": "Local",
+   "fieldname": "anesthesia",
+   "fieldtype": "Select",
+   "label": "Anesthesia",
+   "options": "None\nLocal\nRegional\nSpinal\nGeneral\nSedation"
+  },
+  {
+   "fieldname": "pr2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Scheduled",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Scheduled\nIn Progress\nCompleted\nCancelled"
+  },
+  {
+   "fieldname": "consent",
+   "fieldtype": "Link",
+   "label": "Consent",
+   "options": "Consent Form",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pre_auth",
+   "fieldtype": "Link",
+   "label": "Pre Auth",
+   "options": "Insurance Pre-Auth"
+  },
+  {
+   "fieldname": "completed_at",
+   "fieldtype": "Datetime",
+   "label": "Completed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pr3",
+   "fieldtype": "Section Break",
+   "label": "Team"
+  },
+  {
+   "fieldname": "team",
+   "fieldtype": "Table",
+   "label": "Team",
+   "options": "Procedure Team Member"
+  },
+  {
+   "fieldname": "pr4",
+   "fieldtype": "Section Break",
+   "label": "Charges"
+  },
+  {
+   "fieldname": "procedure_fee",
+   "fieldtype": "Currency",
+   "label": "Procedure Fee"
+  },
+  {
+   "fieldname": "theatre_charge",
+   "fieldtype": "Currency",
+   "label": "Theatre Charge"
+  },
+  {
+   "fieldname": "pr5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "anesthesia_charge",
+   "fieldtype": "Currency",
+   "label": "Anesthesia Charge"
+  },
+  {
+   "fieldname": "ipd_charge",
+   "fieldtype": "Link",
+   "label": "IPD Charge",
+   "options": "IPD Charge",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pr6",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text",
+   "label": "Notes",
+   "permlevel": 0
+  },
+  {
+   "fieldname": "cancel_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancel Reason"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "IPD Procedure",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "procedure_type",
+ "track_changes": 1
+}

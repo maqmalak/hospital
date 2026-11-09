@@ -1,0 +1,269 @@
+{
+ "actions": [],
+ "autoname": "MO-.YYYY.-.######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_allotment",
+  "er_visit",
+  "patient",
+  "patient_name",
+  "branch",
+  "m1",
+  "item",
+  "item_name",
+  "dose",
+  "units_per_dose",
+  "route",
+  "m2",
+  "frequency",
+  "times",
+  "start_at",
+  "days",
+  "status",
+  "m3",
+  "doctor",
+  "ordered_by",
+  "m4",
+  "alert_type",
+  "alert_message",
+  "override_reason",
+  "stop_reason",
+  "stopped_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "er_visit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "ER Visit",
+   "options": "ER Visit"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "m1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "description": "As written: 1 tab, 500 mg, 5 ml",
+   "fieldname": "dose",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dose",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "Stock units issued and billed per dose",
+   "fieldname": "units_per_dose",
+   "fieldtype": "Float",
+   "label": "Units Per Dose"
+  },
+  {
+   "default": "Oral",
+   "fieldname": "route",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Route",
+   "options": "Oral\nIV\nIM\nSC\nInhalation\nTopical\nPR\nSL\nNG\nOther"
+  },
+  {
+   "fieldname": "m2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "BD",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Frequency",
+   "options": "OD\nBD\nTDS\nQID\nQ4H\nQ6H\nQ8H\nHS\nSTAT\nPRN"
+  },
+  {
+   "description": "Comma-separated, e.g. 08:00,20:00 (empty = from the frequency)",
+   "fieldname": "times",
+   "fieldtype": "Data",
+   "label": "Times"
+  },
+  {
+   "fieldname": "start_at",
+   "fieldtype": "Datetime",
+   "label": "Start At"
+  },
+  {
+   "default": "3",
+   "fieldname": "days",
+   "fieldtype": "Int",
+   "label": "Days"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nStopped\nCompleted"
+  },
+  {
+   "fieldname": "m3",
+   "fieldtype": "Section Break",
+   "label": "Doctor"
+  },
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "label": "Doctor",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "ordered_by",
+   "fieldtype": "Link",
+   "label": "Ordered By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "m4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "alert_type",
+   "fieldtype": "Data",
+   "label": "Alert Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alert_message",
+   "fieldtype": "Small Text",
+   "label": "Alert Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "override_reason",
+   "fieldtype": "Small Text",
+   "label": "Override Reason"
+  },
+  {
+   "fieldname": "stop_reason",
+   "fieldtype": "Small Text",
+   "label": "Stop Reason"
+  },
+  {
+   "fieldname": "stopped_by",
+   "fieldtype": "Link",
+   "label": "Stopped By",
+   "options": "User",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "IPD Medication Order",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Reviewer"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "item_name",
+ "track_changes": 1
+}

@@ -1,14 +1,15 @@
 # Progress
 
-Status as of **2026-11-06**. Phases from `docs/CLAUDE.md` §8.
+Status as of **2026-11-09**. Phases from `docs/CLAUDE.md` §8.
 
 | Phase | State |
 |---|---|
 | 0 Foundation | **Done** (see deferred) |
 | 1 Patients + OPD + Messaging | **Done** — 19 automated tests green |
 | Ward map + kiosk (from Phase 3, owner request) | **Done** (masters, live map, allot/extend/transfer/discharge, kiosk) |
-| 2 Pharmacy + Lab + Cash | Next — waiting for review |
-| 3–7 | Not started |
+| 2 Pharmacy + Lab + Cash | **Done** (2026-11-07) |
+| 3 IPD + ER | **Done** (2026-11-09) — W4, W18 green; full suite 37 green |
+| 4–7 | Not started — Phase 4 (Online Visit) waits for review |
 
 ## How to run
 
@@ -18,6 +19,8 @@ bench --site hospital serve --port 8011                 # desk + built React at 
 cd apps/hospital_vvs/frontend && npm run dev            # dev server http://hospital.localhost:5183 (proxy → :8011)
 bench --site hospital execute hospital_vvs.setup.company.run   # company, branches, accounts, POS profiles (re-run safe)
 bench --site hospital execute hospital_vvs.setup.demo.seed     # demo data (re-run safe)
+bench --site hospital execute hospital_vvs.setup.demo_phase2.seed
+bench --site hospital execute hospital_vvs.setup.demo_phase3.seed   # wards rates, diets, procedures, packages, nurses + roster, admissions, ER
 bench --site hospital run-tests --app hospital_vvs
 ```
 Demo logins (`<name>@vvs.demo`, password `Demo@1234` or site_config `hv_demo_password`): admin, reception, reception2, reception.isb (Islamabad only),
@@ -66,6 +69,20 @@ Identity (MR, customer, CNIC encrypted/masked, duplicate + merge moves visits/in
 ## Tests — Phase 2 (`tests/test_phase2.py`, 10; full suite 32 green)
 Pharmacy packs + FEFO + expired blocked + Rx rule + return; pipeline race (two finders) + wrong batch refused; pay at handover; controlled register · store transfer, cycle count, quarantine, supplier return · lab order → samples → results → critical log → verify → release → token link (verify, lock, expiry) · outsourced dispatch → purchase bill → report · cash shift open/close blind count, tolerance, approval, liability · W1 prescription → lab order + draft medicine invoice · display page keeps the signed-in session.
 
+## Phase 3 — built (2026-11-09)
+- **Admission** (`/ipd`, admit from the bed map or the list): patient, bed, doctor, billing mode (self / panel / insurance with an approved pre-auth / welfare), package, agreed rate, planned days, optional advance. Bed → Occupied, Patient Comms profile + bedside token, wristband print (QR = MR only). Readmission within 30 days is linked.
+- **Chart** (`/ipd/:name`): overview (bed history, vitals, doses due, nurses on duty), signed notes and ward rounds, **medication orders → MAR** (dose times from frequency, allergy / interaction / dose checks with override reason, approval gate, Given / Missed / Refused / Held, PRN doses, stop with reason), vitals with trend and intake/output, diet orders, procedures with team and signed consent, lab orders on the running bill, charges (service, consumable from the IPD store, oxygen by hours), discharge.
+- **Drug round** `/ipd/mar` (all wards, overdue first, one-tap chart, bulk approve), **diet list** `/ipd/kitchen`, **pre-auth** `/ipd/pre-auth`.
+- **Billing** `/ipd_slip`: running bill by type or line, package cover, payer split capped by pre-auth, discount via the existing approval flow, advances / settlement / refund as Payment Entries in the cashier shift, interim bill, advance request and final bill prints (A4), final invoice (+ payer invoice) with the admission's advances allocated, cancel final bill (accountant / supervisor).
+- **Discharge**: summary signed (Normal / LAMA with form / Referred / Expired with death details) → clearance checklist (summary, labs, doses, procedures, bill, dues) with hold and reasoned override → final bill → complete → bed Cleaning → Available, comms profile off, open orders closed. Summary print (A4).
+- **Emergency** `/er`: register known or **unknown** patient (temporary MR), arrival mode, medico-legal record, triage (Red/Yellow/Green or 5-level, setting) with vitals, live board by triage and waiting time, doctor and bay, medicines / labs / procedures / notes / vitals as in IPD, disposition: home / referred / LAMA / expired (bills the visit: OPD-style POS or running bill) or **admit** (charges, orders, labs and advances move to the admission). Admin merges an identified unknown patient from the visit.
+- **Nurse roster** `/roster` on HRMS Shift Type / Shift Assignment: week grid wards × shifts, nurse in charge, repeat next week. On-duty nurses show on the chart and drug round.
+- **Reports** `/ipd_report`: occupancy and census by ward, admissions / discharges per day, average stay, revenue by charge type, discharges by type and doctor, ER visits by triage and outcome, outstanding after discharge.
+- Bed map: allot = admit, transfer and extend go through the admission, discharge opens the chart, IPD Slip opens the bill. Beds occupied before Phase 3 were turned into admissions by a patch.
+
+## Tests — Phase 3 (`tests/test_phase3.py`, 5; full suite 37 green)
+Bed days by midnight census + minimum · nursing per started shift across a transfer · package cover with limits · **W4**: insurance admission refused without pre-auth → admit with pre-auth (bed occupied, comms token) → ward round → MAR gate, stock issued from IPD store, charge → transfer to ICU → diet → procedure blocked until consent → oxygen, ad-hoc, lab → advance in the cashier shift → clearance hold (unsigned summary, pending lab) → summary signed → final bill with every charge type, one line per bed segment, payer 70 % invoice, advance allocated, GL balanced → discharge held for dues → settle → discharged, bed Cleaning → Available, comms off · **W18**: unknown patient → Red at the top of the board → lab + medicine → admitted with ER charges carried → merged into the real patient. Phase 1/2 test helpers now skip stale demo shifts and temporary patients.
+
 ## Deferred / known gaps
 - **Staging + training sites, restore drill on staging**: need `bench new-site` (MariaDB root password) — scripts and steps in `docs/OPS.md`; decrypt-and-check drill done locally.
 - **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.
@@ -73,4 +90,5 @@ Pharmacy packs + FEFO + expired blocked + Rx rule + return; pipeline race (two f
 - Sentry/uptime: hooks documented, not wired (needs DSN / monitoring host).
 - Lab template editor screen (`/lab/templates`) not built yet — templates are edited in the desk for now.
 - Thermal label / receipt printing tested through the browser print dialog only (QZ Tray silent print untested on real printers).
-- Urdu/Arabic: navigation, actions and main clinical/billing terms translated; long help texts still English.
+- Urdu/Arabic: navigation, actions and main clinical/billing terms translated; long help texts still English. Phase 3 screens are English-first (labels go through i18n where shared components are used).
+- Phase 3: bedside room portal `/patient/:token` and nursing stations are Phase 5 (the token is created now); insurance claims, doctor share on IPD bills and welfare funds are Phase 6; feedback after discharge waits for a `ipd_feedback` message template (Phase 5); LAMA / consent scans are linked by file URL (upload in the desk).

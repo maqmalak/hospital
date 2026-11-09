@@ -1,6 +1,6 @@
 export interface Bed { name: string; bed_no: string; ward: string; room?: string; bed_type: string; status: string; daily_rate?: number; has_oxygen: number; has_monitor: number;
   current_patient?: string; patient_name?: string; occupied_since?: string; expected_discharge?: string; agreed_rate?: number; admission_reason?: string;
-  attending_doctor?: string; doctor_name?: string; reserved_until?: string; status_note?: string; pos_x?: number; pos_y?: number; gender?: string; age?: number; category?: string; label?: string }
+  attending_doctor?: string; doctor_name?: string; reserved_until?: string; status_note?: string; pos_x?: number; pos_y?: number; gender?: string; age?: number; category?: string; label?: string; admission?: string; admission_status?: string; payer_type?: string }
 export interface Ward { name: string; ward_name: string; ward_name_ur?: string; ward_type: string; gender: string; floor?: string; color?: string; bed_charge_per_day?: number; nursing_station?: string }
 export interface BedMap { branch: string; branches: string[]; wards: Ward[]; beds: Bed[]; totals: Record<string, number>; occupancy: number; now: string }
 

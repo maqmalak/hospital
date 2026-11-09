@@ -7,3 +7,4 @@ IPD
 Cash
 Lab
 Pharmacy
+Emergency

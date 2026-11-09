@@ -36,8 +36,9 @@ def split_lines(lines, fraction):
 
 
 def create_invoice(*, customer, patient, lines, billing_type, branch, reference_doctype, reference_name,
-	discount_amount=0, payment_mode="Cash", pos=True, payer_share_of=None, remarks=None, posting_date=None, payer=False):
-	"""Create and submit a Sales Invoice. Idempotent per (reference, payer/patient side). Returns its name."""
+	discount_amount=0, payment_mode="Cash", pos=True, payer_share_of=None, remarks=None, posting_date=None, payer=False, prepare=None):
+	"""Create and submit a Sales Invoice. Idempotent per (reference, payer/patient side). Returns its name.
+	prepare(si): optional last step before insert (IPD uses it to allocate the admission's advances)."""
 	existing = existing_invoice(reference_doctype, reference_name, payer=payer)
 	if existing:
 		return existing
@@ -102,6 +103,8 @@ def create_invoice(*, customer, patient, lines, billing_type, branch, reference_
 		amount = flt(si.rounded_total or si.grand_total)
 		si.append("payments", {"mode_of_payment": mop.mode_of_payment, "amount": amount})
 		si.calculate_taxes_and_totals()
+	if prepare:
+		prepare(si)
 	si.flags.ignore_permissions = True
 	si.insert()
 	if flt(si.grand_total) or not pos:

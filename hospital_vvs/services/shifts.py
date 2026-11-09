@@ -122,6 +122,10 @@ def summary(shift_name, until=None):
 	poe = frappe.get_doc("POS Opening Entry", shift_name)
 	data = get_invoices(poe.period_start_date, until or now_datetime(), poe.pos_profile, poe.user)
 	coll = {p.mode_of_payment: flt(p.amount) for p in data.get("payments")}
+	# IPD / ER advances and settlements are Payment Entries tagged with the shift (refunds paid out are negative)
+	for pe in frappe.get_all("Payment Entry", filters={"hv_shift": shift_name, "docstatus": 1}, fields=["mode_of_payment", "paid_amount", "payment_type"]):
+		sign = -1 if pe.payment_type == "Pay" else 1
+		coll[pe.mode_of_payment] = coll.get(pe.mode_of_payment, 0.0) + sign * flt(pe.paid_amount)
 	mv = _movements(shift_name)
 	modes, total = [], 0.0
 	names = [b.mode_of_payment for b in poe.balance_details] + [m for m in coll if m not in [b.mode_of_payment for b in poe.balance_details]]

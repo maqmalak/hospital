@@ -162,6 +162,26 @@
   "safe_account",
   "petty_expense_account",
   "float_source_account",
+  "ipd2_tab",
+  "mar_approval_gate",
+  "require_preauth_for_insurance",
+  "nursing_shift_starts",
+  "oxygen_rate_per_hour",
+  "ad1",
+  "min_bed_days",
+  "bed_charge_item",
+  "icu_charge_item",
+  "nursing_charge_item",
+  "diet_charge_item",
+  "oxygen_charge_item",
+  "adhoc_charge_item",
+  "er_tab",
+  "triage_scale",
+  "er_billing_mode",
+  "er1",
+  "er_fee_item",
+  "er_fee",
+  "er_ward",
   "security_tab",
   "enforce_two_factor",
   "idle_lock_minutes",
@@ -1077,6 +1097,125 @@
    "options": "Account"
   },
   {
+   "fieldname": "ipd2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Admissions"
+  },
+  {
+   "description": "A charge nurse / doctor approves each dose before it is given",
+   "fieldname": "mar_approval_gate",
+   "fieldtype": "Check",
+   "label": "Mar Approval Gate"
+  },
+  {
+   "default": "1",
+   "fieldname": "require_preauth_for_insurance",
+   "fieldtype": "Check",
+   "label": "Insurance Admission Needs an Approved Pre-Auth"
+  },
+  {
+   "default": "08:00,14:00,20:00",
+   "description": "Nursing is charged per started shift",
+   "fieldname": "nursing_shift_starts",
+   "fieldtype": "Data",
+   "label": "Nursing Shift Starts"
+  },
+  {
+   "default": "300",
+   "fieldname": "oxygen_rate_per_hour",
+   "fieldtype": "Currency",
+   "label": "Oxygen Rate Per Hour"
+  },
+  {
+   "fieldname": "ad1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "Bed days = midnights in each bed; at least this many",
+   "fieldname": "min_bed_days",
+   "fieldtype": "Int",
+   "label": "Min Bed Days"
+  },
+  {
+   "fieldname": "bed_charge_item",
+   "fieldtype": "Link",
+   "label": "Bed Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "icu_charge_item",
+   "fieldtype": "Link",
+   "label": "Icu Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "nursing_charge_item",
+   "fieldtype": "Link",
+   "label": "Nursing Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "diet_charge_item",
+   "fieldtype": "Link",
+   "label": "Diet Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "oxygen_charge_item",
+   "fieldtype": "Link",
+   "label": "Oxygen Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "adhoc_charge_item",
+   "fieldtype": "Link",
+   "label": "Adhoc Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "er_tab",
+   "fieldtype": "Tab Break",
+   "label": "Emergency"
+  },
+  {
+   "default": "Red / Yellow / Green",
+   "fieldname": "triage_scale",
+   "fieldtype": "Select",
+   "label": "Triage Scale",
+   "options": "Red / Yellow / Green\n5-level (ESI)"
+  },
+  {
+   "default": "Running bill",
+   "fieldname": "er_billing_mode",
+   "fieldtype": "Select",
+   "label": "ER Billing Mode",
+   "options": "Running bill\nOPD-style slip"
+  },
+  {
+   "fieldname": "er1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "er_fee_item",
+   "fieldtype": "Link",
+   "label": "ER Fee Item",
+   "options": "Item"
+  },
+  {
+   "default": "1500",
+   "fieldname": "er_fee",
+   "fieldtype": "Currency",
+   "label": "ER Fee"
+  },
+  {
+   "description": "Bays for the ER board (default branch)",
+   "fieldname": "er_ward",
+   "fieldtype": "Link",
+   "label": "ER Ward",
+   "options": "Ward"
+  },
+  {
    "fieldname": "security_tab",
    "fieldtype": "Tab Break",
    "label": "Security"
@@ -1123,7 +1262,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-07 18:53:06.810170",
+ "modified": "2026-11-09 18:00:57.178185",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

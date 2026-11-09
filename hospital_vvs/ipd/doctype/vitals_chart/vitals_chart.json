@@ -1,0 +1,241 @@
+{
+ "actions": [],
+ "autoname": "VIT-.YYYY.-.#######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_allotment",
+  "er_visit",
+  "patient",
+  "patient_name",
+  "branch",
+  "v1",
+  "recorded_at",
+  "recorded_by",
+  "v2",
+  "bp_systolic",
+  "bp_diastolic",
+  "pulse",
+  "v3",
+  "temperature",
+  "spo2",
+  "resp_rate",
+  "v4",
+  "rbs",
+  "pain_score",
+  "gcs",
+  "v5",
+  "intake_ml",
+  "v6",
+  "output_ml",
+  "v7",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "er_visit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "ER Visit",
+   "options": "ER Visit"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "v1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recorded_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Recorded At"
+  },
+  {
+   "fieldname": "recorded_by",
+   "fieldtype": "Link",
+   "label": "Recorded By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "v2",
+   "fieldtype": "Section Break",
+   "label": "Vitals"
+  },
+  {
+   "fieldname": "bp_systolic",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "BP Systolic"
+  },
+  {
+   "fieldname": "bp_diastolic",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "BP Diastolic"
+  },
+  {
+   "fieldname": "pulse",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Pulse"
+  },
+  {
+   "fieldname": "v3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperature",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Temperature"
+  },
+  {
+   "fieldname": "spo2",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "SpO2"
+  },
+  {
+   "fieldname": "resp_rate",
+   "fieldtype": "Int",
+   "label": "Respiratory Rate"
+  },
+  {
+   "fieldname": "v4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rbs",
+   "fieldtype": "Float",
+   "label": "RBS"
+  },
+  {
+   "description": "0–10",
+   "fieldname": "pain_score",
+   "fieldtype": "Int",
+   "label": "Pain Score"
+  },
+  {
+   "fieldname": "gcs",
+   "fieldtype": "Int",
+   "label": "GCS"
+  },
+  {
+   "fieldname": "v5",
+   "fieldtype": "Section Break",
+   "label": "Intake / output (ml)"
+  },
+  {
+   "fieldname": "intake_ml",
+   "fieldtype": "Float",
+   "label": "Intake Ml"
+  },
+  {
+   "fieldname": "v6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "output_ml",
+   "fieldtype": "Float",
+   "label": "Output Ml"
+  },
+  {
+   "fieldname": "v7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Vitals Chart",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "recorded_at",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

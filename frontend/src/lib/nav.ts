@@ -1,7 +1,7 @@
 import {
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
   ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
-  Activity, BarChart3, BedDouble, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
+  Activity, BarChart3, BedDouble, Receipt, Soup, UserCheck, ShieldPlus, ClipboardPlus, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
   MessageCircle, MessagesSquare, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
   type LucideIcon,
 } from "lucide-react";
@@ -51,9 +51,16 @@ export const NAV: NavGroup[] = [
     { route: "/cash/reports", label: "Cash reports", icon: ScrollText, color: "from-blue-600 to-indigo-700", desc: "Shifts, day-end, excess/short" },
   ] },
   { label: "Inpatient", items: [
-    { route: "/ward", label: "Wards & beds", icon: BedDouble, color: "from-emerald-500 to-teal-600", desc: "Live bed map" },
+    { route: "/er", label: "Emergency", icon: HeartPulse, color: "from-red-500 to-rose-600", desc: "Triage board, unknown patients, disposition" },
+    { route: "/ward", label: "Wards & beds", icon: BedDouble, color: "from-emerald-500 to-teal-600", desc: "Live bed map, admit, transfer" },
+    { route: "/ipd", label: "Admissions", icon: ClipboardPlus, color: "from-teal-600 to-cyan-700", desc: "Inpatients, charts, discharge" },
+    { route: "/ipd/mar", label: "Drug round", icon: Pill, color: "from-green-500 to-emerald-600", desc: "Doses due, chart in one tap" },
+    { route: "/ipd_slip", label: "IPD bill", icon: Receipt, color: "from-sky-600 to-indigo-600", desc: "Running bill, advances, final invoice" },
+    { route: "/ipd/kitchen", label: "Diet list", icon: Soup, color: "from-lime-500 to-green-600", desc: "Meals per bed for the kitchen" },
+    { route: "/ipd/pre-auth", label: "Insurance pre-auth", icon: ShieldPlus, color: "from-indigo-500 to-violet-600", desc: "Approvals before admission" },
+    { route: "/roster", label: "Nurse roster", icon: UserCheck, color: "from-violet-500 to-fuchsia-600", desc: "Duty by ward and shift" },
+    { route: "/ipd_report", label: "IPD reports", icon: BarChart3, color: "from-slate-600 to-slate-800", desc: "Census, stays, revenue, dues" },
     { route: "/display/ward", label: "Ward kiosk display", icon: MonitorPlay, color: "from-cyan-600 to-blue-700", desc: "Full-screen bed status" },
-    { route: "/er", label: "Emergency", icon: HeartPulse, color: "from-red-500 to-rose-600", desc: "Triage board (Phase 3)" },
   ] },
   { label: "Billing", items: [
     { route: "/billing/discount-approvals", label: "Discount approvals", icon: Percent, color: "from-orange-500 to-amber-500", desc: "Requests above the limit" },

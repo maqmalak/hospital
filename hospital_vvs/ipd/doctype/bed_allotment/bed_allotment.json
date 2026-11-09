@@ -1,0 +1,479 @@
+{
+ "actions": [],
+ "autoname": "ADM-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "t_adm",
+  "patient",
+  "patient_name",
+  "gender",
+  "branch",
+  "company",
+  "a1",
+  "status",
+  "admit_datetime",
+  "expected_discharge",
+  "planned_days",
+  "release_datetime",
+  "a2",
+  "bed",
+  "ward",
+  "admitting_doctor",
+  "doctor_name",
+  "a3",
+  "source",
+  "er_visit",
+  "opd_slip",
+  "readmission_of",
+  "a4",
+  "reason",
+  "provisional_diagnosis",
+  "consultants",
+  "t_bill",
+  "payer_type",
+  "payer",
+  "pre_auth",
+  "coverage_percent",
+  "b1",
+  "service_package",
+  "daily_rate",
+  "nursing_charge_per_shift",
+  "b2",
+  "charges_total",
+  "advance_total",
+  "b3",
+  "final_invoice",
+  "payer_invoice",
+  "discount_amount",
+  "discount_authorization",
+  "t_stay",
+  "segments",
+  "t_dis",
+  "discharge_type",
+  "discharge_summary",
+  "d1",
+  "clearance_override",
+  "clearance_override_reason",
+  "clearance_override_by",
+  "comms_profile"
+ ],
+ "fields": [
+  {
+   "fieldname": "t_adm",
+   "fieldtype": "Tab Break",
+   "label": "Admission"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "global_search": 1,
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "patient.gender",
+   "fieldname": "gender",
+   "fieldtype": "Data",
+   "label": "Gender",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "a1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Admitted",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Admitted\nDischarge Pending\nDischarged\nCancelled"
+  },
+  {
+   "fieldname": "admit_datetime",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Admit Datetime",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_discharge",
+   "fieldtype": "Datetime",
+   "label": "Expected Discharge"
+  },
+  {
+   "default": "1",
+   "fieldname": "planned_days",
+   "fieldtype": "Int",
+   "label": "Planned Days"
+  },
+  {
+   "fieldname": "release_datetime",
+   "fieldtype": "Datetime",
+   "label": "Actual Release",
+   "read_only": 1
+  },
+  {
+   "fieldname": "a2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Current Bed",
+   "options": "Hospital Bed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ward",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Ward",
+   "options": "Ward",
+   "read_only": 1
+  },
+  {
+   "fieldname": "admitting_doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Admitting Doctor",
+   "options": "Doctor",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "admitting_doctor.doctor_name",
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "label": "Doctor Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "a3",
+   "fieldtype": "Section Break",
+   "label": "Why"
+  },
+  {
+   "default": "Direct",
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Source",
+   "options": "Direct\nOPD\nER\nTransfer"
+  },
+  {
+   "fieldname": "er_visit",
+   "fieldtype": "Link",
+   "label": "ER Visit",
+   "options": "ER Visit"
+  },
+  {
+   "fieldname": "opd_slip",
+   "fieldtype": "Link",
+   "label": "OPD Slip",
+   "options": "OPD Slip"
+  },
+  {
+   "fieldname": "readmission_of",
+   "fieldtype": "Link",
+   "label": "Readmission Of",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "a4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason for Admission"
+  },
+  {
+   "fieldname": "provisional_diagnosis",
+   "fieldtype": "Small Text",
+   "label": "Provisional Diagnosis",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "consultants",
+   "fieldtype": "Table",
+   "label": "Consultants",
+   "options": "Admission Consultant"
+  },
+  {
+   "fieldname": "t_bill",
+   "fieldtype": "Tab Break",
+   "label": "Billing"
+  },
+  {
+   "default": "Patient",
+   "fieldname": "payer_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Billing Mode",
+   "options": "Patient\nPanel\nInsurance\nWelfare"
+  },
+  {
+   "fieldname": "payer",
+   "fieldtype": "Link",
+   "label": "Payer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "pre_auth",
+   "fieldtype": "Link",
+   "label": "Pre Auth",
+   "options": "Insurance Pre-Auth"
+  },
+  {
+   "fieldname": "coverage_percent",
+   "fieldtype": "Percent",
+   "label": "Coverage Percent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "b1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_package",
+   "fieldtype": "Link",
+   "label": "Service Package",
+   "options": "Service Package"
+  },
+  {
+   "description": "Agreed bed rate (empty = the bed's rate)",
+   "fieldname": "daily_rate",
+   "fieldtype": "Currency",
+   "label": "Daily Rate"
+  },
+  {
+   "description": "Empty = the ward's rate",
+   "fieldname": "nursing_charge_per_shift",
+   "fieldtype": "Currency",
+   "label": "Nursing Charge Per Shift"
+  },
+  {
+   "fieldname": "b2",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "charges_total",
+   "fieldtype": "Currency",
+   "label": "Running Bill",
+   "read_only": 1
+  },
+  {
+   "fieldname": "advance_total",
+   "fieldtype": "Currency",
+   "label": "Advances",
+   "read_only": 1
+  },
+  {
+   "fieldname": "b3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "final_invoice",
+   "fieldtype": "Link",
+   "label": "Final Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payer_invoice",
+   "fieldtype": "Link",
+   "label": "Payer Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_authorization",
+   "fieldtype": "Link",
+   "label": "Discount Authorization",
+   "options": "Discount Authorization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "t_stay",
+   "fieldtype": "Tab Break",
+   "label": "Stay"
+  },
+  {
+   "fieldname": "segments",
+   "fieldtype": "Table",
+   "label": "Bed History",
+   "options": "Bed Transfer Segment"
+  },
+  {
+   "fieldname": "t_dis",
+   "fieldtype": "Tab Break",
+   "label": "Discharge"
+  },
+  {
+   "fieldname": "discharge_type",
+   "fieldtype": "Select",
+   "label": "Discharge Type",
+   "options": "\nNormal\nLAMA\nReferred\nExpired"
+  },
+  {
+   "fieldname": "discharge_summary",
+   "fieldtype": "Link",
+   "label": "Discharge Summary",
+   "options": "Discharge Summary",
+   "read_only": 1
+  },
+  {
+   "fieldname": "d1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "clearance_override",
+   "fieldtype": "Check",
+   "label": "Clearance Override",
+   "read_only": 1
+  },
+  {
+   "fieldname": "clearance_override_reason",
+   "fieldtype": "Small Text",
+   "label": "Clearance Override Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "clearance_override_by",
+   "fieldtype": "Link",
+   "label": "Clearance Override By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "comms_profile",
+   "fieldtype": "Link",
+   "label": "Comms Profile",
+   "options": "Patient Comms Profile",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Bed Allotment",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "patient,bed",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

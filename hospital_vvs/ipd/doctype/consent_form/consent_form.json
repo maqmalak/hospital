@@ -1,0 +1,221 @@
+{
+ "actions": [],
+ "autoname": "CONS-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_allotment",
+  "er_visit",
+  "patient",
+  "patient_name",
+  "branch",
+  "cf1",
+  "consent_type",
+  "procedure",
+  "signed_at",
+  "cf2",
+  "signed_by",
+  "signer_name",
+  "relation",
+  "cf3",
+  "witness_name",
+  "witness_2",
+  "scanned_copy",
+  "cf4",
+  "details",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "er_visit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "ER Visit",
+   "options": "ER Visit"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "cf1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "consent_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Consent Type",
+   "options": "Admission\nProcedure\nAnesthesia\nBlood Transfusion\nHigh Risk\nLAMA\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "label": "Procedure",
+   "options": "IPD Procedure"
+  },
+  {
+   "fieldname": "signed_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Signed At"
+  },
+  {
+   "fieldname": "cf2",
+   "fieldtype": "Section Break",
+   "label": "Signed by"
+  },
+  {
+   "default": "Patient",
+   "fieldname": "signed_by",
+   "fieldtype": "Select",
+   "label": "Signed By",
+   "options": "Patient\nAttendant"
+  },
+  {
+   "fieldname": "signer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Signer Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "relation",
+   "fieldtype": "Data",
+   "label": "Relation"
+  },
+  {
+   "fieldname": "cf3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "witness_name",
+   "fieldtype": "Data",
+   "label": "Witness Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "witness_2",
+   "fieldtype": "Data",
+   "label": "Second Witness"
+  },
+  {
+   "fieldname": "scanned_copy",
+   "fieldtype": "Attach",
+   "label": "Scanned Copy"
+  },
+  {
+   "fieldname": "cf4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Small Text",
+   "label": "What was explained"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Consent Form",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Consent Form",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "consent_type",
+ "track_changes": 1
+}

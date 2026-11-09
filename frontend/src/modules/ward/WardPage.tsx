@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,11 +7,12 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/lib/auth";
 import { call, humanizeError, useApi } from "@/lib/api";
 import { useRealtime } from "@/lib/realtime";
-import { Field, inputCls, PageHeader, PatientPicker, StatCard, type PatientHit } from "@/components/common";
+import { PageHeader, StatCard } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
 import { type Bed, type BedMap, fmtDT, hoursText, parseDT, STATUS_STYLE, stayState, type Ward } from "./shared";
+import { AdmitDialog } from "@/modules/ipd/AdmitDialog";
 
 export default function WardPage() {
   const { boot, branch } = useAuth();
@@ -79,7 +80,7 @@ export default function WardPage() {
             </div>
             <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {list.map((b) => <BedCard key={b.name} b={b} w={w} now={now} onAllot={() => setAllot(b)} onTransfer={() => setTransfer(b)}
-                onAct={(m, a, ok) => void act(m, { bed: b.name, ...a }, ok)} onChart={() => b.current_patient && nav(`/pw-history/${b.current_patient}`)} />)}
+                onAct={(m, a, ok) => void act(m, { bed: b.name, ...a }, ok)} onChart={() => nav(b.admission ? `/ipd/${b.admission}` : `/pw-history/${b.current_patient}`)} />)}
             </div>
           </section>);
       }) : (
@@ -94,12 +95,12 @@ export default function WardPage() {
             </div>))}</div>
           <aside className="rounded-2xl border border-border bg-card p-4 xl:sticky xl:top-0 xl:self-start">
             {(() => { const b = beds.find((x) => x.name === sel); const w = data?.wards.find((x) => x.name === b?.ward);
-              return b && w ? <BedCard b={b} w={w} now={now} onAllot={() => setAllot(b)} onTransfer={() => setTransfer(b)} onAct={(m, a, ok) => void act(m, { bed: b.name, ...a }, ok)} onChart={() => b.current_patient && nav(`/pw-history/${b.current_patient}`)} />
+              return b && w ? <BedCard b={b} w={w} now={now} onAllot={() => setAllot(b)} onTransfer={() => setTransfer(b)} onAct={(m, a, ok) => void act(m, { bed: b.name, ...a }, ok)} onChart={() => nav(b.admission ? `/ipd/${b.admission}` : `/pw-history/${b.current_patient}`)} />
                 : <div className="py-10 text-center text-sm text-muted-foreground"><BedDouble className="mx-auto mb-2 h-8 w-8" />Pick a bed on the plan</div>; })()}
           </aside>
         </div>
       )}
-      {allot && <AllotDialog bed={allot} ward={data?.wards.find((w) => w.name === allot.ward)} onClose={() => setAllot(null)} onDone={() => { setAllot(null); refresh(); }} />}
+      {allot && <AdmitDialog bed={allot.name} onClose={() => setAllot(null)} />}
       {transfer && <Dialog open onClose={() => setTransfer(null)} title={`${t("Transfer")} ${transfer.patient_name} · ${transfer.bed_no}`} size="lg">
         <div className="space-y-3">{(data?.wards ?? []).map((w) => { const free = beds.filter((b) => b.ward === w.name && b.status === "Available"); if (!free.length) return null; return (
           <div key={w.name}><div className="mb-1 text-xs font-bold text-muted-foreground">{wardName(w)}</div><div className="grid grid-cols-5 gap-2 sm:grid-cols-8">{free.map((b) => (
@@ -112,6 +113,7 @@ export default function WardPage() {
 function BedCard({ b, w, now, onAllot, onTransfer, onAct, onChart }: { b: Bed; w: Ward; now: number; onAllot: () => void; onTransfer: () => void;
   onAct: (method: string, args: Record<string, unknown>, ok: string) => void; onChart: () => void }) {
   const { t } = useTranslation();
+  const navTo = useNavigate();
   const st = STATUS_STYLE[b.status] ?? STATUS_STYLE.Available;
   const stay = stayState(b, now);
   const rate = b.agreed_rate || b.daily_rate || w.bed_charge_per_day || 0;
@@ -154,8 +156,9 @@ function BedCard({ b, w, now, onAllot, onTransfer, onAct, onChart }: { b: Bed; w
         <Chip tone="sky" icon={ClipboardList} label="IPD Chart" onClick={onChart} />
         <Chip tone="violet" icon={CalendarPlus} label={t("Extend")} onClick={() => { const d = prompt("Extend by how many days?", "1"); if (d) onAct("extend", { days: Number(d) || 1 }, "Stay extended"); }} />
         <Chip tone="amber" icon={ArrowRightLeft} label={t("Transfer")} onClick={onTransfer} />
-        <Chip tone="rose" icon={LogOut} label={t("Discharge")} onClick={() => { if (confirm(`Discharge ${b.patient_name} from ${b.bed_no}? The bed goes to cleaning.`)) onAct("release", { note: "Discharged" }, `${b.bed_no} → cleaning`); }} />
-        <Chip tone="green" icon={Receipt} label="IPD Slip" onClick={() => toast("IPD billing arrives in Phase 3", { icon: "🧾" })} />
+        {b.admission ? <Chip tone="rose" icon={LogOut} label={t("Discharge")} onClick={() => navTo(`/ipd/${b.admission}?tab=discharge`)} />
+          : <Chip tone="rose" icon={LogOut} label="Free bed" onClick={() => { if (confirm(`${b.patient_name} has no admission on ${b.bed_no}. Free the bed (it goes to cleaning)?`)) onAct("release", { note: "Left the bed" }, `${b.bed_no} → cleaning`); }} />}
+        {b.admission && <Chip tone="green" icon={Receipt} label="IPD Slip" onClick={() => navTo(`/ipd_slip?adm=${b.admission}`)} />}
       </div>
     </div>
   );
@@ -187,43 +190,5 @@ function BedShape({ b, now, selected, onClick }: { b: Bed; now: number; selected
         {b.status !== "Occupied" && <span className="text-[10px] font-semibold uppercase">{b.status.slice(0, 5)}</span>}
       </span>
     </button>
-  );
-}
-
-function AllotDialog({ bed, ward, onClose, onDone }: { bed: Bed; ward?: Ward; onClose: () => void; onDone: () => void }) {
-  const { t } = useTranslation();
-  const { branch } = useAuth();
-  const [patient, setPatient] = useState<PatientHit | null>(null);
-  const [doctor, setDoctor] = useState("");
-  const [days, setDays] = useState("1");
-  const defaultRate = bed.daily_rate || ward?.bed_charge_per_day || 0;
-  const [rate, setRate] = useState(String(defaultRate));
-  const [reason, setReason] = useState("");
-  const [busy, setBusy] = useState(false);
-  const docs = useApi<{ doctors: { name: string; doctor_name: string; branch?: string }[] }>("opd.counter_context", { branch });
-  const total = useMemo(() => (Number(rate) || 0) * Math.max(Number(days) || 1, 1), [rate, days]);
-  const submit = async () => {
-    setBusy(true);
-    try { await call("ward.assign", { bed: bed.name, patient: patient!.name, doctor: doctor || undefined, days: Number(days) || 1, rate: Number(rate) || undefined, reason }); toast.success(`${bed.bed_no} allotted to ${patient!.patient_name}`); onDone(); }
-    catch (e) { toast.error(humanizeError(e)); } finally { setBusy(false); }
-  };
-  return (
-    <Dialog open onClose={onClose} title={<span className="flex items-center gap-2"><PlusCircle className="h-5 w-5 text-emerald-600" />{t("Allot bed")} <span className="text-emerald-600">— Bed {bed.bed_no}</span></span>}
-      description="Fill in patient details to assign this bed" size="md">
-      <div className="space-y-4">
-        <Field label="Patient" required><PatientPicker autoFocus value={patient} onPick={setPatient} onClear={() => setPatient(null)} /></Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Attending doctor"><select className={inputCls} value={doctor} onChange={(e) => setDoctor(e.target.value)}><option value="">—</option>{docs.data?.doctors.filter((d) => !d.branch || d.branch === branch).map((d) => <option key={d.name} value={d.name}>{d.doctor_name}</option>)}</select></Field>
-          <Field label="Expected stay (days)"><input className={inputCls} inputMode="numeric" value={days} onChange={(e) => setDays(e.target.value.replace(/\D/g, ""))} /></Field>
-        </div>
-        <Field label="Rate per day" hint={`${ward?.ward_type ?? "Ward"} default: ${defaultRate.toLocaleString()}/day`}><input className={inputCls} inputMode="numeric" value={rate} onChange={(e) => setRate(e.target.value.replace(/\D/g, ""))} /></Field>
-        <div><div className="text-xs font-semibold text-muted-foreground">{t("Estimated total")}</div><div className="text-2xl font-extrabold tabular-nums text-emerald-600">{total.toLocaleString()}</div></div>
-        <Field label="Reason for admission"><textarea className={inputCls + " h-20 py-2"} placeholder="Chief complaint / diagnosis…" value={reason} onChange={(e) => setReason(e.target.value)} /></Field>
-        <div className="flex justify-end gap-2 border-t border-border pt-4">
-          <Button variant="outline" onClick={onClose}>{t("Cancel")}</Button>
-          <Button variant="submit" disabled={!patient} loading={busy} onClick={() => void submit()}><CheckCircle2 className="h-4 w-4" />{t("Allot bed")}</Button>
-        </div>
-      </div>
-    </Dialog>
   );
 }

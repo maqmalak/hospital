@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "autoname": "field:procedure_name",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "procedure_name",
+  "department",
+  "category",
+  "pt1",
+  "price",
+  "theatre_charge",
+  "anesthesia_charge",
+  "requires_consent",
+  "requires_preauth",
+  "item",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "procedure_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Procedure Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Department",
+   "options": "Medical Department"
+  },
+  {
+   "default": "Minor",
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "Minor\nMajor\nBedside\nDiagnostic\nDelivery"
+  },
+  {
+   "fieldname": "pt1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Surgeon / procedure fee",
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price"
+  },
+  {
+   "fieldname": "theatre_charge",
+   "fieldtype": "Currency",
+   "label": "Theatre Charge"
+  },
+  {
+   "fieldname": "anesthesia_charge",
+   "fieldtype": "Currency",
+   "label": "Anesthesia Charge"
+  },
+  {
+   "default": "1",
+   "fieldname": "requires_consent",
+   "fieldtype": "Check",
+   "label": "Requires Consent"
+  },
+  {
+   "fieldname": "requires_preauth",
+   "fieldtype": "Check",
+   "label": "Insurance Pre-Auth Required"
+  },
+  {
+   "description": "Created automatically",
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-09 18:08:30.063374",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Procedure Type",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "procedure_name",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

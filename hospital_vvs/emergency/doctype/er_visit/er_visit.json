@@ -1,0 +1,390 @@
+{
+ "actions": [],
+ "autoname": "ER-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "t_reg",
+  "patient",
+  "patient_name",
+  "is_unknown",
+  "branch",
+  "r1",
+  "arrival_at",
+  "arrival_mode",
+  "brought_by",
+  "brought_by_phone",
+  "r2",
+  "status",
+  "bay",
+  "assigned_doctor",
+  "medico_legal",
+  "mlc_no",
+  "police_station",
+  "t_tri",
+  "triage_scale",
+  "triage_level",
+  "triage_rank",
+  "triage_color",
+  "t1",
+  "triaged_by",
+  "triaged_at",
+  "t2",
+  "chief_complaint",
+  "t3",
+  "bp_systolic",
+  "bp_diastolic",
+  "pulse",
+  "t4",
+  "temperature",
+  "spo2",
+  "resp_rate",
+  "gcs",
+  "t_out",
+  "disposition",
+  "disposition_at",
+  "disposition_note",
+  "o1",
+  "referred_to",
+  "bed_allotment",
+  "billing_mode",
+  "sales_invoice",
+  "death_datetime",
+  "cause_of_death"
+ ],
+ "fields": [
+  {
+   "fieldname": "t_reg",
+   "fieldtype": "Tab Break",
+   "label": "Arrival"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "is_unknown",
+   "fieldtype": "Check",
+   "label": "Unknown Patient",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "r1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "arrival_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Arrival At",
+   "reqd": 1
+  },
+  {
+   "default": "Walk-in",
+   "fieldname": "arrival_mode",
+   "fieldtype": "Select",
+   "label": "Arrival Mode",
+   "options": "Walk-in\nAmbulance (1122)\nPrivate ambulance\nPrivate vehicle\nPolice\nReferred"
+  },
+  {
+   "fieldname": "brought_by",
+   "fieldtype": "Data",
+   "label": "Brought By"
+  },
+  {
+   "fieldname": "brought_by_phone",
+   "fieldtype": "Data",
+   "label": "Brought By Phone"
+  },
+  {
+   "fieldname": "r2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Waiting",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Waiting\nIn Treatment\nObservation\nDisposed"
+  },
+  {
+   "fieldname": "bay",
+   "fieldtype": "Link",
+   "label": "Bay / Bed",
+   "options": "Hospital Bed"
+  },
+  {
+   "fieldname": "assigned_doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assigned Doctor",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "medico_legal",
+   "fieldtype": "Check",
+   "label": "Medico-legal Case"
+  },
+  {
+   "depends_on": "medico_legal",
+   "fieldname": "mlc_no",
+   "fieldtype": "Data",
+   "label": "MLC No."
+  },
+  {
+   "depends_on": "medico_legal",
+   "fieldname": "police_station",
+   "fieldtype": "Data",
+   "label": "Police Station"
+  },
+  {
+   "fieldname": "t_tri",
+   "fieldtype": "Tab Break",
+   "label": "Triage"
+  },
+  {
+   "fieldname": "triage_scale",
+   "fieldtype": "Data",
+   "label": "Triage Scale",
+   "read_only": 1
+  },
+  {
+   "fieldname": "triage_level",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Triage Level"
+  },
+  {
+   "description": "1 = most urgent",
+   "fieldname": "triage_rank",
+   "fieldtype": "Int",
+   "label": "Triage Rank",
+   "read_only": 1
+  },
+  {
+   "fieldname": "triage_color",
+   "fieldtype": "Data",
+   "label": "Triage Color",
+   "read_only": 1
+  },
+  {
+   "fieldname": "t1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "triaged_by",
+   "fieldtype": "Link",
+   "label": "Triaged By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "triaged_at",
+   "fieldtype": "Datetime",
+   "label": "Triaged At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "t2",
+   "fieldtype": "Section Break",
+   "label": "Complaint & vitals"
+  },
+  {
+   "fieldname": "chief_complaint",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Chief Complaint"
+  },
+  {
+   "fieldname": "t3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bp_systolic",
+   "fieldtype": "Int",
+   "label": "BP Systolic"
+  },
+  {
+   "fieldname": "bp_diastolic",
+   "fieldtype": "Int",
+   "label": "BP Diastolic"
+  },
+  {
+   "fieldname": "pulse",
+   "fieldtype": "Int",
+   "label": "Pulse"
+  },
+  {
+   "fieldname": "t4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "temperature",
+   "fieldtype": "Float",
+   "label": "Temperature"
+  },
+  {
+   "fieldname": "spo2",
+   "fieldtype": "Int",
+   "label": "SpO2"
+  },
+  {
+   "fieldname": "resp_rate",
+   "fieldtype": "Int",
+   "label": "Resp Rate"
+  },
+  {
+   "fieldname": "gcs",
+   "fieldtype": "Int",
+   "label": "GCS"
+  },
+  {
+   "fieldname": "t_out",
+   "fieldtype": "Tab Break",
+   "label": "Disposition"
+  },
+  {
+   "fieldname": "disposition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Disposition",
+   "options": "\nDischarged Home\nAdmitted\nReferred Out\nLAMA\nExpired"
+  },
+  {
+   "fieldname": "disposition_at",
+   "fieldtype": "Datetime",
+   "label": "Disposition At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "disposition_note",
+   "fieldtype": "Small Text",
+   "label": "Disposition Note"
+  },
+  {
+   "fieldname": "o1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "referred_to",
+   "fieldtype": "Data",
+   "label": "Referred To"
+  },
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "label": "Admission",
+   "options": "Bed Allotment",
+   "read_only": 1
+  },
+  {
+   "default": "Running bill",
+   "fieldname": "billing_mode",
+   "fieldtype": "Select",
+   "label": "Billing Mode",
+   "options": "Running bill\nOPD-style slip"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.disposition=='Expired'",
+   "fieldname": "death_datetime",
+   "fieldtype": "Datetime",
+   "label": "Death Datetime"
+  },
+  {
+   "depends_on": "eval:doc.disposition=='Expired'",
+   "fieldname": "cause_of_death",
+   "fieldtype": "Small Text",
+   "label": "Cause Of Death"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Emergency",
+ "name": "ER Visit",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "arrival_at",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

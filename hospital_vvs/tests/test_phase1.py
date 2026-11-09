@@ -86,9 +86,14 @@ def admin_shift():
 	"""Billing needs an open cashier shift (Phase 2): Administrator works at a free reception counter."""
 	from hospital_vvs.services import shifts
 
+	from hospital_vvs.tests.test_phase2 import retire_stale_shift
+
 	frappe.set_user("Administrator")
-	if shifts.current_shift():
+	if retire_stale_shift("Administrator"):
 		return
+	for c in frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main", "open_shift": ["is", "set"]}, pluck="current_user"):
+		if c:
+			retire_stale_shift(c)
 	free = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main", "open_shift": ["is", "not set"]}, pluck="name")
 	shifts.open_shift(free[0], {"Cash": 0})
 

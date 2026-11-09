@@ -1,0 +1,204 @@
+{
+ "actions": [],
+ "autoname": "DIET-.YYYY.-.######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_allotment",
+  "patient",
+  "patient_name",
+  "branch",
+  "do1",
+  "diet_date",
+  "diet_type",
+  "status",
+  "do2",
+  "breakfast",
+  "lunch",
+  "do3",
+  "dinner",
+  "snacks",
+  "do4",
+  "instructions",
+  "do5",
+  "charge",
+  "ipd_charge"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "do1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "diet_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Diet Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "diet_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Diet Type",
+   "options": "Diet Type",
+   "reqd": 1
+  },
+  {
+   "default": "Ordered",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Ordered\nServed\nCancelled"
+  },
+  {
+   "fieldname": "do2",
+   "fieldtype": "Section Break",
+   "label": "Meals"
+  },
+  {
+   "default": "1",
+   "fieldname": "breakfast",
+   "fieldtype": "Check",
+   "label": "Breakfast"
+  },
+  {
+   "default": "1",
+   "fieldname": "lunch",
+   "fieldtype": "Check",
+   "label": "Lunch"
+  },
+  {
+   "fieldname": "do3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "dinner",
+   "fieldtype": "Check",
+   "label": "Dinner"
+  },
+  {
+   "fieldname": "snacks",
+   "fieldtype": "Check",
+   "label": "Snacks"
+  },
+  {
+   "fieldname": "do4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "instructions",
+   "fieldtype": "Small Text",
+   "label": "Instructions"
+  },
+  {
+   "fieldname": "do5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "charge",
+   "fieldtype": "Currency",
+   "label": "Charge",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ipd_charge",
+   "fieldtype": "Link",
+   "label": "IPD Charge",
+   "options": "IPD Charge",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "Diet Order",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Accountant"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

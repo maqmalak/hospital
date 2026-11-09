@@ -30,6 +30,10 @@ SERVICE_ITEMS = [
 	("REG-FEE", "Registration Fee", "General"), ("PROC-DRESSING", "Dressing", "General"),
 	("PROC-INJECTION", "Injection Administration", "General"), ("PROC-NEBULIZE", "Nebulization", "General"),
 	("PROC-ECG", "ECG", "General"),
+	# Phase 3: IPD / ER bill lines
+	("IPD-BED", "Bed Charges", "IPD Slip"), ("IPD-ICU", "ICU Surcharge", "IPD Slip"), ("IPD-NURSING", "Nursing Care", "IPD Slip"),
+	("IPD-DIET", "Patient Diet", "IPD Slip"), ("IPD-OXYGEN", "Oxygen", "IPD Slip"), ("IPD-ADHOC", "Other Hospital Services", "IPD Slip"),
+	("ER-FEE", "Emergency Assessment", "IPD Slip"),
 ]
 DISCOUNT_RULES = [(R.RECEPTIONIST, 10, 1000), (R.LAB_USER, 10, 1000), (R.PHARMACY_CASHIER, 5, 500),
 	(R.DISPENSER, 5, 500), (R.CASH_SUPERVISOR, 50, 20000), (R.ACCOUNTANT, 50, 50000)]
@@ -206,6 +210,9 @@ def fill_settings(company, profiles):
 	s.consultation_item = s.consultation_item or "OPD-CONSULT"
 	s.follow_up_item = s.follow_up_item or "OPD-FOLLOWUP"
 	s.registration_item = s.registration_item or "REG-FEE"
+	for field, code in (("bed_charge_item", "IPD-BED"), ("icu_charge_item", "IPD-ICU"), ("nursing_charge_item", "IPD-NURSING"),
+		("diet_charge_item", "IPD-DIET"), ("oxygen_charge_item", "IPD-OXYGEN"), ("adhoc_charge_item", "IPD-ADHOC"), ("er_fee_item", "ER-FEE")):
+		s.set(field, s.get(field) or code)
 	if not s.discount_rules:
 		for role, pct, amt in DISCOUNT_RULES:
 			s.append("discount_rules", {"role": role, "max_percent": pct, "max_amount": amt})

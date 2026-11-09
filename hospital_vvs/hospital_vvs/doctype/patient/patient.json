@@ -58,6 +58,7 @@
   "l1",
   "disabled",
   "merged_into",
+  "temporary_record",
   "duplicate_reason",
   "registered_by"
  ],
@@ -391,6 +392,14 @@
    "read_only": 1
   },
   {
+   "description": "Unknown ER patient on a temporary MR; merge into the real record once identified",
+   "fieldname": "temporary_record",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Temporary Record",
+   "read_only": 1
+  },
+  {
    "description": "Why the user created a new record despite a possible duplicate",
    "fieldname": "duplicate_reason",
    "fieldtype": "Small Text",
@@ -408,7 +417,7 @@
  "image_field": "photo",
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-09 18:08:30.057497",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Patient",

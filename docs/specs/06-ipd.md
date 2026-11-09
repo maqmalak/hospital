@@ -24,3 +24,6 @@
 - If ERPNext **HRMS** is installed, use **Shift Type** and **Shift Assignment**; otherwise a simple **Nurse Duty Roster** DocType (ward, date, shift, nurses). Record which in `DECISIONS.md`.
 - Nursing station shows on-duty nurses; nursing charges per shift and MAR "administered by" suggestions use the roster.
 - Roster screen `/roster` (Admin, head nurse).
+
+## Build decisions (Phase 3)
+See `DECISIONS.md` D-28 … D-34: one IPD Charge ledger + one final invoice per stay, bed days by midnight census, nursing per started shift, advances as Payment Entries in the cashier shift, package and pre-auth caps, temporary MR for unknown ER patients, HRMS roster, and Floor/Room/ad-hoc/consumable folded into existing DocTypes.

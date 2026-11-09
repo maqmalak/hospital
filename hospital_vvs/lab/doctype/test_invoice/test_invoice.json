@@ -43,7 +43,12 @@
   "ti8",
   "released_at",
   "report_version",
-  "client_ref"
+  "client_ref",
+  "ti9",
+  "bed_allotment",
+  "ti10",
+  "er_visit",
+  "bill_to_admission"
  ],
  "fields": [
   {
@@ -286,11 +291,40 @@
    "label": "Client Ref",
    "no_copy": 1,
    "unique": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "ti9",
+   "fieldtype": "Section Break",
+   "label": "Admission"
+  },
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "label": "Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "ti10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "er_visit",
+   "fieldtype": "Link",
+   "label": "ER Visit",
+   "options": "ER Visit"
+  },
+  {
+   "description": "Charged on the admission / ER running bill, not at the lab counter",
+   "fieldname": "bill_to_admission",
+   "fieldtype": "Check",
+   "label": "Bill To Admission",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-09 18:00:57.207924",
  "modified_by": "Administrator",
  "module": "Lab",
  "name": "Test Invoice",

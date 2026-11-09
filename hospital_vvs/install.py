@@ -94,6 +94,23 @@ CUSTOM_FIELDS = {
 		{"fieldname": "hv_dispense_ticket", "fieldtype": "Link", "options": "Dispense Ticket", "label": "Dispense Ticket", "insert_after": "hv_token",
 			"read_only": 1},
 	],
+	"Payment Entry": [
+		{"fieldname": "hv_section", "fieldtype": "Section Break", "label": "VVSDesk", "insert_after": "remarks", "collapsible": 1},
+		{"fieldname": "hv_patient", "fieldtype": "Link", "options": "Patient", "label": "Patient", "insert_after": "hv_section", "read_only": 1},
+		{"fieldname": "hv_bed_allotment", "fieldtype": "Link", "options": "Bed Allotment", "label": "Admission", "insert_after": "hv_patient",
+			"read_only": 1, "search_index": 1},
+		{"fieldname": "hv_er_visit", "fieldtype": "Link", "options": "ER Visit", "label": "ER Visit", "insert_after": "hv_bed_allotment", "read_only": 1},
+		{"fieldname": "hv_col", "fieldtype": "Column Break", "insert_after": "hv_er_visit"},
+		{"fieldname": "hv_shift", "fieldtype": "Link", "options": "POS Opening Entry", "label": "Cashier Shift", "insert_after": "hv_col",
+			"read_only": 1, "search_index": 1},
+		{"fieldname": "hv_counter", "fieldtype": "Link", "options": "Counter", "label": "Counter", "insert_after": "hv_shift", "read_only": 1},
+		{"fieldname": "hv_purpose", "fieldtype": "Select", "options": "\nAdvance\nSettlement\nRefund", "label": "VVSDesk Purpose",
+			"insert_after": "hv_counter", "read_only": 1},
+	],
+	"Shift Assignment": [
+		{"fieldname": "hv_ward", "fieldtype": "Link", "options": "Ward", "label": "Ward", "insert_after": "shift_type"},
+		{"fieldname": "hv_is_head_nurse", "fieldtype": "Check", "label": "In Charge", "insert_after": "hv_ward"},
+	],
 }
 
 
@@ -135,6 +152,11 @@ EXTRA_PERMS = {
 	"Purchase Receipt": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN)},
 	"Purchase Invoice": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN, roles.ACCOUNTANT)},
 	"Stock Reconciliation": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN)},
+	# Phase 3: IPD / ER advances and settlements at the admission desk
+	"Payment Entry": {r: ["read", "create", "write", "submit", "print"] for r in (roles.RECEPTIONIST, roles.CASH_SUPERVISOR, roles.ACCOUNTANT, roles.ADMIN)},
+	"Shift Assignment": {r: ["read", "create", "write", "submit", "cancel"] for r in (roles.NURSE, roles.ADMIN)},
+	"Shift Type": {r: ["read"] for r in (roles.NURSE, roles.DOCTOR, roles.ADMIN, roles.RECEPTIONIST)},
+	"Employee": {r: ["read"] for r in (roles.NURSE, roles.ADMIN)},
 }
 
 
@@ -149,6 +171,8 @@ def ensure_erpnext_permissions():
 			if not frappe.db.exists("Custom DocPerm", {"parent": dt, "role": role, "permlevel": 0}):
 				add_permission(dt, role, 0)
 	for dt, by_role in EXTRA_PERMS.items():
+		if not frappe.db.exists("DocType", dt):
+			continue
 		for role, rights in by_role.items():
 			if not frappe.db.exists("Custom DocPerm", {"parent": dt, "role": role, "permlevel": 0}):
 				add_permission(dt, role, 0)
@@ -193,7 +217,8 @@ def after_migrate():
 	ensure_mm_core_compat()
 	ensure_erpnext_permissions()
 	fill_settings_defaults()
-	create_custom_fields(CUSTOM_FIELDS, update=True)
+	fields = {k: v for k, v in CUSTOM_FIELDS.items() if frappe.db.exists("DocType", k)}
+	create_custom_fields(fields, update=True)
 	ensure_page_access()
 	from hospital_vvs.messaging.templates import ensure_templates
 

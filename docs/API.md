@@ -81,6 +81,65 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 |---|---|---|---|---|
 | `board` | branch |  | RECEPTIONIST, DOCTOR, NURSE, DEO |  |
 
+## er
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `board` | branch |  | STAFF |  |
+| `register` | data | POST | STAFF |  |
+| `triage` | name, level, vitals, chief_complaint | POST | NURSE, DOCTOR |  |
+| `assign` | name, doctor, bay, status | POST | STAFF |  |
+| `visit` | name |  | STAFF |  |
+| `dispose` | name, disposition, note, referred_to, death_datetime, cause_of_death, admit, payment_mode, lama_form | POST | DOCTOR, RECEPTIONIST |  |
+| `identify` | name, patient | POST | ADMIN | Unknown patient identified: merge the temporary record into the real one (Admin; uses the patient merge tool). |
+
+## ipd
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `context` | branch |  |  |  |
+| `admissions` | branch, status, ward, q, limit |  | CLINICAL, DESK, BILL, DEO |  |
+| `admit` | data | POST | DESK, CLINICAL |  |
+| `transfer` | name, to_bed, reason | POST | CLINICAL, DESK |  |
+| `extend` | name, days | POST | CLINICAL, DESK |  |
+| `new_comms_token` | name | POST | CLINICAL, DESK |  |
+| `chart` | name |  | CLINICAL, DESK, DEO |  |
+| `add_note` | data | POST | CLINICAL, DEO |  |
+| `add_round` | data | POST | DOCTOR |  |
+| `add_vitals` | data | POST | CLINICAL, DEO |  |
+| `check_medicine` | patient, item, dose, frequency, bed_allotment, er_visit |  |  |  |
+| `order_medicine` | data | POST | DOCTOR |  |
+| `stop_order` | name, reason | POST | DOCTOR |  |
+| `chart_dose` | name, status, reason | POST | NURSE, DOCTOR |  |
+| `approve_dose` | names | POST | DOCTOR | MAR gate: a doctor, or the nurse in charge of the shift, approves doses. |
+| `prn_dose` | order, note | POST | NURSE, DOCTOR |  |
+| `mar_board` | branch, ward, hours |  | NURSE, DOCTOR |  |
+| `order_diet` | data | POST | CLINICAL |  |
+| `cancel_diet` | name, reason | POST | CLINICAL |  |
+| `kitchen` | branch, date |  | CLINICAL, DESK | Diet list for the kitchen: today's orders by ward and bed. |
+| `schedule_procedure` | data | POST | CLINICAL |  |
+| `procedure_status` | name, status, reason, notes | POST | CLINICAL |  |
+| `record_consent` | data | POST | CLINICAL, DESK |  |
+| `order_labs` | data | POST | DOCTOR, NURSE, RECEPTIONIST |  |
+| `add_charge` | data | POST | CLINICAL, DESK |  |
+| `cancel_charge` | name, reason | POST | RECEPTIONIST, ACCOUNTANT, CASH_SUPERVISOR |  |
+| `search_items` | q, stock_only, limit |  |  |  |
+| `bill` | name, er_visit |  | BILL, CLINICAL |  |
+| `request_discount` | name, amount, reason | POST | BILL |  |
+| `apply_discount` | name, discount_authorization | POST | BILL | Attach an approved discount to the admission; it is taken off when the final bill is made. |
+| `take_payment` | amount, payment_mode, purpose, name, er_visit, cash_tendered | POST | RECEPTIONIST, CASH_SUPERVISOR |  |
+| `start_discharge` | name, discharge_type | POST | DOCTOR, NURSE |  |
+| `sign_summary` | name, data | POST | DOCTOR |  |
+| `clearance` | name |  | CLINICAL, BILL |  |
+| `final_bill` | name, discount_amount, discount_authorization, override_reason | POST | BILL |  |
+| `cancel_final_bill` | name, reason | POST | ACCOUNTANT, CASH_SUPERVISOR |  |
+| `complete_discharge` | name, override_reason | POST | RECEPTIONIST, NURSE, DOCTOR |  |
+| `summary_print` | name |  | CLINICAL, RECEPTIONIST |  |
+| `pre_auths` | patient, status |  | DESK, ACCOUNTANT, DOCTOR |  |
+| `save_pre_auth` | data | POST | DESK, ACCOUNTANT |  |
+| `decide_pre_auth` | name, status, approved_amount, approval_no, valid_till, notes | POST | ACCOUNTANT |  |
+| `report` | branch, from_date, to_date |  | ADMIN, DOCTOR, RECEPTIONIST, ACCOUNTANT |  |
+
 ## lab
 
 | Method | Params | Flags | Roles | Summary |
@@ -203,6 +262,16 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `copy_previous` | patient |  |  |  |
 | `print_data` | name |  |  |  |
 
+## roster
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `week` | branch, start, days |  | NURSE, DOCTOR |  |
+| `assign` | user, ward, date, shift_type, head | POST |  |  |
+| `unassign` | name | POST |  |  |
+| `copy_week` | branch, start, to_start | POST |  | Repeat one week's roster a week later (skips shifts already planned). |
+| `on_duty` | ward, branch |  | NURSE, DOCTOR, RECEPTIONIST |  |
+
 ## session
 
 | Method | Params | Flags | Roles | Summary |
@@ -238,9 +307,9 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 |---|---|---|---|---|
 | `bed_map` | branch |  |  |  |
 | `set_status` | bed, status, note, hours | POST | STAFF |  |
-| `assign` | bed, patient, doctor, note, days, rate, reason | POST | STAFF | Allot a bed (interim until Phase 3's Bed Allotment drives this): expected stay, agreed daily rate, reason. |
+| `assign` | bed, patient, doctor, note, days, rate, reason | POST | STAFF | Allot a bed = admit the patient (kept for the bed map's quick allot). |
 | `extend` | bed, days | POST | STAFF |  |
 | `kiosk` | branch |  |  | Ward kiosk display: per-ward counts and beds; initials only unless first names are allowed on displays. |
-| `transfer` | bed, to_bed, note | POST | NURSE, DOCTOR |  |
-| `release` | bed, note | POST | STAFF |  |
+| `transfer` | bed, to_bed, note | POST | NURSE, DOCTOR, RECEPTIONIST |  |
+| `release` | bed, note | POST | STAFF | Free a bed that has no admission (e.g. an ER bay). Admitted patients leave through discharge. |
 | `bed_history` | bed |  |  |  |

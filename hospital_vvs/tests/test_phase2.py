@@ -18,13 +18,28 @@ def as_user(user):
 	frappe.set_user(user)
 
 
+def retire_stale_shift(user):
+	"""A demo shift left open on an earlier day (or stuck in closing) would block billing today. Tests roll back, so it is simply
+	marked closed for the duration of the test."""
+	s = shifts.current_shift(user)
+	if s and (str(s.posting_date) != today() or shifts.pending_closing(s.name)):
+		frappe.db.set_value("POS Opening Entry", s.name, "status", "Closed")
+		if s.hv_counter:
+			frappe.db.set_value("Counter", s.hv_counter, {"open_shift": None, "current_user": None})
+		return None
+	return s
+
+
 def shift_for(user, counter, float_=0):
 	as_user(user)
-	s = shifts.current_shift()
+	s = retire_stale_shift(user)
 	if s:
 		return s
 	# the counter might be held by someone in the demo data: use a free counter of the same type
 	c = frappe.get_doc("Counter", counter)
+	if c.open_shift and c.current_user:
+		retire_stale_shift(c.current_user)
+		c.reload()
 	if c.open_shift and frappe.db.get_value("POS Opening Entry", c.open_shift, "status") == "Open":
 		free = frappe.get_all("Counter", filters={"counter_type": c.counter_type, "branch": c.branch, "open_shift": ["is", "not set"]}, pluck="name")
 		if not free:
@@ -55,7 +70,8 @@ def receive(code, warehouse=RETAIL, near_months=6):
 
 
 def a_patient():
-	return frappe.get_all("Patient", filters={"branch": "Lahore Main", "disabled": 0}, pluck="name", limit=1)[0]
+	return frappe.get_all("Patient", filters={"branch": "Lahore Main", "disabled": 0, "temporary_record": 0, "phone": ["is", "set"]}, pluck="name",
+		limit=1)[0]
 
 
 def signed_rx(patient, item, qty=30, lab_tests=()):

@@ -1,4 +1,4 @@
-"""Live bed map (user request; Restaurant OS table-map style). Admission/discharge workflow arrives in Phase 3."""
+"""Live bed map (Restaurant OS table-map style). Occupying, moving and freeing a bed goes through the admission (services/ipd.py)."""
 
 import frappe
 from frappe import _
@@ -31,7 +31,13 @@ def bed_map(branch=None):
 	docs = {d.name: d.doctor_name for d in frappe.get_all("Doctor", fields=["name", "doctor_name"])}
 	from hospital_vvs.api.patients import age_of
 
+	adms = {a.bed: a for a in frappe.get_all("Bed Allotment", filters={"branch": branch, "status": ["in", ["Admitted", "Discharge Pending"]]},
+		fields=["name", "bed", "status", "payer_type", "final_invoice"])}
 	for b in beds:
+		a = adms.get(b.name)
+		b["admission"] = a.name if a else None
+		b["admission_status"] = a.status if a else None
+		b["payer_type"] = a.payer_type if a else None
 		p = pats.get(b.current_patient)
 		b["gender"] = p.gender if p else None
 		b["age"] = age_of(p.dob) if p else None
@@ -70,6 +76,8 @@ def _set(bed_name, status, note=None, **values):
 @frappe.whitelist(methods=["POST"])
 def set_status(bed, status, note=None, hours=None):
 	require_roles(*STAFF)
+	if status == "Occupied":
+		frappe.throw(_("Admit the patient to occupy a bed."))
 	values = {}
 	if status == "Reserved":
 		values["reserved_until"] = add_to_date(now_datetime(), hours=cint(hours) or 4)
@@ -83,29 +91,26 @@ def bed_rate(bed_name):
 
 @frappe.whitelist(methods=["POST"])
 def assign(bed, patient, doctor=None, note=None, days=1, rate=None, reason=None):
-	"""Allot a bed (interim until Phase 3's Bed Allotment drives this): expected stay, agreed daily rate, reason."""
+	"""Allot a bed = admit the patient (kept for the bed map's quick allot)."""
 	require_roles(*STAFF)
-	if frappe.db.exists("Hospital Bed", {"current_patient": patient, "status": "Occupied"}):
-		frappe.throw(_("This patient already has a bed."))
-	now = now_datetime()
-	return _set(bed, "Occupied", note, current_patient=patient, patient_name=frappe.db.get_value("Patient", patient, "patient_name"),
-		occupied_since=now, attending_doctor=doctor, expected_discharge=add_to_date(now, days=max(cint(days), 1)),
-		agreed_rate=flt(rate) or bed_rate(bed), admission_reason=reason)
+	from hospital_vvs.services import ipd
+
+	if not doctor:
+		frappe.throw(_("Choose the attending doctor."))
+	adm, _token = ipd.admit(patient, bed, doctor, reason=reason, planned_days=days, daily_rate=rate)
+	return frappe.get_doc("Hospital Bed", bed).as_dict() | {"admission": adm.name}
 
 
 @frappe.whitelist(methods=["POST"])
 def extend(bed, days=1):
 	require_roles(*STAFF)
-	b = frappe.get_doc("Hospital Bed", bed)
-	if b.status != "Occupied":
-		frappe.throw(_("Only an occupied bed can be extended."))
-	base = max(b.expected_discharge or now_datetime(), now_datetime())
-	b.expected_discharge = add_to_date(base, days=max(cint(days), 1))
-	b.flags.ignore_permissions = True
-	b.save()
-	_log(b, "Occupied", "Occupied", b.current_patient, _("Stay extended by {0} day(s)").format(cint(days) or 1))
-	publish("beds", {"bed": b.name, "status": "Occupied"}, b.branch)
-	return b.as_dict()
+	from hospital_vvs.services import ipd
+
+	adm = frappe.db.get_value("Bed Allotment", {"bed": bed, "status": ["in", ipd.OPEN_STATES]}, "name")
+	if not adm:
+		frappe.throw(_("No admission on this bed."))
+	ipd.extend(adm, days)
+	return frappe.get_doc("Hospital Bed", bed).as_dict()
 
 
 @frappe.whitelist()
@@ -116,28 +121,32 @@ def kiosk(branch=None):
 	for b in data["beds"]:
 		name = b.pop("patient_name", None) or ""
 		b["label"] = (name.split(" ")[0] if show else "".join(w[0] for w in name.split()[:2]).upper()) if name else None
-		for k in ("current_patient", "admission_reason", "agreed_rate", "category", "doctor_name", "attending_doctor", "status_note"):
+		for k in ("admission", "admission_status", "payer_type", "current_patient", "admission_reason", "agreed_rate", "category", "doctor_name", "attending_doctor", "status_note"):
 			b.pop(k, None)
 	return data
 
 
 @frappe.whitelist(methods=["POST"])
 def transfer(bed, to_bed, note=None):
-	require_roles(R.NURSE, R.DOCTOR)
-	src = frappe.get_doc("Hospital Bed", bed)
-	if src.status != "Occupied":
-		frappe.throw(_("Only an occupied bed can be transferred."))
-	patient, doctor, reason, until = src.current_patient, src.attending_doctor, src.admission_reason, src.expected_discharge
-	since = src.occupied_since
-	_set(bed, "Cleaning", note or _("Transferred to {0}").format(to_bed))
-	out = assign(to_bed, patient, doctor, note or _("Transferred from {0}").format(bed), reason=reason)
-	frappe.db.set_value("Hospital Bed", to_bed, {"occupied_since": since, "expected_discharge": until})
-	return out
+	require_roles(R.NURSE, R.DOCTOR, R.RECEPTIONIST)
+	from hospital_vvs.services import ipd
+
+	adm = frappe.db.get_value("Bed Allotment", {"bed": bed, "status": ["in", ipd.OPEN_STATES]}, "name")
+	if not adm:
+		frappe.throw(_("No admission on this bed."))
+	ipd.transfer(adm, to_bed, note)
+	return frappe.get_doc("Hospital Bed", to_bed).as_dict()
 
 
 @frappe.whitelist(methods=["POST"])
 def release(bed, note=None):
+	"""Free a bed that has no admission (e.g. an ER bay). Admitted patients leave through discharge."""
 	require_roles(*STAFF)
+	from hospital_vvs.services import ipd
+
+	adm = frappe.db.get_value("Bed Allotment", {"bed": bed, "status": ["in", ipd.OPEN_STATES]}, "name")
+	if adm:
+		frappe.throw(_("{0} is admitted on this bed. Use Discharge on the admission.").format(adm))
 	return _set(bed, "Cleaning", note or _("Patient left the bed"))
 
 

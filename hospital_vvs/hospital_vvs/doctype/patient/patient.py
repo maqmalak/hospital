@@ -28,7 +28,8 @@ def mask_cnic(digits):
 class Patient(Document):
 	def autoname(self):
 		code = frappe.db.get_value("Branch", self.branch, "hv_branch_code") or "GEN"
-		self.name = make_autoname(f"MR-{code}-.######", doc=self)
+		prefix = "TMP" if self.temporary_record else "MR"  # unknown ER patients get a temporary MR (06-ipd.md)
+		self.name = make_autoname(f"{prefix}-{code}-.######", doc=self)
 
 	def validate(self):
 		self.patient_name = " ".join((self.patient_name or "").split())

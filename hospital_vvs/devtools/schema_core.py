@@ -2,6 +2,7 @@
 
 from hospital_vvs.devtools.dt import cb, doctype, f, p, sb, tab
 from hospital_vvs.devtools.schema_phase2 import SETTINGS_FIELDS as PHASE2_SETTINGS
+from hospital_vvs.devtools.schema_phase3 import SETTINGS_FIELDS as PHASE3_SETTINGS
 from hospital_vvs.roles import (
 	ACCOUNTANT, ADMIN, CASH_SUPERVISOR, CLINICAL, DEO, DISPENSER, DOCTOR, FINDER, LAB_USER, NURSE, OV_DOCTOR, OV_STAFF,
 	PATHOLOGIST, PHARMACY_CASHIER, RECEPTIONIST, REVIEWER, STORE_KEEPER,
@@ -135,6 +136,7 @@ SETTINGS = doctype("Clinic Settings", M, [
 	cb("b1"), f("doctor_share_basis", "Select", ["At invoice", "On payment"], default="At invoice"),
 
 	*PHASE2_SETTINGS,
+	*PHASE3_SETTINGS,
 
 	tab("security_tab", "Security"),
 	f("enforce_two_factor", "Check", description="Two-factor login for PW Admin, Accountant, Cash Supervisor and Pathologist"),
@@ -284,6 +286,7 @@ PATIENT = doctype("Patient", M, [
 	tab("links_tab", "Links"),
 	f("customer", "Link", "Customer", ro=1), f("household", "Link", "Household", ro=1), cb("l1"),
 	f("disabled", "Check", filter=1), f("merged_into", "Link", "Patient", ro=1),
+	f("temporary_record", "Check", ro=1, filter=1, description="Unknown ER patient on a temporary MR; merge into the real record once identified"),
 	f("duplicate_reason", "Small Text", ro=1, description="Why the user created a new record despite a possible duplicate"),
 	f("registered_by", "Link", "User", ro=1),
 ], [

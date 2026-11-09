@@ -1,0 +1,245 @@
+{
+ "actions": [],
+ "autoname": "MAR-.YYYY.-.#######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bed_allotment",
+  "er_visit",
+  "patient",
+  "patient_name",
+  "branch",
+  "medication_order",
+  "e1",
+  "item",
+  "item_name",
+  "dose",
+  "route",
+  "qty_units",
+  "e2",
+  "scheduled_at",
+  "status",
+  "administered_by",
+  "administered_at",
+  "approved_by",
+  "e3",
+  "batch_no",
+  "stock_entry",
+  "e4",
+  "billed",
+  "ipd_charge",
+  "reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "bed_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "er_visit",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "ER Visit",
+   "options": "ER Visit"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "medication_order",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Medication Order",
+   "options": "IPD Medication Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "e1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dose",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dose"
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Data",
+   "label": "Route"
+  },
+  {
+   "default": "1",
+   "fieldname": "qty_units",
+   "fieldtype": "Float",
+   "label": "Qty Units"
+  },
+  {
+   "fieldname": "e2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "scheduled_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Scheduled At"
+  },
+  {
+   "default": "Scheduled",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Scheduled\nPending Approval\nApproved\nAdministered\nMissed\nRefused\nHeld\nCancelled"
+  },
+  {
+   "fieldname": "administered_by",
+   "fieldtype": "Link",
+   "label": "Administered By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "administered_at",
+   "fieldtype": "Datetime",
+   "label": "Administered At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "e3",
+   "fieldtype": "Section Break",
+   "label": "Stock & bill"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Data",
+   "label": "Batch No.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "label": "Stock Entry",
+   "options": "Stock Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "e4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billed",
+   "fieldtype": "Check",
+   "label": "Billed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ipd_charge",
+   "fieldtype": "Link",
+   "label": "IPD Charge",
+   "options": "IPD Charge",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Missed / Refused / Held Reason"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IPD",
+ "name": "MAR Entry",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW DEO"
+  },
+  {
+   "read": 1,
+   "role": "PW Reviewer"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "scheduled_at",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}
