@@ -16,6 +16,12 @@ def my_shift():
 	require_roles(*CASH_ROLES)
 	shift = shifts.current_shift()
 	counters = shifts.counters_for()
+	# counters a user may open: pharmacy counters belong to the contract pharmacy staff (D-38), lab counters to the lab
+	from hospital_vvs.utils import has_any_role
+
+	allowed = {"Reception": (R.RECEPTIONIST,), "IPD Desk": (R.RECEPTIONIST,), "General": (R.RECEPTIONIST,), "Lab": (R.LAB_USER,),
+		"Pharmacy Billing": (R.PHARMACY_CASHIER,), "Pharmacy Handover": (R.DISPENSER,)}
+	counters = [c for c in counters if has_any_role(*allowed.get(c.counter_type, (R.RECEPTIONIST,)), R.CASH_SUPERVISOR)]
 	out = {"counters": counters, "shift": None, "denominations": shifts.denominations(), "blind": cint(setting("blind_count")),
 		"tolerance": flt(setting("cash_tolerance")), "modes": ["Cash", "Card", "Bank Transfer", "JazzCash", "Easypaisa"]}
 	if shift:

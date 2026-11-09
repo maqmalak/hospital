@@ -69,6 +69,22 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `confirm_drop` | name, accept, note | POST |  |  |
 | `report` | from_date, to_date, branch |  | CASH_SUPERVISOR, ACCOUNTANT | Shift history, day-end position per counter and mode, excess/short per cashier, open shifts, pending drops. |
 
+## counter
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `context` | branch |  | ROLES |  |
+| `patient` | name |  | ROLES |  |
+| `price` | data | POST | ROLES |  |
+| `request_discounts` | data | POST | ROLES |  |
+| `discount_status` | names |  | ROLES |  |
+| `checkout` | data | POST | ROLES |  |
+| `sync` | receipts | POST | ROLES |  |
+| `receipts` | shift, q, limit |  | ROLES |  |
+| `receipt` | name |  | ROLES |  |
+| `refund` | name, rows, reason | POST | ROLES |  |
+| `offline_bundle` | branch |  | ROLES |  |
+
 ## dashboard
 
 | Method | Params | Flags | Roles | Summary |

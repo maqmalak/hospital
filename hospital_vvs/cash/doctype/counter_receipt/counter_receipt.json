@@ -1,0 +1,256 @@
+{
+ "actions": [],
+ "autoname": "RCPT-.YY.MM.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient",
+  "patient_name",
+  "branch",
+  "counter",
+  "r1",
+  "shift",
+  "cashier",
+  "posted_at",
+  "status",
+  "r2",
+  "lines",
+  "r3",
+  "gross_total",
+  "discount_total",
+  "net_total",
+  "payer_share",
+  "patient_total",
+  "r4",
+  "tenders",
+  "tendered",
+  "change_amount",
+  "r5",
+  "client_ref",
+  "offline",
+  "offline_created",
+  "r6",
+  "refund_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "counter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Counter",
+   "options": "Counter"
+  },
+  {
+   "fieldname": "r1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Cashier Shift",
+   "options": "POS Opening Entry"
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cashier",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posted_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Posted At"
+  },
+  {
+   "default": "Paid",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Paid\nPartly Refunded\nRefunded"
+  },
+  {
+   "fieldname": "r2",
+   "fieldtype": "Section Break",
+   "label": "Lines"
+  },
+  {
+   "fieldname": "lines",
+   "fieldtype": "Table",
+   "label": "Lines",
+   "options": "Counter Receipt Line"
+  },
+  {
+   "fieldname": "r3",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "fieldname": "gross_total",
+   "fieldtype": "Currency",
+   "label": "Gross Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_total",
+   "fieldtype": "Currency",
+   "label": "Discount Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payer_share",
+   "fieldtype": "Currency",
+   "label": "Payer Share",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_total",
+   "fieldtype": "Currency",
+   "label": "Patient Pays",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tenders",
+   "fieldtype": "Table",
+   "label": "Tenders",
+   "options": "Counter Receipt Tender"
+  },
+  {
+   "fieldname": "tendered",
+   "fieldtype": "Currency",
+   "label": "Tendered",
+   "read_only": 1
+  },
+  {
+   "fieldname": "change_amount",
+   "fieldtype": "Currency",
+   "label": "Change Amount",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "r5",
+   "fieldtype": "Section Break",
+   "label": "Offline"
+  },
+  {
+   "fieldname": "client_ref",
+   "fieldtype": "Data",
+   "label": "Client Ref",
+   "no_copy": 1,
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "offline",
+   "fieldtype": "Check",
+   "label": "Offline",
+   "read_only": 1
+  },
+  {
+   "fieldname": "offline_created",
+   "fieldtype": "Datetime",
+   "label": "Offline Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "refund_reason",
+   "fieldtype": "Small Text",
+   "label": "Refund Reason",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Cash",
+ "name": "Counter Receipt",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "PW Cash Supervisor"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "PW Accountant"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "posted_at",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

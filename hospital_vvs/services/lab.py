@@ -50,7 +50,7 @@ def create_order(patient, tests, branch, referring_doctor=None, prescription=Non
 	return ti
 
 
-def pay(name, payment_mode="Cash", discount_amount=0, discount_reason=None, discount_authorization=None, cash_tendered=None):
+def pay(name, payment_mode="Cash", discount_amount=0, discount_reason=None, discount_authorization=None, cash_tendered=None, payments=None):
 	"""Bill the order on the Lab POS Profile (in the collector's shift), then create samples and send the thank-you."""
 	ti = frappe.get_doc("Test Invoice", name)
 	if ti.status not in ("Ordered", "Draft"):
@@ -68,7 +68,7 @@ def pay(name, payment_mode="Cash", discount_amount=0, discount_reason=None, disc
 		if flt(ti.patient_share):
 			si = billing.create_invoice(customer=customer, patient=ti.patient, lines=billing.split_lines(lines, fraction) if ti.payer_share else lines,
 				billing_type="Lab", branch=ti.branch, reference_doctype="Test Invoice", reference_name=ti.name,
-				discount_amount=flt(ti.discount_amount) * fraction, payment_mode=payment_mode)
+				discount_amount=flt(ti.discount_amount) * fraction, payment_mode=payment_mode, payments=payments)
 			ti.db_set("sales_invoice", si)
 			from hospital_vvs.opd.doctype.opd_slip.opd_slip import shift_of
 

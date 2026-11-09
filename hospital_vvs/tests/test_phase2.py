@@ -317,6 +317,10 @@ class TestCash(IntegrationTestCase):
 		from hospital_vvs.services import billing
 
 		as_user("reception2@vvs.demo")
+		cur = shifts.current_shift()
+		if cur:  # someone is using the demo counter today: set that shift aside for this test (rolled back)
+			frappe.db.set_value("POS Opening Entry", cur.name, "status", "Closed")
+			frappe.db.set_value("Counter", cur.hv_counter, {"open_shift": None, "current_user": None})
 		sh = shifts.open_shift("Reception 2", {"Cash": 5000})
 		pat = frappe.get_all("Patient", filters={"branch": "Lahore Main"}, pluck="name", limit=5)
 		cust = frappe.db.get_value("Patient", pat[0], "customer")

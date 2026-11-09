@@ -64,6 +64,8 @@ const PreAuthPage = lazy(() => import("@/modules/ipd/MorePages").then((m) => ({ 
 const IpdReportPage = lazy(() => import("@/modules/ipd/MorePages").then((m) => ({ default: m.ReportPage })));
 const RosterPage = lazy(() => import("@/modules/ipd/RosterPage"));
 const ErBoardPage = lazy(() => import("@/modules/er/ErBoardPage"));
+const CounterPage = lazy(() => import("@/modules/counter/CounterPage"));
+const CounterDisplayPage = lazy(() => import("@/modules/counter/DisplayPage"));
 const OnlineVisitPage = lazy(() => import("@/modules/public/OnlineVisitPage"));
 const OnlineVisitStatusPage = lazy(() => import("@/modules/public/OnlineVisitStatusPage"));
 const OvStaffPage = lazy(() => import("@/modules/ov/OvStaffPage"));
@@ -113,6 +115,8 @@ export default function App() {
         <Route path="/patients/merge" element={g("/patients/merge", <MergePage />)} />
         <Route path="/patients/:mr" element={g("/patients", <PatientDetailPage />)} />
         <Route path="/opd_slip" element={g("/opd_slip", <OpdSlipPage />)} />
+        <Route path="/counter" element={g("/counter", <CounterPage />)} />
+        <Route path="/counter/display" element={g("/counter", <CounterDisplayPage />, true)} />
         <Route path="/physician-queue" element={g("/physician-queue", <QueuePage />)} />
         <Route path="/display/queue" element={g("/physician-queue", <QueueDisplayPage />, true)} />
         <Route path="/pw-prescription" element={g("/pw-prescription", <PrescriptionPage />)} />

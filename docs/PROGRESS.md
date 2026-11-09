@@ -103,6 +103,14 @@ Bed days by midnight census + minimum · nursing per started shift across a tran
 - Online visit fees are taken by **reception in their shift** (Cash / Bank Transfer / JazzCash / Easypaisa) and refunded from the shift; reception sees `/ov-staff` for that. Hospital wallets now have their own accounts (JazzCash Wallet, Easypaisa Wallet).
 - Tests: 42 green (new: ward order billed by the pharmacy; fee in the reception shift; online desk cannot post money).
 
+## Change — Reception counter (Restaurant OS style, 2026-11-09, D-39)
+- `/counter` for receptionists (and cash supervisors): catalogue of doctors (fee, waiting count), services and lab tests; patient search or quick new patient; **Patient bills** tab with the open admission (advance, or settle the final bill), unpaid online visit fees and old dues.
+- Cart cards with kind colour, quantity, Rs discount (authorization per billing type), and Normal / Elderly / Disabled / Urgent priority on consultations (moves the token up the doctor's queue). Server prices every line (free follow-up, panel share).
+- Payment: tender tiles, keypad, exact / quick cash, split across modes with transaction IDs, change; 80 mm receipt with big OPD tokens; customer display window; hold / resume; receipts panel with reprint and refund by line; F-key shortcuts; lock (F12).
+- Offline: sales queue in the browser and sync every 30 s / on reconnect; posted once (client reference); failed ones stay listed with the reason.
+- Shift page now offers each role only its own counters (reception does not see the contractor's pharmacy counters).
+- Tests: `tests/test_counter.py` (3) — one cart with split tender, change only from cash, priority, idempotent retry, refund of one line; IPD advance split over two modes and refunded; offline sync with one failing sale. Full suite 45 green. Checked in the browser as reception2: Rs 2,000 cash + Rs 5,500 JazzCash over a consultation and an IPD advance (RCPT-2611-00001, token 1). That demo shift at Reception 2 is still open.
+
 ## Deferred / known gaps
 - **Staging + training sites, restore drill on staging**: need `bench new-site` (MariaDB root password) — scripts and steps in `docs/OPS.md`; decrypt-and-check drill done locally.
 - **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.

@@ -216,7 +216,7 @@ def fee_modes():
 	return [m.strip() for m in (setting("ov_fee_modes") or "Cash\nBank Transfer\nJazzCash\nEasypaisa").split("\n") if m.strip()]
 
 
-def verify_fee(name, ok=True, note=None, payment_reference=None, payment_mode=None):
+def verify_fee(name, ok=True, note=None, payment_reference=None, payment_mode=None, payments=None):
 	"""Reception confirms the transfer (or takes the fee at the desk) inside their cashier shift: a POS Sales Invoice (Fee) paid by
 	Cash / Bank Transfer / JazzCash / Easypaisa, counted in the shift like OPD and IPD money (DECISIONS D-38, replaces D-35)."""
 	ov = get_open(name, ("Pending", "Accepted", "Completed"))
@@ -240,7 +240,7 @@ def verify_fee(name, ok=True, note=None, payment_reference=None, payment_mode=No
 
 	shift = billing_shift(ov.branch)
 	si = billing.create_invoice(customer=customer, patient=patient, lines=[{"item_code": fee_item(), "qty": 1, "rate": flt(ov.fee)}], billing_type="Fee",
-		branch=ov.branch, reference_doctype="Online Visit Request", reference_name=ov.name, pos=True, payment_mode=mode,
+		branch=ov.branch, reference_doctype="Online Visit Request", reference_name=ov.name, pos=True, payment_mode=mode, payments=payments,
 		remarks=_("Online visit {0}{1}").format(ov.name, f" · ref {ov.payment_reference}" if ov.payment_reference else ""))
 	ov.update({"fee_status": "Verified", "fee_verified_by": frappe.session.user, "fee_verified_at": now_datetime(), "sales_invoice": si,
 		"payment_entry": None, "payment_method": ov.payment_method if mode != "Cash" else ov.payment_method})

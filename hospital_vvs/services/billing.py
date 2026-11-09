@@ -36,9 +36,10 @@ def split_lines(lines, fraction):
 
 
 def create_invoice(*, customer, patient, lines, billing_type, branch, reference_doctype, reference_name,
-	discount_amount=0, payment_mode="Cash", pos=True, payer_share_of=None, remarks=None, posting_date=None, payer=False, prepare=None):
+	discount_amount=0, payment_mode="Cash", pos=True, payer_share_of=None, remarks=None, posting_date=None, payer=False, prepare=None, payments=None):
 	"""Create and submit a Sales Invoice. Idempotent per (reference, payer/patient side). Returns its name.
-	prepare(si): optional last step before insert (IPD uses it to allocate the admission's advances)."""
+	prepare(si): optional last step before insert (IPD uses it to allocate the admission's advances).
+	payments: optional split tender [{mode_of_payment, amount}] for POS invoices (reception counter); default = one row of payment_mode."""
 	existing = existing_invoice(reference_doctype, reference_name, payer=payer)
 	if existing:
 		return existing
@@ -101,7 +102,18 @@ def create_invoice(*, customer, patient, lines, billing_type, branch, reference_
 		if not mop:
 			frappe.throw(_("POS Profile {0} has no payment methods.").format(profile_name))
 		amount = flt(si.rounded_total or si.grand_total)
-		si.append("payments", {"mode_of_payment": mop.mode_of_payment, "amount": amount})
+		split = [p for p in (payments or []) if flt(p.get("amount")) > 0]
+		if split:
+			allowed = {p.mode_of_payment for p in pay_profile.payments}
+			left = amount
+			for i, p in enumerate(split):
+				if p["mode_of_payment"] not in allowed:
+					frappe.throw(_("{0} is not set up on this counter.").format(p["mode_of_payment"]))
+				part = left if i == len(split) - 1 else min(flt(p["amount"]), left)
+				si.append("payments", {"mode_of_payment": p["mode_of_payment"], "amount": part})
+				left -= part
+		else:
+			si.append("payments", {"mode_of_payment": mop.mode_of_payment, "amount": amount})
 		si.calculate_taxes_and_totals()
 	if prepare:
 		prepare(si)

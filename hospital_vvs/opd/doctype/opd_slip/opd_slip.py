@@ -102,7 +102,7 @@ class OPDSlip(Document):
 			si = billing.create_invoice(customer=customer, patient=self.patient, lines=gross_lines, billing_type="OPD Slip",
 				branch=self.branch, reference_doctype=self.doctype, reference_name=self.name,
 				discount_amount=flt(self.discount_amount) * fraction, payment_mode=self.payment_mode,
-				posting_date=self.posting_date)
+				posting_date=self.posting_date, payments=self.flags.get("hv_payments"))
 			self.db_set("sales_invoice", si)
 			self.db_set("pos_opening_entry", shift_of(si))
 		if flt(self.payer_share):

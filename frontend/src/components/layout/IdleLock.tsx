@@ -28,6 +28,13 @@ export function IdleLock({ minutes }: { minutes: number }) {
     return () => { evs.forEach((e) => window.removeEventListener(e, bump)); clearInterval(timer); };
   }, [locked, minutes]);
 
+  // manual lock (reception counter "Lock" button / F12)
+  useEffect(() => {
+    const lock = () => { setLocked(true); try { sessionStorage.setItem("hv.locked", "1"); } catch { /* ignore */ } };
+    window.addEventListener("hv-lock", lock);
+    return () => window.removeEventListener("hv-lock", lock);
+  }, []);
+
   if (!locked) return null;
   const unlock = async () => {
     setBusy(true);

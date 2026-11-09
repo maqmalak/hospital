@@ -21,6 +21,7 @@ DEFAULT_ROUTES = [
 	("/appointments/inbox", "WhatsApp inbox", [RECEPTIONIST], "enable_whatsapp"),
 	("/physician-queue", "Physician queue", ALL, ""),
 	("/opd_slip", "OPD slip", [RECEPTIONIST], ""),
+	("/counter", "Reception counter", [RECEPTIONIST, CASH_SUPERVISOR], "enable_shifts"),
 	("/pw-prescription", "Prescription workspace", [DOCTOR, OV_DOCTOR], ""),
 	("/pw-history", "Patient history", [DOCTOR, NURSE], ""),
 	("/doctors", "Doctors", [RECEPTIONIST], ""),

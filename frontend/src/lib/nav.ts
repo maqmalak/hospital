@@ -1,7 +1,7 @@
 import {
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
   ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
-  Activity, BarChart3, BedDouble, Receipt, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
+  Activity, BarChart3, BedDouble, Receipt, ReceiptText, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
   MessageCircle, MessagesSquare, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
   type LucideIcon,
 } from "lucide-react";
@@ -12,6 +12,7 @@ export interface NavGroup { label: string; items: NavItem[] }
 export const NAV: NavGroup[] = [
   { label: "Front desk", items: [
     { route: "/registration", label: "Patient registration", icon: UserPlus, color: "from-teal-500 to-emerald-500", desc: "Register, search, duplicate check, card" },
+    { route: "/counter", label: "Reception counter", icon: ReceiptText, color: "from-emerald-600 to-teal-700", desc: "One cart: OPD, services, lab, IPD, online fees, dues" },
     { route: "/opd_slip", label: "OPD slip", icon: FilePlus2, color: "from-sky-500 to-cyan-500", desc: "Fee, vitals, token and receipt" },
     { route: "/appointments", label: "Appointments", icon: CalendarClock, color: "from-violet-500 to-indigo-500", desc: "Reception, web and WhatsApp bookings" },
     { route: "/appointments/inbox", label: "WhatsApp inbox", icon: MessageCircle, color: "from-green-500 to-emerald-600", desc: "Chats handed to reception" },
