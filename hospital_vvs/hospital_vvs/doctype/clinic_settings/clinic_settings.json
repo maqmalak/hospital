@@ -143,6 +143,7 @@
   "skip_review_otc",
   "recall_limit",
   "collect_payment_at",
+  "pharmacy_discount_over_limit",
   "ph2",
   "carry_over_drafts",
   "cycle_variance_threshold",
@@ -999,10 +1000,18 @@
   },
   {
    "default": "Billing counter",
+   "description": "Cashier chooses: each sale is paid at the billing counter or at handover",
    "fieldname": "collect_payment_at",
    "fieldtype": "Select",
    "label": "Collect Payment At",
-   "options": "Billing counter\nHandover counter"
+   "options": "Billing counter\nHandover counter\nCashier chooses (both)"
+  },
+  {
+   "default": "Ask the supervisor",
+   "fieldname": "pharmacy_discount_over_limit",
+   "fieldtype": "Select",
+   "label": "Discount Above the Cashier's Limit",
+   "options": "Ask the supervisor\nNot allowed"
   },
   {
    "fieldname": "ph2",
@@ -1377,7 +1386,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-09 19:16:20.722919",
+ "modified": "2026-11-09 23:37:43.682882",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

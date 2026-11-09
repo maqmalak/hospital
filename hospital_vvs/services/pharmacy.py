@@ -145,22 +145,24 @@ def counter_warehouse(counter):
 	return frappe.db.get_value("POS Profile", prof, "warehouse") if prof else None
 
 
-def search(q, warehouse, limit=24):
+def search(q, warehouse, limit=24, category=None, in_stock=False):
 	like = f"%{(q or '').strip()}%"
-	items = frappe.db.sql("""select i.name item_code, i.item_name, i.hv_generic generic, i.hv_strength strength, i.hv_dosage_form form,
-		i.hv_rack_location rack, i.hv_prescription_required rx, i.hv_controlled_drug controlled, i.image
+	cat = "and i.hv_medicine_category=%(c)s" if category else ""
+	items = frappe.db.sql(f"""select i.name item_code, i.item_name, i.hv_generic generic, i.hv_strength strength, i.hv_dosage_form form,
+		i.hv_rack_location rack, i.hv_prescription_required rx, i.hv_controlled_drug controlled, i.image, i.hv_medicine_category category
 		from tabItem i left join `tabItem Barcode` bc on bc.parent=i.name
-		where i.disabled=0 and i.hv_is_medicine=1 and (i.item_name like %(l)s or i.hv_generic like %(l)s or i.name like %(l)s or bc.barcode=%(q)s)
+		where i.disabled=0 and i.hv_is_medicine=1 {cat} and (i.item_name like %(l)s or i.hv_generic like %(l)s or i.name like %(l)s or bc.barcode=%(q)s)
 		group by i.name order by (i.item_name like %(s)s) desc, i.item_name limit %(n)s""",
-		{"l": like, "q": (q or "").strip(), "s": f"{(q or '').strip()}%", "n": cint(limit) or 24}, as_dict=True)
+		{"l": like, "q": (q or "").strip(), "s": f"{(q or '').strip()}%", "n": cint(limit) or 24, "c": category}, as_dict=True)
 	for it in items:
 		p = pack(it.item_code)
 		bs = batches(it.item_code, warehouse)
 		units = sum(b["qty"] for b in bs)
 		it.update(stock=split_stock(p, units), upp=p.upp, ups=p.ups, spp=p.spp, uoms=allowed_uoms(p), stock_uom=p.stock_uom,
 			prices={u: uom_price(p, it.item_code, u, bs[0]["batch_no"] if bs else None) for u in allowed_uoms(p)},
-			next_expiry=bs[0]["expiry"] if bs else None, near_expiry=bool(bs and bs[0]["near_expiry"]))
-	return items
+			next_expiry=bs[0]["expiry"] if bs else None, near_expiry=bool(bs and bs[0]["near_expiry"]),
+			batch=bs[0]["batch_no"] if bs else None)
+	return [it for it in items if it.stock.get("units")] if in_stock else items
 
 
 def substitutes(item_code, warehouse):
@@ -241,15 +243,66 @@ def next_token(branch, date=None):
 	return n, f"{setting('token_prefix') or 'P'}-{n:03d}"
 
 
+def apply_tenders(si, payments=None, payment_mode="Cash", cash_tendered=None, reference_no=None):
+	"""Split tender on a POS invoice: card / wallet / bank need a transaction ID, change only from cash. Returns (paid, change)."""
+	si.calculate_taxes_and_totals()
+	total = flt(si.rounded_total or si.grand_total)
+	rows = [p for p in (payments or []) if flt(p.get("amount")) > 0] or [{"mode_of_payment": payment_mode, "amount": flt(cash_tendered) or total, "reference_no": reference_no}]
+	paid = sum(flt(p["amount"]) for p in rows)
+	if paid + 0.5 < total:
+		frappe.throw(_("Paid {0} is less than the bill {1}.").format(frappe.format_value(paid, "Currency"), frappe.format_value(total, "Currency")))
+	change = round(paid - total, 2)
+	if change > sum(flt(p["amount"]) for p in rows if p["mode_of_payment"] == "Cash") + 0.01:
+		frappe.throw(_("Only cash can be given back as change."))
+	allowed = {m.mode_of_payment for m in frappe.get_cached_doc("POS Profile", si.pos_profile).payments}
+	refs, out, left = [], [], change
+	for p in rows:
+		if p["mode_of_payment"] not in allowed:
+			frappe.throw(_("{0} is not set up on this counter.").format(p["mode_of_payment"]))
+		if p["mode_of_payment"] != "Cash" and not (p.get("reference_no") or "").strip():
+			frappe.throw(_("Enter the transaction ID for {0}.").format(p["mode_of_payment"]))
+		if p.get("reference_no"):
+			refs.append(f"{p['mode_of_payment']} {p['reference_no']}")
+		amt = flt(p["amount"])
+		if p["mode_of_payment"] == "Cash" and left:
+			take = min(amt, left)
+			amt -= take
+			left -= take
+		if amt > 0.004:
+			out.append({"mode_of_payment": p["mode_of_payment"], "amount": amt})
+	si.set("payments", out)
+	if refs:
+		si.remarks = ((si.remarks or "") + " · " + ", ".join(refs)).strip(" ·")
+	si.calculate_taxes_and_totals()
+	return paid, change
+
+
+def pay_mode_for(pay_at=None, credit=False):
+	"""True = pay at handover. Setting: billing counter / handover counter / cashier chooses per sale."""
+	if credit or not cint(setting("enable_pharmacy_pipeline")):
+		return False
+	mode = setting("collect_payment_at") or "Billing counter"
+	if mode == "Handover counter":
+		return True
+	if mode.startswith("Cashier chooses"):
+		return pay_at == "handover"
+	return False
+
+
 def checkout(counter, lines, patient=None, prescription=None, payment_mode="Cash", cash_tendered=None, discount_amount=0,
-	discount_authorization=None, rx_override_reason=None, priority="Normal", client_ref=None):
+	discount_authorization=None, rx_override_reason=None, priority="Normal", client_ref=None, customer=None, pay_at=None, payments=None):
+	"""payment_mode "On account" = credit sale to a pharmacy credit customer (no money now). pay_at: "now" / "handover" (setting permitting)."""
 	c = frappe.get_doc("Counter", counter)
 	if client_ref:
 		done = frappe.db.get_value("Sales Invoice", {"remarks": ["like", f"%[{client_ref}]%"], "docstatus": ["<", 2]}, "name")
 		if done:
 			return receipt(done)
 	warehouse = counter_warehouse(counter)
-	pay_later = setting("collect_payment_at") == "Handover counter" and cint(setting("enable_pharmacy_pipeline"))
+	credit = payment_mode == "On account"
+	if credit:
+		if not customer or not cint(frappe.db.get_value("Customer", customer, "hv_pharmacy_credit")):
+			frappe.throw(_("Only a pharmacy credit customer can buy on account."))
+	pay_later = pay_mode_for(pay_at, credit)
 	q = quote(lines, warehouse, prescription)
 	if q["errors"]:
 		frappe.throw("<br>".join(q["errors"]), title=_("Cannot bill"))
@@ -259,14 +312,14 @@ def checkout(counter, lines, patient=None, prescription=None, payment_mode="Cash
 	shift = None
 	from hospital_vvs.services.shifts import billing_shift
 
-	if not pay_later:
+	if not pay_later and not credit:
 		shift = billing_shift(c.branch)
-	customer = frappe.db.get_value("Patient", patient, "customer") if patient else walk_in_customer()
+	customer = customer or (frappe.db.get_value("Patient", patient, "customer") if patient else walk_in_customer())
 	base_profile = frappe.get_cached_doc("POS Profile", billing.pos_profile_for("Medicine", c.branch))
 	profile_name = shift.pos_profile if shift else c.pos_profile
 	si = frappe.new_doc("Sales Invoice")
 	si.update({"customer": customer, "company": base_profile.company or branch_company(c.branch), "posting_date": today(), "branch": c.branch,
-		"is_pos": 1, "pos_profile": profile_name, "update_stock": 1, "set_warehouse": warehouse, "selling_price_list": base_profile.selling_price_list,
+		"is_pos": 0 if credit else 1, "pos_profile": profile_name, "update_stock": 1, "set_warehouse": warehouse, "selling_price_list": base_profile.selling_price_list,
 		"hv_patient": patient, "hv_billing_type": "Medicine", "hv_prescription": prescription, "hv_counter": c.name, "apply_discount_on": "Net Total",
 		"ignore_pricing_rule": 1, "cost_center": base_profile.cost_center,
 		"remarks": f"Pharmacy {c.counter_name}" + (f" [{client_ref}]" if client_ref else "") + (f" · Rx override: {rx_override_reason}" if rx_override_reason and q["rx_missing"] else "")})
@@ -287,11 +340,12 @@ def checkout(counter, lines, patient=None, prescription=None, payment_mode="Cash
 		si.discount_amount = flt(discount_amount)
 	si.calculate_taxes_and_totals()
 	total = flt(si.rounded_total or si.grand_total)
-	if not pay_later:
-		pay_profile = frappe.get_cached_doc("POS Profile", si.pos_profile)
-		mop = next((m.mode_of_payment for m in pay_profile.payments if m.mode_of_payment == payment_mode), "Cash")
-		si.set("payments", [{"mode_of_payment": mop, "amount": total}])
-		si.calculate_taxes_and_totals()
+	change = 0
+	if credit:
+		si.remarks = (si.remarks or "") + " · On account"
+		si.set("payments", [])
+	elif not pay_later:
+		paid, change = apply_tenders(si, payments, payment_mode, cash_tendered)
 	si.flags.ignore_permissions = True
 	si.flags.hv_rx_override = bool(rx_override_reason)
 	si.insert()
@@ -307,8 +361,8 @@ def checkout(counter, lines, patient=None, prescription=None, payment_mode="Cash
 	for d in frappe.get_all("Sales Invoice", filters={"hv_prescription": prescription, "docstatus": 0, "name": ["!=", si.name],
 		"hv_dispense_ticket": ["is", "not set"]}, pluck="name") if prescription else []:
 		frappe.delete_doc("Sales Invoice", d, ignore_permissions=True, force=True)
-	push_display(c.name, {"state": "done", "token": ticket.token if ticket else None, "total": total, "change": max(flt(cash_tendered) - total, 0) if cash_tendered else 0})
-	return receipt(si.name, cash_tendered=cash_tendered)
+	push_display(c.name, {"state": "done", "token": ticket.token if ticket else None, "total": total, "change": change})
+	return receipt(si.name, cash_tendered=(total + change) if change else cash_tendered)
 
 
 def make_ticket(si, counter, patient, prescription, priority="Normal", amount_due=0):
@@ -338,13 +392,17 @@ def receipt(si_name, cash_tendered=None):
 	return {"name": si.name, "docstatus": si.docstatus, "token": si.hv_token, "ticket": si.hv_dispense_ticket, "posting_date": str(si.posting_date),
 		"posting_time": str(si.posting_time)[:5], "customer": si.customer_name, "patient": si.hv_patient, "prescription": si.hv_prescription,
 		"counter": si.hv_counter, "cashier": frappe.db.get_value("User", si.owner, "full_name"),
-		"items": [{"item_name": i.item_name, "generic": frappe.get_cached_value("Item", i.item_code, "hv_generic"), "qty": i.qty, "uom": i.uom,
+		"is_return": si.is_return, "return_against": si.return_against, "company": si.company,
+		"items": [{"item_code": i.item_code, "item_name": i.item_name, "generic": frappe.get_cached_value("Item", i.item_code, "hv_generic"), "qty": i.qty, "uom": i.uom,
 			"rate": i.rate, "amount": i.amount, "batch_no": i.batch_no, "expiry": str(frappe.db.get_value("Batch", i.batch_no, "expiry_date") or "") if i.batch_no else "",
 			"substitute_for": frappe.get_cached_value("Item", i.hv_original_item, "item_name") if i.hv_original_item else None} for i in si.items],
 		"total": si.total, "discount": si.discount_amount, "grand_total": flt(si.rounded_total or si.grand_total), "paid": paid,
 		"tendered": flt(cash_tendered) or paid, "change": max(flt(cash_tendered) - flt(si.rounded_total or si.grand_total), 0) if cash_tendered else 0,
-		"mode": "Pay at handover" if si.docstatus == 0 else " + ".join(p.mode_of_payment for p in si.payments),
-		"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "address": branch.get("hv_address") or s.address, "phone": branch.get("hv_phone") or s.phone}}
+		"mode": "Pay at handover" if si.docstatus == 0 else (" + ".join(p.mode_of_payment for p in si.payments) or ("On account" if not si.is_pos else "")),
+		# the contract pharmacy prints its own name (D-38); the hospital's address stays as the location
+		"clinic": {"name": si.company if si.company == s.get("pharmacy_company") else s.clinic_name,
+			"name_ur": None if si.company == s.get("pharmacy_company") else s.clinic_name_ur, "address": branch.get("hv_address") or s.address,
+			"phone": branch.get("hv_phone") or s.phone}}
 
 
 # ------------------------------------------------------------------ invoice hooks
@@ -642,36 +700,8 @@ def collect_payment(name, payment_mode="Cash", cash_tendered=None, payments=None
 		si.pos_profile, si.is_created_using_pos, si.hv_counter = shift.pos_profile, 1, shift.hv_counter
 	si.calculate_taxes_and_totals()
 	total = flt(si.rounded_total or si.grand_total)
-	rows = [p for p in (payments or []) if flt(p.get("amount")) > 0] or [{"mode_of_payment": payment_mode, "amount": flt(cash_tendered) or total, "reference_no": reference_no}]
-	paid = sum(flt(p["amount"]) for p in rows)
-	if paid + 0.5 < total:
-		frappe.throw(_("Paid {0} is less than the bill {1}.").format(frappe.format_value(paid, "Currency"), frappe.format_value(total, "Currency")))
-	change = round(paid - total, 2)
-	cash = sum(flt(p["amount"]) for p in rows if p["mode_of_payment"] == "Cash")
-	if change > cash + 0.01:
-		frappe.throw(_("Only cash can be given back as change."))
-	refs = []
-	for p in rows:
-		if p["mode_of_payment"] != "Cash" and not (p.get("reference_no") or "").strip():
-			frappe.throw(_("Enter the transaction ID for {0}.").format(p["mode_of_payment"]))
-		if p.get("reference_no"):
-			refs.append(f"{p['mode_of_payment']} {p['reference_no']}")
-	allowed = {m.mode_of_payment for m in frappe.get_cached_doc("POS Profile", si.pos_profile).payments}
-	left, out = change, []
-	for p in rows:
-		if p["mode_of_payment"] not in allowed:
-			frappe.throw(_("{0} is not set up on this counter.").format(p["mode_of_payment"]))
-		amt = flt(p["amount"])
-		if p["mode_of_payment"] == "Cash" and left:
-			take = min(amt, left)
-			amt -= take
-			left -= take
-		if amt > 0.004:
-			out.append({"mode_of_payment": p["mode_of_payment"], "amount": amt})
-	si.set("payments", out)
-	if refs:
-		si.remarks = ((si.remarks or "") + " · " + ", ".join(refs)).strip(" ·")
-	si.calculate_taxes_and_totals()
+	paid, change = apply_tenders(si, payments, payment_mode, cash_tendered, reference_no)
+	out = si.payments
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()
@@ -681,7 +711,7 @@ def collect_payment(name, payment_mode="Cash", cash_tendered=None, payments=None
 		frappe.db.set_value("Sales Invoice", si.name, "owner", shift.user, update_modified=False)
 	t.reload()
 	t.invoice_status, t.amount_due = "Paid", 0
-	_log(t, t.status, f"Paid {total} by {' + '.join(p['mode_of_payment'] for p in out)}")
+	_log(t, t.status, f"Paid {total} by {' + '.join(p.mode_of_payment for p in out)}")
 	t.save(ignore_permissions=True)
 	return receipt(si.name, cash_tendered=paid if change else cash_tendered)
 

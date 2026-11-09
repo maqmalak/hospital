@@ -37,14 +37,22 @@ def pos_context(counter=None):
 		"display_key": frappe.db.get_value("Display Device", c.display_device, "device_key") if c and c.display_device else None,
 		"counters": frappe.get_all("Counter", filters={"branch": branch, "counter_type": ["in", ["Pharmacy Billing", "Pharmacy Handover"]], "is_active": 1},
 			fields=["name", "counter_type", "number", "current_user"]),
-		"waiting_prescriptions": waiting, "modes": ["Cash", "Card", "Bank Transfer", "JazzCash", "Easypaisa"]}
+		"waiting_prescriptions": waiting, "modes": _modes(counter),
+		"discount": dict(zip(("max_percent", "max_amount"), discounts.limits_for(frappe.session.user, "Medicine")), policy=setting("pharmacy_discount_over_limit") or "Ask the supervisor"),
+		"categories": frappe.get_all("Medicine Category", pluck="name", order_by="name"), "pay_choice": setting("collect_payment_at") or "Billing counter",
+		"credit_customers": frappe.db.count("Customer", {"hv_pharmacy_credit": 1, "disabled": 0}), "user": frappe.session.user}
+
+
+def _modes(counter):
+	prof = frappe.db.get_value("Counter", counter, "pos_profile") if counter else None
+	return [p.mode_of_payment for p in frappe.get_cached_doc("POS Profile", prof).payments] if prof else ["Cash"]
 
 
 @frappe.whitelist()
-def search(q="", counter=None):
+def search(q="", counter=None, category=None, limit=24, in_stock=0):
 	require_roles(*POS_ROLES, R.REVIEWER, R.STORE_KEEPER)
 	wh = pharmacy.counter_warehouse(_counter(counter))
-	return pharmacy.search(q, wh) if wh else []
+	return pharmacy.search(q, wh, limit=min(cint(limit) or 24, 300), category=category or None, in_stock=cint(in_stock)) if wh else []
 
 
 @frappe.whitelist(methods=["POST"])
@@ -75,6 +83,10 @@ def prescription(code):
 def request_discount(gross, amount, reason, counter=None):
 	require_roles(*POS_ROLES)
 	c = frappe.get_doc("Counter", _counter(counter))
+	pct, amt = discounts.limits_for(frappe.session.user, "Medicine")
+	over = flt(gross) and (flt(amount) * 100 / flt(gross) > pct + 0.001 or (amt and flt(amount) > amt))
+	if over and (setting("pharmacy_discount_over_limit") or "") == "Not allowed":
+		frappe.throw(_("Your discount limit is {0}% / Rs {1}.").format(pct, frappe.format_value(amt or 0, "Float")), title=_("Above your limit"))
 	auth = discounts.request(billing_type="Medicine", gross=flt(gross), discount_amount=flt(amount), reason=reason, branch=c.branch)
 	return {"name": auth.name, "status": auth.status}
 
@@ -82,11 +94,7 @@ def request_discount(gross, amount, reason, counter=None):
 @frappe.whitelist(methods=["POST"])
 def checkout(data):
 	require_roles(*POS_ROLES)
-	d = frappe.parse_json(data)
-	return pharmacy.checkout(_counter(d.get("counter")), d["lines"], patient=d.get("patient"), prescription=d.get("prescription"),
-		payment_mode=d.get("payment_mode") or "Cash", cash_tendered=d.get("cash_tendered"), discount_amount=flt(d.get("discount_amount")),
-		discount_authorization=d.get("discount_authorization"), rx_override_reason=d.get("rx_override_reason"), priority=d.get("priority") or "Normal",
-		client_ref=d.get("client_ref"))
+	return _checkout(frappe.parse_json(data))
 
 
 @frappe.whitelist()
@@ -216,3 +224,148 @@ def _as_guest(fn, branch):
 		frappe.set_user(saved["user"])
 		sess.sid, sess.data = saved["sid"], saved["data"]
 		frappe.local.form_dict = form_dict
+
+
+# ------------------------------------------------------------------ POS (Restaurant OS style): customers, prescriptions, invoices, shift, offline
+def _checkout(d):
+	return pharmacy.checkout(_counter(d.get("counter")), d["lines"], patient=d.get("patient"), prescription=d.get("prescription"),
+		payment_mode=d.get("payment_mode") or "Cash", cash_tendered=d.get("cash_tendered"), discount_amount=flt(d.get("discount_amount")),
+		discount_authorization=d.get("discount_authorization"), rx_override_reason=d.get("rx_override_reason"), priority=d.get("priority") or "Normal",
+		client_ref=d.get("client_ref"), customer=d.get("customer"), pay_at=d.get("pay_at"), payments=d.get("payments"))
+
+
+@frappe.whitelist()
+def customers(q=""):
+	"""Cart customer: patients by name / MR / mobile / CNIC, and pharmacy credit customers (balance and limit)."""
+	require_roles(*POS_ROLES, R.REVIEWER)
+	from hospital_vvs.api.patients import age_of
+	from hospital_vvs.hospital_vvs.doctype.patient.patient import cnic_digits, cnic_hash, normalize_phone
+
+	q = (q or "").strip()
+	if len(q) < 2:
+		return {"patients": [], "credit": _credit_customers("")}
+	digits = cnic_digits(q)
+	args = {"l": f"%{q}%", "q": q}
+	ors = ["p.patient_name like %(l)s", "p.name like %(l)s", "p.patient_name_ur like %(l)s"]
+	if len(digits) >= 7:
+		args["ph"] = f"%{normalize_phone(q)[-10:]}%"
+		ors.append("p.phone like %(ph)s")
+	if len(digits) == 13:
+		args["h"] = cnic_hash(digits)
+		ors.append("p.cnic_hash=%(h)s")
+	rows = frappe.db.sql(f"""select p.name, p.patient_name, p.patient_name_ur, p.phone, p.gender, p.dob, p.category, p.customer, p.cnic_masked
+		from tabPatient p where p.disabled=0 and ({' or '.join(ors)}) order by (p.name=%(q)s) desc, p.modified desc limit 12""", args, as_dict=True)
+	for r in rows:
+		r["age"] = age_of(r.pop("dob"))
+		r["credit"] = cint(frappe.db.get_value("Customer", r.customer, "hv_pharmacy_credit")) if r.customer else 0
+	return {"patients": rows, "credit": _credit_customers(q)}
+
+
+def _credit_customers(q):
+	company = frappe.db.get_single_value("Clinic Settings", "pharmacy_company")
+	filters = {"hv_pharmacy_credit": 1, "disabled": 0}
+	if q:
+		filters["customer_name"] = ["like", f"%{q}%"]
+	out = frappe.get_all("Customer", filters=filters, fields=["name", "customer_name", "mobile_no", "hv_patient"], limit=12, order_by="customer_name")
+	for c in out:
+		c["balance"] = flt(frappe.db.sql("""select sum(debit-credit) from `tabGL Entry` where party_type='Customer' and party=%s and company=%s and is_cancelled=0""",
+			(c.name, company))[0][0]) if company else 0
+		c["credit_limit"] = flt(frappe.db.get_value("Customer Credit Limit", {"parent": c.name, "company": company}, "credit_limit")) if company else 0
+	return out
+
+
+@frappe.whitelist()
+def find_prescriptions(q="", limit=15):
+	"""Load prescription by Rx no., patient name, MR, mobile or CNIC; shows whether it was already billed."""
+	require_roles(*POS_ROLES, R.REVIEWER)
+	q = (q or "").strip()
+	filters = {"docstatus": 1, "status": "Signed"}
+	if q.upper().startswith("RX-"):
+		filters["name"] = q
+	elif q:
+		pats = [p["name"] for p in customers(q)["patients"]]
+		if not pats:
+			return []
+		filters["patient"] = ["in", pats]
+	rows = frappe.get_all("Prescription", filters=filters, fields=["name", "patient", "patient_name", "doctor_name", "prescription_date", "source", "creation"],
+		order_by="creation desc", limit=cint(limit) or 15)
+	for r in rows:
+		r["medicines"] = frappe.db.count("Prescription Medicine", {"parent": r.name})
+		r["billed"] = frappe.db.get_value("Sales Invoice", {"hv_prescription": r.name, "docstatus": 1, "is_return": 0}, "name")
+		r["draft"] = frappe.db.get_value("Sales Invoice", {"hv_prescription": r.name, "docstatus": 0}, "name")
+	return rows
+
+
+@frappe.whitelist(methods=["POST"])
+def sync(sales):
+	"""Offline sales (paid at the counter), posted once each by client_ref; one failure does not stop the rest."""
+	require_roles(*POS_ROLES)
+	out = []
+	for d in frappe.parse_json(sales):
+		frappe.db.savepoint("hv_ph_sync")
+		try:
+			r = _checkout(dict(d, pay_at="now"))
+			out.append({"client_ref": d.get("client_ref"), "ok": 1, "name": r["name"], "receipt": r})
+		except Exception as e:
+			frappe.db.rollback(save_point="hv_ph_sync")
+			frappe.clear_last_message()
+			out.append({"client_ref": d.get("client_ref"), "ok": 0, "error": frappe.utils.strip_html(str(e)) or e.__class__.__name__})
+	return out
+
+
+@frappe.whitelist()
+def offline_bundle(counter=None):
+	"""Catalogue in stock, credit customers and recent patients, for selling while the server is unreachable."""
+	require_roles(*POS_ROLES)
+	counter = _counter(counter)
+	wh = pharmacy.counter_warehouse(counter)
+	from hospital_vvs.api.patients import age_of
+
+	pats = frappe.db.sql("""select name, patient_name, phone, gender, dob, customer from tabPatient where disabled=0 order by modified desc limit 1500""", as_dict=True)
+	for p in pats:
+		p["age"] = age_of(p.pop("dob"))
+	return {"items": pharmacy.search("", wh, limit=2000, in_stock=True) if wh else [], "patients": pats, "credit": _credit_customers(""),
+		"categories": frappe.get_all("Medicine Category", pluck="name", order_by="name"), "modes": _modes(counter), "counter": counter,
+		"generated_at": str(frappe.utils.now_datetime())}
+
+
+@frappe.whitelist()
+def invoices(scope="shift", q=None, limit=80):
+	"""Invoice management: this shift / today / waiting at handover / on account / returns; search by invoice, token, customer, MR."""
+	require_roles(*POS_ROLES, R.REVIEWER)
+	filters = {"hv_billing_type": "Medicine"}
+	shift = shifts.current_shift()
+	if scope == "drafts":
+		filters.update(docstatus=0, hv_dispense_ticket=["is", "set"])
+	elif scope == "returns":
+		filters.update(docstatus=1, is_return=1, posting_date=today())
+	elif scope == "credit":
+		filters.update(docstatus=1, is_pos=0, is_return=0)
+	elif scope == "shift" and shift:
+		filters.update(docstatus=1, pos_profile=shift.pos_profile, owner=shift.user, posting_date=shift.posting_date)
+	else:
+		filters.update(docstatus=["<", 2], posting_date=today())
+	or_filters = {"name": ["like", f"%{q}%"], "customer_name": ["like", f"%{q}%"], "hv_token": ["like", f"%{q}%"], "hv_patient": ["like", f"%{q}%"]} if q else None
+	if q:
+		filters.pop("posting_date", None)
+	rows = frappe.get_all("Sales Invoice", filters=filters, or_filters=or_filters, fields=["name", "customer", "customer_name", "hv_patient", "grand_total",
+		"rounded_total", "outstanding_amount", "docstatus", "is_return", "is_pos", "hv_token", "posting_date", "posting_time", "hv_prescription", "return_against",
+		"hv_dispense_ticket", "status", "owner"], order_by="creation desc", limit=cint(limit) or 80)
+	for r in rows:
+		r["modes"] = " + ".join(frappe.get_all("Sales Invoice Payment", filters={"parent": r.name}, pluck="mode_of_payment")) or (
+			"On account" if not r.is_pos and r.docstatus == 1 else "Pay at handover" if r.docstatus == 0 else "")
+		r["returned"] = flt(frappe.db.sql("select -sum(grand_total) from `tabSales Invoice` where return_against=%s and docstatus=1", r.name)[0][0])
+	return rows
+
+
+@frappe.whitelist()
+def shift_summary():
+	require_roles(*POS_ROLES)
+	shift = shifts.current_shift()
+	if not shift:
+		return None
+	s = shifts.summary(shift.name)
+	s["credit_sales"] = flt(frappe.db.sql("""select sum(grand_total) from `tabSales Invoice` where docstatus=1 and is_pos=0 and is_return=0 and hv_billing_type='Medicine'
+		and owner=%s and posting_date=%s""", (shift.user, shift.posting_date))[0][0])
+	s["handover_pending"] = frappe.db.count("Sales Invoice", {"docstatus": 0, "hv_billing_type": "Medicine", "hv_dispense_ticket": ["is", "set"]})
+	return s

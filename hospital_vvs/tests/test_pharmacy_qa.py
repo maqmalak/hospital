@@ -243,3 +243,70 @@ class TestPharmacyQA(IntegrationTestCase):
 		ret = api.refund(r["name"], "Patient returned unopened strip")
 		self.assertEqual(pharmacy.stock_units(ctl, RETAIL), before + 10)
 		self.assertEqual(frappe.db.get_value("Sales Invoice Item", {"parent": ret}, "batch_no"), a)
+
+
+class TestPharmacyPOSOptions(IntegrationTestCase):
+	"""POS upgrade: cashier chooses pay-now or pay-at-handover, credit customers on account, split payment at the counter,
+	discount policy, customer / prescription search."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		p = patch.object(frappe.db, "commit", lambda *a, **k: None)
+		p.start()
+		self.addCleanup(p.stop)
+		frappe.db.set_single_value("Clinic Settings", {"collect_payment_at": "Cashier chooses (both)", "enable_pharmacy_pipeline": 1,
+			"pharmacy_discount_over_limit": "Ask the supervisor"})
+		frappe.clear_document_cache("Clinic Settings")
+		self.code = make_item(f"QA-CTZ-{random.randint(1000, 9999)}", generic="QA Cetirizine", rack="E1-02", strength="10 mg")
+		self.near, _f = stock(self.code)
+		self.pat = patient()
+
+	def sell(self, **kw):
+		as_user(CASHIER)
+		return api.checkout(frappe.as_json({"counter": "Pharmacy 1", "lines": [{"item_code": self.code, "uom": "Pack", "qty": 1}], "patient": self.pat, **kw}))
+
+	def test_cashier_chooses_now_or_handover(self):
+		open_shift(CASHIER, "Pharmacy 1")
+		later = self.sell(pay_at="handover")
+		self.assertEqual(frappe.db.get_value("Sales Invoice", later["name"], "docstatus"), 0)
+		now = self.sell(pay_at="now", payments=[{"mode_of_payment": "Cash", "amount": 100}, {"mode_of_payment": "Easypaisa", "amount": 140, "reference_no": "EP-55"}])
+		si = frappe.get_doc("Sales Invoice", now["name"])
+		self.assertEqual(si.docstatus, 1)
+		self.assertEqual(sorted(p.mode_of_payment for p in si.payments), ["Cash", "Easypaisa"])
+		self.assertEqual(frappe.db.get_value("Dispense Ticket", si.hv_dispense_ticket, "invoice_status"), "Paid")
+
+	def test_credit_customer_on_account(self):
+		cust = frappe.get_doc({"doctype": "Customer", "customer_name": f"QA Credit {random.randint(100, 999)}", "customer_group": "Patients", "territory": "Pakistan",
+			"hv_pharmacy_credit": 1}).insert()
+		with self.assertRaises(frappe.ValidationError):  # a normal patient cannot buy on account
+			self.sell(payment_mode="On account", customer=frappe.db.get_value("Patient", self.pat, "customer"))
+		r = self.sell(payment_mode="On account", customer=cust.name, patient=None)
+		si = frappe.get_doc("Sales Invoice", r["name"])
+		self.assertEqual((si.docstatus, si.is_pos, si.company), (1, 0, VVSP))
+		self.assertGreater(flt(si.outstanding_amount), 0)  # owed by the credit customer
+		self.assertEqual(r["mode"], "On account")
+		as_user(CASHIER)
+		self.assertIn(cust.name, [c.name for c in api.customers(cust.customer_name[:6])["credit"]])
+
+	def test_discount_policy_not_allowed(self):
+		frappe.db.set_single_value("Clinic Settings", "pharmacy_discount_over_limit", "Not allowed")
+		frappe.clear_document_cache("Clinic Settings")
+		as_user(CASHIER)
+		with self.assertRaises(frappe.ValidationError):
+			api.request_discount(1000, 400, "Too much", "Pharmacy 1")
+		self.assertEqual(api.request_discount(1000, 30, "Small", "Pharmacy 1")["status"], "Within Limit")
+
+	def test_search_customer_and_prescription(self):
+		phone = frappe.db.get_value("Patient", self.pat, "phone")
+		as_user(CASHIER)
+		self.assertIn(self.pat, [p.name for p in api.customers(phone[-10:])["patients"]])
+		self.assertIn(self.pat, [p.name for p in api.customers(self.pat)["patients"]])
+		as_user("Administrator")
+		rx = frappe.get_doc({"doctype": "Prescription", "patient": self.pat, "doctor": frappe.db.get_value("Doctor", {"is_active": 1}), "branch": "Lahore Main",
+			"medicines": [{"item": self.code, "dose": "1", "frequency": "0+0+1", "qty": 10}]})
+		rx.insert()
+		rx.submit()
+		as_user(CASHIER)
+		found = api.find_prescriptions(phone[-10:])
+		self.assertIn(rx.name, [x.name for x in found])
+		self.assertEqual(api.find_prescriptions(rx.name)[0].name, rx.name)

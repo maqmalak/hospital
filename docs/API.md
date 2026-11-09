@@ -271,7 +271,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | Method | Params | Flags | Roles | Summary |
 |---|---|---|---|---|
 | `pos_context` | counter |  | POS_ROLES, REVIEWER |  |
-| `search` | q, counter |  | POS_ROLES, REVIEWER, STORE_KEEPER |  |
+| `search` | q, counter, category, limit, in_stock |  | POS_ROLES, REVIEWER, STORE_KEEPER |  |
 | `quote` | lines, counter, prescription | POST | POS_ROLES, REVIEWER |  |
 | `substitutes` | item_code, counter |  | POS_ROLES, REVIEWER |  |
 | `prescription` | code |  | POS_ROLES, REVIEWER | Load a signed prescription by Rx number or patient MR (latest). |
@@ -286,6 +286,12 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `action` | name, action | POST | roles[action] | One endpoint for pipeline stage changes (row-locked in the service). |
 | `dashboard` | branch |  | PIPE, ADMIN |  |
 | `display` | key | guest |  |  |
+| `customers` | q |  | POS_ROLES, REVIEWER | Cart customer: patients by name / MR / mobile / CNIC, and pharmacy credit customers (balance and limit). |
+| `find_prescriptions` | q, limit |  | POS_ROLES, REVIEWER | Load prescription by Rx no., patient name, MR, mobile or CNIC; shows whether it was already billed. |
+| `sync` | sales | POST | POS_ROLES | Offline sales (paid at the counter), posted once each by client_ref; one failure does not stop the rest. |
+| `offline_bundle` | counter |  | POS_ROLES | Catalogue in stock, credit customers and recent patients, for selling while the server is unreachable. |
+| `invoices` | scope, q, limit |  | POS_ROLES, REVIEWER | Invoice management: this shift / today / waiting at handover / on account / returns; search by invoice, token, customer, MR. |
+| `shift_summary` |  |  | POS_ROLES |  |
 
 ## prescription
 

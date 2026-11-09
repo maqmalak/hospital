@@ -39,7 +39,7 @@ export function PriorityBadge({ p }: { p?: string }) {
 }
 
 export interface Receipt { name: string; docstatus: number; token?: string; ticket?: string; posting_date: string; posting_time: string; customer: string; patient?: string; prescription?: string;
-  counter?: string; cashier: string; items: { item_name: string; generic?: string; qty: number; uom: string; rate: number; amount: number; batch_no?: string; expiry?: string; substitute_for?: string | null }[];
+  counter?: string; cashier: string; is_return?: number; return_against?: string; company?: string; pending_sync?: boolean; items: { item_code?: string; item_name: string; generic?: string; qty: number; uom: string; rate: number; amount: number; batch_no?: string; expiry?: string; substitute_for?: string | null }[];
   total: number; discount: number; grand_total: number; paid: number; tendered: number; change: number; mode: string; clinic: { name: string; name_ur?: string; address?: string; phone?: string } }
 
 /** 80 mm thermal receipt with the big collection token. */

@@ -75,6 +75,8 @@ CUSTOM_FIELDS = {
 			"read_only": 1},
 		{"fieldname": "hv_coverage_percent", "fieldtype": "Percent", "label": "Payer Coverage %", "insert_after": "customer_group",
 			"description": "Panel / insurance / welfare fund: share of the bill the payer covers", "depends_on": "eval:!doc.hv_patient"},
+		{"fieldname": "hv_pharmacy_credit", "fieldtype": "Check", "label": "Pharmacy Credit Customer", "insert_after": "hv_coverage_percent",
+			"description": "May buy medicines on account at the contract pharmacy (credit limit per company applies)"},
 	],
 	"Sales Invoice": [
 		{"fieldname": "hv_patient", "fieldtype": "Link", "options": "Patient", "label": "Patient", "insert_after": "customer_name",
