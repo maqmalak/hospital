@@ -27,7 +27,7 @@ bench --site hospital execute hospital_vvs.setup.demo_phase3.seed   # wards rate
 bench --site hospital execute hospital_vvs.setup.demo_phase4.seed   # OV staff (ovstaff@vvs.demo), OV doctors (dr.sana, dr.farah), sample requests
 bench --site hospital run-tests --app hospital_vvs
 ```
-Demo logins (`<name>@vvs.demo`, password `Demo@1234` or site_config `hv_demo_password`): admin, reception, reception2, reception.isb (Islamabad only),
+Demo logins (`<name>@vvs.demo`, password `demo@123` or site_config `hv_demo_password`): admin, reception, reception2,
 nurse, supervisor, accounts, lab, pathologist, pharmacist, cashier, store, deo, dr.ayesha, dr.usman, dr.sana, dr.farah, dr.imran.
 
 ## Phase 0 — built
