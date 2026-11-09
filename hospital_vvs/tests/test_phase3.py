@@ -34,7 +34,11 @@ def desk_shift():
 		frappe.db.set_value("Counter", s.hv_counter, {"open_shift": None, "current_user": None})
 		as_user(DESK)
 		s = None
-	s = s or shifts.open_shift("IPD Desk Test", {"Cash": 1000})
+	if not s:
+		from hospital_vvs.tests.test_phase2 import make_staff
+
+		make_staff("IPD Desk Test", DESK)
+		s = shifts.open_shift("IPD Desk Test", {"Cash": 1000})
 	as_user("Administrator")
 	return s
 

@@ -127,3 +127,6 @@ Billing at handover is now on (Collect payment at = Handover counter). Full jour
 
 ## Pharmacy POS upgrade (2026-11-09) — D-40
 `/medicine_invoice` rebuilt in Restaurant OS style: top bar (Prescription, Drafts, Return, Invoices, Shift summary / close, display, lock, F-keys), cards / list with category tabs, Walk-in / Patient / Credit customer search (name, MR, mobile, CNIC), quick prescription search, discount in % or Rs within the setup limit (over-limit → supervisor or blocked), pay now (split tender) **or** pay at handover chosen per sale, credit sales on account, offline queue. New endpoints: `customers`, `find_prescriptions`, `invoices`, `shift_summary`, `offline_bundle`, `sync`. Tests: 56 green (4 new POS option cases).
+
+## Branch and counter lock (2026-11-10) — D-41
+Users locked to their branch (strict) and to counters whose POS Profile lists them (Applicable for Users); shift page, open shift, pharmacy POS and checkout enforce it. Setup `hospital_vvs.setup.access.run`. Tests: 59 green (3 new access cases).

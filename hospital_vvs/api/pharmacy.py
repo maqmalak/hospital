@@ -6,19 +6,33 @@ from frappe.utils import cint, flt, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import billing, discounts, pharmacy, shifts
-from hospital_vvs.utils import default_branch, require_roles, setting
+from hospital_vvs.utils import default_branch, has_any_role, is_admin, require_roles, setting
 
 POS_ROLES = (R.PHARMACY_CASHIER, R.DISPENSER)
 PIPE = (R.PHARMACY_CASHIER, R.FINDER, R.REVIEWER, R.DISPENSER)
 
 
 def _counter(counter=None):
-	if counter:
-		return counter
+	"""The counter this user works on. With an open shift it is always the shift's counter; otherwise
+	one of the pharmacy counters the user is staff on (branch + counter staff rules, shifts.can_use_counter)."""
 	shift = shifts.current_shift()
 	if shift and shift.hv_counter:
-		return shift.hv_counter
-	return frappe.db.get_value("Counter", {"counter_type": "Pharmacy Billing", "branch": default_branch(), "is_active": 1}, "name")
+		if counter and counter != shift.hv_counter and not is_admin():
+			frappe.throw(_("Your shift is on {0}; you cannot work on {1}.").format(shift.hv_counter, counter), frappe.PermissionError)
+		return counter or shift.hv_counter
+	if counter:
+		shifts.check_counter(counter)
+		return counter
+	mine = [c for c in shifts.counters_for() if c.counter_type in ("Pharmacy Billing", "Pharmacy Handover")]
+	mine.sort(key=lambda c: (c.counter_type != "Pharmacy Billing", c.branch != default_branch(), c.counter_name))
+	if mine:
+		return mine[0].name
+	if not has_any_role(*POS_ROLES):
+		# finder / pharmacist: no money, only the branch's pharmacy stock for search and substitutes
+		from hospital_vvs.utils import user_branches
+
+		return frappe.db.get_value("Counter", {"counter_type": "Pharmacy Billing", "is_active": 1, "branch": ["in", user_branches() or [""]]}, "name")
+	return None
 
 
 @frappe.whitelist()
@@ -35,8 +49,8 @@ def pos_context(counter=None):
 		"warehouse": pharmacy.counter_warehouse(counter) if counter else None, "collect_payment_at": setting("collect_payment_at"),
 		"pipeline": cint(setting("enable_pharmacy_pipeline")), "near_expiry_days": cint(setting("near_expiry_days")),
 		"display_key": frappe.db.get_value("Display Device", c.display_device, "device_key") if c and c.display_device else None,
-		"counters": frappe.get_all("Counter", filters={"branch": branch, "counter_type": ["in", ["Pharmacy Billing", "Pharmacy Handover"]], "is_active": 1},
-			fields=["name", "counter_type", "number", "current_user"]),
+		"counters": [{"name": x.name, "counter_type": x.counter_type, "number": x.number, "current_user": x.current_user}
+			for x in shifts.counters_for(branch=branch) if x.counter_type in ("Pharmacy Billing", "Pharmacy Handover")],
 		"waiting_prescriptions": waiting, "modes": _modes(counter),
 		"discount": dict(zip(("max_percent", "max_amount"), discounts.limits_for(frappe.session.user, "Medicine")), policy=setting("pharmacy_discount_over_limit") or "Ask the supervisor"),
 		"categories": frappe.get_all("Medicine Category", pluck="name", order_by="name"), "pay_choice": setting("collect_payment_at") or "Billing counter",

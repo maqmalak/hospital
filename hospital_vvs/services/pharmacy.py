@@ -292,6 +292,11 @@ def pay_mode_for(pay_at=None, credit=False):
 def checkout(counter, lines, patient=None, prescription=None, payment_mode="Cash", cash_tendered=None, discount_amount=0,
 	discount_authorization=None, rx_override_reason=None, priority="Normal", client_ref=None, customer=None, pay_at=None, payments=None):
 	"""payment_mode "On account" = credit sale to a pharmacy credit customer (no money now). pay_at: "now" / "handover" (setting permitting)."""
+	if not counter:
+		frappe.throw(_("You are not on the staff of any pharmacy counter. Ask the admin to add you."), frappe.PermissionError)
+	from hospital_vvs.services.shifts import check_counter
+
+	check_counter(counter)
 	c = frappe.get_doc("Counter", counter)
 	if client_ref:
 		done = frappe.db.get_value("Sales Invoice", {"remarks": ["like", f"%[{client_ref}]%"], "docstatus": ["<", 2]}, "name")

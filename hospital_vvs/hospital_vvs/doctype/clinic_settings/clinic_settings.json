@@ -151,6 +151,8 @@
   "auto_lab_order",
   "cash_tab",
   "require_shift_for_billing",
+  "counter_staff_only",
+  "strict_branch_access",
   "denominations",
   "blind_count",
   "cash_tolerance",
@@ -1053,6 +1055,20 @@
    "label": "Require Shift For Billing"
   },
   {
+   "default": "1",
+   "description": "A user can work only on counters whose POS Profile lists them under Applicable for Users",
+   "fieldname": "counter_staff_only",
+   "fieldtype": "Check",
+   "label": "Counter Staff Only"
+  },
+  {
+   "default": "1",
+   "description": "Users see and work only in the branches given to them (User Permission on Branch). Users with no branch get none; admins see all.",
+   "fieldname": "strict_branch_access",
+   "fieldtype": "Check",
+   "label": "Strict Branch Access"
+  },
+  {
    "default": "5000,1000,500,100,50,20,10,5,2,1",
    "fieldname": "denominations",
    "fieldtype": "Data",
@@ -1386,7 +1402,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-09 23:37:43.682882",
+ "modified": "2026-11-10 00:13:53.385592",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

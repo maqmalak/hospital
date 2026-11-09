@@ -37,7 +37,11 @@ def ensure_counter_profile(counter):
 		new = frappe.copy_doc(base)
 		new.set("__newname", name)
 		new.name = None
+		# keep the counter's staff when the profile is re-created (e.g. the billing type moved company, D-38)
+		old_users = counter_staff(c.name) if c.pos_profile else []
 		new.applicable_for_users = []
+		for u in old_users:
+			new.append("applicable_for_users", {"user": u})
 		if c.counter_type in ("Pharmacy Billing", "Pharmacy Handover"):
 			new.update_stock = 1
 		new.insert(ignore_permissions=True)
@@ -46,13 +50,45 @@ def ensure_counter_profile(counter):
 	return name
 
 
+def counter_staff(counter):
+	"""Staff of a counter = the users on its POS Profile (ERPNext POS Profile → Applicable for Users)."""
+	profile = frappe.db.get_value("Counter", counter, "pos_profile")
+	if not profile:
+		return []
+	return frappe.get_all("POS Profile User", filters={"parent": profile, "parenttype": "POS Profile"}, pluck="user")
+
+
+def can_use_counter(counter, user=None):
+	"""Branch first, then the counter's staff list (Clinic Settings → Counter Staff Only). Admins may use any counter."""
+	from hospital_vvs.utils import is_admin, user_branches
+
+	user = user or frappe.session.user
+	if is_admin(user):
+		return True
+	branch = frappe.db.get_value("Counter", counter, "branch")
+	if branch not in user_branches(user):
+		return False
+	if cint(setting("counter_staff_only")):
+		return user in counter_staff(counter)
+	return True
+
+
+def check_counter(counter, user=None):
+	if not can_use_counter(counter, user):
+		frappe.throw(_("You are not allowed on counter {0}. Ask the admin to add you to its POS Profile (Applicable for Users).").format(counter), frappe.PermissionError)
+
+
 def counters_for(user=None, branch=None):
 	from hospital_vvs.utils import user_branches
 
-	branches = [branch] if branch else user_branches(user)
-	return frappe.get_all("Counter", filters={"is_active": 1, "branch": ["in", branches]},
+	user = user or frappe.session.user
+	branches = user_branches(user)
+	if branch:
+		branches = [b for b in branches if b == branch]
+	rows = frappe.get_all("Counter", filters={"is_active": 1, "branch": ["in", branches or [""]]},
 		fields=["name", "counter_name", "branch", "counter_type", "billing_type", "pos_profile", "current_user", "open_shift", "number"],
 		order_by="branch, counter_name")
+	return [r for r in rows if can_use_counter(r.name, user)]
 
 
 # ------------------------------------------------------------------ shift lookup
@@ -89,6 +125,7 @@ def open_shift(counter, balances=None, user=None):
 	user = user or frappe.session.user
 	c = frappe.get_doc("Counter", counter)
 	check_branch(c.branch)
+	check_counter(c.name, user)
 	if not c.is_active:
 		frappe.throw(_("Counter {0} is not active.").format(counter))
 	if current_shift(user):

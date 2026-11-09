@@ -21,6 +21,15 @@ def as_user(user):
 	frappe.set_user(user)
 
 
+def make_staff(counter, user=None):
+	"""Counter staff rule (D-41): put the test user on the counter's POS Profile users (rolled back with the test)."""
+	user = user or frappe.session.user
+	profile = shifts.ensure_counter_profile(counter)
+	if not frappe.db.exists("POS Profile User", {"parent": profile, "parenttype": "POS Profile", "user": user}):
+		frappe.get_doc({"doctype": "POS Profile User", "parent": profile, "parenttype": "POS Profile", "parentfield": "applicable_for_users",
+			"user": user, "idx": 99}).db_insert()
+
+
 def retire_stale_shift(user):
 	"""A demo shift left open on an earlier day (or stuck in closing) would block billing today. Tests roll back, so it is simply
 	marked closed for the duration of the test."""
@@ -48,6 +57,7 @@ def shift_for(user, counter, float_=0):
 		if not free:
 			frappe.throw(f"no free {c.counter_type} counter for tests")
 		counter = free[0]
+	make_staff(counter, user)
 	return shifts.open_shift(counter, {"Cash": float_})
 
 
@@ -321,6 +331,7 @@ class TestCash(IntegrationTestCase):
 		if cur:  # someone is using the demo counter today: set that shift aside for this test (rolled back)
 			frappe.db.set_value("POS Opening Entry", cur.name, "status", "Closed")
 			frappe.db.set_value("Counter", cur.hv_counter, {"open_shift": None, "current_user": None})
+		make_staff("Reception 2")
 		sh = shifts.open_shift("Reception 2", {"Cash": 5000})
 		pat = frappe.get_all("Patient", filters={"branch": "Lahore Main"}, pluck="name", limit=5)
 		cust = frappe.db.get_value("Patient", pat[0], "customer")
@@ -353,6 +364,7 @@ class TestCash(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("POS Opening Entry", sh.name, "status"), "Closed")
 		# second shift: excess 30 within tolerance closes by itself
 		as_user("reception2@vvs.demo")
+		make_staff("Reception 2")
 		sh2 = shifts.open_shift("Reception 2", {"Cash": 1000})
 		sc2 = shifts.close_shift({"1000": 1, "10": 3})
 		self.assertEqual(sc2.status, "Within Tolerance")

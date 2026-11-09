@@ -95,6 +95,9 @@ def admin_shift():
 		if c:
 			retire_stale_shift(c)
 	free = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main", "open_shift": ["is", "not set"]}, pluck="name")
+	from hospital_vvs.tests.test_phase2 import make_staff
+
+	make_staff(free[0])
 	shifts.open_shift(free[0], {"Cash": 0})
 
 

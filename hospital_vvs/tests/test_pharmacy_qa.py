@@ -55,6 +55,9 @@ def open_shift(user, counter):
 		retire_stale_shift(c.current_user)
 		frappe.db.set_value("POS Opening Entry", c.open_shift, "status", "Closed")
 		frappe.db.set_value("Counter", counter, {"open_shift": None, "current_user": None})
+	from hospital_vvs.tests.test_phase2 import make_staff
+
+	make_staff(counter, user)
 	return shifts.open_shift(counter, {"Cash": 2000})
 
 
@@ -310,3 +313,55 @@ class TestPharmacyPOSOptions(IntegrationTestCase):
 		found = api.find_prescriptions(phone[-10:])
 		self.assertIn(rx.name, [x.name for x in found])
 		self.assertEqual(api.find_prescriptions(rx.name)[0].name, rx.name)
+
+
+class TestCounterAccess(IntegrationTestCase):
+	"""D-41: a cashier works only in their own branch and only on counters whose POS Profile lists them (Applicable for Users)."""
+
+	def setUp(self):
+		p = patch.object(frappe.db, "commit", lambda *a, **k: None)
+		p.start()
+		self.addCleanup(p.stop)
+		self.addCleanup(as_user, "Administrator")
+		frappe.db.set_single_value("Clinic Settings", {"counter_staff_only": 1, "strict_branch_access": 1})
+		from hospital_vvs.setup.access import set_staff
+
+		set_staff("Pharmacy 1", [CASHIER])
+		set_staff("Pharmacy 2", ["cashier2@vvs.demo"])
+
+	def test_cashier_sees_and_opens_only_own_counter(self):
+		from hospital_vvs.utils import user_branches
+
+		as_user(CASHIER)
+		self.assertEqual(user_branches(), ["Lahore Main"])
+		self.assertEqual([c.name for c in shifts.counters_for()], ["Pharmacy 1"])
+		retire_stale_shift(CASHIER)
+		for other in ("Pharmacy 2", "Pharmacy ISB", "Handover 3", "Reception 1"):
+			self.assertFalse(shifts.can_use_counter(other))
+			with self.assertRaises(frappe.PermissionError):
+				shifts.open_shift(other, {"Cash": 0})
+
+	def test_no_billing_on_another_counter(self):
+		as_user(CASHIER)
+		retire_stale_shift(CASHIER)
+		if not shifts.current_shift():
+			c = frappe.get_doc("Counter", "Pharmacy 1")
+			if c.open_shift:
+				frappe.db.set_value("POS Opening Entry", c.open_shift, "status", "Closed")
+				frappe.db.set_value("Counter", c.name, {"open_shift": None, "current_user": None})
+			shifts.open_shift("Pharmacy 1", {"Cash": 0})
+		self.assertEqual(api.pos_context()["counter"]["name"], "Pharmacy 1")
+		with self.assertRaises(frappe.PermissionError):
+			api.pos_context(counter="Pharmacy 2")
+		with self.assertRaises(frappe.PermissionError):
+			pharmacy.checkout("Pharmacy ISB", [{"item_code": "X", "uom": "Nos", "qty": 1}])
+
+	def test_user_without_branch_gets_none_and_admin_all(self):
+		from hospital_vvs.utils import user_branches
+
+		frappe.db.delete("User Permission", {"user": "cashier2@vvs.demo", "allow": "Branch"})
+		as_user("cashier2@vvs.demo")
+		self.assertEqual(user_branches(), [])
+		self.assertEqual(shifts.counters_for(), [])
+		as_user("Administrator")
+		self.assertIn("Islamabad", user_branches())

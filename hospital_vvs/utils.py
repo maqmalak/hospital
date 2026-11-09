@@ -49,11 +49,16 @@ def can_see_clinical(user=None):
 
 
 def user_branches(user=None):
-	"""Branches the user may work in: User Permissions on Branch, else every branch."""
+	"""Branches the user may work in: User Permissions on Branch. Without any: every branch, unless
+	Clinic Settings → Strict Branch Access is on (then none). Admins always see every branch."""
 	user = user or frappe.session.user
+	if is_admin(user) or user == "Guest":
+		return frappe.get_all("Branch", pluck="name", order_by="name")
 	allowed = frappe.get_all("User Permission", filters={"user": user, "allow": "Branch"}, pluck="for_value")
 	if allowed:
 		return allowed
+	if frappe.utils.cint(settings().get("strict_branch_access")):
+		return []
 	return frappe.get_all("Branch", pluck="name", order_by="name")
 
 
@@ -68,6 +73,8 @@ def default_branch(user=None):
 
 
 def check_branch(branch):
+	if not branch and not user_branches():
+		frappe.throw(_("No branch is assigned to you. Ask the admin to give you a branch."), frappe.PermissionError)
 	if branch and branch not in user_branches():
 		frappe.throw(_("You do not have access to branch {0}.").format(branch), frappe.PermissionError)
 
