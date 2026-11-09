@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { AlertTriangle, Banknote, BellRing, CheckCircle2, ClipboardCheck, HandHelping, PackageSearch, Play, Replace, ScanLine, Undo2, XCircle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Ban, Banknote, BellRing, CheckCircle2, ClipboardCheck, HandHelping, PackageSearch, Play, Plus, Replace, ScanLine, Undo2, X, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { call, humanizeError, useApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -115,9 +116,17 @@ function ReviewPanel({ name, onChange }: { name: string; onChange: () => void })
   const [counts, setCounts] = useState<Record<string, string>>({});
   const [back, setBack] = useState("");
   const [swap, setSwap] = useState<TItem | null>(null);
+  const [drop, setDrop] = useState<TItem | null>(null);
   if (!data) return <div className="h-80 animate-pulse rounded-3xl bg-muted" />;
   const t = data.ticket;
-  const run = async (fn: () => Promise<unknown>, ok: string, close = true) => { try { await fn(); toast.success(ok); if (close) onChange(); else void refetch(); } catch (e) { toast.error(humanizeError(e), { duration: 7000 }); } };
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const run = async (fn: () => Promise<unknown>, ok: string, close = true) => {
+    if (busy) return;  // no double submit
+    setBusy(true);
+    try { await fn(); toast.success(ok); void qc.invalidateQueries({ queryKey: ["pharmacy.tickets"] }); if (close) onChange(); else void refetch(); }
+    catch (e) { toast.error(humanizeError(e), { duration: 7000 }); } finally { setBusy(false); }
+  };
   return (
     <Section title={<span className="flex items-center gap-2 text-lg"><b className="text-2xl">{t.token}</b>{t.patient_name}<PriorityBadge p={t.priority} /></span>}
       actions={t.status === "Picked" ? <Button variant="workflow" onClick={() => void run(() => act(name, "start_review"), "Review started", false)}><Play className="h-4 w-4" />Start review</Button> : undefined}>
@@ -131,14 +140,27 @@ function ReviewPanel({ name, onChange }: { name: string; onChange: () => void })
           <tr key={i.name} className="border-b border-border/60"><td className="py-2"><b>{i.item_name}</b>{i.note && <div className="text-xs text-muted-foreground">{i.note}</div>}<div className="text-[11px]">{i.line_status}</div></td>
             <td className="font-mono text-xs">{i.batch_no}<div className="text-muted-foreground">{i.expiry?.slice(0, 7)}</div></td><td className="text-end font-bold tabular-nums">{i.qty} {i.uom}</td>
             <td className="ps-2"><input className={cn(inputCls, "h-9 text-end tabular-nums", bad && "border-rose-500 text-rose-600")} value={c} inputMode="numeric" onChange={(e) => setCounts((x) => ({ ...x, [i.name]: e.target.value.replace(/[^\d.]/g, "") }))} /></td>
-            <td className="ps-1"><button title="Substitute" onClick={() => setSwap(i)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><Replace className="h-4 w-4" /></button></td></tr>); })}</tbody></table>
+            <td className="ps-1 whitespace-nowrap"><button title="Substitute (same generic, strength, form)" onClick={() => setSwap(i)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><Replace className="h-4 w-4" /></button>
+              <button title="Not supplied — remove from the bill" onClick={() => setDrop(i)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-rose-50 hover:text-rose-600"><Ban className="h-4 w-4" /></button></td></tr>); })}</tbody></table>
       <div className="mt-4 flex flex-wrap gap-2">
         <input className={inputCls + " min-w-48 flex-1"} placeholder="Reason to send back to the finder" value={back} onChange={(e) => setBack(e.target.value)} />
         <Button variant="outline" disabled={!back.trim()} onClick={() => void run(() => act(name, "send_back", { reason: back }), "Sent back")}><Undo2 className="h-4 w-4" />Send back</Button>
         <Button variant="submit" disabled={!["Reviewing", "Picked"].includes(t.status)} onClick={() => void run(() => act(name, "approve", { counts: JSON.stringify(Object.fromEntries(t.items.map((i) => [i.name, Number(counts[i.name] ?? i.qty)]))) }), "Approved — ready for handover")}><CheckCircle2 className="h-4 w-4" />Approve</Button>
       </div>
+      {drop && <DropDialog item={drop} busy={busy} onClose={() => setDrop(null)} onSave={(reason) => void run(() => act(name, "drop_line", { line: drop.name, reason }), `${drop.item_name} removed from the bill`, false).then(() => setDrop(null))} />}
       {swap && <SwapDialog item={swap} onClose={() => setSwap(null)} onPick={(code) => void run(() => act(name, "swap_line", { line: swap.name, new_item: code }), "Substitute applied", false).then(() => setSwap(null))} />}
     </Section>
+  );
+}
+
+function DropDialog({ item, busy, onClose, onSave }: { item: TItem; busy?: boolean; onClose: () => void; onSave: (reason: string) => void }) {
+  const [reason, setReason] = useState("Out of stock");
+  return (
+    <Dialog open onClose={onClose} title={`Not supplied: ${item.item_name}`} description="Partial supply: the line comes off the unpaid bill (a paid bill goes back to the counter for a refund)." size="sm">
+      <Field label="Reason"><input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} autoFocus /></Field>
+      <div className="mt-2 flex flex-wrap gap-1">{["Out of stock", "Patient declined", "Doctor changed the order", "Short-dated only"].map((r) => <button key={r} onClick={() => setReason(r)} className="rounded-full border border-border px-2 py-0.5 text-xs">{r}</button>)}</div>
+      <Button variant="danger" className="mt-4 w-full" disabled={!reason.trim()} loading={busy} onClick={() => onSave(reason)}><Ban className="h-4 w-4" />Remove from the bill</Button>
+    </Dialog>
   );
 }
 
@@ -193,21 +215,35 @@ export function DispensePage() {
 }
 
 function CollectDialog({ t, modes, agent, onClose, onDone }: { t: Ticket; modes: string[]; agent: boolean; onClose: () => void; onDone: () => void }) {
-  const [mode, setMode] = useState("Cash");
-  const [tendered, setTendered] = useState("");
+  const [rows, setRows] = useState<{ mode: string; amount: string; ref: string }[]>([{ mode: "Cash", amount: String(Math.round(t.amount_due)), ref: "" }]);
   const [busy, setBusy] = useState(false);
+  const paid = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+  const cash = rows.filter((r) => r.mode === "Cash").reduce((s, r) => s + (Number(r.amount) || 0), 0);
+  const due = Math.max(Math.round(t.amount_due) - paid, 0);
+  const change = Math.max(paid - Math.round(t.amount_due), 0);
+  const problem = due > 0 ? `Still due ${rs(due)}` : change > cash ? "Only cash can be given back as change" : rows.some((r) => r.mode !== "Cash" && Number(r.amount) > 0 && !r.ref.trim()) ? "Enter the transaction ID" : "";
+  const upd = (i: number, p: Partial<(typeof rows)[number]>) => setRows((x) => x.map((r, j) => (j === i ? { ...r, ...p } : r)));
   const save = async () => {
     setBusy(true);
-    try { const r = await act(t.name, "collect_payment", { payment_mode: mode, cash_tendered: Number(tendered) || undefined }); toast.success(`Paid${r.change ? ` · change ${rs(r.change)}` : ""}`); void printDoc(receiptHtml(r), "receipt", { agent }); onDone(); }
-    catch (e) { toast.error(humanizeError(e)); } finally { setBusy(false); }
+    try {
+      const r = await act(t.name, "collect_payment", { payments: JSON.stringify(rows.filter((x) => Number(x.amount) > 0).map((x) => ({ mode_of_payment: x.mode, amount: Number(x.amount), reference_no: x.ref.trim() || undefined }))) });
+      toast.success(`Paid${change ? ` · give change ${rs(change)}` : ""}`); void printDoc(receiptHtml(r), "receipt", { agent }); onDone();
+    } catch (e) { toast.error(humanizeError(e)); } finally { setBusy(false); }
   };
   return (
-    <Dialog open onClose={onClose} title={`Collect for ${t.token}`} size="sm">
+    <Dialog open onClose={onClose} title={`Collect for ${t.token}`} description="Billing at handover — counted in your shift" size="md">
       <div className="mb-3 text-center text-4xl font-black tabular-nums">{rs(t.amount_due)}</div>
-      <div className="mb-3 flex flex-wrap gap-1">{modes.map((m) => <button key={m} onClick={() => setMode(m)} className={cn("flex-1 rounded-xl border py-2 text-xs font-semibold", mode === m ? "border-emerald-600 bg-emerald-600 text-white" : "border-border")}>{m}</button>)}</div>
-      {mode === "Cash" && <Field label="Cash tendered"><input className={inputCls + " h-11 text-end text-lg font-bold"} inputMode="numeric" value={tendered} onChange={(e) => setTendered(e.target.value.replace(/\D/g, ""))} autoFocus /></Field>}
-      {Number(tendered) > t.amount_due && <div className="mt-2 text-end font-bold text-emerald-600">Change {rs(Number(tendered) - t.amount_due)}</div>}
-      <Button variant="submit" className="mt-4 w-full" loading={busy} onClick={() => void save()}>Collect & print</Button>
+      <div className="space-y-2">{rows.map((r, i) => (
+        <div key={i} className="rounded-xl border border-border p-2">
+          <div className="mb-1.5 flex flex-wrap gap-1">{modes.map((m) => <button key={m} onClick={() => upd(i, { mode: m })} className={cn("flex-1 rounded-lg border py-1.5 text-xs font-semibold", r.mode === m ? "border-emerald-600 bg-emerald-600 text-white" : "border-border")}>{m}</button>)}
+            {rows.length > 1 && <button onClick={() => setRows((x) => x.filter((_, j) => j !== i))} className="px-1 text-rose-600"><X className="h-4 w-4" /></button>}</div>
+          <div className="flex gap-2"><input className={inputCls + " h-10 text-end text-lg font-bold tabular-nums"} inputMode="numeric" value={r.amount} onChange={(e) => upd(i, { amount: e.target.value.replace(/\D/g, "") })} autoFocus={i === 0} />
+            {r.mode !== "Cash" && <input className={inputCls + " h-10"} placeholder="Transaction ID" value={r.ref} onChange={(e) => upd(i, { ref: e.target.value })} />}</div>
+        </div>))}</div>
+      <button onClick={() => setRows((x) => [...x, { mode: modes.find((m) => m !== "Cash") ?? "Card", amount: String(due), ref: "" }])} className="mt-2 flex items-center gap-1 text-xs font-semibold text-emerald-700"><Plus className="h-3.5 w-3.5" />Split payment</button>
+      <div className="mt-3 flex justify-between text-sm"><span>Paid {rs(paid)}</span>{change > 0 ? <b className="text-emerald-600">Change {rs(change)}</b> : due > 0 ? <b className="text-rose-600">Due {rs(due)}</b> : <b>Exact</b>}</div>
+      {problem && <div className="mt-1 text-xs font-semibold text-rose-600">{problem}</div>}
+      <Button variant="submit" className="mt-4 w-full" loading={busy} disabled={!!problem} onClick={() => void save()}><Banknote className="h-4 w-4" />Collect & print</Button>
     </Dialog>
   );
 }

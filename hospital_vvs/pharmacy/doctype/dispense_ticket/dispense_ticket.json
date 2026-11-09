@@ -130,7 +130,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Priority",
-   "options": "Normal\nUrgent\nElderly-Disabled"
+   "options": "Normal\nElderly\nDisabled\nUrgent\nElderly-Disabled"
   },
   {
    "fieldname": "billing_counter",
@@ -273,7 +273,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-09 20:31:50.603232",
  "modified_by": "Administrator",
  "module": "Pharmacy",
  "name": "Dispense Ticket",

@@ -35,7 +35,7 @@ export const TICKET_TONE: Record<string, string> = {
 };
 export function PriorityBadge({ p }: { p?: string }) {
   if (!p || p === "Normal") return null;
-  return <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold text-white", p === "Urgent" ? "bg-rose-600" : "bg-amber-500")}>{p === "Urgent" ? "URGENT" : "ELDERLY / DISABLED"}</span>;
+  return <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold text-white", p === "Urgent" ? "bg-rose-600" : p === "Disabled" ? "bg-sky-600" : "bg-amber-500")}>{p === "Elderly-Disabled" ? "ELDERLY / DISABLED" : p.toUpperCase()}</span>;
 }
 
 export interface Receipt { name: string; docstatus: number; token?: string; ticket?: string; posting_date: string; posting_time: string; customer: string; patient?: string; prescription?: string;

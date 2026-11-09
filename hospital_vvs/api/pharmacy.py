@@ -127,7 +127,7 @@ def tickets(stage="board", branch=None):
 	rows = frappe.get_all("Dispense Ticket", filters={"branch": branch or default_branch(), "ticket_date": today(), "status": ["in", STAGES.get(stage, STAGES["board"])]},
 		fields=["name", "token", "status", "priority", "patient_name", "patient", "sales_invoice", "invoice_status", "amount_due", "finder", "reviewer",
 			"handover_counter", "queued_at", "pick_started_at", "picked_at", "ready_at", "called_at", "recalls", "exception_reason", "prescription"], order_by="token_no")
-	order = {"Urgent": 0, "Elderly-Disabled": 1, "Normal": 2}
+	order = {"Urgent": 0, "Elderly": 1, "Disabled": 1, "Elderly-Disabled": 1, "Normal": 2}
 	rows.sort(key=lambda r: (order.get(r.priority, 2), str(r.queued_at)))
 	for r in rows:
 		r["items"] = frappe.get_all("Dispense Ticket Item", filters={"parent": r.name}, fields=["name", "item_code", "item_name", "uom", "qty", "batch_no", "expiry",
@@ -145,15 +145,16 @@ def ticket(name):
 def action(name, action, **kw):
 	"""One endpoint for pipeline stage changes (row-locked in the service)."""
 	roles = {"start_pick": (R.FINDER,), "scan": (R.FINDER,), "not_found": (R.FINDER, R.REVIEWER), "complete_pick": (R.FINDER,), "start_review": (R.REVIEWER,),
-		"approve": (R.REVIEWER,), "send_back": (R.REVIEWER,), "swap_line": (R.REVIEWER,), "call": (R.DISPENSER,), "collect_payment": (R.DISPENSER,),
+		"approve": (R.REVIEWER,), "send_back": (R.REVIEWER,), "swap_line": (R.REVIEWER,), "drop_line": (R.REVIEWER,), "call": (R.DISPENSER,), "collect_payment": (R.DISPENSER,),
 		"handover": (R.DISPENSER,)}
 	if action not in roles:
 		frappe.throw(_("Unknown action"))
 	require_roles(*roles[action])
 	fn = getattr(pharmacy, action)
 	kw.pop("cmd", None)
-	if "counts" in kw:
-		kw["counts"] = frappe.parse_json(kw["counts"])
+	for k in ("counts", "payments"):
+		if isinstance(kw.get(k), str):
+			kw[k] = frappe.parse_json(kw[k])
 	res = fn(name, **kw)
 	return res.as_dict() if hasattr(res, "as_dict") else res
 

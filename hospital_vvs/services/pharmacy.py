@@ -343,7 +343,7 @@ def receipt(si_name, cash_tendered=None):
 			"substitute_for": frappe.get_cached_value("Item", i.hv_original_item, "item_name") if i.hv_original_item else None} for i in si.items],
 		"total": si.total, "discount": si.discount_amount, "grand_total": flt(si.rounded_total or si.grand_total), "paid": paid,
 		"tendered": flt(cash_tendered) or paid, "change": max(flt(cash_tendered) - flt(si.rounded_total or si.grand_total), 0) if cash_tendered else 0,
-		"mode": si.payments[0].mode_of_payment if si.payments else ("Pay at handover" if si.docstatus == 0 else ""),
+		"mode": "Pay at handover" if si.docstatus == 0 else " + ".join(p.mode_of_payment for p in si.payments),
 		"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "address": branch.get("hv_address") or s.address, "phone": branch.get("hv_phone") or s.phone}}
 
 
@@ -588,6 +588,34 @@ def swap_line(name, line, new_item):
 	return _move(t, "Reviewing" if t.status == "Exception" else t.status)
 
 
+def drop_line(name, line, reason):
+	"""Partial supply: the pharmacist removes a line that cannot be supplied from an unpaid (pay-at-handover) bill."""
+	if not has_any_role(R.REVIEWER):
+		frappe.throw(_("Only the pharmacist removes a line."), frappe.PermissionError)
+	if not (reason or "").strip():
+		frappe.throw(_("Enter the reason."))
+	t = _lock(name)
+	r = next((x for x in t.items if x.name == line), None)
+	if not r:
+		frappe.throw(_("Line not found."))
+	si = frappe.get_doc("Sales Invoice", t.sales_invoice)
+	if si.docstatus == 1:
+		return _move(t, "Exception", exception_reason=f"{r.item_name} not supplied ({reason}): refund that line at the counter")
+	si.items = [i for i in si.items if i.name != r.invoice_item]
+	t.items = [x for x in t.items if x.name != line]
+	if not t.items:
+		frappe.delete_doc("Sales Invoice", si.name, ignore_permissions=True, force=True)
+		t.sales_invoice, t.amount_due = None, 0
+		return _move(t, "Cancelled", exception_reason=f"Nothing could be supplied: {reason}")
+	si.set_missing_values()
+	si.calculate_taxes_and_totals()
+	si.flags.ignore_permissions = True
+	si.save()
+	t.amount_due = flt(si.rounded_total or si.grand_total)
+	t.notes = ((t.notes or "") + f"\nNot supplied: {r.item_name} — {reason}").strip()
+	return _move(t, "Reviewing" if t.status == "Exception" else t.status)
+
+
 def call(name, counter=None):
 	t = _lock(name)
 	if t.status not in ("Ready", "Called", "Not Collected"):
@@ -600,8 +628,9 @@ def call(name, counter=None):
 		recalls=cint(t.recalls) + (1 if recall else 0))
 
 
-def collect_payment(name, payment_mode="Cash", cash_tendered=None):
-	"""Pay at handover: the draft becomes a paid POS invoice in the dispenser's shift (stock deducted now)."""
+def collect_payment(name, payment_mode="Cash", cash_tendered=None, payments=None, reference_no=None):
+	"""Pay at handover: the draft becomes a paid POS invoice in the dispenser's shift (stock deducted now).
+	payments: optional split [{mode_of_payment, amount, reference_no}] — change only from cash; card / wallet / bank need a transaction ID."""
 	from hospital_vvs.services.shifts import billing_shift
 
 	t = _lock(name)
@@ -613,18 +642,48 @@ def collect_payment(name, payment_mode="Cash", cash_tendered=None):
 		si.pos_profile, si.is_created_using_pos, si.hv_counter = shift.pos_profile, 1, shift.hv_counter
 	si.calculate_taxes_and_totals()
 	total = flt(si.rounded_total or si.grand_total)
-	if payment_mode == "Cash" and cash_tendered and flt(cash_tendered) < total:
-		frappe.throw(_("Cash tendered is less than the bill."))
-	si.set("payments", [{"mode_of_payment": payment_mode, "amount": total}])
+	rows = [p for p in (payments or []) if flt(p.get("amount")) > 0] or [{"mode_of_payment": payment_mode, "amount": flt(cash_tendered) or total, "reference_no": reference_no}]
+	paid = sum(flt(p["amount"]) for p in rows)
+	if paid + 0.5 < total:
+		frappe.throw(_("Paid {0} is less than the bill {1}.").format(frappe.format_value(paid, "Currency"), frappe.format_value(total, "Currency")))
+	change = round(paid - total, 2)
+	cash = sum(flt(p["amount"]) for p in rows if p["mode_of_payment"] == "Cash")
+	if change > cash + 0.01:
+		frappe.throw(_("Only cash can be given back as change."))
+	refs = []
+	for p in rows:
+		if p["mode_of_payment"] != "Cash" and not (p.get("reference_no") or "").strip():
+			frappe.throw(_("Enter the transaction ID for {0}.").format(p["mode_of_payment"]))
+		if p.get("reference_no"):
+			refs.append(f"{p['mode_of_payment']} {p['reference_no']}")
+	allowed = {m.mode_of_payment for m in frappe.get_cached_doc("POS Profile", si.pos_profile).payments}
+	left, out = change, []
+	for p in rows:
+		if p["mode_of_payment"] not in allowed:
+			frappe.throw(_("{0} is not set up on this counter.").format(p["mode_of_payment"]))
+		amt = flt(p["amount"])
+		if p["mode_of_payment"] == "Cash" and left:
+			take = min(amt, left)
+			amt -= take
+			left -= take
+		if amt > 0.004:
+			out.append({"mode_of_payment": p["mode_of_payment"], "amount": amt})
+	si.set("payments", out)
+	if refs:
+		si.remarks = ((si.remarks or "") + " · " + ", ".join(refs)).strip(" ·")
 	si.calculate_taxes_and_totals()
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()
+	if shift and si.owner != shift.user:
+		# ERPNext counts a POS invoice in the shift of the user who owns it: the draft was made at the billing counter, the money was
+		# taken here, so the invoice becomes the collector's (otherwise the dispenser's expected cash and POS closing miss it)
+		frappe.db.set_value("Sales Invoice", si.name, "owner", shift.user, update_modified=False)
 	t.reload()
 	t.invoice_status, t.amount_due = "Paid", 0
-	_log(t, t.status, f"Paid {total} by {payment_mode}")
+	_log(t, t.status, f"Paid {total} by {' + '.join(p['mode_of_payment'] for p in out)}")
 	t.save(ignore_permissions=True)
-	return receipt(si.name, cash_tendered=cash_tendered)
+	return receipt(si.name, cash_tendered=paid if change else cash_tendered)
 
 
 def handover(name, code=None):

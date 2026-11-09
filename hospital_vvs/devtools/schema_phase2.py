@@ -206,7 +206,7 @@ PH_DT = [
 		f("patient", "Link", "Patient"), f("patient_name", "Data", list=1), f("customer", "Link", "Customer"), cb("dt2"),
 		f("status", "Select", ["Queued", "Picking", "Picked", "Reviewing", "Ready", "Called", "Handed Over", "Exception", "On Hold", "Not Collected", "Cancelled"],
 			default="Queued", list=1, filter=1),
-		f("priority", "Select", ["Normal", "Urgent", "Elderly-Disabled"], default="Normal", list=1),
+		f("priority", "Select", ["Normal", "Elderly", "Disabled", "Urgent", "Elderly-Disabled"], default="Normal", list=1),
 		f("billing_counter", "Link", "Counter"), f("handover_counter", "Link", "Counter"), f("prescription", "Link", "Prescription"),
 		sb("dt3", "Items"), f("items", "Table", "Dispense Ticket Item"),
 		sb("dt4", "People & times"), f("finder", "Link", "User", ro=1), f("reviewer", "Link", "User", ro=1), f("dispenser", "Link", "User", ro=1),

@@ -111,6 +111,9 @@ Bed days by midnight census + minimum · nursing per started shift across a tran
 - Shift page now offers each role only its own counters (reception does not see the contractor's pharmacy counters).
 - Tests: `tests/test_counter.py` (3) — one cart with split tender, change only from cash, priority, idempotent retry, refund of one line; IPD advance split over two modes and refunded; offline sync with one failing sale. Full suite 45 green. Checked in the browser as reception2: Rs 2,000 cash + Rs 5,500 JazzCash over a consultation and an IPD advance (RCPT-2611-00001, token 1). That demo shift at Reception 2 is still open.
 
+## Pharmacy QA (2026-11-09)
+Billing at handover is now on (Collect payment at = Handover counter). Full journey cart → pick → review → handover tested as the four demo users (browser + `tests/test_pharmacy_qa.py`, 7 cases); 6 defects found and fixed (dispenser shift missing handover sales, partial supply, split payment with transaction IDs, 4 priorities, draft label, review refresh / double submit). Report: [QA-PHARMACY.md](QA-PHARMACY.md). Full suite 52 green.
+
 ## Deferred / known gaps
 - **Staging + training sites, restore drill on staging**: need `bench new-site` (MariaDB root password) — scripts and steps in `docs/OPS.md`; decrypt-and-check drill done locally.
 - **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.
