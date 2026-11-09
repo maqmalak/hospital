@@ -103,8 +103,7 @@ UR = {"Muhammad": "محمد", "Ali": "علی", "Ahmed": "احمد", "Hassan": "�
 STAFF = [("admin", "Nadia Admin", [R.ADMIN]), ("reception", "Rizwan Reception", [R.RECEPTIONIST]), ("reception2", "Saba Front Desk", [R.RECEPTIONIST]),
 	("nurse", "Nargis Nurse", [R.NURSE]), ("supervisor", "Shahzad Supervisor", [R.CASH_SUPERVISOR]), ("accounts", "Aamir Accountant", [R.ACCOUNTANT]),
 	("lab", "Laiba Lab", [R.LAB_USER]), ("pathologist", "Dr. Pervaiz Pathologist", [R.PATHOLOGIST]), ("pharmacist", "Haris Pharmacist", [R.REVIEWER]),
-	("cashier", "Kamal Cashier", [R.PHARMACY_CASHIER]), ("store", "Sohail Store", [R.STORE_KEEPER]), ("deo", "Danish Data Entry", [R.DEO]),
-	("reception.isb", "Iram Reception ISB", [R.RECEPTIONIST])]
+	("cashier", "Kamal Cashier", [R.PHARMACY_CASHIER]), ("store", "Sohail Store", [R.STORE_KEEPER]), ("deo", "Danish Data Entry", [R.DEO])]
 
 
 def password():
