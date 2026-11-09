@@ -47,9 +47,11 @@
   {
    "description": "Nursing station",
    "fieldname": "station",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Station"
+   "in_standard_filter": 1,
+   "label": "Station",
+   "options": "Nursing Station"
   },
   {
    "fieldname": "bed",
@@ -87,7 +89,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-10 01:15:05.951209",
  "modified_by": "Administrator",
  "module": "IPD",
  "name": "Patient Comms Profile",
@@ -110,7 +112,8 @@
   },
   {
    "read": 1,
-   "role": "PW Nurse"
+   "role": "PW Nurse",
+   "write": 1
   },
   {
    "read": 1,

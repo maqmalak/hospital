@@ -31,6 +31,8 @@ APPS = [
 	("Cashier shift", "/hms/cash/shift", "wallet", "Yellow"),
 	("Online visits", "/hms/ov-staff", "video", "Blue"),
 	("Doctor share", "/hms/doctor-share", "wallet", "Green"),
+	("Nursing stations", "/hms/ns", "bell", "Cyan"),
+	("Patient feedback", "/hms/feedback", "star", "Pink"),
 	("Reports", "/hms/reports", "bar-chart", "Grey"),
 ]
 
@@ -46,6 +48,7 @@ SECTIONS = [
 		"Payment Entry"]),
 	("Accounts & Doctor Share", "book-open", ["Doctor Share Rule", "Doctor Share Ledger", "Doctor Share Payout", "Supplier", "Journal Entry", "Payment Entry",
 		"Discount Authorization"]),
+	("Patient Comms & Feedback", "message-circle", ["Nursing Station", "Patient Comms Profile", "Comms Message", "Station Broadcast", "Patient Feedback"]),
 	("Online & Messages", "message-circle", ["Online Visit Request", "Message Log", "Message Template", "WhatsApp Conversation"]),
 	("Setup", "settings", ["Clinic Settings", "Branch", "User Permission", "Medical Department", "Specialization", "Generic Name", "Drug Class", "Drug Interaction",
 		"Discount Rule", "Diet Type", "Procedure Type", "Clinical Access Log"]),

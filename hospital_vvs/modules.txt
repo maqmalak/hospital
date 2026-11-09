@@ -9,3 +9,4 @@ Lab
 Pharmacy
 Emergency
 Online Visit
+Patient Comms

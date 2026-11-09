@@ -202,6 +202,20 @@
   "ipd_medicine_billing",
   "cp1",
   "ov_fee_modes",
+  "comms_tab",
+  "comms_urgent_kinds",
+  "comms_answer_target_min",
+  "pcf1",
+  "feedback_opd",
+  "feedback_opd_hours",
+  "feedback_ipd",
+  "feedback_ipd_hours",
+  "feedback_pharmacy",
+  "feedback_pharmacy_hours",
+  "pcf2",
+  "feedback_gap_days",
+  "feedback_low_rating",
+  "feedback_link_days",
   "doctor_share_tab",
   "doctor_share_expense_account",
   "doctor_supplier_group",
@@ -1371,6 +1385,87 @@
    "label": "Online Fee Modes (reception)"
   },
   {
+   "fieldname": "comms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Patient Comms & Feedback"
+  },
+  {
+   "default": "Pain\nNurse",
+   "description": "Quick buttons treated as urgent at the station (one per line)",
+   "fieldname": "comms_urgent_kinds",
+   "fieldtype": "Small Text",
+   "label": "Comms Urgent Kinds"
+  },
+  {
+   "default": "5",
+   "description": "Patient messages unanswered longer than this turn red",
+   "fieldname": "comms_answer_target_min",
+   "fieldtype": "Int",
+   "label": "Answer Target (minutes)"
+  },
+  {
+   "fieldname": "pcf1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "feedback_opd",
+   "fieldtype": "Check",
+   "label": "Feedback After OPD Visit"
+  },
+  {
+   "default": "2",
+   "fieldname": "feedback_opd_hours",
+   "fieldtype": "Float",
+   "label": "OPD Delay (hours)"
+  },
+  {
+   "default": "1",
+   "fieldname": "feedback_ipd",
+   "fieldtype": "Check",
+   "label": "Feedback After Discharge"
+  },
+  {
+   "default": "24",
+   "fieldname": "feedback_ipd_hours",
+   "fieldtype": "Float",
+   "label": "Discharge Delay (hours)"
+  },
+  {
+   "default": "0",
+   "fieldname": "feedback_pharmacy",
+   "fieldtype": "Check",
+   "label": "Feedback After Pharmacy Handover"
+  },
+  {
+   "default": "2",
+   "fieldname": "feedback_pharmacy_hours",
+   "fieldtype": "Float",
+   "label": "Pharmacy Delay (hours)"
+  },
+  {
+   "fieldname": "pcf2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "fieldname": "feedback_gap_days",
+   "fieldtype": "Int",
+   "label": "At Most One Request per Patient Every (days)"
+  },
+  {
+   "default": "2",
+   "fieldname": "feedback_low_rating",
+   "fieldtype": "Int",
+   "label": "Alert Admin at Rating ≤"
+  },
+  {
+   "default": "7",
+   "fieldname": "feedback_link_days",
+   "fieldtype": "Int",
+   "label": "Feedback Link Valid (days)"
+  },
+  {
    "fieldname": "doctor_share_tab",
    "fieldtype": "Tab Break",
    "label": "Doctor Share"
@@ -1447,7 +1542,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 01:04:09.005329",
+ "modified": "2026-11-10 01:15:05.946823",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

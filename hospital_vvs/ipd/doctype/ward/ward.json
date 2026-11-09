@@ -74,8 +74,9 @@
   },
   {
    "fieldname": "nursing_station",
-   "fieldtype": "Data",
-   "label": "Nursing Station"
+   "fieldtype": "Link",
+   "label": "Nursing Station",
+   "options": "Nursing Station"
   },
   {
    "fieldname": "color",
@@ -127,7 +128,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-09 18:00:57.200144",
+ "modified": "2026-11-10 01:15:05.948923",
  "modified_by": "Administrator",
  "module": "IPD",
  "name": "Ward",

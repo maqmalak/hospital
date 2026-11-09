@@ -12,7 +12,7 @@ WARD = doctype("Ward", IPD, [
 	f("ward_type", "Select", ["General", "Semi-Private", "Private", "ICU", "CCU", "NICU", "HDU", "Emergency", "Maternity", "Day Care"],
 		default="General", list=1, filter=1),
 	f("gender", "Select", ["Mixed", "Male", "Female", "Children"], default="Mixed", list=1), cb("w1"),
-	f("branch", "Link", "Branch", reqd=1, list=1, filter=1), f("floor", "Data", list=1), f("nursing_station", "Data"),
+	f("branch", "Link", "Branch", reqd=1, list=1, filter=1), f("floor", "Data", list=1), f("nursing_station", "Link", "Nursing Station"),
 	f("color", "Color"), f("sort_order", "Int"), f("is_active", "Check", default="1"),
 	sb("w2", "Charges"), f("bed_charge_per_day", "Currency"), cb("w3"), f("nursing_charge_per_shift", "Currency"),
 	f("icu_surcharge_per_day", "Currency", label="ICU Surcharge per Day", description="Added to the bed charge for every day in this ward"),

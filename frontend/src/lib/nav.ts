@@ -1,4 +1,4 @@
-import {
+import { MessageSquareHeart, Radio,
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
   ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
   Activity, BarChart3, BedDouble, Receipt, ReceiptText, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
@@ -56,6 +56,7 @@ export const NAV: NavGroup[] = [
     { route: "/ward", label: "Wards & beds", icon: BedDouble, color: "from-emerald-500 to-teal-600", desc: "Live bed map, admit, transfer" },
     { route: "/ipd", label: "Admissions", icon: ClipboardPlus, color: "from-teal-600 to-cyan-700", desc: "Inpatients, charts, discharge" },
     { route: "/ipd/mar", label: "Drug round", icon: Pill, color: "from-green-500 to-emerald-600", desc: "Doses due, chart in one tap" },
+    { route: "/ns", label: "Nursing stations", icon: Radio, color: "from-teal-500 to-sky-600", desc: "Bedside calls, replies, broadcast" },
     { route: "/ipd_slip", label: "IPD bill", icon: Receipt, color: "from-sky-600 to-indigo-600", desc: "Running bill, advances, final invoice" },
     { route: "/ipd/kitchen", label: "Diet list", icon: Soup, color: "from-lime-500 to-green-600", desc: "Meals per bed for the kitchen" },
     { route: "/ipd/pre-auth", label: "Insurance pre-auth", icon: ShieldPlus, color: "from-indigo-500 to-violet-600", desc: "Approvals before admission" },
@@ -76,6 +77,7 @@ export const NAV: NavGroup[] = [
   { label: "Insights", items: [
     { route: "/pw-dashboard", label: "Dashboard", icon: LayoutDashboard, color: "from-indigo-500 to-blue-600", desc: "Today at a glance" },
     { route: "/reports", label: "Reports", icon: BarChart3, color: "from-blue-500 to-sky-600", desc: "MIS reports" },
+    { route: "/feedback", label: "Patient feedback", icon: MessageSquareHeart, color: "from-pink-500 to-rose-600", desc: "Ratings and follow-ups" },
   ] },
   { label: "Admin", items: [
     { route: "/doctors", label: "Doctors", icon: Activity, color: "from-teal-600 to-cyan-700", desc: "Doctors, schedules, leave" },

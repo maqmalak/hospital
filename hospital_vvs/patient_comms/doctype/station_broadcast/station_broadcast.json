@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "autoname": "BRD-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "station",
+  "text",
+  "b1",
+  "sent_by",
+  "recipients"
+ ],
+ "fields": [
+  {
+   "fieldname": "station",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Station",
+   "options": "Nursing Station",
+   "reqd": 1
+  },
+  {
+   "fieldname": "text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Text",
+   "reqd": 1
+  },
+  {
+   "fieldname": "b1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sent_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sent By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recipients",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Recipients",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Patient Comms",
+ "name": "Station Broadcast",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin"
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

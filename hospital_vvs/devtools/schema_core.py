@@ -4,6 +4,7 @@ from hospital_vvs.devtools.dt import cb, doctype, f, p, sb, tab
 from hospital_vvs.devtools.schema_phase2 import SETTINGS_FIELDS as PHASE2_SETTINGS
 from hospital_vvs.devtools.schema_phase3 import SETTINGS_FIELDS as PHASE3_SETTINGS
 from hospital_vvs.devtools.schema_phase4 import SETTINGS_FIELDS as PHASE4_SETTINGS
+from hospital_vvs.devtools.schema_phase5 import SETTINGS_FIELDS as PHASE5_SETTINGS
 from hospital_vvs.devtools.schema_phase6 import SETTINGS_FIELDS as PHASE6_SETTINGS
 from hospital_vvs.roles import (
 	ACCOUNTANT, ADMIN, CASH_SUPERVISOR, CLINICAL, DEO, DISPENSER, DOCTOR, FINDER, LAB_USER, NURSE, OV_DOCTOR, OV_STAFF,
@@ -141,6 +142,7 @@ SETTINGS = doctype("Clinic Settings", M, [
 	*PHASE2_SETTINGS,
 	*PHASE3_SETTINGS,
 	*PHASE4_SETTINGS,
+	*PHASE5_SETTINGS,
 	*PHASE6_SETTINGS,
 
 	tab("security_tab", "Security"),

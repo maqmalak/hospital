@@ -303,6 +303,10 @@ def handle_inbound(phone, text=None, reply_id=None, media=None, provider_id=None
 		"body": text or reply_id or ("[image]" if media else ""), "media_url": media, "provider_message_id": provider_id,
 		"conversation": conv.name, "patient": (household(phone) or [{}])[0].get("name")}).insert(ignore_permissions=True)
 	words = (text or "").strip().lower()
+	from hospital_vvs.services.patient_comms import whatsapp_rating
+
+	if not conv.handed_off and whatsapp_rating(phone, words):  # "1".."5" answers an open feedback request (D-44)
+		return say(conv, "شکریہ! Thank you for your feedback.")
 	if words in HANDOFF_WORDS or reply_id == "menu:reception":
 		return handoff(conv)
 	if conv.handed_off and not (words in RESTART_WORDS):

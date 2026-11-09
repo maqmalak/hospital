@@ -69,6 +69,27 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `confirm_drop` | name, accept, note | POST |  |  |
 | `report` | from_date, to_date, branch |  | CASH_SUPERVISOR, ACCOUNTANT | Shift history, day-end position per counter and mode, excess/short per cashier, open shifts, pending drops. |
 
+## comms
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `portal` | token | guest |  |  |
+| `portal_send` | token, kind, text, voice, language | guest POST |  |  |
+| `stations` |  |  | STAFF, RECEPTIONIST |  |
+| `board` | station |  | STAFF |  |
+| `thread` | profile |  | STAFF |  |
+| `reply` | profile, text | POST | STAFF |  |
+| `broadcast` | station, text | POST | NURSE |  |
+| `assignments` |  |  | NURSE |  |
+| `set_station` | profile, station | POST | NURSE |  |
+| `response_report` | from_date, to_date, station |  | NURSE, DOCTOR |  |
+| `feedback_form` | token | guest |  |  |
+| `feedback_submit` | token, rating, comment | guest POST |  |  |
+| `feedback_list` | status, follow_up, source, q, limit |  | ADMIN |  |
+| `feedback_follow_up` | name, note, done | POST | ADMIN |  |
+| `feedback_report` | from_date, to_date, branch |  | ADMIN, DOCTOR, ACCOUNTANT |  |
+| `feedback_send_now` |  | POST | ADMIN | Admin: run the feedback request job now (normally every 15 minutes). |
+
 ## counter
 
 | Method | Params | Flags | Roles | Summary |

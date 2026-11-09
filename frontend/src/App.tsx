@@ -68,6 +68,13 @@ const CounterPage = lazy(() => import("@/modules/counter/CounterPage"));
 const CounterDisplayPage = lazy(() => import("@/modules/counter/DisplayPage"));
 const PharmacyDisplayPage = lazy(() => import("@/modules/pharmacy/DisplayPage"));
 const DoctorSharePage = lazy(() => import("@/modules/billing/DoctorSharePage"));
+const PatientRoomPage = lazy(() => import("@/modules/comms/PatientRoomPage"));
+const StationListPage = lazy(() => import("@/modules/comms/StationPages"));
+const NursingStationPage = lazy(() => import("@/modules/comms/StationPages").then((m) => ({ default: m.NursingStationPage })));
+const AssignPage = lazy(() => import("@/modules/comms/StationPages").then((m) => ({ default: m.AssignPage })));
+const ResponseReportPage = lazy(() => import("@/modules/comms/StationPages").then((m) => ({ default: m.ResponseReportPage })));
+const FeedbackAdminPage = lazy(() => import("@/modules/comms/FeedbackPages"));
+const FeedbackFormPage = lazy(() => import("@/modules/comms/FeedbackPages").then((m) => ({ default: m.FeedbackFormPage })));
 const MySharePage = lazy(() => import("@/modules/billing/DoctorSharePage").then((m) => ({ default: m.MySharePage })));
 const OnlineVisitPage = lazy(() => import("@/modules/public/OnlineVisitPage"));
 const OnlineVisitStatusPage = lazy(() => import("@/modules/public/OnlineVisitStatusPage"));
@@ -104,6 +111,8 @@ export default function App() {
         <Route path="/book-appointment" element={<BookPage />} />
         <Route path="/my-appointment/:token" element={<ManagePage />} />
         <Route path="/lab-report/:token" element={<LabReportPage />} />
+        <Route path="/patient/:token" element={<PatientRoomPage />} />
+        <Route path="/feedback/:token" element={<FeedbackFormPage />} />
         <Route path="/online-visit" element={<OnlineVisitPage />} />
         <Route path="/online-visit/:token" element={<OnlineVisitStatusPage />} />
         <Route path="/display/counter/:key" element={<DevicePage />} />
@@ -153,6 +162,11 @@ export default function App() {
         <Route path="/cash/reports" element={g("/cash/reports", <CashReportsPage />)} />
         <Route path="/doctor-share" element={g("/doctor-share", <DoctorSharePage />)} />
         <Route path="/my-share" element={g("/my-share", <MySharePage />)} />
+        <Route path="/ns" element={g("/ns", <StationListPage />)} />
+        <Route path="/ns/:station" element={g("/ns/:station", <NursingStationPage />)} />
+        <Route path="/pc-assign" element={g("/pc-assign", <AssignPage />)} />
+        <Route path="/pc-report" element={g("/pc-report", <ResponseReportPage />)} />
+        <Route path="/feedback" element={g("/feedback", <FeedbackAdminPage />)} />
         <Route path="/lab/orders" element={g("/lab/orders", <LabOrdersPage />)} />
         <Route path="/lab/samples" element={g("/lab/samples", <LabSamplesPage />)} />
         <Route path="/tests" element={g("/tests", <LabTestsPage />)} />

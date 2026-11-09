@@ -10,7 +10,9 @@ Status as of **2026-11-09**. Phases from `docs/CLAUDE.md` §8.
 | 2 Pharmacy + Lab + Cash | **Done** (2026-11-07) |
 | 3 IPD + ER | **Done** (2026-11-09) — W4, W18 green; full suite 37 green |
 | 4 Online Visit | **Done** (2026-11-09) — W5 green; full suite 41 green |
-| 5–7 | Not started — Phase 5 (Patient Comms + Feedback) waits for review |
+| 5 | Done 2026-11-10 — patient comms + feedback (D-44) |
+| 6 | Doctor share built early (D-43); rest (panels / claims, welfare, expenses, purchasing, MIS) not started |
+| 7 | Not started |
 
 ## How to run
 
@@ -136,3 +138,7 @@ Paper prescription for walk-ins; cash in / out (F6) inside the POS; Restaurant O
 
 ## Doctor share (2026-11-10) — D-43 (Phase 6 part, built early on request)
 Commission rules, ledger earned as bills are paid, reversals on refunds / cancelled payments, payouts to the doctor's supplier with Payment Entry, accountant screen `/doctor-share` (owed / earned / taken back / paid, statement, rules, pay, apply to past bills), doctor's `/my-share`, desk section *Accounts & Doctor Share*. Demo rules: Dr Ayesha (OPD 50 %, lab referrals 10 %), Dr Usman (OPD 40 %), Dr Sana (OPD 45 %, online fees 60 %), applied to November bills. Tests: 67 green (5 new).
+
+## Phase 5 — patient comms + feedback (2026-11-10) — D-44
+Built: Nursing Station, Comms Message, Station Broadcast, Patient Feedback; bedside page `/patient/:token` (quick buttons, text, Urdu/English voice-to-text, live replies, broadcasts), nursing station `/ns` and `/ns/:station` (urgent first, unread, waiting time vs target, thread, quick replies, broadcast, on-duty nurses, chime), `/pc-assign`, `/pc-report`; feedback job (OPD / discharge / pharmacy, delay, gap, link expiry), public `/feedback/:token`, WhatsApp 1–5 reply, admin `/feedback` with follow-ups and report; desk section *Patient Comms & Feedback*. Tests: W6 and W16 plus token, branch and gap cases — full suite 72 green. Browser: bedside "I am in pain" → station urgent → reply answered in 17 s.
+Pending / owner: Meta approval of `visit_feedback` (EN/UR); bedside tablets per room; which wards' stations to staff.

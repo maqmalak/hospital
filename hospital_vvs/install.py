@@ -242,3 +242,6 @@ def after_migrate():
 	from hospital_vvs.services.doctor_share import ensure_accounts
 
 	ensure_accounts()
+	from hospital_vvs.services.patient_comms import ensure_stations
+
+	ensure_stations()

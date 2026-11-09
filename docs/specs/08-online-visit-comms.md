@@ -15,3 +15,6 @@
 
 ## Build decisions (Phase 4)
 See `DECISIONS.md` D-35 … D-37: online fees posted outside cashier shifts, token + last-4-digits rule for the prescription, Jitsi link by default, prescription is a normal signed Prescription linked to the request.
+
+## Build decisions (Phase 5)
+See `DECISIONS.md` D-44: Nursing Station DocType linked from Ward; assignment is a profile field (`/pc-assign`); bedside and station pages poll; Pain / Nurse urgent by setting; response time = first staff reply.

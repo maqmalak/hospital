@@ -215,10 +215,10 @@ ADMISSION = [
 	], _signed_perm, autoname="DS-.YYYY.-.#####", is_submittable=1, track_changes=1, title_field="patient_name"),
 	doctype("Patient Comms Profile", IPD, [
 		f("patient", "Link", "Patient", reqd=1, list=1), f("patient_name", "Data", fetch_from="patient.patient_name", ro=1, list=1),
-		f("bed_allotment", "Link", "Bed Allotment", list=1), cb("pc1"), f("station", "Data", list=1, description="Nursing station"),
+		f("bed_allotment", "Link", "Bed Allotment", list=1), cb("pc1"), f("station", "Link", "Nursing Station", list=1, filter=1, description="Nursing station"),
 		f("bed", "Link", "Hospital Bed"), f("active", "Check", default="1", list=1, filter=1),
 		f("token_hash", "Data", hidden=1, search_index=1), f("activated_on", "Datetime", ro=1), f("deactivated_on", "Datetime", ro=1),
-	], [p("System Manager", "rwcd"), p(ADMIN, "rwcd"), p(NURSE, "r"), p(RECEPTIONIST, "r")], autoname="PCP-.#####"),
+	], [p("System Manager", "rwcd"), p(ADMIN, "rwcd"), p(NURSE, "rw"), p(RECEPTIONIST, "r")], autoname="PCP-.#####"),
 ]
 
 EMERGENCY = [

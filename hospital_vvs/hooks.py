@@ -57,6 +57,9 @@ scheduler_events = {
 			"hospital_vvs.services.appointments.send_reminders",
 			"hospital_vvs.messaging.whatsapp_bot.expire_conversations",
 		],
+		"*/15 * * * *": [
+			"hospital_vvs.services.patient_comms.queue_feedback_requests",
+		],
 	},
 	"daily": [
 		"hospital_vvs.services.appointments.generate_slots",
