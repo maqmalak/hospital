@@ -1,0 +1,217 @@
+{
+ "actions": [],
+ "autoname": "DSL-.YYYY.-.######",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date",
+  "doctor",
+  "doctor_name",
+  "supplier",
+  "entry_type",
+  "l1",
+  "amount",
+  "status",
+  "payout",
+  "l2",
+  "sales_invoice",
+  "invoice_item",
+  "item_code",
+  "item_name",
+  "billing_type",
+  "l3",
+  "patient",
+  "branch",
+  "company",
+  "line_amount",
+  "earned_fraction",
+  "rule",
+  "journal_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Doctor",
+   "options": "Doctor",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "doctor.doctor_name",
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "label": "Doctor Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "entry_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Entry Type",
+   "options": "Earned\nReversed"
+  },
+  {
+   "fieldname": "l1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Positive = owed to the doctor; negative = taken back (refund / cancelled payment)",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Unpaid\nPaid"
+  },
+  {
+   "fieldname": "payout",
+   "fieldtype": "Link",
+   "label": "Payout",
+   "options": "Doctor Share Payout",
+   "read_only": 1
+  },
+  {
+   "fieldname": "l2",
+   "fieldtype": "Section Break",
+   "label": "Source"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice"
+  },
+  {
+   "description": "Sales Invoice Item row",
+   "fieldname": "invoice_item",
+   "fieldtype": "Data",
+   "label": "Invoice Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "billing_type",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Billing Type"
+  },
+  {
+   "fieldname": "l3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "line_amount",
+   "fieldtype": "Currency",
+   "label": "Line amount (basis)"
+  },
+  {
+   "description": "Share of the bill paid when this entry was made",
+   "fieldname": "earned_fraction",
+   "fieldtype": "Percent",
+   "label": "Earned Fraction"
+  },
+  {
+   "fieldname": "rule",
+   "fieldtype": "Link",
+   "label": "Rule",
+   "options": "Doctor Share Rule"
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing",
+ "name": "Doctor Share Ledger",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Admin"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

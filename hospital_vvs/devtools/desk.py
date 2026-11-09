@@ -30,6 +30,7 @@ APPS = [
 	("Emergency", "/hms/er", "alert-triangle", "Red"),
 	("Cashier shift", "/hms/cash/shift", "wallet", "Yellow"),
 	("Online visits", "/hms/ov-staff", "video", "Blue"),
+	("Doctor share", "/hms/doctor-share", "wallet", "Green"),
 	("Reports", "/hms/reports", "bar-chart", "Grey"),
 ]
 
@@ -43,6 +44,8 @@ SECTIONS = [
 		"Insurance Pre Auth", "Service Package"]),
 	("Cash & Counters", "wallet", ["Counter", "POS Profile", "POS Opening Entry", "Shift Closing", "Cash Movement", "Counter Receipt", "Discount Authorization",
 		"Payment Entry"]),
+	("Accounts & Doctor Share", "book-open", ["Doctor Share Rule", "Doctor Share Ledger", "Doctor Share Payout", "Supplier", "Journal Entry", "Payment Entry",
+		"Discount Authorization"]),
 	("Online & Messages", "message-circle", ["Online Visit Request", "Message Log", "Message Template", "WhatsApp Conversation"]),
 	("Setup", "settings", ["Clinic Settings", "Branch", "User Permission", "Medical Department", "Specialization", "Generic Name", "Drug Class", "Drug Interaction",
 		"Discount Rule", "Diet Type", "Procedure Type", "Clinical Access Log"]),

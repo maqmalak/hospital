@@ -30,17 +30,18 @@ const TONES: Record<string, string> = {
 
 export function StatCard({ label, value, hint, icon: Icon, tone = "teal", onClick }: { label: string; value: ReactNode; hint?: ReactNode;
   icon?: LucideIcon; tone?: keyof typeof TONES; onClick?: () => void }) {
+  const t = TONES[tone] ?? TONES.teal;
   return (
     <button type="button" onClick={onClick} disabled={!onClick}
       className={cn("hover-lift relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-start shadow-sm disabled:cursor-default")}>
-      <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-90", TONES[tone])} />
+      <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-90", t)} />
       <div className="relative flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
           <div className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">{value}</div>
           {hint && <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div>}
         </div>
-        {Icon && <span className={cn("rounded-xl bg-white/70 p-2 dark:bg-white/10", TONES[tone].split(" ").slice(2).join(" "))}><Icon className="h-5 w-5" /></span>}
+        {Icon && <span className={cn("rounded-xl bg-white/70 p-2 dark:bg-white/10", t.split(" ").slice(2).join(" "))}><Icon className="h-5 w-5" /></span>}
       </div>
     </button>
   );

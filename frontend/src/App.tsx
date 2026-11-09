@@ -67,6 +67,8 @@ const ErBoardPage = lazy(() => import("@/modules/er/ErBoardPage"));
 const CounterPage = lazy(() => import("@/modules/counter/CounterPage"));
 const CounterDisplayPage = lazy(() => import("@/modules/counter/DisplayPage"));
 const PharmacyDisplayPage = lazy(() => import("@/modules/pharmacy/DisplayPage"));
+const DoctorSharePage = lazy(() => import("@/modules/billing/DoctorSharePage"));
+const MySharePage = lazy(() => import("@/modules/billing/DoctorSharePage").then((m) => ({ default: m.MySharePage })));
 const OnlineVisitPage = lazy(() => import("@/modules/public/OnlineVisitPage"));
 const OnlineVisitStatusPage = lazy(() => import("@/modules/public/OnlineVisitStatusPage"));
 const OvStaffPage = lazy(() => import("@/modules/ov/OvStaffPage"));
@@ -149,6 +151,8 @@ export default function App() {
         <Route path="/cash/close" element={g("/cash/close", <CashClosePage />)} />
         <Route path="/cash/approvals" element={g("/cash/approvals", <CashApprovalsPage />)} />
         <Route path="/cash/reports" element={g("/cash/reports", <CashReportsPage />)} />
+        <Route path="/doctor-share" element={g("/doctor-share", <DoctorSharePage />)} />
+        <Route path="/my-share" element={g("/my-share", <MySharePage />)} />
         <Route path="/lab/orders" element={g("/lab/orders", <LabOrdersPage />)} />
         <Route path="/lab/samples" element={g("/lab/samples", <LabSamplesPage />)} />
         <Route path="/tests" element={g("/tests", <LabTestsPage />)} />

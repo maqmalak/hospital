@@ -133,3 +133,6 @@ Users locked to their branch (strict) and to counters whose POS Profile lists th
 
 ## POS polish (2026-11-10) — D-42
 Paper prescription for walk-ins; cash in / out (F6) inside the POS; Restaurant OS style top bar, cart panel, invoice management (cards / list, status tiles, view / reprint / return) and customer display (`/medicine_invoice/display`, same design for the reception counter and display devices); hide / show left menu on every page and full-page POS. Invoice list now limited to the user's branches. Tests: 62 green.
+
+## Doctor share (2026-11-10) — D-43 (Phase 6 part, built early on request)
+Commission rules, ledger earned as bills are paid, reversals on refunds / cancelled payments, payouts to the doctor's supplier with Payment Entry, accountant screen `/doctor-share` (owed / earned / taken back / paid, statement, rules, pay, apply to past bills), doctor's `/my-share`, desk section *Accounts & Doctor Share*. Demo rules: Dr Ayesha (OPD 50 %, lab referrals 10 %), Dr Usman (OPD 40 %), Dr Sana (OPD 45 %, online fees 60 %), applied to November bills. Tests: 67 green (5 new).

@@ -91,6 +91,21 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 |---|---|---|---|---|
 | `summary` | branch, date, days |  | DOCTOR, ACCOUNTANT, CASH_SUPERVISOR |  |
 
+## doctor_share
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `overview` | company, branch |  | FIN | Every doctor with commission: earned, taken back, paid, unpaid (what we owe now). |
+| `statement` | doctor, from_date, to_date, status |  | FIN |  |
+| `my_statement` | from_date, to_date |  |  | The signed-in doctor's own commission statement (read-only). |
+| `unpaid` | doctor, company, from_date, to_date, branch |  | FIN |  |
+| `pay` | doctor, mode_of_payment, company, from_date, to_date, branch, reference_no, remarks | POST | ACCOUNTANT | Payout run: all unpaid commission of the period → Doctor Share Payout (submitted) → Payment Entry to the doctor's supplier. |
+| `cancel_payout` | name | POST | ACCOUNTANT |  |
+| `save_rule` | data | POST | ACCOUNTANT |  |
+| `recompute` | invoice | POST | ACCOUNTANT | Re-check one bill's commission (after adding a rule for past bills). |
+| `recompute_range` | from_date, to_date | POST | ACCOUNTANT | Apply new / changed rules to bills already posted in a period (adds only the difference). |
+| `doctors` |  |  | FIN |  |
+
 ## doctors
 
 | Method | Params | Flags | Roles | Summary |

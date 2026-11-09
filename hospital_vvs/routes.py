@@ -26,6 +26,8 @@ DEFAULT_ROUTES = [
 	("/pw-history", "Patient history", [DOCTOR, NURSE], ""),
 	("/doctors", "Doctors", [RECEPTIONIST], ""),
 	("/billing/discount-approvals", "Discount approvals", [CASH_SUPERVISOR, ACCOUNTANT], ""),
+	("/doctor-share", "Doctor share", [ACCOUNTANT, CASH_SUPERVISOR], "enable_doctor_share"),
+	("/my-share", "My commission", [DOCTOR], "enable_doctor_share"),
 	("/messages", "Message log", [RECEPTIONIST], ""),
 	("/er", "Emergency", [DOCTOR, NURSE, RECEPTIONIST], "enable_emergency"),
 	("/ward", "Wards & beds", [DOCTOR, NURSE, RECEPTIONIST], "enable_ward"),

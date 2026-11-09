@@ -68,6 +68,8 @@ export const NAV: NavGroup[] = [
     { route: "/ov-staff/report", label: "Online visit report", icon: BarChart3, color: "from-violet-600 to-fuchsia-700", desc: "Requests, fees, refunds" },
   ] },
   { label: "Billing", items: [
+    { route: "/doctor-share", label: "Doctor share", icon: HandCoins, color: "from-sky-600 to-emerald-600", desc: "Commission, owed / paid, payouts" },
+    { route: "/my-share", label: "My commission", icon: HandCoins, color: "from-teal-600 to-sky-600", desc: "Your commission statement" },
     { route: "/billing/discount-approvals", label: "Discount approvals", icon: Percent, color: "from-orange-500 to-amber-500", desc: "Requests above the limit" },
     { route: "/messages", label: "Message log", icon: MessagesSquare, color: "from-green-600 to-teal-600", desc: "WhatsApp / SMS delivery" },
   ] },

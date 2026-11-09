@@ -202,6 +202,11 @@
   "ipd_medicine_billing",
   "cp1",
   "ov_fee_modes",
+  "doctor_share_tab",
+  "doctor_share_expense_account",
+  "doctor_supplier_group",
+  "dsh1",
+  "doctor_share_on_payer_bills",
   "security_tab",
   "enforce_two_factor",
   "idle_lock_minutes",
@@ -862,7 +867,8 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "At invoice",
+   "default": "On payment",
+   "description": "On payment: commission is earned as the bill is paid (panel / credit bills only when the money comes in)",
    "fieldname": "doctor_share_basis",
    "fieldtype": "Select",
    "label": "Doctor Share Basis",
@@ -1365,6 +1371,36 @@
    "label": "Online Fee Modes (reception)"
   },
   {
+   "fieldname": "doctor_share_tab",
+   "fieldtype": "Tab Break",
+   "label": "Doctor Share"
+  },
+  {
+   "description": "Debited when commission is earned (the doctor's supplier account is credited)",
+   "fieldname": "doctor_share_expense_account",
+   "fieldtype": "Link",
+   "label": "Doctor Share Expense Account",
+   "options": "Account"
+  },
+  {
+   "description": "New doctor suppliers go into this group",
+   "fieldname": "doctor_supplier_group",
+   "fieldtype": "Link",
+   "label": "Doctor Supplier Group",
+   "options": "Supplier Group"
+  },
+  {
+   "fieldname": "dsh1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "Commission also on the payer's part of a split bill (earned when the payer pays)",
+   "fieldname": "doctor_share_on_payer_bills",
+   "fieldtype": "Check",
+   "label": "Share on Panel / Insurance Bills"
+  },
+  {
    "fieldname": "security_tab",
    "fieldtype": "Tab Break",
    "label": "Security"
@@ -1411,7 +1447,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 00:30:29.853723",
+ "modified": "2026-11-10 01:04:09.005329",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

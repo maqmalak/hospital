@@ -55,6 +55,8 @@ CUSTOM_FIELDS = {
 		{"fieldname": "hv_original_item", "fieldtype": "Link", "options": "Item", "label": "Substitute for", "insert_after": "item_name", "read_only": 1},
 		{"fieldname": "hv_substitute_approved_by", "fieldtype": "Link", "options": "User", "label": "Substitution Approved by",
 			"insert_after": "hv_original_item", "read_only": 1},
+		{"fieldname": "hv_doctor", "fieldtype": "Link", "options": "Doctor", "label": "Doctor (commission)", "insert_after": "hv_substitute_approved_by",
+			"description": "Doctor who earns commission on this line; filled from the OPD slip, referral, procedure or admission"},
 	],
 	"POS Opening Entry": [
 		{"fieldname": "hv_counter", "fieldtype": "Link", "options": "Counter", "label": "Counter", "insert_after": "pos_profile", "read_only": 1},
@@ -237,3 +239,6 @@ def after_migrate():
 	from hospital_vvs.messaging.templates import ensure_templates
 
 	ensure_templates()
+	from hospital_vvs.services.doctor_share import ensure_accounts
+
+	ensure_accounts()

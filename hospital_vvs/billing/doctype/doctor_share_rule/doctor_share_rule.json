@@ -1,0 +1,178 @@
+{
+ "actions": [],
+ "autoname": "DSR-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "doctor",
+  "doctor_name",
+  "is_active",
+  "r1",
+  "billing_type",
+  "item_group",
+  "item_code",
+  "r2",
+  "share_type",
+  "value",
+  "basis",
+  "r3",
+  "from_date",
+  "to_date",
+  "branch",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Doctor",
+   "options": "Doctor",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "doctor.doctor_name",
+   "fieldname": "doctor_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Doctor Name",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "r1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Any",
+   "description": "OPD Slip = consultations, Lab = tests the doctor referred, IPD Slip = admission bills",
+   "fieldname": "billing_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Billing Type",
+   "options": "Any\nOPD Slip\nFee\nLab\nIPD Slip\nGeneral",
+   "reqd": 1
+  },
+  {
+   "description": "Optional: only services in this group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "description": "Optional: only this service (most specific rule wins)",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "r2",
+   "fieldtype": "Section Break",
+   "label": "Commission"
+  },
+  {
+   "default": "Percent",
+   "fieldname": "share_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Share Type",
+   "options": "Percent\nFixed per unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "value",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Percent / Rs per unit",
+   "reqd": 1
+  },
+  {
+   "default": "Net of discount",
+   "description": "Percent of the line after its share of the bill discount, or before",
+   "fieldname": "basis",
+   "fieldtype": "Select",
+   "label": "Basis",
+   "options": "Net of discount\nGross"
+  },
+  {
+   "fieldname": "r3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "description": "Empty = all branches",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing",
+ "name": "Doctor Share Rule",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Accountant",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "doctor,billing_type",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "doctor_name",
+ "track_changes": 1
+}

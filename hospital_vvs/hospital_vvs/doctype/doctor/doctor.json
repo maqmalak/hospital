@@ -31,6 +31,8 @@
   "d5",
   "show_license",
   "signature",
+  "d7",
+  "supplier",
   "d6",
   "schedule"
  ],
@@ -184,6 +186,19 @@
    "label": "Signature"
   },
   {
+   "fieldname": "d7",
+   "fieldtype": "Section Break",
+   "label": "Commission (doctor share)"
+  },
+  {
+   "description": "Created on the first commission; commission is paid to this supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
    "fieldname": "d6",
    "fieldtype": "Section Break",
    "label": "Availability"
@@ -198,7 +213,7 @@
  "image_field": "photo",
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-09 18:44:40.075931",
+ "modified": "2026-11-10 01:04:09.006857",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Doctor",
