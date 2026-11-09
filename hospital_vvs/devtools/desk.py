@@ -1,7 +1,8 @@
 """Frappe Desk entry for VVS Hospital: launcher icon, workspace and workspace sidebar (Frappe v16).
 
 Writes standard JSON files that `bench migrate` imports:
-  hospital_vvs/desktop_icon/vvs_hospital.json        – the app tile on /desk
+  hospital_vvs/desktop_icon/vvs_hospital.json        – the app tile on /desk (desk workspace)
+  hospital_vvs/desktop_icon/vvsdesk.json             – the VVSDesk tile (opens the React app at /hms)
   hospital_vvs/workspace_sidebar/vvs_hospital.json   – the left menu inside the app
   hospital_vvs/hospital_vvs/workspace/vvs_hospital/  – the home page (shortcuts to the React screens + DocType cards)
 
@@ -16,6 +17,7 @@ import frappe
 NAME = "VVS Hospital"
 STAMP = "2026-11-10 01:00:00.000000"
 LOGO = "/assets/hospital_vvs/images/logo.svg"
+LOGO_APP = "/assets/hospital_vvs/images/vvsdesk.svg"
 
 # React screens (served at /hms), shown first
 APPS = [
@@ -95,9 +97,18 @@ def icon():
 		logo_url=LOGO, hidden=0, standard=1, roles=[], idx=15)
 
 
+def react_icon():
+	"""Second tile: opens the React app (VVSDesk, /hms) directly, like the Frappe CRM tile."""
+	d = _base("Desktop Icon", app="hospital_vvs", label="VVSDesk", icon_type="App", link_type="External", link="/hms/pw-home", link_to=None, logo_url=LOGO_APP,
+		hidden=0, standard=1, roles=[], idx=16)
+	d["name"] = "VVSDesk"
+	return d
+
+
 def run():
 	app = frappe.get_app_path("hospital_vvs")
 	_write(os.path.join(app, "desktop_icon", "vvs_hospital.json"), icon())
+	_write(os.path.join(app, "desktop_icon", "vvsdesk.json"), react_icon())
 	_write(os.path.join(app, "workspace_sidebar", "vvs_hospital.json"), sidebar())
 	_write(os.path.join(app, "hospital_vvs", "workspace", "vvs_hospital", "vvs_hospital.json"), workspace())
 	print("desk files written — run bench --site <site> migrate")
