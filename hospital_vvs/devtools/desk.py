@@ -6,7 +6,7 @@ Writes standard JSON files that `bench migrate` imports:
   hospital_vvs/workspace_sidebar/vvs_hospital.json   – the left menu inside the app
   hospital_vvs/hospital_vvs/workspace/vvs_hospital/  – the home page (shortcuts to the React screens + DocType cards)
 
-bench --site hospital execute hospital_vvs.devtools.desk.run   (then bench --site hospital migrate)
+bench --site hospital execute hospital_vvs.devtools.desk.run   (writes the files and loads them into the site)
 """
 
 import json
@@ -56,11 +56,13 @@ def _write(path, doc):
 
 
 def _base(doctype, **kw):
-	return {"doctype": doctype, "name": NAME, "creation": STAMP, "modified": STAMP, "modified_by": "Administrator", "owner": "Administrator", "docstatus": 0, "idx": 0, **kw}
+	# "modified" = now, so bench migrate re-imports the files after every change
+	return {"doctype": doctype, "name": NAME, "creation": STAMP, "modified": str(frappe.utils.now_datetime()), "modified_by": "Administrator", "owner": "Administrator", "docstatus": 0, "idx": 0, **kw}
 
 
 def _existing(doctypes):
-	return [d for d in doctypes if frappe.db.exists("DocType", d)]
+	"""Only DocTypes that have their own desk page: child tables (edited inside their parent) have none."""
+	return [d for d in doctypes if frappe.db.exists("DocType", d) and not frappe.db.get_value("DocType", d, "istable")]
 
 
 def sidebar():
@@ -111,4 +113,11 @@ def run():
 	_write(os.path.join(app, "desktop_icon", "vvsdesk.json"), react_icon())
 	_write(os.path.join(app, "workspace_sidebar", "vvs_hospital.json"), sidebar())
 	_write(os.path.join(app, "hospital_vvs", "workspace", "vvs_hospital", "vvs_hospital.json"), workspace())
-	print("desk files written — run bench --site <site> migrate")
+	# load them into this site now (migrate skips files it has already seen)
+	from frappe.modules.import_file import import_file_by_path
+
+	for rel in ("desktop_icon/vvs_hospital.json", "desktop_icon/vvsdesk.json", "workspace_sidebar/vvs_hospital.json", "hospital_vvs/workspace/vvs_hospital/vvs_hospital.json"):
+		import_file_by_path(os.path.join(app, rel), force=True, ignore_version=True)
+	frappe.db.commit()
+	frappe.clear_cache()
+	print("desk menu written and loaded")
