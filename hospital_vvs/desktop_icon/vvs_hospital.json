@@ -1,0 +1,21 @@
+{
+ "app": "hospital_vvs",
+ "creation": "2026-11-10 01:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "Link",
+ "idx": 15,
+ "label": "VVS Hospital",
+ "link": null,
+ "link_to": "VVS Hospital",
+ "link_type": "Workspace Sidebar",
+ "logo_url": "/assets/hospital_vvs/images/logo.svg",
+ "modified": "2026-11-10 01:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "VVS Hospital",
+ "owner": "Administrator",
+ "roles": [],
+ "sidebar": "VVS Hospital",
+ "standard": 1
+}
