@@ -96,6 +96,13 @@ Bed days by midnight census + minimum · nursing per started shift across a tran
 ## Tests — Phase 4 (`tests/test_phase4.py`, 4; full suite 41 green)
 **W5**: Urdu request → token (hash only) → status pending, no link → fee confirmed (invoice + JazzCash payment) → accepted, patient registered, Jitsi link on the status page → complete refused without a prescription → prescription signed from the workspace links itself → completed → prescription hidden until the 4-digit check, wrong digits refused, right digits show it · cancel → refund (credit note + payment back, reference on the status page) · patient self-cancel while pending · registered phone must be verified to link a patient · `no-store` header. Tests now block database commits (the wrong-PIN path commits its lock), so test records no longer leak into the site.
 
+## Change — contract pharmacy and reception money (2026-11-09, D-38)
+- New company **VVS Pharmacy (Contract)** (`bench --site hospital execute hospital_vvs.setup.pharmacy_company.run`): own accounts, bank, JazzCash / Easypaisa wallets, warehouses, POS profile per branch; the Medicine billing type, store screens and pharmacy counters use it. Demo medicine stock (108 batches, not the expired one) was handed over with `pharmacy_company.move_demo_stock` (demo only).
+- Counters **Pharmacy 1** and **Pharmacy 2** still have demo shifts open from 7 Nov (cashier@ and Administrator, the latter with a closing waiting for the supervisor); they switch to the contractor as soon as those shifts are closed at `/cash/close` / `/cash/approvals`. Handover 3 and Pharmacy ISB already switched.
+- Ward medicine orders → signed IPD/ER prescription → pharmacy waiting list; the patient pays the pharmacy. No medicines on the IPD bill; MAR is nursing only. Stopping an order withdraws an unpaid pharmacy draft.
+- Online visit fees are taken by **reception in their shift** (Cash / Bank Transfer / JazzCash / Easypaisa) and refunded from the shift; reception sees `/ov-staff` for that. Hospital wallets now have their own accounts (JazzCash Wallet, Easypaisa Wallet).
+- Tests: 42 green (new: ward order billed by the pharmacy; fee in the reception shift; online desk cannot post money).
+
 ## Deferred / known gaps
 - **Staging + training sites, restore drill on staging**: need `bench new-site` (MariaDB root password) — scripts and steps in `docs/OPS.md`; decrypt-and-check drill done locally.
 - **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.

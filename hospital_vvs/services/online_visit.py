@@ -1,8 +1,8 @@
 """Online Visit (telemedicine) — 08-online-visit-comms.md.
 
 Patients use a public form and a token link (no login). Staff verify the fee, accept and assign an OV doctor, share a video
-link; the doctor signs a normal Prescription linked to the visit and completes it. Online fees are bank / wallet money, not
-counter cash: a Sales Invoice (Fee) with a Payment Entry to the method's account, outside cashier shifts (DECISIONS D-35).
+link; the doctor signs a normal Prescription linked to the visit and completes it. Fees are collected by reception inside their
+cashier shift (Cash / Bank Transfer / JazzCash / Easypaisa) as a POS Sales Invoice (DECISIONS D-38).
 """
 
 import hashlib
@@ -212,11 +212,13 @@ def ensure_patient(ov):
 	return p.name
 
 
-def verify_fee(name, ok=True, note=None, payment_reference=None):
-	"""Staff checked the transfer: post the fee (invoice + payment to the method's account), or send the patient back to pay."""
-	from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+def fee_modes():
+	return [m.strip() for m in (setting("ov_fee_modes") or "Cash\nBank Transfer\nJazzCash\nEasypaisa").split("\n") if m.strip()]
 
+
+def verify_fee(name, ok=True, note=None, payment_reference=None, payment_mode=None):
+	"""Reception confirms the transfer (or takes the fee at the desk) inside their cashier shift: a POS Sales Invoice (Fee) paid by
+	Cash / Bank Transfer / JazzCash / Easypaisa, counted in the shift like OPD and IPD money (DECISIONS D-38, replaces D-35)."""
 	ov = get_open(name, ("Pending", "Accepted", "Completed"))
 	if ov.fee_status == "Verified":
 		return ov
@@ -225,31 +227,25 @@ def verify_fee(name, ok=True, note=None, payment_reference=None):
 		frappe.get_doc({"doctype": "Comment", "comment_type": "Comment", "reference_doctype": ov.doctype, "reference_name": ov.name,
 			"content": _("Payment not found: {0}").format(note or "")}).insert(ignore_permissions=True)
 		return ov
+	mode = payment_mode or MODE_FOR.get(ov.payment_method, "Bank Transfer")
+	if mode not in fee_modes():
+		frappe.throw(_("Choose one of: {0}").format(", ".join(fee_modes())))
 	if payment_reference:
 		ov.payment_reference = payment_reference
+	if mode != "Cash" and not ov.payment_reference:
+		frappe.throw(_("Enter the transaction ID."))
 	patient = ensure_patient(ov)
 	customer = frappe.db.get_value("Patient", patient, "customer")
-	frappe.flags.hv_no_shift = True
-	try:
-		si = billing.create_invoice(customer=customer, patient=patient, lines=[{"item_code": fee_item(), "qty": 1, "rate": flt(ov.fee)}], billing_type="Fee",
-			branch=ov.branch, reference_doctype="Online Visit Request", reference_name=ov.name, pos=False, remarks=_("Online visit {0}").format(ov.name))
-	finally:
-		frappe.flags.hv_no_shift = False
-	mode = MODE_FOR.get(ov.payment_method, "Bank Transfer")
-	company = branch_company(ov.branch)
-	pe = get_payment_entry("Sales Invoice", si)
-	pe.mode_of_payment = mode
-	pe.paid_to = setting("ov_bank_account") or get_bank_cash_account(mode, company).get("account") or pe.paid_to
-	pe.reference_no = ov.payment_reference or ov.name
-	pe.reference_date = today()
-	pe.hv_patient = patient
-	pe.remarks = _("Online visit fee {0}").format(ov.name)
-	pe.flags.ignore_permissions = True
-	pe.insert()
-	pe.submit()
-	ov.update({"fee_status": "Verified", "fee_verified_by": frappe.session.user, "fee_verified_at": now_datetime(), "sales_invoice": si, "payment_entry": pe.name})
+	from hospital_vvs.services.shifts import billing_shift
+
+	shift = billing_shift(ov.branch)
+	si = billing.create_invoice(customer=customer, patient=patient, lines=[{"item_code": fee_item(), "qty": 1, "rate": flt(ov.fee)}], billing_type="Fee",
+		branch=ov.branch, reference_doctype="Online Visit Request", reference_name=ov.name, pos=True, payment_mode=mode,
+		remarks=_("Online visit {0}{1}").format(ov.name, f" · ref {ov.payment_reference}" if ov.payment_reference else ""))
+	ov.update({"fee_status": "Verified", "fee_verified_by": frappe.session.user, "fee_verified_at": now_datetime(), "sales_invoice": si,
+		"payment_entry": None, "payment_method": ov.payment_method if mode != "Cash" else ov.payment_method})
 	ov.save(ignore_permissions=True)
-	publish("ov", {"action": "fee", "name": ov.name}, ov.branch)
+	publish("ov", {"action": "fee", "name": ov.name, "shift": shift.name if shift else None}, ov.branch)
 	return ov
 
 
@@ -326,41 +322,25 @@ def complete(name, doctor_notes=None, follow_up=None, follow_up_date=None):
 	return ov
 
 
-def refund(name, amount=None, refund_reference=None, refund_notes=None):
-	"""Cancelled / rejected visit: refund the verified fee (credit note + payment back), or just record it when nothing was posted."""
-	from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account, make_sales_return
-
+def refund(name, amount=None, refund_reference=None, refund_notes=None, payment_mode=None):
+	"""Cancelled / rejected visit: reception refunds the fee from their shift (credit note on the fee invoice), or just records it when
+	the fee was never posted."""
 	ov = frappe.get_doc("Online Visit Request", name)
 	if ov.status not in ("Cancelled", "Rejected"):
 		frappe.throw(_("Cancel or reject the visit before refunding."))
 	if ov.fee_status == "Refunded":
 		frappe.throw(_("Already refunded."))
-	if not (refund_reference or "").strip():
-		frappe.throw(_("Enter the refund transaction ID."))
 	amount = flt(amount) or flt(ov.fee)
 	if ov.fee_status == "Verified" and ov.sales_invoice:
 		if amount > flt(ov.fee) + 0.01:
 			frappe.throw(_("Refund cannot be more than the fee."))
-		ret = make_sales_return(ov.sales_invoice)
-		for it in ret.items:
-			it.rate = it.price_list_rate = amount  # qty stays -1
-		ret.remarks = _("Refund · online visit {0}").format(ov.name)
-		ret.calculate_taxes_and_totals()
-		ret.flags.ignore_permissions = True
-		ret.insert()
-		ret.submit()
-		mode = MODE_FOR.get(ov.payment_method, "Bank Transfer")
-		pe = get_payment_entry("Sales Invoice", ret.name)
-		pe.mode_of_payment = mode
-		pe.paid_from = setting("ov_bank_account") or get_bank_cash_account(mode, branch_company(ov.branch)).get("account") or pe.paid_from
-		pe.reference_no, pe.reference_date = refund_reference, today()
-		pe.hv_patient = ov.patient
-		pe.remarks = _("Refund · online visit {0}").format(ov.name)
-		pe.flags.ignore_permissions = True
-		pe.insert()
-		pe.submit()
-		ov.credit_note, ov.refund_entry = ret.name, pe.name
+		mode = payment_mode or frappe.db.get_value("Sales Invoice Payment", {"parent": ov.sales_invoice}, "mode_of_payment") or "Cash"
+		if mode != "Cash" and not (refund_reference or "").strip():
+			frappe.throw(_("Enter the refund transaction ID."))
+		if amount < flt(ov.fee) - 0.01:
+			frappe.throw(_("Part refunds of the online fee are not supported; refund the full fee."))
+		ov.credit_note = billing.refund_invoice(ov.sales_invoice, refund_notes or _("Online visit {0} {1}").format(ov.name, ov.status.lower()),
+			payment_mode=mode)
 	elif ov.fee_status not in ("Proof Submitted", "Verified"):
 		frappe.throw(_("No fee was paid for this visit."))
 	ov.update({"fee_status": "Refunded", "refund_amount": amount, "refund_reference": refund_reference, "refund_notes": refund_notes})

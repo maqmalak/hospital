@@ -200,16 +200,16 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `verify` | token, answer | guest POST |  |  |
 | `pay` | token, payment_method, payment_reference, payment_proof | guest POST |  |  |
 | `cancel_request` | token, reason | guest POST |  |  |
-| `queue` | status, date, mine |  | STAFF, DOCS |  |
-| `get` | name |  | STAFF, DOCS |  |
-| `verify_fee` | name, ok, note, payment_reference | POST | STAFF |  |
+| `queue` | status, date, mine |  | STAFF, DOCS, MONEY |  |
+| `get` | name |  | STAFF, DOCS, MONEY |  |
+| `verify_fee` | name, ok, note, payment_reference, payment_mode | POST | MONEY | Posting the fee is money: reception in their shift. The online desk may only mark a transfer as not found. |
 | `accept` | name, doctor, scheduled_at, video_link | POST | STAFF |  |
 | `update_visit` | name, scheduled_at, video_link, doctor | POST | STAFF, DOCS |  |
 | `reject` | name, reason | POST | STAFF |  |
 | `cancel` | name, reason | POST | STAFF |  |
 | `complete` | name, doctor_notes, follow_up, follow_up_date | POST | DOCS, STAFF |  |
-| `refund` | name, amount, refund_reference, refund_notes | POST | STAFF |  |
-| `report` | from_date, to_date |  | STAFF, ACCOUNTANT |  |
+| `refund` | name, amount, refund_reference, refund_notes, payment_mode | POST | MONEY |  |
+| `report` | from_date, to_date |  | STAFF, MONEY, ACCOUNTANT |  |
 
 ## opd
 

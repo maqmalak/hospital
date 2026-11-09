@@ -15,7 +15,15 @@ STORE = (R.STORE_KEEPER, R.REVIEWER)
 def warehouses(branch=None):
 	branch = branch or default_branch()
 	code = frappe.db.get_value("Branch", branch, "hv_branch_code") or "LHR"
-	return {k: f"{k} {code} - {ABBR}" for k in ("Main Store", "Pharmacy Retail", "IPD Dispensing", "Lab Store", "General Store", "Quarantine")}
+	out = {k: f"{k} {code} - {ABBR}" for k in ("Main Store", "Pharmacy Retail", "IPD Dispensing", "Lab Store", "General Store", "Quarantine")}
+	pharmacy = frappe.db.get_single_value("Clinic Settings", "pharmacy_company")
+	if pharmacy:
+		# contract pharmacy (D-38): the medicine store, shelf and quarantine are the contractor's
+		pa = frappe.db.get_value("Company", pharmacy, "abbr")
+		for key, wh in (("Main Store", "Pharmacy Store"), ("Pharmacy Retail", "Pharmacy Retail"), ("Quarantine", "Pharmacy Quarantine")):
+			if frappe.db.exists("Warehouse", f"{wh} {code} - {pa}"):
+				out[key] = f"{wh} {code} - {pa}"
+	return out
 
 
 @frappe.whitelist()

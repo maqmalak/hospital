@@ -58,7 +58,7 @@ DEFAULT_ROUTES = [
 	("/store/returns", "Expiry & returns", [STORE_KEEPER], "enable_medicine"),
 	("/store/receive", "Receive stock", [STORE_KEEPER], "enable_medicine"),
 	("/display/devices", "Display devices", [], ""),
-	("/ov-staff", "Online visits", [OV_STAFF, OV_DOCTOR], "enable_online_visit"),
+	("/ov-staff", "Online visits", [OV_STAFF, OV_DOCTOR, RECEPTIONIST, CASH_SUPERVISOR], "enable_online_visit"),
 	("/ov-staff/report", "Online visit report", [OV_STAFF, ACCOUNTANT], "enable_online_visit"),
 	("/reports", "Reports", [DOCTOR, ACCOUNTANT, CASH_SUPERVISOR, STORE_KEEPER, REVIEWER], ""),
 	("/audit", "Audit log", [ADMIN], ""),

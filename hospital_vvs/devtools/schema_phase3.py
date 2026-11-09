@@ -141,7 +141,7 @@ ADMISSION = [
 		f("status", "Select", ["Active", "Stopped", "Completed"], default="Active", list=1, filter=1),
 		sb("m3", "Doctor"), f("doctor", "Link", "Doctor"), f("ordered_by", "Link", "User", ro=1), cb("m4"),
 		f("alert_type", "Data", ro=1), f("alert_message", "Small Text", ro=1), f("override_reason", "Small Text"),
-		f("stop_reason", "Small Text"), f("stopped_by", "Link", "User", ro=1),
+		f("stop_reason", "Small Text"), f("stopped_by", "Link", "User", ro=1), f("prescription", "Link", "Prescription", ro=1, description="Ward order sent to the contract pharmacy"),
 	], _clin_perm + [p(REVIEWER, "r")], autoname="MO-.YYYY.-.######", track_changes=1, title_field="item_name"),
 	doctype("MAR Entry", IPD, [
 		*_ref(), f("medication_order", "Link", "IPD Medication Order", reqd=1, filter=1), cb("e1"),

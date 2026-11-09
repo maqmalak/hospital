@@ -17,7 +17,7 @@ import { IpdHero } from "../ipd/shared";
 interface Row { name: string; patient?: string; patient_name: string; phone: string; gender?: string; age?: number; language: string; city?: string; complaint: string; status: string;
   fee: number; fee_status: string; payment_method: string; assigned_doctor?: string; doctor_name?: string; scheduled_at?: string; video_link?: string; prescription?: string; creation: string;
   specialization?: string }
-interface Q { rows: Row[]; counts: Record<string, number>; my_doctor?: string; is_staff: boolean; doctors: { name: string; doctor_name: string; specialization?: string }[] }
+interface Q { rows: Row[]; counts: Record<string, number>; my_doctor?: string; is_staff: boolean; is_cashier: boolean; fee_modes: string[]; doctors: { name: string; doctor_name: string; specialization?: string }[] }
 const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
 const dt = (s?: string) => (s ? new Date(s.replace(" ", "T")).toLocaleString([], { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "–");
 const ago = (s: string) => { const m = Math.round((Date.now() - new Date(s.replace(" ", "T")).getTime()) / 60000); return m < 60 ? `${m}m` : m < 1440 ? `${Math.floor(m / 60)}h` : `${Math.floor(m / 1440)}d`; };
@@ -72,7 +72,7 @@ export default function OvStaffPage() {
           </section>);
       })}</div>
       {data && !data.rows.length && <Empty title="No online visits yet" hint="Share the public form link with patients." icon={Video} />}
-      {open && <VisitDialog name={open} doctors={data?.doctors ?? []} isStaff={!!data?.is_staff} onClose={() => setOpen(null)} />}
+      {open && <VisitDialog name={open} doctors={data?.doctors ?? []} isStaff={!!data?.is_staff} isCashier={!!data?.is_cashier} feeModes={data?.fee_modes ?? []} onClose={() => setOpen(null)} />}
     </div>
   );
 }
@@ -83,7 +83,8 @@ interface Detail extends Row { symptoms?: string; duration?: string; conditions?
   prescription_data?: { name: string; medicines: { item_name: string; dose?: string; frequency?: string; duration?: string }[]; advice?: string; diagnoses: string[] } | null;
   draft_prescription?: string; history?: { name: string; status: string; complaint: string; creation: string }[]; allergies?: string[] }
 
-function VisitDialog({ name, doctors, isStaff, onClose }: { name: string; doctors: Q["doctors"]; isStaff: boolean; onClose: () => void }) {
+function VisitDialog({ name, doctors, isStaff, isCashier, feeModes, onClose }: { name: string; doctors: Q["doctors"]; isStaff: boolean; isCashier: boolean; feeModes: string[];
+  onClose: () => void }) {
   const { hasRole } = useAuth();
   const qc = useQueryClient();
   const { data: v, refetch } = useApi<Detail>("online_visit.get", { name });
@@ -93,6 +94,8 @@ function VisitDialog({ name, doctors, isStaff, onClose }: { name: string; doctor
   const [notes, setNotes] = useState("");
   const [fu, setFu] = useState("Not needed");
   const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState("");
+  const [txn, setTxn] = useState("");
   const act = async (method: string, args: Record<string, unknown>, ok: string) => {
     setBusy(true);
     try { await call(`online_visit.${method}`, { name, ...args }); toast.success(ok); void refetch(); void qc.invalidateQueries({ queryKey: ["online_visit.queue"] }); return true; }
@@ -129,11 +132,18 @@ function VisitDialog({ name, doctors, isStaff, onClose }: { name: string; doctor
             <div className="text-xs text-muted-foreground">{v.payment_method}{v.payment_reference ? ` · ${v.payment_reference}` : ""}</div>
             {v.payment_proof && <a href={v.payment_proof} target="_blank" rel="noreferrer" className="text-xs font-semibold text-indigo-700 underline">Open payment receipt</a>}
             {v.sales_invoice && <div className="flex items-center gap-1 text-xs"><Receipt className="h-3 w-3" />{v.sales_invoice} · {v.payment_entry}</div>}
-            {isStaff && ["Unpaid", "Proof Submitted"].includes(v.fee_status) && !["Cancelled", "Rejected"].includes(v.status) && <div className="flex gap-2">
-              <Button size="sm" variant="submit" disabled={busy} onClick={() => void act("verify_fee", { ok: 1, payment_reference: v.payment_reference || prompt("Transaction ID received") || undefined }, "Fee posted")}><Check className="h-4 w-4" />Received</Button>
-              {v.fee_status === "Proof Submitted" && <Button size="sm" variant="danger" disabled={busy} onClick={() => { const n = prompt("What was wrong with the payment?"); if (n) void act("verify_fee", { ok: 0, note: n }, "Patient asked to pay again"); }}><X className="h-4 w-4" />Not found</Button>}</div>}
-            {isStaff && ["Cancelled", "Rejected"].includes(v.status) && ["Verified", "Proof Submitted"].includes(v.fee_status) && <Button size="sm" variant="danger" className="w-full" disabled={busy}
-              onClick={() => { const r = prompt("Refund transaction ID"); if (!r) return; const a = prompt("Amount", String(v.fee)); void act("refund", { refund_reference: r, amount: Number(a) || v.fee, refund_notes: prompt("Notes (optional)") || undefined }, "Refund recorded"); }}><Undo2 className="h-4 w-4" />Record refund</Button>}
+            {isCashier && ["Unpaid", "Proof Submitted"].includes(v.fee_status) && !["Cancelled", "Rejected"].includes(v.status) && <div className="space-y-2 rounded-xl bg-muted/50 p-2">
+              <div className="text-[11px] font-semibold text-muted-foreground">Take the fee in your cashier shift</div>
+              <div className="flex flex-wrap gap-1">{feeModes.map((m) => <button key={m} onClick={() => setMode(m)} className={cn("rounded-lg border px-2 py-1 text-xs font-semibold",
+                (mode || ({ JazzCash: "JazzCash", Easypaisa: "Easypaisa" } as Record<string, string>)[v.payment_method] || "Bank Transfer") === m ? "border-emerald-600 bg-emerald-600 text-white" : "border-border")}>{m}</button>)}</div>
+              {(mode || "x") !== "Cash" && <input className={inputCls + " h-9"} placeholder="Transaction ID" value={txn || v.payment_reference || ""} onChange={(e) => setTxn(e.target.value)} />}
+              <Button size="sm" variant="submit" className="w-full" disabled={busy} onClick={() => void act("verify_fee", { ok: 1, payment_mode: mode || ({ JazzCash: "JazzCash", Easypaisa: "Easypaisa" } as Record<string, string>)[v.payment_method] || "Bank Transfer",
+                payment_reference: txn || v.payment_reference || undefined }, "Fee received in your shift")}><Check className="h-4 w-4" />Receive {rs(v.fee)}</Button></div>}
+            {(isStaff || isCashier) && v.fee_status === "Proof Submitted" && !["Cancelled", "Rejected"].includes(v.status) && <Button size="sm" variant="danger" disabled={busy}
+              onClick={() => { const n = prompt("What was wrong with the payment?"); if (n) void act("verify_fee", { ok: 0, note: n }, "Patient asked to pay again"); }}><X className="h-4 w-4" />Transfer not found</Button>}
+            {!isCashier && ["Unpaid", "Proof Submitted"].includes(v.fee_status) && !["Cancelled", "Rejected"].includes(v.status) && <div className="text-[11px] text-muted-foreground">Reception takes the fee in their shift.</div>}
+            {isCashier && ["Cancelled", "Rejected"].includes(v.status) && ["Verified", "Proof Submitted"].includes(v.fee_status) && <Button size="sm" variant="danger" className="w-full" disabled={busy}
+              onClick={() => { const r = prompt("Refund transaction ID (empty for cash)") ?? ""; void act("refund", { refund_reference: r || undefined, refund_notes: prompt("Notes (optional)") || undefined }, "Refunded from your shift"); }}><Undo2 className="h-4 w-4" />Refund from my shift</Button>}
             {v.fee_status === "Refunded" && <div className="text-xs">Refunded {rs(v.refund_amount)} · {v.refund_reference}{v.credit_note ? ` · ${v.credit_note}` : ""}</div>}
           </section>
 

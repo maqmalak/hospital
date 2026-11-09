@@ -57,7 +57,13 @@ SETTINGS_FIELDS = [
 	f("ov_video_provider", "Select", ["Jitsi Meet (auto link)", "Manual link"], default="Jitsi Meet (auto link)"),
 	f("ov_video_base", "Data", default="https://meet.jit.si/", description="Auto links are this address + a random room name"),
 	f("ov_link_days", "Int", default="30", label="Status Link Valid (days)"), f("ov_branch", "Link", "Branch", description="Branch whose books get online fees"),
-	f("ov_bank_account", "Link", "Account", description="Where online fees land (default: the payment method's account)"),
+	f("ov_bank_account", "Link", "Account", description="Not used since D-38: online fees are collected by the receptionist in a shift"),
+	tab("contract_tab", "Contract Pharmacy"),
+	f("pharmacy_company", "Link", "Company", description="The contractor's own company: pharmacy sales, stock and pharmacy shifts post here, never to the hospital"),
+	f("ipd_medicine_billing", "Select", ["Pharmacy bills patient", "Hospital IPD bill"], default="Pharmacy bills patient",
+		description="Pharmacy bills patient: ward medicine orders become pharmacy invoices for the attendant to pay; the IPD bill has no medicines"),
+	cb("cp1"),
+	f("ov_fee_modes", "Small Text", default="Cash\nBank Transfer\nJazzCash\nEasypaisa", label="Online Fee Modes (reception)"),
 ]
 
 

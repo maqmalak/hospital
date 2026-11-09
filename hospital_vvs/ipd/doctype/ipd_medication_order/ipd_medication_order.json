@@ -30,7 +30,8 @@
   "alert_message",
   "override_reason",
   "stop_reason",
-  "stopped_by"
+  "stopped_by",
+  "prescription"
  ],
  "fields": [
   {
@@ -203,11 +204,19 @@
    "label": "Stopped By",
    "options": "User",
    "read_only": 1
+  },
+  {
+   "description": "Ward order sent to the contract pharmacy",
+   "fieldname": "prescription",
+   "fieldtype": "Link",
+   "label": "Prescription",
+   "options": "Prescription",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-09 19:18:45.423200",
  "modified_by": "Administrator",
  "module": "IPD",
  "name": "IPD Medication Order",

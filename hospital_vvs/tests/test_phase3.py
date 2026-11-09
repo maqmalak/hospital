@@ -107,7 +107,7 @@ class TestW4Admission(IntegrationTestCase):
 		frappe.db.set_single_value("Clinic Settings", {"mar_approval_gate": 1, "mar_billing_trigger": "On administration",
 			"stock_deduction_timing": "Immediately", "require_preauth_for_insurance": 1, "procedure_invoice_trigger": "On completion",
 			"discharge_clearance_hold": 1, "enable_consent": 1, "min_bed_days": 1, "nursing_shift_starts": "08:00,14:00,20:00",
-			"diet_billing_mode": "Per day", "require_shift_for_billing": 1, "enable_shifts": 1})
+			"diet_billing_mode": "Per day", "require_shift_for_billing": 1, "enable_shifts": 1, "ipd_medicine_billing": "Hospital IPD bill"})
 		frappe.clear_document_cache("Clinic Settings")
 
 	def test_w4_admission_to_discharge(self):
@@ -225,6 +225,45 @@ class TestW4Admission(IntegrationTestCase):
 
 		_set(icu, "Available")
 		self.assertEqual(frappe.db.get_value("Hospital Bed", icu, "status"), "Available")
+		_set(bed, "Available")
+
+
+class TestContractPharmacyWardOrders(IntegrationTestCase):
+	"""D-38: ward medicines go to the contract pharmacy as a prescription; the hospital bill and stock are untouched."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		frappe.db.set_single_value("Clinic Settings", {"ipd_medicine_billing": "Pharmacy bills patient", "mar_approval_gate": 0,
+			"enable_medicine": 1, "auto_medicine_invoice": 1})
+		frappe.clear_document_cache("Clinic Settings")
+
+	def test_ward_order_billed_by_pharmacy(self):
+		pat = new_patient("Ward Order")
+		bed = free_bed("General")
+		adm, _t = ipd.admit(pat.name, bed, doctor(), reason="Test")
+		code = test_item("TEST-WARD-PCM", rx=1)
+		mo, _a = ipd.order_medicine(patient=pat.name, item=code, dose="1 tab", frequency="BD", units_per_dose=1, days=2, doctor=doctor(), adm=adm.name)
+		mo.reload()
+		self.assertTrue(mo.prescription)
+		rx = frappe.get_doc("Prescription", mo.prescription)
+		self.assertEqual((rx.source, rx.docstatus), ("IPD", 1))
+		doses = frappe.db.count("MAR Entry", {"medication_order": mo.name})
+		self.assertEqual(rx.medicines[0].qty, doses)
+		draft = frappe.get_all("Sales Invoice", filters={"hv_prescription": rx.name, "docstatus": 0}, fields=["name", "company"])
+		self.assertEqual(len(draft), 1)
+		self.assertEqual(draft[0].company, frappe.db.get_single_value("Clinic Settings", "pharmacy_company"))
+		dose = frappe.get_all("MAR Entry", filters={"medication_order": mo.name}, pluck="name", order_by="scheduled_at", limit=1)[0]
+		e = ipd.chart_dose(dose, "Administered")
+		self.assertFalse(e.stock_entry)
+		self.assertFalse(e.ipd_charge)
+		self.assertFalse([ln for ln in ipd.running_bill(adm.name)["lines"] if ln["charge_type"] == "Medicine"])
+		self.assertTrue(next(c for c in ipd.clearance(adm.name)["checks"] if c["key"] == "pharmacy")["warn"])
+		ipd.stop_order(mo.name, "Changed plan")
+		self.assertFalse(frappe.db.exists("Sales Invoice", {"hv_prescription": rx.name, "docstatus": 0}))
+		frappe.db.set_value("Bed Allotment", adm.name, "status", "Cancelled")
+		from hospital_vvs.api.ward import _set
+
+		_set(bed, "Cleaning")
 		_set(bed, "Available")
 
 

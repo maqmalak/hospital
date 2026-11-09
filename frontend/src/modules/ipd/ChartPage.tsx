@@ -109,6 +109,8 @@ export default function ChartPage() {
       </div>}
 
       {tab === "notes" && <NotesPanel target={{ bed_allotment: c.name }} notes={c.notes} rounds={c.rounds} refresh={refresh} canWrite={!!open && (isDoctor || isNurse || hasRole("PW DEO"))} isDoctor={isDoctor} />}
+      {tab === "meds" && !!ctx?.flags.pharmacy_bills && <div className="mb-3 rounded-xl border border-sky-300 bg-sky-50 px-3 py-2 text-sm text-sky-900 dark:bg-sky-500/10 dark:text-sky-200">
+        Ward medicines are dispensed and billed by the contract pharmacy: each order goes to the pharmacy as a prescription and the attendant pays at the pharmacy counter. The drug chart here is for nursing only.</div>}
       {tab === "meds" && <MedicationPanel target={{ bed_allotment: c.name }} patient={c.patient} orders={c.orders} mar={c.mar} refresh={refresh} gate={!!ctx?.flags.mar_gate}
         canOrder={!!open && isDoctor} canChart={!!open && (isNurse || isDoctor)} />}
       {tab === "vitals" && <VitalsPanel target={{ bed_allotment: c.name }} vitals={c.vitals} refresh={refresh} canAdd={!!open && (isNurse || isDoctor || hasRole("PW DEO"))} />}
@@ -185,7 +187,7 @@ function DietTab({ c, ctx, refresh, canWrite }: { c: Chart; ctx?: Ctx; refresh: 
   );
 }
 
-interface Clearance { checks: { key: string; label: string; ok: boolean; items?: string[]; amount?: number }[]; hold: number; ready_for_bill: boolean; ready: boolean }
+interface Clearance { checks: { key: string; label: string; ok: boolean; warn?: boolean; items?: string[]; amount?: number }[]; hold: number; ready_for_bill: boolean; ready: boolean }
 
 function DischargeTab({ c, bill, refresh }: { c: Chart; bill?: Bill; refresh: () => void }) {
   const { hasRole } = useAuth();
@@ -238,8 +240,8 @@ function DischargeTab({ c, bill, refresh }: { c: Chart; bill?: Bill; refresh: ()
       <div className="space-y-4">
         <section className="rounded-2xl border border-border bg-card p-4">
           <h3 className="mb-3 flex items-center gap-2 font-bold"><ClipboardCheck className="h-5 w-5 text-teal-600" />Clearance{cl?.hold ? <span className="rounded bg-amber-100 px-1.5 text-[10px] font-bold text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">HOLD ON</span> : null}</h3>
-          <ul className="space-y-2">{cl?.checks.map((ch) => <li key={ch.key} className="flex items-start gap-2 text-sm">{ch.ok ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
-            : <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500" />}<div><div className={cn("font-semibold", !ch.ok && "text-amber-800 dark:text-amber-200")}>{ch.label}{ch.key === "dues" && ch.amount ? ` · ${rs(ch.amount)}` : ""}</div>
+          <ul className="space-y-2">{cl?.checks.map((ch) => <li key={ch.key} className="flex items-start gap-2 text-sm">{ch.ok && !ch.warn ? <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
+            : <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500" />}<div><div className={cn("font-semibold", (!ch.ok || ch.warn) && "text-amber-800 dark:text-amber-200")}>{ch.label}{ch.warn ? " (contractor's — does not hold discharge)" : ""}{ch.key === "dues" && ch.amount ? ` · ${rs(ch.amount)}` : ""}</div>
             {ch.items?.map((x) => <div key={x} className="text-xs text-muted-foreground">{x}</div>)}</div></li>)}</ul>
         </section>
         <section className="space-y-2 rounded-2xl border border-border bg-card p-4">

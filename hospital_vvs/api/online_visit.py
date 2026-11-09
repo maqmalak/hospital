@@ -13,6 +13,7 @@ from hospital_vvs.services import online_visit as svc
 from hospital_vvs.utils import has_any_role, log_access, module_enabled, require_roles, setting, settings
 
 STAFF = (R.OV_STAFF,)
+MONEY = (R.RECEPTIONIST, R.CASH_SUPERVISOR)
 DOCS = (R.OV_DOCTOR,)
 
 
@@ -131,7 +132,7 @@ def _my_doctor():
 
 
 def _can_open(ov):
-	if has_any_role(*STAFF):
+	if has_any_role(*STAFF, *MONEY):
 		return
 	if has_any_role(*DOCS) and ov.assigned_doctor and ov.assigned_doctor == _my_doctor():
 		return
@@ -140,7 +141,7 @@ def _can_open(ov):
 
 @frappe.whitelist()
 def queue(status=None, date=None, mine=0):
-	require_roles(*STAFF, *DOCS)
+	require_roles(*STAFF, *DOCS, *MONEY)
 	filters = {}
 	if status == "open":
 		filters["status"] = ["in", ["Pending", "Accepted"]]
@@ -148,7 +149,7 @@ def queue(status=None, date=None, mine=0):
 		filters["status"] = status
 	if date:
 		filters["creation"] = [">=", date]
-	if cint(mine) or not has_any_role(*STAFF):
+	if cint(mine) or not has_any_role(*STAFF, *MONEY):
 		filters["assigned_doctor"] = _my_doctor() or "-"
 	rows = frappe.get_all("Online Visit Request", filters=filters, fields=["name", "patient", "patient_name", "phone", "gender", "age", "language", "city",
 		"complaint", "status", "fee", "fee_status", "payment_method", "assigned_doctor", "scheduled_at", "video_link", "prescription", "creation",
@@ -160,13 +161,14 @@ def queue(status=None, date=None, mine=0):
 	counts["today_done"] = frappe.db.count("Online Visit Request", {"status": "Completed", "completed_at": [">=", today()]})
 	counts["fee_to_check"] = frappe.db.count("Online Visit Request", {"fee_status": "Proof Submitted", "status": ["in", ["Pending", "Accepted", "Completed"]]})
 	counts["refunds_due"] = frappe.db.count("Online Visit Request", {"status": ["in", ["Cancelled", "Rejected"]], "fee_status": ["in", ["Verified", "Proof Submitted"]]})
-	return {"rows": rows, "counts": counts, "my_doctor": _my_doctor(), "is_staff": has_any_role(*STAFF),
+	return {"rows": rows, "counts": counts, "my_doctor": _my_doctor(), "is_staff": has_any_role(*STAFF), "is_cashier": has_any_role(*MONEY),
+		"fee_modes": svc.fee_modes(),
 		"doctors": frappe.get_all("Doctor", filters={"is_active": 1, "online_visits": 1}, fields=["name", "doctor_name", "specialization", "user"], order_by="doctor_name")}
 
 
 @frappe.whitelist()
 def get(name):
-	require_roles(*STAFF, *DOCS)
+	require_roles(*STAFF, *DOCS, *MONEY)
 	ov = frappe.get_doc("Online Visit Request", name)
 	_can_open(ov)
 	log_access("Online visit", patient=ov.patient, reference_doctype=ov.doctype, reference_name=ov.name, branch=ov.branch)
@@ -184,9 +186,10 @@ def get(name):
 
 
 @frappe.whitelist(methods=["POST"])
-def verify_fee(name, ok=1, note=None, payment_reference=None):
-	require_roles(*STAFF)
-	return svc.verify_fee(name, ok, note, payment_reference).status
+def verify_fee(name, ok=1, note=None, payment_reference=None, payment_mode=None):
+	"""Posting the fee is money: reception in their shift. The online desk may only mark a transfer as not found."""
+	require_roles(*MONEY) if cint(ok) else require_roles(*MONEY, *STAFF)
+	return svc.verify_fee(name, ok, note, payment_reference, payment_mode).status
 
 
 @frappe.whitelist(methods=["POST"])
@@ -226,14 +229,14 @@ def complete(name, doctor_notes=None, follow_up=None, follow_up_date=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def refund(name, amount=None, refund_reference=None, refund_notes=None):
-	require_roles(*STAFF)
-	return svc.refund(name, amount, refund_reference, refund_notes).name
+def refund(name, amount=None, refund_reference=None, refund_notes=None, payment_mode=None):
+	require_roles(*MONEY)
+	return svc.refund(name, amount, refund_reference, refund_notes, payment_mode).name
 
 
 @frappe.whitelist()
 def report(from_date=None, to_date=None):
-	require_roles(*STAFF, R.ACCOUNTANT)
+	require_roles(*STAFF, *MONEY, R.ACCOUNTANT)
 	to_date = to_date or today()
 	from_date = from_date or frappe.utils.add_days(to_date, -29)
 	rows = frappe.db.sql("""select status, count(*) n, sum(case when fee_status='Verified' then fee else 0 end) fees,

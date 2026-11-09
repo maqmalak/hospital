@@ -19,6 +19,8 @@ def summary(branch=None, date=None, days=14):
 	date = getdate(date or today())
 	start = add_days(date, -(cint(days) - 1))
 	a = (branch, date)
+	# contract pharmacy sales are the contractor's money (D-38): hospital figures exclude its company
+	ex = frappe.db.get_single_value("Clinic Settings", "pharmacy_company") or "-"
 
 	visits = frappe.db.sql("""select count(*) total, sum(purpose='Follow-up') follow_up, sum(is_free_follow_up) free_follow_up,
 		coalesce(sum(net_total),0) billed, coalesce(sum(discount_amount),0) discount from `tabOPD Slip`
@@ -26,10 +28,10 @@ def summary(branch=None, date=None, days=14):
 	new_patients = _scalar("select count(*) from tabPatient where branch=%s and date(creation)=%s", a)
 
 	revenue_type = frappe.db.sql("""select coalesce(hv_billing_type,'Other') label, sum(grand_total) value from `tabSales Invoice`
-		where docstatus=1 and is_return=0 and branch=%s and posting_date=%s group by hv_billing_type order by value desc""", a, as_dict=True)
+		where docstatus=1 and is_return=0 and branch=%s and posting_date=%s and company!=%s group by hv_billing_type order by value desc""", a + (ex,), as_dict=True)
 	revenue_mode = frappe.db.sql("""select p.mode_of_payment label, sum(p.amount) value from `tabSales Invoice Payment` p
-		join `tabSales Invoice` si on si.name=p.parent where si.docstatus=1 and si.branch=%s and si.posting_date=%s
-		group by p.mode_of_payment order by value desc""", a, as_dict=True)
+		join `tabSales Invoice` si on si.name=p.parent where si.docstatus=1 and si.branch=%s and si.posting_date=%s and si.company!=%s
+		group by p.mode_of_payment order by value desc""", a + (ex,), as_dict=True)
 	credit = _scalar("""select coalesce(sum(grand_total),0) from `tabSales Invoice` where docstatus=1 and is_pos=0 and branch=%s
 		and posting_date=%s and hv_is_payer_share=1""", a)
 

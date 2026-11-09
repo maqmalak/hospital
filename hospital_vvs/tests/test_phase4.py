@@ -8,6 +8,8 @@ from frappe.tests import IntegrationTestCase
 from frappe.utils import flt
 
 from hospital_vvs.services import online_visit as svc
+from hospital_vvs.tests.test_phase2 import as_user
+from hospital_vvs.tests.test_phase3 import DESK, desk_shift
 
 
 def _phone():
@@ -44,14 +46,25 @@ class TestW5OnlineVisit(IntegrationTestCase):
 		with self.assertRaises(frappe.DoesNotExistError):
 			svc.by_token(token[:-2] + "xx")
 
-		# staff: fee verified → invoice + payment to the wallet account; accept → patient registered, doctor, video link
-		svc.verify_fee(ov.name)
+		# reception: fee taken in their cashier shift (JazzCash) → POS invoice in the shift; accept → patient registered, doctor, video link
+		shift = desk_shift()
+		with self.assertRaises(frappe.PermissionError):
+			from hospital_vvs.api.online_visit import verify_fee as api_verify
+
+			as_user("ovstaff@vvs.demo")
+			api_verify(ov.name, 1)  # the online desk cannot post money
+		as_user(DESK)
+		svc.verify_fee(ov.name, payment_mode="JazzCash")
+		as_user("Administrator")
 		ov.reload()
 		self.assertEqual(ov.fee_status, "Verified")
 		si = frappe.get_doc("Sales Invoice", ov.sales_invoice)
 		self.assertEqual(flt(si.grand_total), 1500)
-		self.assertEqual(flt(si.outstanding_amount), 0)
-		self.assertEqual(frappe.db.get_value("Payment Entry", ov.payment_entry, "mode_of_payment"), "JazzCash")
+		self.assertEqual((si.is_pos, si.is_created_using_pos), (1, 1))
+		self.assertEqual(si.payments[0].mode_of_payment, "JazzCash")
+		from hospital_vvs.services import shifts
+
+		self.assertEqual(next(m for m in shifts.summary(shift.name)["modes"] if m["mode_of_payment"] == "JazzCash")["collections"], 1500)
 		doctor = ov_doctor()
 		svc.accept(ov.name, doctor)
 		ov.reload()
@@ -88,17 +101,22 @@ class TestW5OnlineVisit(IntegrationTestCase):
 	def test_cancel_and_refund(self):
 		ov, token = svc.create({"patient_name": "Refund Test", "phone": _phone(), "gender": "Male", "age": 30, "complaint": "Back pain",
 			"payment_method": "Easypaisa", "payment_reference": "EP-1"})
-		svc.verify_fee(ov.name)
+		desk_shift()
+		as_user(DESK)
+		svc.verify_fee(ov.name, payment_mode="Easypaisa")
 		with self.assertRaises(frappe.ValidationError):
 			svc.refund(ov.name, refund_reference="R-1")  # still open
+		as_user("Administrator")
 		svc.cancel(ov.name, "Doctor unavailable")
+		as_user(DESK)
 		svc.refund(ov.name, refund_reference="EP-REF-1", refund_notes="Sent back to the wallet")
+		as_user("Administrator")
 		ov.reload()
 		self.assertEqual(ov.fee_status, "Refunded")
 		self.assertEqual(flt(ov.refund_amount), 1500)
 		cn = frappe.get_doc("Sales Invoice", ov.credit_note)
 		self.assertEqual(cn.is_return, 1)
-		self.assertEqual(frappe.db.get_value("Payment Entry", ov.refund_entry, "payment_type"), "Pay")
+		self.assertEqual(cn.payments[0].mode_of_payment, "Easypaisa")  # paid back from the shift
 		self.assertEqual(svc.public_view(svc.by_token(token))["refund_reference"], "EP-REF-1")
 		# a patient can cancel only while pending
 		ov2, token2 = svc.create({"patient_name": "Self Cancel", "phone": _phone(), "complaint": "Headache"})

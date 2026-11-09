@@ -52,7 +52,8 @@ def context(branch=None):
 		"flags": {"mar_gate": cint(s.mar_approval_gate), "mar_billing": s.mar_billing_trigger, "stock": s.stock_deduction_timing,
 			"diet_mode": s.diet_billing_mode, "procedure_trigger": s.procedure_invoice_trigger, "hold": cint(s.discharge_clearance_hold),
 			"consent": cint(s.enable_consent), "packages": cint(s.enable_packages), "diet": cint(s.enable_diet), "mar": cint(s.enable_mar),
-			"procedures": cint(s.enable_procedures), "preauth": cint(s.require_preauth_for_insurance), "oxygen_rate": flt(s.oxygen_rate_per_hour)}}
+			"procedures": cint(s.enable_procedures), "preauth": cint(s.require_preauth_for_insurance), "oxygen_rate": flt(s.oxygen_rate_per_hour),
+			"pharmacy_bills": int(ipd.pharmacy_bills())}}
 
 
 @frappe.whitelist()

@@ -23,7 +23,7 @@ export interface Ctx {
   lab_templates: { name: string; test_code: string; department: string; price: number }[];
   charge_items: { name: string; item_name: string; standard_rate: number }[];
   flags: { mar_gate: number; mar_billing: string; stock: string; diet_mode: string; procedure_trigger: string; hold: number; consent: number; packages: number;
-    diet: number; mar: number; procedures: number; preauth: number; oxygen_rate: number };
+    diet: number; mar: number; procedures: number; preauth: number; oxygen_rate: number; pharmacy_bills: number };
 }
 
 export interface BillLine { charge_type: string; item_code: string; description: string; qty: number; rate: number; amount: number; charge?: string; source?: string;

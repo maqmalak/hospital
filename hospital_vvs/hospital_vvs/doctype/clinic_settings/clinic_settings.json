@@ -193,6 +193,11 @@
   "ov_link_days",
   "ov_branch",
   "ov_bank_account",
+  "contract_tab",
+  "pharmacy_company",
+  "ipd_medicine_billing",
+  "cp1",
+  "ov_fee_modes",
   "security_tab",
   "enforce_two_factor",
   "idle_lock_minutes",
@@ -1289,11 +1294,41 @@
    "options": "Branch"
   },
   {
-   "description": "Where online fees land (default: the payment method's account)",
+   "description": "Not used since D-38: online fees are collected by the receptionist in a shift",
    "fieldname": "ov_bank_account",
    "fieldtype": "Link",
    "label": "Ov Bank Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "contract_tab",
+   "fieldtype": "Tab Break",
+   "label": "Contract Pharmacy"
+  },
+  {
+   "description": "The contractor's own company: pharmacy sales, stock and pharmacy shifts post here, never to the hospital",
+   "fieldname": "pharmacy_company",
+   "fieldtype": "Link",
+   "label": "Pharmacy Company",
+   "options": "Company"
+  },
+  {
+   "default": "Pharmacy bills patient",
+   "description": "Pharmacy bills patient: ward medicine orders become pharmacy invoices for the attendant to pay; the IPD bill has no medicines",
+   "fieldname": "ipd_medicine_billing",
+   "fieldtype": "Select",
+   "label": "IPD Medicine Billing",
+   "options": "Pharmacy bills patient\nHospital IPD bill"
+  },
+  {
+   "fieldname": "cp1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Cash\nBank Transfer\nJazzCash\nEasypaisa",
+   "fieldname": "ov_fee_modes",
+   "fieldtype": "Small Text",
+   "label": "Online Fee Modes (reception)"
   },
   {
    "fieldname": "security_tab",
@@ -1342,7 +1377,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-09 18:44:40.074763",
+ "modified": "2026-11-09 19:16:20.722919",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

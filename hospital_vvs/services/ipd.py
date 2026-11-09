@@ -269,7 +269,7 @@ def computed_lines(adm, until):
 		rate = flt(adm.nursing_charge_per_shift) or flt(frappe.db.get_value("Ward", s.ward, "nursing_charge_per_shift"))
 		if n and rate:
 			lines.append(_line("Nursing", nurse_item, _("Nursing · {0} · {1} shift(s)").format(s.ward, n), n, rate, source="nursing", posted_at=s.from_time))
-	if setting("mar_billing_trigger") == "At discharge":
+	if not pharmacy_bills() and setting("mar_billing_trigger") == "At discharge":
 		for m in frappe.get_all("MAR Entry", filters={"bed_allotment": adm.name, "status": "Administered", "billed": 0},
 			fields=["name", "item", "item_name", "qty_units", "administered_at", "batch_no"]):
 			lines.append(_line("Medicine", m.item, f"{m.item_name} · {m.administered_at}", m.qty_units, unit_price(m.item, m.batch_no), source=f"mar:{m.name}",
@@ -510,6 +510,9 @@ def order_medicine(*, patient, item, dose, frequency="BD", route="Oral", units_p
 		"doctor": doctor, "ordered_by": frappe.session.user, "alert_type": atype, "alert_message": msg, "override_reason": override_reason})
 	mo.insert(ignore_permissions=True)
 	schedule_doses(mo)
+	if pharmacy_bills() and mo.frequency != "PRN":
+		doses = frappe.db.count("MAR Entry", {"medication_order": mo.name})
+		mo.db_set("prescription", ward_prescription(mo, flt(mo.units_per_dose) * doses))
 	publish("mar", {"action": "order", "admission": adm, "er_visit": er_visit}, src.branch)
 	return mo, res["alerts"]
 
@@ -538,6 +541,42 @@ def schedule_doses(mo):
 				frappe.get_doc(dict(base, scheduled_at=at, status=_initial())).insert(ignore_permissions=True)
 
 
+def pharmacy_bills():
+	"""Contract pharmacy (D-38): ward medicines are billed by the pharmacy to the patient, not on the IPD bill."""
+	return (setting("ipd_medicine_billing") or "Pharmacy bills patient") != "Hospital IPD bill"
+
+
+ROUTE_MAP = {"PR": "Rectal", "SL": "Sublingual", "NG": "Oral", "Other": "Oral"}
+
+
+def ward_prescription(mo, qty_units, note=None):
+	"""A ward medicine order reaches the contract pharmacy as a signed IPD / ER prescription: the pharmacy's waiting list gets a draft
+	invoice for the attendant to pay, and prescription-only and controlled-drug rules apply as for OPD."""
+	if not qty_units:
+		return None
+	src = frappe.db.get_value("Bed Allotment", mo.bed_allotment, ["admitting_doctor", "bed"], as_dict=True) if mo.bed_allotment else None
+	bed_no = frappe.db.get_value("Hospital Bed", src.bed, "bed_no") if src else None
+	doctor = mo.doctor or (src.admitting_doctor if src else frappe.db.get_value("ER Visit", mo.er_visit, "assigned_doctor"))
+	if not doctor:
+		frappe.throw(_("Choose the ordering doctor."))
+	rx = frappe.get_doc({"doctype": "Prescription", "patient": mo.patient, "doctor": doctor, "branch": mo.branch, "source": "IPD" if mo.bed_allotment else "ER",
+		"advice": note or _("Ward order {0}{1}").format(mo.name, f" · bed {bed_no}" if bed_no else ""),
+		"medicines": [{"item": mo.item, "dose": mo.dose, "frequency": mo.frequency, "route": ROUTE_MAP.get(mo.route, mo.route),
+			"duration": f"{cint(mo.days) or 1} days" if mo.frequency != "PRN" else "1 dose", "qty": qty_units,
+			"instructions": _("Ward order {0}{1}").format(mo.name, f" · bed {bed_no}" if bed_no else ""), "override_reason": mo.override_reason}]})
+	rx.insert(ignore_permissions=True)
+	rx.submit()
+	return rx.name
+
+
+def _drop_unpaid_ward_rx(rx_name):
+	"""Order stopped before the attendant paid: withdraw the pharmacy draft (paid invoices are the pharmacy's to return)."""
+	if not rx_name:
+		return
+	for si in frappe.get_all("Sales Invoice", filters={"hv_prescription": rx_name, "docstatus": 0}, pluck="name"):
+		frappe.delete_doc("Sales Invoice", si, ignore_permissions=True, force=True)
+
+
 def _initial():
 	return "Pending Approval" if cint(setting("mar_approval_gate")) else "Scheduled"
 
@@ -558,6 +597,8 @@ def prn_dose(order, note=None):
 	e = frappe.get_doc({"doctype": "MAR Entry", "medication_order": mo.name, "bed_allotment": mo.bed_allotment, "er_visit": mo.er_visit,
 		"patient": mo.patient, "branch": mo.branch, "item": mo.item, "item_name": frappe.db.get_value("Item", mo.item, "item_name"), "dose": mo.dose,
 		"route": mo.route, "qty_units": mo.units_per_dose, "scheduled_at": now_datetime(), "status": _initial(), "reason": note}).insert(ignore_permissions=True)
+	if pharmacy_bills():
+		ward_prescription(mo, flt(mo.units_per_dose), _("PRN dose for {0}: {1}").format(mo.name, note or ""))
 	return e
 
 
@@ -578,12 +619,14 @@ def chart_dose(name, status="Administered", reason=None):
 		if adm and (adm.status not in OPEN_STATES or adm.final_invoice):
 			frappe.throw(_("The admission is closed for new doses."))
 		e.administered_by, e.administered_at = frappe.session.user, now_datetime()
-		if setting("stock_deduction_timing") != "At discharge":
+		if pharmacy_bills():
+			pass  # the contract pharmacy dispensed and billed it; the chart is clinical only
+		elif setting("stock_deduction_timing") != "At discharge":
 			wh = ipd_warehouse(e.branch)
 			e.stock_entry = issue_stock(e.item, e.qty_units, wh, remarks=_("MAR {0}").format(e.name))
 			if e.stock_entry:
 				e.batch_no = frappe.db.get_value("Stock Entry Detail", {"parent": e.stock_entry}, "batch_no")
-		if setting("mar_billing_trigger") != "At discharge":
+		if not pharmacy_bills() and setting("mar_billing_trigger") != "At discharge":
 			ch = add_charge(charge_type="Medicine", item_code=e.item, qty=e.qty_units, rate=unit_price(e.item, e.batch_no),
 				description=f"{e.item_name} · {e.dose}", adm=e.bed_allotment, er_visit=None if e.bed_allotment else e.er_visit,
 				reference_doctype="MAR Entry", reference_name=e.name, posted_at=e.administered_at)
@@ -601,6 +644,7 @@ def stop_order(order, reason):
 	if mo.status != "Active":
 		frappe.throw(_("The order is {0}.").format(mo.status))
 	mo.db_set({"status": "Stopped", "stop_reason": reason, "stopped_by": frappe.session.user})
+	_drop_unpaid_ward_rx(mo.prescription)
 	frappe.db.sql("""update `tabMAR Entry` set status='Cancelled', reason=%s where medication_order=%s
 		and status in ('Scheduled','Pending Approval','Approved') and scheduled_at > %s""", (_("Order stopped: {0}").format(reason), order, now_datetime()))
 	return mo
@@ -743,6 +787,8 @@ def clearance(adm_name):
 		fields=["name", "procedure_type", "status"])
 	bill = running_bill(adm.name)
 	expired = adm.discharge_type == "Expired"
+	unpaid_rx = frappe.db.sql("""select si.name, si.grand_total from `tabSales Invoice` si join tabPrescription rx on rx.name=si.hv_prescription
+		join `tabIPD Medication Order` mo on mo.prescription=rx.name where mo.bed_allotment=%s and si.docstatus=0""", adm.name, as_dict=True)
 	checks = [
 		{"key": "summary", "label": _("Discharge summary signed"), "ok": summary_signed},
 		{"key": "labs", "label": _("No lab tests pending"), "ok": not pending_labs, "items": [f"{r.template} ({r.status})" for r in pending_labs]},
@@ -750,6 +796,8 @@ def clearance(adm_name):
 			"items": [f"{r.item_name} @ {str(r.scheduled_at)[:16]}" for r in undocumented]},
 		{"key": "procedures", "label": _("No procedure left open"), "ok": not open_procs, "items": [f"{r.procedure_type} ({r.status})" for r in open_procs]},
 		{"key": "bill", "label": _("Final bill made"), "ok": bool(adm.final_invoice)},
+		{"key": "pharmacy", "label": _("Ward medicines paid at the pharmacy"), "ok": True, "warn": bool(unpaid_rx),
+			"items": [f"{r.name}: {frappe.format_value(r.grand_total, 'Currency')}" for r in unpaid_rx], "info": True},
 		{"key": "dues", "label": _("Patient dues cleared"), "ok": bool(adm.final_invoice) and (bill["balance"] <= 0.5 or expired),
 			"amount": bill["balance"]},
 	]
@@ -803,7 +851,7 @@ def make_final_bill(adm_name, discount_amount=0, discount_authorization=None, ov
 	adm.db_set("release_datetime", until)
 	adm.reload()
 	# at-discharge stock: doses given but not yet issued
-	if setting("stock_deduction_timing") == "At discharge":
+	if setting("stock_deduction_timing") == "At discharge" and not pharmacy_bills():
 		wh = ipd_warehouse(adm.branch)
 		for m in frappe.get_all("MAR Entry", filters={"bed_allotment": adm.name, "status": "Administered", "stock_entry": ["is", "not set"]},
 			fields=["name", "item", "qty_units"]):

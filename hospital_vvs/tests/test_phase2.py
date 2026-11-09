@@ -10,9 +10,10 @@ from hospital_vvs import roles as R
 from hospital_vvs.services import lab, pharmacy, shifts
 from hospital_vvs.setup.company import ABBR
 
-RETAIL = f"Pharmacy Retail LHR - {ABBR}"
-MAIN = f"Main Store LHR - {ABBR}"
-QUAR = f"Quarantine LHR - {ABBR}"
+# contract pharmacy (D-38): medicine stock lives in the contractor's company
+RETAIL = "Pharmacy Retail LHR - VVSP"
+MAIN = "Pharmacy Store LHR - VVSP"
+QUAR = "Pharmacy Quarantine LHR - VVSP"
 DIST = "Muller & Phipps Pakistan"
 
 

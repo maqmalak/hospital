@@ -21,12 +21,18 @@ CASH = "Cash"
 def ensure_counter_profile(counter):
 	"""Copy the branch's billing-type POS Profile into a profile owned by this counter."""
 	c = frappe.get_doc("Counter", counter) if isinstance(counter, str) else counter
-	if c.pos_profile and frappe.db.exists("POS Profile", c.pos_profile):
-		return c.pos_profile
 	from hospital_vvs.services.billing import pos_profile_for
 
 	base = frappe.get_doc("POS Profile", pos_profile_for(c.billing_type or "General", c.branch))
+	if c.pos_profile and frappe.db.exists("POS Profile", c.pos_profile):
+		if frappe.db.get_value("POS Profile", c.pos_profile, "company") == base.company:
+			return c.pos_profile
+		# the billing type moved to another company (contract pharmacy, D-38): switch once the counter has no open shift
+		if c.open_shift and frappe.db.get_value("POS Opening Entry", c.open_shift, "status") == "Open":
+			return c.pos_profile
 	name = f"{c.counter_name} POS"
+	if frappe.db.exists("POS Profile", name) and frappe.db.get_value("POS Profile", name, "company") != base.company:
+		name = f"{c.counter_name} POS ({frappe.db.get_value('Company', base.company, 'abbr')})"
 	if not frappe.db.exists("POS Profile", name):
 		new = frappe.copy_doc(base)
 		new.set("__newname", name)
@@ -150,6 +156,15 @@ def _cost_center(shift):
 	return frappe.db.get_value("POS Profile", shift.pos_profile, "cost_center")
 
 
+def company_account(account, company):
+	"""Clinic Settings hold the hospital's cash accounts; a counter of another company (contract pharmacy) uses its account of the same name."""
+	if not account or frappe.db.get_value("Account", account, "company") == company:
+		return account
+	name = frappe.db.get_value("Account", account, "account_name")
+	return frappe.db.get_value("Account", {"company": company, "account_name": name, "is_group": 0}) or frappe.throw(
+		_("Company {0} has no account named {1}.").format(company, name))
+
+
 def cash_account(company):
 	return frappe.db.get_value("Mode of Payment Account", {"parent": CASH, "company": company}, "default_account")
 
@@ -191,6 +206,7 @@ def add_movement(movement_type, amount, reason, account=None, refund_invoice=Non
 	account = account or default_account
 	if not account:
 		frappe.throw(_("Set the {0} account in Clinic Settings → Cash.").format(movement_type))
+	account = company_account(account, shift.company)
 	mv = frappe.get_doc({"doctype": "Cash Movement", "shift": shift.name, "counter": shift.hv_counter, "branch": shift.hv_branch, "user": user,
 		"movement_type": movement_type, "amount": amount, "reason": reason, "account": account, "refund_invoice": refund_invoice,
 		"status": "Pending Confirmation" if movement_type == "Cash Drop" else "Posted"}).insert(ignore_permissions=True)
@@ -273,9 +289,9 @@ def finalize(sc, liability=False):
 		cash = cash_account(shift.company)
 		cc = _cost_center(shift)
 		if diff > 0:
-			sc.journal_entry = post_je(shift.company, cash, s.cash_over_account, diff, cc, shift.hv_branch, f"Cash excess · {sc.counter} · {sc.name}", sc.name)
+			sc.journal_entry = post_je(shift.company, cash, company_account(s.cash_over_account, shift.company), diff, cc, shift.hv_branch, f"Cash excess · {sc.counter} · {sc.name}", sc.name)
 		else:
-			debit = s.staff_receivable_account if liability else s.cash_short_account
+			debit = company_account(s.staff_receivable_account if liability else s.cash_short_account, shift.company)
 			sc.journal_entry = post_je(shift.company, debit, cash, -diff, cc, shift.hv_branch,
 				f"Cash {'shortage (cashier liability)' if liability else 'short'} · {sc.counter} · {sc.user} · {sc.name}", sc.name)
 	pce = make_closing_entry_from_opening(shift)
