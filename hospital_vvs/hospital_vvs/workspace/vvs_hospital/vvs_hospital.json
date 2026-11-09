@@ -113,9 +113,31 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Pharmacy",
-   "link_count": 9,
+   "link_count": 11,
    "onboard": 0,
    "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Profile",
+   "link_count": 0,
+   "link_to": "POS Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "POS Settings",
+   "link_count": 0,
+   "link_to": "POS Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   },
   {
    "dependencies": "",

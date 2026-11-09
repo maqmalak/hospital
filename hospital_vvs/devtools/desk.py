@@ -34,7 +34,7 @@ APPS = [
 # Desk lists, by area
 SECTIONS = [
 	("Patients & OPD", "user", ["Patient", "Appointment", "OPD Slip", "Prescription", "Queue Entry", "Doctor", "Doctor Schedule", "Household"]),
-	("Pharmacy", "package", ["Dispense Ticket", "Sales Invoice", "Item", "Batch", "Controlled Drug Register", "Cycle Count", "Medicine Category", "Pharma Company",
+	("Pharmacy", "package", ["POS Profile", "POS Settings", "Dispense Ticket", "Sales Invoice", "Item", "Batch", "Controlled Drug Register", "Cycle Count", "Medicine Category", "Pharma Company",
 		"Display Device"]),
 	("Laboratory", "activity", ["Lab Sample", "Lab Result", "Test Invoice", "Lab Test Template", "Outsourced Dispatch", "Critical Value Log"]),
 	("IPD & Emergency", "bed", ["Bed Allotment", "Hospital Bed", "Ward", "IPD Charge", "IPD Medication Order", "MAR Entry", "Discharge Summary", "ER Visit",
