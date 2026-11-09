@@ -1,0 +1,550 @@
+{
+ "actions": [],
+ "autoname": "OV-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "t_pat",
+  "patient",
+  "patient_name",
+  "phone",
+  "gender",
+  "age",
+  "p1",
+  "language",
+  "city",
+  "branch",
+  "phone_verified",
+  "messages_allowed",
+  "t_comp",
+  "complaint",
+  "symptoms",
+  "duration",
+  "c1",
+  "conditions",
+  "current_meds",
+  "allergies_text",
+  "c2",
+  "photos",
+  "specialization",
+  "t_fee",
+  "fee",
+  "payment_method",
+  "payment_proof",
+  "payment_reference",
+  "f1",
+  "fee_status",
+  "fee_verified_by",
+  "fee_verified_at",
+  "sales_invoice",
+  "payment_entry",
+  "f2",
+  "refund_amount",
+  "refund_reference",
+  "f3",
+  "refund_notes",
+  "refund_entry",
+  "credit_note",
+  "t_visit",
+  "status",
+  "assigned_doctor",
+  "scheduled_at",
+  "video_link",
+  "v1",
+  "accepted_by",
+  "accepted_at",
+  "completed_at",
+  "rejection_reason",
+  "cancel_reason",
+  "v2",
+  "prescription",
+  "doctor_notes",
+  "v3",
+  "follow_up",
+  "follow_up_date",
+  "v4",
+  "token_hash",
+  "token_expires",
+  "verified_until",
+  "failed_attempts",
+  "locked_until",
+  "access_log",
+  "client_ref"
+ ],
+ "fields": [
+  {
+   "fieldname": "t_pat",
+   "fieldtype": "Tab Break",
+   "label": "Patient"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "global_search": 1,
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Phone",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "p1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "ur",
+   "fieldname": "language",
+   "fieldtype": "Select",
+   "label": "Language",
+   "options": "en\nur\nar"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "Location / City"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "description": "Existing patient linked after a one-time code",
+   "fieldname": "phone_verified",
+   "fieldtype": "Check",
+   "label": "Phone Verified",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "messages_allowed",
+   "fieldtype": "Check",
+   "label": "Patient agreed to messages about this visit"
+  },
+  {
+   "fieldname": "t_comp",
+   "fieldtype": "Tab Break",
+   "label": "Complaint"
+  },
+  {
+   "fieldname": "complaint",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Complaint",
+   "reqd": 1
+  },
+  {
+   "description": "Comma separated",
+   "fieldname": "symptoms",
+   "fieldtype": "Small Text",
+   "label": "Symptoms"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Data",
+   "label": "How long"
+  },
+  {
+   "fieldname": "c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "conditions",
+   "fieldtype": "Small Text",
+   "label": "Known conditions"
+  },
+  {
+   "fieldname": "current_meds",
+   "fieldtype": "Small Text",
+   "label": "Current medicines"
+  },
+  {
+   "fieldname": "allergies_text",
+   "fieldtype": "Small Text",
+   "label": "Allergies (patient-reported)"
+  },
+  {
+   "fieldname": "c2",
+   "fieldtype": "Section Break",
+   "label": "Photos"
+  },
+  {
+   "fieldname": "photos",
+   "fieldtype": "Table",
+   "label": "Photos",
+   "options": "Online Visit Photo"
+  },
+  {
+   "fieldname": "specialization",
+   "fieldtype": "Link",
+   "label": "Preferred speciality",
+   "options": "Specialization"
+  },
+  {
+   "fieldname": "t_fee",
+   "fieldtype": "Tab Break",
+   "label": "Fee"
+  },
+  {
+   "fieldname": "fee",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Fee",
+   "read_only": 1
+  },
+  {
+   "default": "Payment Proof",
+   "fieldname": "payment_method",
+   "fieldtype": "Select",
+   "label": "Payment Method",
+   "options": "Payment Proof\nJazzCash\nEasypaisa\nBank Transfer\nCard (online)"
+  },
+  {
+   "fieldname": "payment_proof",
+   "fieldtype": "Attach",
+   "label": "Payment Proof"
+  },
+  {
+   "fieldname": "payment_reference",
+   "fieldtype": "Data",
+   "label": "Transaction ID"
+  },
+  {
+   "fieldname": "f1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "fee_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fee Status",
+   "options": "Unpaid\nProof Submitted\nVerified\nRefunded\nWaived"
+  },
+  {
+   "fieldname": "fee_verified_by",
+   "fieldtype": "Link",
+   "label": "Fee Verified By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fee_verified_at",
+   "fieldtype": "Datetime",
+   "label": "Fee Verified At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "f2",
+   "fieldtype": "Section Break",
+   "label": "Refund"
+  },
+  {
+   "fieldname": "refund_amount",
+   "fieldtype": "Currency",
+   "label": "Refund Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "refund_reference",
+   "fieldtype": "Data",
+   "label": "Refund Reference"
+  },
+  {
+   "fieldname": "f3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "refund_notes",
+   "fieldtype": "Small Text",
+   "label": "Refund Notes"
+  },
+  {
+   "fieldname": "refund_entry",
+   "fieldtype": "Link",
+   "label": "Refund Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit_note",
+   "fieldtype": "Link",
+   "label": "Credit Note",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "t_visit",
+   "fieldtype": "Tab Break",
+   "label": "Visit"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nAccepted\nRejected\nCompleted\nCancelled"
+  },
+  {
+   "fieldname": "assigned_doctor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assigned Doctor",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "scheduled_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Scheduled At"
+  },
+  {
+   "fieldname": "video_link",
+   "fieldtype": "Data",
+   "label": "Video Link",
+   "options": "URL"
+  },
+  {
+   "fieldname": "v1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accepted_by",
+   "fieldtype": "Link",
+   "label": "Accepted By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accepted_at",
+   "fieldtype": "Datetime",
+   "label": "Accepted At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "completed_at",
+   "fieldtype": "Datetime",
+   "label": "Completed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rejection_reason",
+   "fieldtype": "Small Text",
+   "label": "Rejection Reason"
+  },
+  {
+   "fieldname": "cancel_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancel Reason"
+  },
+  {
+   "fieldname": "v2",
+   "fieldtype": "Section Break",
+   "label": "Consultation"
+  },
+  {
+   "fieldname": "prescription",
+   "fieldtype": "Link",
+   "label": "Prescription",
+   "options": "Prescription",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doctor_notes",
+   "fieldtype": "Text",
+   "label": "Doctor Notes",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "v3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "follow_up",
+   "fieldtype": "Select",
+   "label": "Follow Up",
+   "options": "\nNot needed\nOnline\nVisit the clinic"
+  },
+  {
+   "fieldname": "follow_up_date",
+   "fieldtype": "Date",
+   "label": "Follow Up Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "v4",
+   "fieldtype": "Section Break",
+   "label": "Access"
+  },
+  {
+   "fieldname": "token_hash",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Token Hash",
+   "search_index": 1
+  },
+  {
+   "fieldname": "token_expires",
+   "fieldtype": "Datetime",
+   "label": "Token Expires",
+   "read_only": 1
+  },
+  {
+   "fieldname": "verified_until",
+   "fieldtype": "Datetime",
+   "label": "Verified Until",
+   "read_only": 1
+  },
+  {
+   "fieldname": "failed_attempts",
+   "fieldtype": "Int",
+   "label": "Failed Attempts",
+   "read_only": 1
+  },
+  {
+   "fieldname": "locked_until",
+   "fieldtype": "Datetime",
+   "label": "Locked Until",
+   "read_only": 1
+  },
+  {
+   "fieldname": "access_log",
+   "fieldtype": "Small Text",
+   "label": "Access Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "client_ref",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Client Ref",
+   "no_copy": 1,
+   "unique": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Online Visit",
+ "name": "Online Visit Request",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "OV Staff",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "OV Doctor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "OV Doctor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Doctor"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "PW Accountant"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "phone,patient",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

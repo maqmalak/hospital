@@ -3,6 +3,7 @@
 from hospital_vvs.devtools.dt import cb, doctype, f, p, sb, tab
 from hospital_vvs.devtools.schema_phase2 import SETTINGS_FIELDS as PHASE2_SETTINGS
 from hospital_vvs.devtools.schema_phase3 import SETTINGS_FIELDS as PHASE3_SETTINGS
+from hospital_vvs.devtools.schema_phase4 import SETTINGS_FIELDS as PHASE4_SETTINGS
 from hospital_vvs.roles import (
 	ACCOUNTANT, ADMIN, CASH_SUPERVISOR, CLINICAL, DEO, DISPENSER, DOCTOR, FINDER, LAB_USER, NURSE, OV_DOCTOR, OV_STAFF,
 	PATHOLOGIST, PHARMACY_CASHIER, RECEPTIONIST, REVIEWER, STORE_KEEPER,
@@ -137,6 +138,7 @@ SETTINGS = doctype("Clinic Settings", M, [
 
 	*PHASE2_SETTINGS,
 	*PHASE3_SETTINGS,
+	*PHASE4_SETTINGS,
 
 	tab("security_tab", "Security"),
 	f("enforce_two_factor", "Check", description="Two-factor login for PW Admin, Accountant, Cash Supervisor and Pathologist"),
@@ -174,6 +176,7 @@ MASTERS = [
 		f("photo", "Attach Image"),
 		sb("d2", "Fees"), f("default_fee", "Currency"), f("follow_up_fee", "Currency"), cb("d3"),
 		f("revisit_days", "Int", default="7", description="Prescription follow-up date default"),
+		f("online_visits", "Check", description="Takes online (video) consultations"),
 		f("slot_minutes", "Int", description="Overrides Clinic Settings"),
 		sb("d4", "Registration (shown on prints)"),
 		f("registration_no", "Data", label="PMDC Registration No."), f("qualification", "Data"), cb("d5"),

@@ -1,7 +1,7 @@
 import {
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
   ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
-  Activity, BarChart3, BedDouble, Receipt, Soup, UserCheck, ShieldPlus, ClipboardPlus, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
+  Activity, BarChart3, BedDouble, Receipt, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
   MessageCircle, MessagesSquare, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
   type LucideIcon,
 } from "lucide-react";
@@ -61,6 +61,10 @@ export const NAV: NavGroup[] = [
     { route: "/roster", label: "Nurse roster", icon: UserCheck, color: "from-violet-500 to-fuchsia-600", desc: "Duty by ward and shift" },
     { route: "/ipd_report", label: "IPD reports", icon: BarChart3, color: "from-slate-600 to-slate-800", desc: "Census, stays, revenue, dues" },
     { route: "/display/ward", label: "Ward kiosk display", icon: MonitorPlay, color: "from-cyan-600 to-blue-700", desc: "Full-screen bed status" },
+  ] },
+  { label: "Online", items: [
+    { route: "/ov-staff", label: "Online visits", icon: Video, color: "from-indigo-500 to-violet-600", desc: "Video consultations: fee, accept, prescribe" },
+    { route: "/ov-staff/report", label: "Online visit report", icon: BarChart3, color: "from-violet-600 to-fuchsia-700", desc: "Requests, fees, refunds" },
   ] },
   { label: "Billing", items: [
     { route: "/billing/discount-approvals", label: "Discount approvals", icon: Percent, color: "from-orange-500 to-amber-500", desc: "Requests above the limit" },

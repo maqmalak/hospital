@@ -16,6 +16,7 @@
   "queue_entry",
   "r2",
   "source",
+  "online_visit",
   "round_no",
   "version_no",
   "status",
@@ -116,6 +117,13 @@
    "fieldtype": "Select",
    "label": "Source",
    "options": "OPD\nIPD\nER\nOnline Visit"
+  },
+  {
+   "fieldname": "online_visit",
+   "fieldtype": "Link",
+   "label": "Online Visit",
+   "options": "Online Visit Request",
+   "read_only": 1
   },
   {
    "fieldname": "round_no",
@@ -255,7 +263,7 @@
  "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-09 18:44:40.078580",
  "modified_by": "Administrator",
  "module": "OPD",
  "name": "Prescription",

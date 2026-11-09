@@ -18,16 +18,20 @@ def my_doctor():
 
 
 @frappe.whitelist()
-def workspace(queue_entry=None, patient=None, prescription=None):
+def workspace(queue_entry=None, patient=None, prescription=None, online_visit=None):
 	require_roles(*DOCTOR_ROLES, R.NURSE, R.DEO)
 	q = frappe.get_doc("Queue Entry", queue_entry) if queue_entry else None
 	rx = frappe.get_doc("Prescription", prescription) if prescription else None
-	patient = patient or (q.patient if q else rx.patient if rx else None)
+	ov = frappe.get_doc("Online Visit Request", online_visit) if online_visit else None
+	patient = patient or (q.patient if q else rx.patient if rx else ov.patient if ov else None)
 	if not patient:
 		frappe.throw(_("Choose a patient."))
 	p = frappe.get_doc("Patient", patient)
 	log_access("Prescription workspace", patient=patient, reference_doctype="Queue Entry" if q else "Patient",
 		reference_name=queue_entry or patient)
+	if not rx and ov:
+		existing = frappe.db.get_value("Prescription", {"online_visit": ov.name, "docstatus": ["<", 2]}, "name", order_by="creation desc")
+		rx = frappe.get_doc("Prescription", existing) if existing else None
 	if not rx and q:
 		existing = frappe.db.get_value("Prescription", {"queue_entry": q.name, "docstatus": 0}, "name")
 		rx = frappe.get_doc("Prescription", existing) if existing else None
@@ -41,7 +45,7 @@ def workspace(queue_entry=None, patient=None, prescription=None):
 		r["medicines"] = frappe.get_all("Prescription Medicine", filters={"parent": r.name}, fields=["item_name", "dose", "frequency",
 			"duration"], order_by="idx")
 		r["diagnoses"] = frappe.get_all("Prescription Diagnosis", filters={"parent": r.name}, pluck="diagnosis_name")
-	doctor = (q.doctor if q else None) or (rx.doctor if rx else None) or my_doctor()
+	doctor = (q.doctor if q else None) or (rx.doctor if rx else None) or (ov.assigned_doctor if ov else None) or my_doctor()
 	return {
 		"patient": {"name": p.name, "patient_name": p.patient_name, "patient_name_ur": p.patient_name_ur, "gender": p.gender,
 			"age": age_of(p.dob), "phone": p.phone, "photo": p.photo, "blood_group": p.blood_group, "category": p.category,
@@ -51,6 +55,8 @@ def workspace(queue_entry=None, patient=None, prescription=None):
 		"slip": {k: slip.get(k) for k in ("name", "chief_complaint", "notes", "bp_systolic", "bp_diastolic", "pulse", "temperature", "spo2",
 			"rbs", "weight", "height", "bmi", "purpose")} if slip else None,
 		"vitals": vitals, "previous": previous,
+		"online_visit": {k: ov.get(k) for k in ("name", "complaint", "symptoms", "duration", "conditions", "current_meds", "allergies_text", "video_link",
+			"scheduled_at", "status")} | {"photos": [r.file_url for r in ov.photos]} if ov else None,
 		"prescription": rx.as_dict() if rx else None,
 		"doctor": frappe.db.get_value("Doctor", doctor, ["name", "doctor_name", "revisit_days"], as_dict=True) if doctor else None,
 		"templates": frappe.get_all("Prescription Template", or_filters=[["doctor", "=", doctor or ""], ["doctor", "is", "not set"]],
@@ -110,6 +116,12 @@ def save(data, sign=0):
 			"opd_slip": q.opd_slip if q else d.get("opd_slip"), "branch": (q.branch if q else d.get("branch")) or setting("default_branch"),
 			"doctor": d.get("doctor") or (q.doctor if q else None) or my_doctor(), "source": d.get("source") or "OPD",
 			"amended_from": d.get("amended_from"), "amendment_reason": d.get("amendment_reason")})
+		if d.get("online_visit"):
+			ov = frappe.db.get_value("Online Visit Request", d["online_visit"], ["patient", "assigned_doctor", "branch", "status"], as_dict=True)
+			if not ov or ov.status != "Accepted":
+				frappe.throw(_("The online visit is not open."))
+			doc.update({"online_visit": d["online_visit"], "source": "Online Visit", "patient": ov.patient, "branch": ov.branch,
+				"doctor": d.get("doctor") or ov.assigned_doctor})
 	for k in ("examination_notes", "advice", "follow_up_days", "follow_up_date", "amendment_reason"):
 		if k in d:
 			doc.set(k, d[k])

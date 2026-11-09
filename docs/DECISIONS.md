@@ -41,6 +41,10 @@ Choices made while building, and questions that need the owner (marked **OPEN**)
 | D-33 | 2026-11-09 | **Nurse roster uses HRMS** (installed on this site): Shift Type per nursing shift and a Shift Assignment per nurse, day and ward (custom fields `hv_ward`, `hv_is_head_nurse`). The roster creates the Employee record for a nurse user on first use. The nurse in charge (or a doctor) approves doses when the MAR approval gate is on. | Spec 06 asks to use HRMS when present. |
 | D-34 | 2026-11-09 | Wards keep floor and room as fields on Ward / Hospital Bed instead of separate **Floor** and **Room** DocTypes; ICU is the ward type plus an ICU surcharge per day on the ward. **Ad-hoc Service Charge** and **Consumable Usage** are IPD Charge types rather than their own DocTypes. **Intake/output** are fields on Vitals Chart. | Fewer screens and one bill ledger; nothing in the workflows needs the extra DocTypes. Ask if you want them split out. |
 
+| D-35 | 2026-11-09 | **Online visit fees** are wallet / bank transfers, not counter cash: when staff confirm the transfer, a Sales Invoice (Fee, OV-CONSULT item) and a Payment Entry to the method's account are posted **outside cashier shifts**. Refunds are a credit note plus a Payment Entry back, with the patient's refund transaction ID. | Cashier shifts count drawer money; online money never passes through a drawer. |
+| D-36 | 2026-11-09 | **Online visit access**: the status link carries a random token (only its SHA-256 is stored, valid 30 days, rate-limited, `Cache-Control: no-store`). Status and the video link show with the link alone; the **prescription needs the last 4 digits of the phone** (5 wrong tries lock it for 15 minutes), the same rule as the lab report portal. Phones that already have patients must pass the WhatsApp/SMS code before one of those patients is linked. | Spec 08 ("same token rules as the lab portal"). The `no-store` header now also covers the lab report endpoints. |
+| D-37 | 2026-11-09 | **Video**: a Jitsi Meet room link (`meet.jit.si/VVS-<random>`) is made on accept unless staff paste their own link (Zoom, WhatsApp video…). No recording, no embedded call. The prescription is a normal signed Prescription (`source = Online Visit`, linked to the request); signing links it, the doctor then completes the visit. | No video vendor account needed to start; switch Clinic Settings → Online Visit to "Manual link" for another service. |
+
 ## Open questions for the owner
 
 1. **Hosting** (on-premise server vs cloud with backup internet) — 09-security-ops.md. Recommendation: on-premise primary for counters/wards + off-site encrypted backups.
@@ -49,4 +53,5 @@ Choices made while building, and questions that need the owner (marked **OPEN**)
 4. SMS gateway provider; WhatsApp Business account and template approval.
 5. Drug-interaction reference list (D-08); real discount limits (D-09); one company vs company per branch (D-02).
 6. Zakat/welfare eligibility rules (Phase 6) — the system only records approvals.
+8. Online visits: real fee, wallet / bank numbers shown to patients, and whether to use Jitsi or another video service (D-37).
 7. IPD: confirm the bed-day rule (midnight census, minimum 1 day) and nursing per shift (D-29); real ward, ICU, nursing, diet and procedure rates; which consumables are billed.

@@ -33,7 +33,7 @@ def patient_links():
 	return [("Bed Allotment", "patient"), ("IPD Charge", "patient"), ("IPD Note", "patient"), ("Ward Round", "patient"),
 		("IPD Medication Order", "patient"), ("MAR Entry", "patient"), ("Diet Order", "patient"), ("IPD Procedure", "patient"),
 		("Vitals Chart", "patient"), ("Consent Form", "patient"), ("Discharge Summary", "patient"), ("Patient Comms Profile", "patient"),
-		("ER Visit", "patient"), ("Insurance Pre-Auth", "patient"), ("Test Invoice", "patient"), ("Payment Entry", "hv_patient")]
+		("ER Visit", "patient"), ("Insurance Pre-Auth", "patient"), ("Test Invoice", "patient"), ("Payment Entry", "hv_patient"), ("Online Visit Request", "patient")]
 
 
 # ------------------------------------------------------------------ helpers

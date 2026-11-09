@@ -7,3 +7,4 @@
 hospital_vvs.patches.v0_2.phase2_settings_defaults
 hospital_vvs.patches.v0_3.phase3_settings
 hospital_vvs.patches.v0_3.adopt_occupied_beds
+hospital_vvs.patches.v0_4.phase4_settings

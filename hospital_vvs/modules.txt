@@ -8,3 +8,4 @@ Cash
 Lab
 Pharmacy
 Emergency
+Online Visit

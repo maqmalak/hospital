@@ -9,7 +9,8 @@ Status as of **2026-11-09**. Phases from `docs/CLAUDE.md` §8.
 | Ward map + kiosk (from Phase 3, owner request) | **Done** (masters, live map, allot/extend/transfer/discharge, kiosk) |
 | 2 Pharmacy + Lab + Cash | **Done** (2026-11-07) |
 | 3 IPD + ER | **Done** (2026-11-09) — W4, W18 green; full suite 37 green |
-| 4–7 | Not started — Phase 4 (Online Visit) waits for review |
+| 4 Online Visit | **Done** (2026-11-09) — W5 green; full suite 41 green |
+| 5–7 | Not started — Phase 5 (Patient Comms + Feedback) waits for review |
 
 ## How to run
 
@@ -21,6 +22,7 @@ bench --site hospital execute hospital_vvs.setup.company.run   # company, branch
 bench --site hospital execute hospital_vvs.setup.demo.seed     # demo data (re-run safe)
 bench --site hospital execute hospital_vvs.setup.demo_phase2.seed
 bench --site hospital execute hospital_vvs.setup.demo_phase3.seed   # wards rates, diets, procedures, packages, nurses + roster, admissions, ER
+bench --site hospital execute hospital_vvs.setup.demo_phase4.seed   # OV staff (ovstaff@vvs.demo), OV doctors (dr.sana, dr.farah), sample requests
 bench --site hospital run-tests --app hospital_vvs
 ```
 Demo logins (`<name>@vvs.demo`, password `Demo@1234` or site_config `hv_demo_password`): admin, reception, reception2, reception.isb (Islamabad only),
@@ -83,6 +85,17 @@ Pharmacy packs + FEFO + expired blocked + Rx rule + return; pipeline race (two f
 ## Tests — Phase 3 (`tests/test_phase3.py`, 5; full suite 37 green)
 Bed days by midnight census + minimum · nursing per started shift across a transfer · package cover with limits · **W4**: insurance admission refused without pre-auth → admit with pre-auth (bed occupied, comms token) → ward round → MAR gate, stock issued from IPD store, charge → transfer to ICU → diet → procedure blocked until consent → oxygen, ad-hoc, lab → advance in the cashier shift → clearance hold (unsigned summary, pending lab) → summary signed → final bill with every charge type, one line per bed segment, payer 70 % invoice, advance allocated, GL balanced → discharge held for dues → settle → discharged, bed Cleaning → Available, comms off · **W18**: unknown patient → Red at the top of the board → lab + medicine → admitted with ER charges carried → merged into the real patient. Phase 1/2 test helpers now skip stale demo shifts and temporary patients.
 
+## Phase 4 — built (2026-11-09)
+- **Public form** `/hms/online-visit` (mobile first, English / Urdu / Arabic with RTL), 4 steps: patient (phone; registered phones verify a WhatsApp/SMS code and pick a household member, otherwise name / age / sex / city) → problem (complaint, symptom chips, since when, conditions, current medicines, allergies, up to 5 photos, preferred speciality) → payment (fee, wallet / bank instructions, method, transaction ID, receipt upload, or pay later) → review with message consent. Result: a private status link.
+- **Status page** `/hms/online-visit/<token>`: progress (sent → accepted → completed), doctor and time, **Join video call** button, fee state, pay later, refund details, cancel while pending; the prescription (view / print) after the last 4 phone digits. Refreshes every 20 s.
+- **Staff dashboard** `/ov-staff` (OV Staff; OV Doctors see their own): live board New / Accepted / Completed / Cancelled, counts (fees to check, refunds due), request detail with photos and receipt, **fee received / not found**, accept (doctor, time, auto Jitsi link or pasted link) or reject, change time / link, cancel, **refund**. OV Doctor: open the call, **Write prescription** (prescription workspace with the request's complaint, medicines and allergy note), complete with notes and follow-up. Report `/ov-staff/report`.
+- Messages (WhatsApp / SMS, Urdu + English): request received (with link), accepted (doctor, time, video link), rejected, completed, cancelled, refunded.
+- Accepting registers the patient if new (MR at the online branch). Signing the prescription links it to the request; the pharmacy draft and lab order rules apply as for OPD.
+- Token endpoints (online visit and lab report) now send `Cache-Control: no-store`.
+
+## Tests — Phase 4 (`tests/test_phase4.py`, 4; full suite 41 green)
+**W5**: Urdu request → token (hash only) → status pending, no link → fee confirmed (invoice + JazzCash payment) → accepted, patient registered, Jitsi link on the status page → complete refused without a prescription → prescription signed from the workspace links itself → completed → prescription hidden until the 4-digit check, wrong digits refused, right digits show it · cancel → refund (credit note + payment back, reference on the status page) · patient self-cancel while pending · registered phone must be verified to link a patient · `no-store` header. Tests now block database commits (the wrong-PIN path commits its lock), so test records no longer leak into the site.
+
 ## Deferred / known gaps
 - **Staging + training sites, restore drill on staging**: need `bench new-site` (MariaDB root password) — scripts and steps in `docs/OPS.md`; decrypt-and-check drill done locally.
 - **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.
@@ -91,4 +104,5 @@ Bed days by midnight census + minimum · nursing per started shift across a tran
 - Lab template editor screen (`/lab/templates`) not built yet — templates are edited in the desk for now.
 - Thermal label / receipt printing tested through the browser print dialog only (QZ Tray silent print untested on real printers).
 - Urdu/Arabic: navigation, actions and main clinical/billing terms translated; long help texts still English. Phase 3 screens are English-first (labels go through i18n where shared components are used).
+- Phase 4: no online card gateway (Frappe Payments) yet — patients pay by wallet / bank transfer and staff confirm it; video calls are external links (no recording). Older Phase 2 lab test runs left a few test lab orders on patient MR-LHR-000057 (LAB-2026-00009 … 00022) — not removed, waiting for the owner's OK.
 - Phase 3: bedside room portal `/patient/:token` and nursing stations are Phase 5 (the token is created now); insurance claims, doctor share on IPD bills and welfare funds are Phase 6; feedback after discharge waits for a `ipd_feedback` message template (Phase 5); LAMA / consent scans are linked by file URL (upload in the desk).

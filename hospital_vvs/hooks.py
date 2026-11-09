@@ -20,6 +20,7 @@ website_route_rules = [
 hv_on_prescription_signed = [
 	"hospital_vvs.services.lab.on_prescription_signed",
 	"hospital_vvs.services.pharmacy.on_prescription_signed",
+	"hospital_vvs.services.online_visit.on_prescription_signed",
 ]
 
 doc_events = {
@@ -50,3 +51,6 @@ scheduler_events = {
 
 # Patient merge also moves admission and ER records (api/patients._extra_links)
 hv_patient_links = ["hospital_vvs.services.ipd.patient_links"]
+
+# token portals: Cache-Control no-store
+after_request = ["hospital_vvs.utils.no_store"]

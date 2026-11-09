@@ -95,7 +95,7 @@ PRESCRIPTION = doctype("Prescription", OPD, [
 	f("branch", "Link", "Branch", reqd=1, filter=1), f("prescription_date", "Date", default="Today", list=1),
 	f("opd_slip", "Link", "OPD Slip"), f("queue_entry", "Link", "Queue Entry", ro=1),
 	cb("r2"),
-	f("source", "Select", ["OPD", "IPD", "ER", "Online Visit"], default="OPD"), f("round_no", "Int", label="Round No. (IPD)"),
+	f("source", "Select", ["OPD", "IPD", "ER", "Online Visit"], default="OPD"), f("online_visit", "Link", "Online Visit Request", ro=1), f("round_no", "Int", label="Round No. (IPD)"),
 	f("version_no", "Int", default="1", ro=1), f("status", "Select", ["Draft", "Signed", "Superseded", "Cancelled"], default="Draft", ro=1, list=1, filter=1),
 	sb("med_sec", "Medicines"), f("medicines", "Table", "Prescription Medicine"),
 	sb("dx_sec", "Diagnosis & tests"), f("diagnoses", "Table", "Prescription Diagnosis"), cb("r3"), f("lab_tests", "Table", "Prescription Lab Test"),

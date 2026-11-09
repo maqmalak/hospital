@@ -141,7 +141,6 @@ READ_FOR_MONEY = ["Account", "Cost Center", "Customer", "Customer Group", "Terri
 	"Serial and Batch Bundle", "Bin", "Supplier"]
 # doctype: {role: rights}; created through Custom DocPerm (core DocPerms untouched)
 EXTRA_PERMS = {
-	"Sales Invoice": {r: ["read", "create", "write", "submit", "print"] for r in roles.MONEY + [roles.ADMIN]},
 	"POS Opening Entry": {r: ["read", "create", "write", "submit"] for r in roles.MONEY + [roles.ADMIN, roles.CASH_SUPERVISOR]},
 	"POS Closing Entry": {r: ["read", "create", "write", "submit"] for r in roles.MONEY + [roles.ADMIN, roles.CASH_SUPERVISOR]},
 	"Journal Entry": {roles.CASH_SUPERVISOR: ["read"], roles.ACCOUNTANT: ["read"]},
@@ -153,7 +152,9 @@ EXTRA_PERMS = {
 	"Purchase Invoice": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN, roles.ACCOUNTANT)},
 	"Stock Reconciliation": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN)},
 	# Phase 3: IPD / ER advances and settlements at the admission desk
-	"Payment Entry": {r: ["read", "create", "write", "submit", "print"] for r in (roles.RECEPTIONIST, roles.CASH_SUPERVISOR, roles.ACCOUNTANT, roles.ADMIN)},
+	"Payment Entry": {r: ["read", "create", "write", "submit", "print"] for r in (roles.RECEPTIONIST, roles.CASH_SUPERVISOR, roles.ACCOUNTANT, roles.ADMIN,
+		roles.OV_STAFF)},
+	"Sales Invoice": {r: ["read", "create", "write", "submit", "print"] for r in roles.MONEY + [roles.ADMIN, roles.OV_STAFF]},
 	"Shift Assignment": {r: ["read", "create", "write", "submit", "cancel"] for r in (roles.NURSE, roles.ADMIN)},
 	"Shift Type": {r: ["read"] for r in (roles.NURSE, roles.DOCTOR, roles.ADMIN, roles.RECEPTIONIST)},
 	"Employee": {r: ["read"] for r in (roles.NURSE, roles.ADMIN)},
@@ -163,7 +164,7 @@ EXTRA_PERMS = {
 def ensure_erpnext_permissions():
 	from frappe.permissions import add_permission, update_permission_property
 
-	readers = set(roles.MONEY + [roles.ADMIN, roles.FINDER, roles.REVIEWER, roles.STORE_KEEPER, roles.DOCTOR, roles.NURSE, roles.PATHOLOGIST, roles.DEO])
+	readers = set(roles.MONEY + [roles.ADMIN, roles.OV_STAFF, roles.FINDER, roles.REVIEWER, roles.STORE_KEEPER, roles.DOCTOR, roles.NURSE, roles.PATHOLOGIST, roles.DEO])
 	for dt in READ_FOR_MONEY:
 		if not frappe.db.exists("DocType", dt):
 			continue

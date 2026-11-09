@@ -182,6 +182,17 @@
   "er_fee_item",
   "er_fee",
   "er_ward",
+  "ov_tab",
+  "ov_fee",
+  "ov_item",
+  "ov_payment_methods",
+  "ov_payment_instructions",
+  "ov1",
+  "ov_video_provider",
+  "ov_video_base",
+  "ov_link_days",
+  "ov_branch",
+  "ov_bank_account",
   "security_tab",
   "enforce_two_factor",
   "idle_lock_minutes",
@@ -1216,6 +1227,75 @@
    "options": "Ward"
   },
   {
+   "fieldname": "ov_tab",
+   "fieldtype": "Tab Break",
+   "label": "Online Visit"
+  },
+  {
+   "default": "1500",
+   "fieldname": "ov_fee",
+   "fieldtype": "Currency",
+   "label": "Online Visit Fee"
+  },
+  {
+   "fieldname": "ov_item",
+   "fieldtype": "Link",
+   "label": "Fee Item",
+   "options": "Item"
+  },
+  {
+   "default": "Payment Proof\nJazzCash\nEasypaisa\nBank Transfer",
+   "description": "One per line, shown on the form",
+   "fieldname": "ov_payment_methods",
+   "fieldtype": "Small Text",
+   "label": "Ov Payment Methods"
+  },
+  {
+   "default": "JazzCash / Easypaisa: 0300-0000000 (VVS Hospital)\nBank: Meezan Bank, A/C 0000-0000000000",
+   "description": "Shown to the patient on the payment step",
+   "fieldname": "ov_payment_instructions",
+   "fieldtype": "Small Text",
+   "label": "Ov Payment Instructions"
+  },
+  {
+   "fieldname": "ov1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Jitsi Meet (auto link)",
+   "fieldname": "ov_video_provider",
+   "fieldtype": "Select",
+   "label": "Ov Video Provider",
+   "options": "Jitsi Meet (auto link)\nManual link"
+  },
+  {
+   "default": "https://meet.jit.si/",
+   "description": "Auto links are this address + a random room name",
+   "fieldname": "ov_video_base",
+   "fieldtype": "Data",
+   "label": "Ov Video Base"
+  },
+  {
+   "default": "30",
+   "fieldname": "ov_link_days",
+   "fieldtype": "Int",
+   "label": "Status Link Valid (days)"
+  },
+  {
+   "description": "Branch whose books get online fees",
+   "fieldname": "ov_branch",
+   "fieldtype": "Link",
+   "label": "Ov Branch",
+   "options": "Branch"
+  },
+  {
+   "description": "Where online fees land (default: the payment method's account)",
+   "fieldname": "ov_bank_account",
+   "fieldtype": "Link",
+   "label": "Ov Bank Account",
+   "options": "Account"
+  },
+  {
    "fieldname": "security_tab",
    "fieldtype": "Tab Break",
    "label": "Security"
@@ -1262,7 +1342,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-09 18:00:57.178185",
+ "modified": "2026-11-09 18:44:40.074763",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

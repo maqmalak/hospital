@@ -19,6 +19,7 @@ interface WS {
     allergies: { allergy: string; severity?: string; reaction?: string }[]; conditions: { diagnosis: string; diagnosis_name: string }[]; long_term_medicines: { item: string; dose?: string }[] };
   queue: { name: string; token_no: number; status: string } | null;
   slip: Record<string, number | string> | null; vitals: Record<string, number | string>[];
+  online_visit?: { name: string; complaint: string; symptoms?: string; duration?: string; conditions?: string; current_meds?: string; allergies_text?: string; video_link?: string; photos: string[] } | null;
   previous: { name: string; prescription_date: string; doctor_name: string; medicines: { item_name: string; dose?: string; frequency?: string; duration?: string }[]; diagnoses: string[] }[];
   prescription: (Record<string, unknown> & { name: string; docstatus: number; status: string; version_no: number; medicines: Med[]; diagnoses: { diagnosis: string; diagnosis_name: string }[]; lab_tests: { test_name: string; urgent?: number }[] }) | null;
   doctor: { name: string; doctor_name: string; revisit_days?: number } | null; templates: { name: string; template_name: string }[];
@@ -33,19 +34,20 @@ export default function PrescriptionPage() {
   const [params, setParams] = useSearchParams();
   const queue = params.get("queue") || undefined;
   const rxParam = params.get("rx") || undefined;
+  const ov = params.get("ov") || undefined;
   const [patientPick, setPatientPick] = useState<PatientHit | null>(null);
   const patient = params.get("patient") || patientPick?.name;
-  if (!queue && !rxParam && !patient) {
+  if (!queue && !rxParam && !patient && !ov) {
     return <div className="mx-auto max-w-2xl"><Section title="Choose a patient"><PatientPicker autoFocus onPick={(p) => { setPatientPick(p); setParams({ patient: p.name }); }} /></Section></div>;
   }
-  return <Workspace key={`${queue}-${rxParam}-${patient}`} queue={queue} rx={rxParam} patient={queue || rxParam ? undefined : patient} />;
+  return <Workspace key={`${queue}-${rxParam}-${patient}-${ov}`} queue={queue} rx={rxParam} ov={ov} patient={queue || rxParam || ov ? undefined : patient} />;
 }
 
-function Workspace({ queue, rx, patient }: { queue?: string; rx?: string; patient?: string }) {
+function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; patient?: string; ov?: string }) {
   const { boot } = useAuth();
   const { t } = useTranslation();
   const nav = useNavigate();
-  const { data: ws, refetch } = useApi<WS>("prescription.workspace", { queue_entry: queue, prescription: rx, patient }, { staleTime: 0 });
+  const { data: ws, refetch } = useApi<WS>("prescription.workspace", { queue_entry: queue, prescription: rx, patient, online_visit: ov }, { staleTime: 0 });
   const [name, setName] = useState<string | undefined>();
   const [meds, setMeds] = useState<Med[]>([]);
   const [alerts, setAlerts] = useState<{ alerts: Alert[]; blocking: boolean }[]>([]);
@@ -90,16 +92,17 @@ function Workspace({ queue, rx, patient }: { queue?: string; rx?: string; patien
     setBusy(true);
     try {
       const doc = await call<{ name: string; docstatus: number }>("prescription.save", { sign: sign ? 1 : 0, data: {
-        name, queue_entry: queue, patient: ws.patient.name, medicines: meds, diagnoses: dx, lab_tests: labs, examination_notes: notes, advice,
+        name, queue_entry: queue, online_visit: ov, patient: ws.patient.name, medicines: meds, diagnoses: dx, lab_tests: labs, examination_notes: notes, advice,
         follow_up_days: Number(fuDays) || undefined, amended_from: amendFrom?.name, amendment_reason: amendFrom?.reason } });
       setName(doc.name);
       if (sign) {
         toast.success(`Signed · ${doc.name}`); setSigned(true);
         await printRx(doc.name);
         if (queue) setTimeout(() => nav("/physician-queue"), 600);
+        if (ov) setTimeout(() => nav("/ov-staff"), 600);
       } else toast.success("Draft saved");
     } catch (e) { toast.error(humanizeError(e), { duration: 8000 }); } finally { setBusy(false); }
-  }, [ws, alerts, meds, dx, labs, notes, advice, fuDays, name, queue, amendFrom, nav]);
+  }, [ws, alerts, meds, dx, labs, notes, advice, fuDays, name, queue, ov, amendFrom, nav]);
 
   const printRx = async (rxName: string) => {
     const d = await getCall<Omit<RxPrint, "mr">>("hospital_vvs.api.prescription.print_data", { name: rxName });
@@ -122,6 +125,10 @@ function Workspace({ queue, rx, patient }: { queue?: string; rx?: string; patien
           <div className="flex items-center gap-3"><Avatarish name={p.patient_name} src={p.photo} size={14} />
             <div className="min-w-0"><div className="truncate text-lg font-bold">{p.patient_name}</div><div className="font-urdu text-sm text-muted-foreground">{p.patient_name_ur}</div>
               <div className="text-xs text-muted-foreground">{p.name} · {p.age}y · {t(p.gender)}{p.blood_group ? ` · ${p.blood_group}` : ""}</div></div></div>
+          {ws.online_visit && <div className="mt-2 space-y-1 rounded-xl bg-indigo-50 p-2 text-xs dark:bg-indigo-500/10"><div className="font-bold text-indigo-800 dark:text-indigo-200">Online visit {ws.online_visit.name}</div>
+            <div>{ws.online_visit.complaint}</div>{ws.online_visit.symptoms && <div className="text-muted-foreground">{ws.online_visit.symptoms}{ws.online_visit.duration ? ` · ${ws.online_visit.duration}` : ""}</div>}
+            {ws.online_visit.current_meds && <div><b>Taking:</b> {ws.online_visit.current_meds}</div>}{ws.online_visit.allergies_text && <div className="text-rose-700"><b>Says allergic to:</b> {ws.online_visit.allergies_text}</div>}
+            {ws.online_visit.video_link && <a href={ws.online_visit.video_link} target="_blank" rel="noreferrer" className="inline-block rounded-lg bg-indigo-600 px-2 py-1 font-semibold text-white">Open video call</a>}</div>}
           {ws.queue && <div className="mt-2 flex items-center gap-2 text-sm"><span className="rounded-lg bg-primary/10 px-2 py-0.5 font-bold text-primary">Token {ws.queue.token_no}</span><Pill value={ws.queue.status} /></div>}
         </Section>
         <Section title={<span className="flex items-center gap-1 text-rose-700 dark:text-rose-300"><ShieldAlert className="h-4 w-4" />{t("Allergies")}</span>}>

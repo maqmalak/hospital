@@ -1,5 +1,7 @@
 """Phase 2 acceptance tests (12-workflows.md: W1 full, W3, W6a, W6b, W6c, W7, W14). Needs both demo seeders."""
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_months, flt, getdate, today
@@ -226,6 +228,9 @@ class TestStore(IntegrationTestCase):
 
 class TestLab(IntegrationTestCase):
 	def setUp(self):
+		patcher = patch.object(frappe.db, "commit", lambda *a, **k: None)  # wrong-answer path commits; keep test data out
+		patcher.start()
+		self.addCleanup(patcher.stop)
 		frappe.db.set_single_value("Clinic Settings", {"quiet_hours_start": None, "quiet_hours_end": None, "lab_auto_verify": 0, "report_require_verification": 1,
 			"report_verification_method": "Last 4 digits of phone"})
 		frappe.clear_document_cache("Clinic Settings")

@@ -64,6 +64,10 @@ const PreAuthPage = lazy(() => import("@/modules/ipd/MorePages").then((m) => ({ 
 const IpdReportPage = lazy(() => import("@/modules/ipd/MorePages").then((m) => ({ default: m.ReportPage })));
 const RosterPage = lazy(() => import("@/modules/ipd/RosterPage"));
 const ErBoardPage = lazy(() => import("@/modules/er/ErBoardPage"));
+const OnlineVisitPage = lazy(() => import("@/modules/public/OnlineVisitPage"));
+const OnlineVisitStatusPage = lazy(() => import("@/modules/public/OnlineVisitStatusPage"));
+const OvStaffPage = lazy(() => import("@/modules/ov/OvStaffPage"));
+const OvReportPage = lazy(() => import("@/modules/ov/OvStaffPage").then((m) => ({ default: m.OvReportPage })));
 
 function Loading() {
   return <div className="flex h-full min-h-[50vh] items-center justify-center"><Spinner size={28} /></div>;
@@ -95,6 +99,8 @@ export default function App() {
         <Route path="/book-appointment" element={<BookPage />} />
         <Route path="/my-appointment/:token" element={<ManagePage />} />
         <Route path="/lab-report/:token" element={<LabReportPage />} />
+        <Route path="/online-visit" element={<OnlineVisitPage />} />
+        <Route path="/online-visit/:token" element={<OnlineVisitStatusPage />} />
         <Route path="/display/counter/:key" element={<DevicePage />} />
         <Route path="/display/pharmacy/:key" element={<DevicePage />} />
         <Route path="/display/waiting/:key" element={<DevicePage />} />
@@ -155,6 +161,8 @@ export default function App() {
         <Route path="/store/cycle-count" element={g("/store/cycle-count", <CycleCountPage />)} />
         <Route path="/display/devices" element={g("/display/devices", <DevicesPage />)} />
         <Route path="/er" element={g("/er", <ErBoardPage />)} />
+        <Route path="/ov-staff" element={g("/ov-staff", <OvStaffPage />)} />
+        <Route path="/ov-staff/report" element={g("/ov-staff/report", <OvReportPage />)} />
         <Route path="*" element={g("/pw-home", <ComingPage title="This screen" phase={4} />)} />
       </Routes>
     </Suspense>

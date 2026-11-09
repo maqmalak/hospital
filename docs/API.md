@@ -187,6 +187,30 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `log` | status, channel, event, phone, limit, start |  | RECEPTIONIST, LAB_USER |  |
 | `resend` | name | POST | RECEPTIONIST, LAB_USER |  |
 
+## online_visit
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `form_context` |  | guest |  |  |
+| `request_otp` | phone | guest POST |  | Phones with registered patients are verified before the household is shown (same code flow as web booking). |
+| `verify_otp` | phone, code | guest POST |  |  |
+| `upload` | filename, filedata | guest POST |  | Photo or payment receipt from the public form (private file, ≤ 5 MB, images / PDF). |
+| `submit` | data | guest POST |  |  |
+| `status` | token | guest |  |  |
+| `verify` | token, answer | guest POST |  |  |
+| `pay` | token, payment_method, payment_reference, payment_proof | guest POST |  |  |
+| `cancel_request` | token, reason | guest POST |  |  |
+| `queue` | status, date, mine |  | STAFF, DOCS |  |
+| `get` | name |  | STAFF, DOCS |  |
+| `verify_fee` | name, ok, note, payment_reference | POST | STAFF |  |
+| `accept` | name, doctor, scheduled_at, video_link | POST | STAFF |  |
+| `update_visit` | name, scheduled_at, video_link, doctor | POST | STAFF, DOCS |  |
+| `reject` | name, reason | POST | STAFF |  |
+| `cancel` | name, reason | POST | STAFF |  |
+| `complete` | name, doctor_notes, follow_up, follow_up_date | POST | DOCS, STAFF |  |
+| `refund` | name, amount, refund_reference, refund_notes | POST | STAFF |  |
+| `report` | from_date, to_date |  | STAFF, ACCOUNTANT |  |
+
 ## opd
 
 | Method | Params | Flags | Roles | Summary |
@@ -251,7 +275,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 
 | Method | Params | Flags | Roles | Summary |
 |---|---|---|---|---|
-| `workspace` | queue_entry, patient, prescription |  | DOCTOR_ROLES, NURSE, DEO |  |
+| `workspace` | queue_entry, patient, prescription, online_visit |  | DOCTOR_ROLES, NURSE, DEO |  |
 | `search_medicines` | q, limit |  |  | Brand or generic, with strength and form. |
 | `search_diagnoses` | q, limit |  |  |  |
 | `check` | patient, lines, prescription |  |  | Live safety check as lines are added (same rules as on save). |

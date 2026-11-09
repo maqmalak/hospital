@@ -12,3 +12,6 @@
 - **Patient room portal (`/patient/:token`):** bedside tablet/phone; quick buttons (nurse, water, pain, bathroom help) plus text and voice-to-text (Urdu/English); sees replies live.
 - **Nursing station (`/ns/:station`):** realtime list of patients with unread counts, urgency by quick-button type, reply, broadcast to all patients of the station, on-duty nurses from the roster (`06-ipd.md`).
 - Response-time report per station.
+
+## Build decisions (Phase 4)
+See `DECISIONS.md` D-35 … D-37: online fees posted outside cashier shifts, token + last-4-digits rule for the prescription, Jitsi link by default, prescription is a normal signed Prescription linked to the request.

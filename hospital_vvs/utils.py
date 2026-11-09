@@ -101,3 +101,19 @@ def hhmm(t):
 		return ""
 	parts = str(t).split(" ")[-1].split(":")
 	return f"{int(parts[0]):02d}:{parts[1][:2]}" if len(parts) > 1 else str(t)
+
+
+TOKEN_METHODS = ("hospital_vvs.api.online_visit.status", "hospital_vvs.api.online_visit.verify", "hospital_vvs.api.online_visit.pay",
+	"hospital_vvs.api.online_visit.cancel_request", "hospital_vvs.api.lab.report_open", "hospital_vvs.api.lab.report_verify",
+	"hospital_vvs.api.lab.report_pdf")
+
+
+def no_store(response=None, request=None):
+	"""after_request hook: token portals (lab report, online visit) must never be cached by browsers or proxies (09-security-ops.md)."""
+	try:
+		path = (request or frappe.local.request).path or ""
+	except Exception:
+		return
+	if response is not None and any(path.endswith(m) for m in TOKEN_METHODS):
+		response.headers["Cache-Control"] = "no-store, max-age=0"
+		response.headers["Pragma"] = "no-cache"
