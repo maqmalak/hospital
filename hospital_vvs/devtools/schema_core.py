@@ -136,7 +136,8 @@ SETTINGS = doctype("Clinic Settings", M, [
 
 	tab("billing_tab", "Billing"),
 	f("discount_rules", "Table", "Discount Rule"), f("discount_approvers", "Table", "Discount Approver"),
-	cb("b1"), f("default_bottle_ml", "Int", default="120", label="Syrup Bottle (ml) for Quantity"), f("doctor_share_basis", "Select", ["At invoice", "On payment"], default="On payment",
+	cb("b1"), f("default_bottle_ml", "Int", default="120", label="Syrup Bottle (ml) for Quantity"),
+	f("opd_nurse_vitals", "Check", default="1", label="OPD: Nurse Takes Vitals Before the Doctor", description="New tokens go to the nurse first (Vitals) unless the counter already entered them"), f("doctor_share_basis", "Select", ["At invoice", "On payment"], default="On payment",
 		description="On payment: commission is earned as the bill is paid (panel / credit bills only when the money comes in)"),
 
 	*PHASE2_SETTINGS,

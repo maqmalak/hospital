@@ -118,6 +118,7 @@
   "discount_approvers",
   "b1",
   "default_bottle_ml",
+  "opd_nurse_vitals",
   "doctor_share_basis",
   "lab_tab",
   "lab_send_thank_you",
@@ -920,6 +921,13 @@
    "fieldname": "default_bottle_ml",
    "fieldtype": "Int",
    "label": "Syrup Bottle (ml) for Quantity"
+  },
+  {
+   "default": "1",
+   "description": "New tokens go to the nurse first (Vitals) unless the counter already entered them",
+   "fieldname": "opd_nurse_vitals",
+   "fieldtype": "Check",
+   "label": "OPD: Nurse Takes Vitals Before the Doctor"
   },
   {
    "default": "On payment",
@@ -1781,7 +1789,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 17:51:59.737185",
+ "modified": "2026-11-10 18:18:46.063681",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

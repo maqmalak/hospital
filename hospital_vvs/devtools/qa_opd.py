@@ -275,7 +275,43 @@ def o10():
 	check("O10-2", "each pending row links to its draft prescription if one exists", all("prescription" in r for r in rows))
 
 
-SCENARIOS = [o01, o02, o03, o04, o05, o06, o07, o08, o09, o10]
+@scenario("O11 Nurse vitals stage")
+def o11():
+	from hospital_vvs.api import opd as api
+
+	frappe.db.set_single_value("Clinic Settings", "opd_nurse_vitals", 1)
+	p, _ = register(REC)
+	as_user(REC)
+	s = api.create_slip(json.dumps({"patient": p["name"], "doctor": DOC_A, "payment_mode": "Cash", "chief_complaint": "Headache"}))
+	sl = frappe.get_doc("OPD Slip", s["name"])
+	check("O11-1", "token without vitals goes to the nurse first (Vitals)", frappe.db.get_value("Queue Entry", sl.queue_entry, "status") == "Vitals")
+	as_user(NURSE)
+	check("O11-2", "nurse's vitals list shows the token", sl.queue_entry in [r.name for r in api.vitals_queue()["rows"]])
+	as_user(DRA)
+	called = None
+	try:
+		called = api.call_next(DOC_A)
+	except Exception:
+		frappe.local.message_log = []
+	check("O11-3", "doctor's Call next never calls a patient still at vitals", not called or called["name"] != sl.queue_entry)
+	if called:
+		api.set_queue_status(called["name"], "Waiting")
+	as_user(NURSE)
+	raises("O11-4", "impossible reading refused (temperature 150 °F)", lambda: api.record_vitals(sl.queue_entry, json.dumps({"temperature": 150})), frappe.ValidationError)
+	raises("O11-5", "empty vitals refused", lambda: api.record_vitals(sl.queue_entry, "{}"), frappe.ValidationError)
+	q = api.record_vitals(sl.queue_entry, json.dumps({"bp_systolic": 150, "bp_diastolic": 95, "pulse": 88, "temperature": 98.6, "spo2": 97, "weight": 80, "height": 175}), "Elderly", "Headache 2 days")
+	sl.reload()
+	check("O11-6", "vitals saved on the slip (BP 150/95, BMI 26.1)", sl.bp_systolic == 150 and abs(float(sl.bmi or 0) - 26.1) < 0.05, sl.bmi)
+	check("O11-7", "patient now waiting for the doctor with the nurse's priority", q["status"] == "Waiting" and q["priority"] == "Elderly" and q["vitals_by"] == NURSE)
+	as_user(DRA)
+	ws = __import__("hospital_vvs.api.prescription", fromlist=["x"]).workspace(queue_entry=sl.queue_entry)
+	check("O11-8", "doctor's workspace shows the nurse's vitals", ws["slip"]["bp_systolic"] == 150 and ws["slip"]["chief_complaint"] == "Headache 2 days")
+	as_user(REC)
+	s2 = api.create_slip(json.dumps({"patient": register(REC)[0]["name"], "doctor": DOC_A, "payment_mode": "Cash", "temperature": 99, "pulse": 80}))
+	check("O11-9", "vitals taken at the counter skip the nurse (Waiting)", frappe.db.get_value("Queue Entry", frappe.db.get_value("OPD Slip", s2["name"], "queue_entry"), "status") == "Waiting")
+
+
+SCENARIOS = [o01, o02, o03, o04, o05, o06, o07, o08, o09, o10, o11]
 
 
 def run(only=None):

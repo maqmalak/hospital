@@ -126,11 +126,11 @@ def queue(doctor=None, branch=None, date=None):
 	if doctor:
 		filters["doctor"] = doctor
 	rows = frappe.get_all("Queue Entry", filters=filters, fields=["name", "doctor", "doctor_name", "patient", "patient_name", "token_no",
-		"status", "priority", "is_follow_up", "room", "creation", "called_at", "started_at", "completed_at", "opd_slip"],
+		"status", "priority", "is_follow_up", "room", "creation", "called_at", "started_at", "completed_at", "opd_slip", "vitals_at"],
 		order_by="token_no asc")
-	order = {"In Consultation": 0, "Called": 1, "Waiting": 2, "Skipped": 3, "Done": 4}
+	order = {"In Consultation": 0, "Called": 1, "Waiting": 2, "Vitals": 3, "Skipped": 4, "Done": 5}
 	prio = {"Urgent": 0, "Elderly": 1, "Disabled": 1}
-	rows.sort(key=lambda r: (order.get(r.status, 9), prio.get(r.priority or "", 5) if r.status == "Waiting" else 0, r.token_no or 0))
+	rows.sort(key=lambda r: (order.get(r.status, 9), prio.get(r.priority or "", 5) if r.status in ("Waiting", "Vitals") else 0, r.token_no or 0))
 	photos = {p.name: p.photo for p in frappe.get_all("Patient", filters={"name": ["in", [r.patient for r in rows] or [""]]},
 		fields=["name", "photo"])}
 	for r in rows:
@@ -145,7 +145,7 @@ def queue(doctor=None, branch=None, date=None):
 def set_queue_status(name, status, priority=None):
 	require_roles(R.DOCTOR, R.RECEPTIONIST, R.NURSE, R.DEO)
 	q = frappe.get_doc("Queue Entry", name)
-	if status not in ("Waiting", "Called", "In Consultation", "Done", "Skipped"):
+	if status not in ("Vitals", "Waiting", "Called", "In Consultation", "Done", "Skipped"):
 		frappe.throw(_("Unknown status"))
 	q.status = status
 	now = now_datetime()
@@ -192,3 +192,60 @@ def display(branch=None):
 			if len(d["next"]) < 4:
 				d["next"].append({"token": r.token_no, "name": name})
 	return {"branch": branch, "doctors": list(by_doc.values()), "clinic": settings().clinic_name, "clinic_ur": settings().clinic_name_ur}
+
+
+# ------------------------------------------------------------------ nurse vitals station (/opd/vitals)
+VITALS = ("bp_systolic", "bp_diastolic", "pulse", "temperature", "spo2", "rbs", "weight", "height")
+
+
+@frappe.whitelist()
+def vitals_queue(branch=None):
+	"""Tokens waiting for the nurse, urgent / elderly first, then by arrival."""
+	require_roles(R.NURSE, R.DOCTOR, R.RECEPTIONIST)
+	branch = branch or default_branch()
+	rows = frappe.get_all("Queue Entry", filters={"branch": branch, "queue_date": today(), "status": "Vitals"},
+		fields=["name", "token_no", "patient", "patient_name", "doctor", "doctor_name", "room", "priority", "creation", "opd_slip", "is_follow_up"], order_by="creation")
+	prio = {"Urgent": 0, "Elderly": 1, "Disabled": 1}
+	rows.sort(key=lambda r: (prio.get(r.priority or "", 5), str(r.creation)))
+	pats = {p.name: p for p in frappe.get_all("Patient", filters={"name": ["in", [r.patient for r in rows] or [""]]}, fields=["name", "gender", "dob", "photo", "phone"])}
+	from hospital_vvs.api.patients import age_of
+
+	for r in rows:
+		p = pats.get(r.patient) or {}
+		r.update(gender=p.get("gender"), age=age_of(p.get("dob")), photo=p.get("photo"),
+			chief_complaint=frappe.db.get_value("OPD Slip", r.opd_slip, "chief_complaint") if r.opd_slip else None,
+			last=frappe.get_all("OPD Slip", filters={"patient": r.patient, "docstatus": 1, "name": ["!=", r.opd_slip or ""], "bp_systolic": [">", 0]},
+				fields=["posting_date", "bp_systolic", "bp_diastolic", "pulse", "temperature", "spo2", "weight", "rbs"], order_by="posting_date desc", limit=1))
+	done_today = frappe.db.count("Queue Entry", {"branch": branch, "queue_date": today(), "vitals_at": ["is", "set"]})
+	return {"rows": rows, "done_today": done_today}
+
+
+@frappe.whitelist(methods=["POST"])
+def record_vitals(queue_entry, vitals, priority=None, chief_complaint=None):
+	"""Nurse saves vitals on the OPD slip and sends the patient to the doctor's waiting list."""
+	require_roles(R.NURSE, R.DOCTOR)
+	v = frappe.parse_json(vitals) or {}
+	q = frappe.get_doc("Queue Entry", queue_entry)
+	if q.status not in ("Vitals", "Waiting"):
+		frappe.throw(_("Token {0} is already {1}.").format(q.token_no, q.status))
+	if not any(flt(v.get(k)) for k in ("bp_systolic", "pulse", "temperature", "spo2", "weight")):
+		frappe.throw(_("Enter at least BP, pulse, temperature, SpO2 or weight."))
+	checks = {"bp_systolic": (50, 260), "bp_diastolic": (30, 160), "pulse": (25, 220), "temperature": (90, 110), "spo2": (50, 100), "weight": (0.5, 300), "height": (30, 230), "rbs": (20, 700)}
+	for k, (lo, hi) in checks.items():
+		if v.get(k) not in (None, "") and not lo <= flt(v[k]) <= hi:
+			frappe.throw(_("{0} {1} looks wrong — check the reading.").format(k.replace("_", " ").title(), v[k]))
+	if q.opd_slip:
+		upd = {k: flt(v[k]) for k in VITALS if v.get(k) not in (None, "")}
+		w, h = flt(v.get("weight")), flt(v.get("height"))
+		if w and h:
+			upd["bmi"] = round(w / ((h / 100) ** 2), 1)
+		if chief_complaint:
+			upd["chief_complaint"] = chief_complaint
+		frappe.db.set_value("OPD Slip", q.opd_slip, upd)  # submitted slip: vitals are clinical notes, not billing fields
+	q.status, q.vitals_at, q.vitals_by = "Waiting", now_datetime(), frappe.session.user
+	if priority is not None:
+		q.priority = priority
+	q.save(ignore_permissions=True)
+	publish("queue", {"doctor": q.doctor, "action": "Waiting", "token": q.token_no, "room": q.room}, q.branch)
+	return q.as_dict()
+

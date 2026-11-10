@@ -358,7 +358,7 @@ function PendingPatients({ onOpen, compact, current, doctor: forDoctor }: { onOp
   const [pick, setPick] = useState<string>("");
   const doctor = forDoctor || boot?.doctor?.name || pick;
   const { data, refetch } = useApi<{ rows: QRow[]; doctors: { name: string; doctor_name: string; consultation_room?: string }[] }>("opd.queue", { doctor: doctor || undefined }, { refetchInterval: 15_000 });
-  const rows = (data?.rows ?? []).filter((r) => ["Waiting", "Called", "In Consultation"].includes(r.status));
+  const rows = (data?.rows ?? []).filter((r) => ["Vitals", "Waiting", "Called", "In Consultation"].includes(r.status));
   const mins = (s: string) => Math.max(0, Math.round((Date.now() - new Date(s.replace(" ", "T")).getTime()) / 60000));
   const callNext = async () => { try { const r = await call<{ name: string; token_no: number }>("opd.call_next", { doctor }); toast.success(`Token ${r.token_no} called`); void refetch(); onOpen(r.name); } catch (e) { toast.error(humanizeError(e)); } };
   if (compact) {
@@ -379,7 +379,7 @@ function PendingPatients({ onOpen, compact, current, doctor: forDoctor }: { onOp
           <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-sky-600 text-white"><span className="text-[9px] uppercase opacity-80">Token</span><span className="text-lg font-black leading-none">{r.token_no}</span></span>
           <span className="min-w-0 flex-1"><b className="block truncate">{r.patient_name}</b><span className="text-xs text-muted-foreground">{r.patient}{!boot?.doctor && !pick ? ` · ${r.doctor_name}` : ""}{r.is_follow_up ? " · follow-up" : ""}{r.prescription ? " · draft Rx" : ""}</span></span>
           <span className="flex flex-col items-end gap-1">{r.priority && <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold", PRIO_TONE[r.priority])}>{r.priority}</span>}
-            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", r.status === "Waiting" ? "bg-amber-100 text-amber-800" : r.status === "Called" ? "bg-sky-100 text-sky-800" : "bg-teal-100 text-teal-800")}>{r.status}</span>
+            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", r.status === "Vitals" ? "bg-rose-100 text-rose-700" : r.status === "Waiting" ? "bg-amber-100 text-amber-800" : r.status === "Called" ? "bg-sky-100 text-sky-800" : "bg-teal-100 text-teal-800")}>{r.status === "Vitals" ? "At vitals" : r.status === "Waiting" ? "Ready" : r.status}</span>
             <span className="text-[10px] text-muted-foreground">{mins(r.creation)} min</span></span></button>))}
         {!rows.length && <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No patient waiting{doctor ? "" : " — choose a doctor"}.</div>}</div>
     </Section>

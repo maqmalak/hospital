@@ -118,9 +118,11 @@ QUEUE = doctype("Queue Entry", OPD, [
 	f("branch", "Link", "Branch", reqd=1, filter=1), f("queue_date", "Date", default="Today", list=1, filter=1),
 	f("room", "Data"), f("token_no", "Int", list=1),
 	cb("q2"),
-	f("status", "Select", ["Waiting", "Called", "In Consultation", "Done", "Skipped"], default="Waiting", list=1, filter=1),
+	f("status", "Select", ["Vitals", "Waiting", "Called", "In Consultation", "Done", "Skipped"], default="Waiting", list=1, filter=1,
+		description="Vitals = with the nurse · Waiting = ready for the doctor · Called / In Consultation = with the doctor · Done"),
 	f("priority", "Select", ["", "Urgent", "Elderly", "Disabled"]), f("is_follow_up", "Check"),
 	sb("q3", "Times"), f("opd_slip", "Link", "OPD Slip"), f("appointment", "Link", "Appointment"), cb("q4"),
+	f("vitals_at", "Datetime", label="Vitals taken at"), f("vitals_by", "Link", "User", ro=1),
 	f("called_at", "Datetime"), f("started_at", "Datetime"), f("completed_at", "Datetime"),
 ], [p("System Manager", "rwcd"), p(ADMIN, "rwcdR"), p(RECEPTIONIST, "rwc"), p(DOCTOR, "rw"), p(NURSE, "rw"), p(DEO, "rw")]
 	+ [p(r, "r") for r in (LAB_USER, PATHOLOGIST, PHARMACY_CASHIER, REVIEWER, DISPENSER, ACCOUNTANT)],

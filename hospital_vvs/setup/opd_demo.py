@@ -99,21 +99,25 @@ def run(new_patients=12, visits=30, seed=None):
 		try:
 			_as(rnd.choice([REC, REC2]))
 			s = opd_api.create_slip(json.dumps({"patient": p, "doctor": doc.name, "payment_mode": rnd.choice(["Cash", "Cash", "Cash", "JazzCash", "Card"]),
-				"chief_complaint": case[0], "bp_systolic": rnd.randint(105, 160), "bp_diastolic": rnd.randint(65, 100), "pulse": rnd.randint(64, 108),
-				"temperature": round(rnd.uniform(97.6, 102.4), 1), "spo2": rnd.randint(94, 99), "weight": rnd.randint(12, 95)}))
+				"chief_complaint": case[0]}))  # vitals are taken by the nurse
 			slips.append((frappe.get_doc("OPD Slip", s["name"]), case, doc))
 			made["slips"] += 1
 			frappe.db.commit()
 		except Exception:
 			frappe.db.rollback()
 	_as(NURSE)
-	for sl, _c, _d in slips:
+	at_nurse = max(2, len(slips) // 8)  # the last few tokens are still waiting for vitals
+	for k, (sl, _c, _d) in enumerate(slips):
+		if frappe.db.get_value("Queue Entry", sl.queue_entry, "status") != "Vitals" or k >= len(slips) - at_nurse:
+			continue
 		age = frappe.db.get_value("Patient", sl.patient, "dob")
-		if age and (frappe.utils.getdate().year - frappe.utils.getdate(age).year) >= 65:
-			opd_api.set_queue_status(sl.queue_entry, "Waiting", "Elderly")
-		elif rnd.random() < 0.08:
-			opd_api.set_queue_status(sl.queue_entry, "Waiting", "Urgent")
+		elderly = age and (frappe.utils.getdate().year - frappe.utils.getdate(age).year) >= 65
+		opd_api.record_vitals(sl.queue_entry, json.dumps({"bp_systolic": rnd.randint(105, 160), "bp_diastolic": rnd.randint(65, 100), "pulse": rnd.randint(64, 108),
+			"temperature": round(rnd.uniform(97.6, 102.4), 1), "spo2": rnd.randint(94, 99), "weight": rnd.randint(12, 95), "height": rnd.randint(95, 185)}),
+			"Elderly" if elderly else ("Urgent" if rnd.random() < 0.08 else ""))
 	frappe.db.commit()
+	slips = slips[: len(slips) - at_nurse]
+	made["at_vitals"] = at_nurse
 	keep_waiting = max(3, len(slips) // 5)
 	for k, (sl, case, doc) in enumerate(slips):
 		if k >= len(slips) - keep_waiting:

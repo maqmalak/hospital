@@ -19,6 +19,7 @@ export const NAV: NavGroup[] = [
     { route: "/patients", label: "Patients", icon: Users, color: "from-slate-500 to-slate-700", desc: "Patient records" },
   ] },
   { label: "Clinical", items: [
+    { route: "/opd/vitals", label: "OPD vitals", icon: HeartPulse, color: "from-rose-500 to-pink-600", desc: "Nurse takes vitals, sends to the doctor" },
     { route: "/physician-queue", label: "Physician queue", icon: ClipboardList, color: "from-amber-500 to-orange-500", desc: "Live queue per doctor" },
     { route: "/pw-prescription", label: "Prescription workspace", icon: Stethoscope, color: "from-rose-500 to-pink-500", desc: "Prescribe with safety alerts" },
     { route: "/pw-history", label: "Patient history", icon: History, color: "from-fuchsia-500 to-purple-600", desc: "Visits, vitals, prescriptions" },

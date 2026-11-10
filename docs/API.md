@@ -312,6 +312,8 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `set_queue_status` | name, status, priority | POST | DOCTOR, RECEPTIONIST, NURSE, DEO |  |
 | `call_next` | doctor, branch | POST | DOCTOR, NURSE, RECEPTIONIST |  |
 | `display` | branch |  |  | Waiting-room display: token and room only (first name when the setting allows). |
+| `vitals_queue` | branch |  | NURSE, DOCTOR, RECEPTIONIST | Tokens waiting for the nurse, urgent / elderly first, then by arrival. |
+| `record_vitals` | queue_entry, vitals, priority, chief_complaint | POST | NURSE, DOCTOR | Nurse saves vitals on the OPD slip and sends the patient to the doctor's waiting list. |
 
 ## ops
 

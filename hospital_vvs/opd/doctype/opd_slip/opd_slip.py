@@ -110,6 +110,13 @@ class OPDSlip(Document):
 				posting_date=self.posting_date)
 			self.db_set("payer_invoice", payer_si)
 
+	def _first_stage(self):
+		"""Nurse vitals first (setting), unless the counter already took them."""
+		from hospital_vvs.utils import setting
+
+		has_vitals = any(self.get(k) for k in ("bp_systolic", "pulse", "temperature", "spo2", "weight"))
+		return "Vitals" if cint(setting("opd_nurse_vitals")) and not has_vitals else "Waiting"
+
 	def _queue(self):
 		existing = frappe.db.get_value("Queue Entry", {"appointment": self.appointment}, "name") if self.appointment else None
 		room = frappe.db.get_value("Doctor", self.doctor, "consultation_room")
@@ -119,7 +126,7 @@ class OPDSlip(Document):
 			q.save(ignore_permissions=True)
 		else:
 			q = frappe.get_doc({"doctype": "Queue Entry", "doctor": self.doctor, "patient": self.patient, "branch": self.branch,
-				"queue_date": self.posting_date, "room": room, "token_no": self.token_no, "status": "Waiting",
+				"queue_date": self.posting_date, "room": room, "token_no": self.token_no, "status": self._first_stage(),
 				"is_follow_up": self.purpose == "Follow-up", "opd_slip": self.name, "appointment": self.appointment,
 				"priority": appt_priority(self.appointment),
 			}).insert(ignore_permissions=True)

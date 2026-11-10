@@ -22,6 +22,8 @@
   "opd_slip",
   "appointment",
   "q4",
+  "vitals_at",
+  "vitals_by",
   "called_at",
   "started_at",
   "completed_at"
@@ -96,12 +98,13 @@
   },
   {
    "default": "Waiting",
+   "description": "Vitals = with the nurse · Waiting = ready for the doctor · Called / In Consultation = with the doctor · Done",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Waiting\nCalled\nIn Consultation\nDone\nSkipped"
+   "options": "Vitals\nWaiting\nCalled\nIn Consultation\nDone\nSkipped"
   },
   {
    "fieldname": "priority",
@@ -136,6 +139,18 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "vitals_at",
+   "fieldtype": "Datetime",
+   "label": "Vitals taken at"
+  },
+  {
+   "fieldname": "vitals_by",
+   "fieldtype": "Link",
+   "label": "Vitals By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
    "fieldname": "called_at",
    "fieldtype": "Datetime",
    "label": "Called At"
@@ -153,7 +168,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-10 18:18:46.067327",
  "modified_by": "Administrator",
  "module": "OPD",
  "name": "Queue Entry",

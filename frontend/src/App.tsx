@@ -73,6 +73,7 @@ const StationListPage = lazy(() => import("@/modules/comms/StationPages"));
 const NursingStationPage = lazy(() => import("@/modules/comms/StationPages").then((m) => ({ default: m.NursingStationPage })));
 const AssignPage = lazy(() => import("@/modules/comms/StationPages").then((m) => ({ default: m.AssignPage })));
 const ResponseReportPage = lazy(() => import("@/modules/comms/StationPages").then((m) => ({ default: m.ResponseReportPage })));
+const VitalsPage = lazy(() => import("@/modules/opd/VitalsPage"));
 const FeedbackAdminPage = lazy(() => import("@/modules/comms/FeedbackPages"));
 const fin = (n: string) => lazy(() => import("@/modules/finance/FinancePages").then((m) => ({ default: (m as unknown as Record<string, React.ComponentType>)[n] })));
 const WelfarePage = fin("WelfarePage");
@@ -176,6 +177,7 @@ export default function App() {
         <Route path="/cash/reports" element={g("/cash/reports", <CashReportsPage />)} />
         <Route path="/doctor-share" element={g("/doctor-share", <DoctorSharePage />)} />
         <Route path="/my-share" element={g("/my-share", <MySharePage />)} />
+        <Route path="/opd/vitals" element={g("/opd/vitals", <VitalsPage />)} />
         <Route path="/ns" element={g("/ns", <StationListPage />)} />
         <Route path="/ns/:station" element={g("/ns/:station", <NursingStationPage />)} />
         <Route path="/pc-assign" element={g("/pc-assign", <AssignPage />)} />

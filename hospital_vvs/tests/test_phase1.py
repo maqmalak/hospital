@@ -147,7 +147,9 @@ class TestOPD(IntegrationTestCase):
 		self.assertEqual(si.items[0].income_account, "OPD Income - VVSH")
 		self.assertEqual(si.branch, "Lahore Main")
 		self.assertTrue(slip.token_no >= 1)
-		self.assertEqual(frappe.db.get_value("Queue Entry", slip.queue_entry, "status"), "Waiting")
+		# no vitals at the counter → the nurse takes them first (D-52); with vitals it would be Waiting
+		self.assertEqual(frappe.db.get_value("Queue Entry", slip.queue_entry, "status"),
+			"Vitals" if frappe.db.get_single_value("Clinic Settings", "opd_nurse_vitals") else "Waiting")
 		gl = frappe.db.sql("select sum(debit)-sum(credit) from `tabGL Entry` where voucher_no=%s and is_cancelled=0", si.name)[0][0]
 		self.assertAlmostEqual(flt(gl), 0)
 
