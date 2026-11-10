@@ -1,6 +1,6 @@
 # Progress
 
-Status as of **2026-11-09**. Phases from `docs/CLAUDE.md` §8.
+Status as of **2026-11-11**. Phases from `docs/CLAUDE.md` §8.
 
 | Phase | State |
 |---|---|
@@ -12,7 +12,7 @@ Status as of **2026-11-09**. Phases from `docs/CLAUDE.md` §8.
 | 4 Online Visit | **Done** (2026-11-09) — W5 green; full suite 41 green |
 | 5 | Done 2026-11-10 — patient comms + feedback (D-44) |
 | 6 | Done 2026-11-10 — doctor share (D-43), welfare, panels, claims, expenses, purchasing, finance reports (D-46) |
-| 7 | Not started |
+| 7 Hardening | Done 2026-11-11 — audit 97/98 (D-53), E2E 20 green, recurring expenses (D-54) |
 
 ## How to run
 
@@ -119,7 +119,7 @@ Billing at handover is now on (Collect payment at = Handover counter). Full jour
 ## Deferred / known gaps
 - **Staging + training sites, restore drill on staging**: need `bench new-site` (MariaDB root password) — scripts and steps in `docs/OPS.md`; decrypt-and-check drill done locally.
 - **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.
-- Playwright E2E not written yet (backend tests cover the workflows); Vitest has one unit file.
+- Playwright E2E: 20 browser tests (`frontend/e2e`, D-54) for the main workflows; IPD, online visit and pharmacy pipeline screens are covered by backend tests only. Vitest has one unit file.
 - Sentry/uptime: hooks documented, not wired (needs DSN / monitoring host).
 - Thermal label / receipt printing tested through the browser print dialog only (QZ Tray silent print untested on real printers).
 - Urdu/Arabic: navigation, actions and main clinical/billing terms translated; long help texts still English. Phase 3 screens are English-first (labels go through i18n where shared components are used).
@@ -172,3 +172,7 @@ Register → token → **nurse vitals** (`/opd/vitals`) → waiting for doctor �
 ## Phase 7 — hardening (2026-11-11) — D-53
 Live audit 97/98 (first run 36/79): 12 defects fixed — clinical endpoints and Rx print limited to clinical roles (+ reception reprint), Prescription diagnoses / tests / notes at permlevel 1, cashier POS lines without allergy alert text, role checks on bed map / slips / payer preview / receipts / duplicate search, branch argument checked on 39 endpoints, internal SQL helper no longer an API, wrong-password limit on lock screen and counter approval, display endpoint rate-limited, version history on 17 more DocTypes (Controlled Drug Register, Doctor Share Ledger, FBR Invoice …), patients shared across branches (W17), API.md regenerated. Performance targets all met (search 3–7 ms, history 20 ms, POS item add 30 ms, lab PDF 0.6 s, /hms 54 ms). Added staging anonymize and `setup.demo.seed_all`. Report: [QA-HARDENING.md](QA-HARDENING.md). Tests: 107 green (10 new, W15 + W17).
 Owner: switch on 2FA; shorter desk sessions (12 h) and stricter lockout (5 / 300 s); create `staging.hospital` for the full restore drill (needs MariaDB root); analyzer interface only if wanted.
+
+## E2E tests + recurring expenses (2026-11-11) — D-54
+Playwright drives the installed Chrome against the running site (`cd frontend && npm run e2e`; `E2E_PASSWORD=… npm run e2e` adds the real login): 20 green — W1 OPD end to end (register → token → nurse vitals → doctor → signed prescription with medicine), W15, W17, POS, lab filters, public pages, recurring expenses. Found on the way: the health check called a running scheduler stale (fixed); the first E2E runs signed 5 prescriptions without medicine on E2E test patients RX-2026-000414…418 (test bug, fixed; records left as signed diagnosis-only prescriptions).
+Recurring expenses on `/expenses` → Recurring: rent / utilities / contracts drafted automatically when due (standing bill → straight to approval). Demo: Building rent Rs 350,000 and Internet Rs 18,500 from 1 Dec. Tests: 110 green (3 new).

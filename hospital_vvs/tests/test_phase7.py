@@ -11,7 +11,8 @@ from hospital_vvs.tests.test_phase1 import demo_doctor, new_patient
 
 def signed_rx():
 	return frappe.db.sql("""select rx.name, rx.patient from `tabPrescription` rx where rx.docstatus=1 and rx.status='Signed'
-		and exists (select 1 from `tabPrescription Diagnosis` d where d.parent=rx.name) order by rx.creation desc limit 1""", as_dict=True)[0]
+		and exists (select 1 from `tabPrescription Diagnosis` d where d.parent=rx.name)
+		and exists (select 1 from `tabPrescription Medicine` m where m.parent=rx.name) order by rx.creation desc limit 1""", as_dict=True)[0]
 
 
 class Base(IntegrationTestCase):

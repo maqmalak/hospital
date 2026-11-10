@@ -37,6 +37,11 @@ def state(**kw):
 		rx, mr = subject()
 		print(json.dumps({"rx": rx, "mr": mr}))
 		return {"rx": rx, "mr": mr}
+	if what == "last_rx":
+		rx = frappe.db.get_value("Prescription", {"patient": kw["patient"], "docstatus": 1}, "name", order_by="creation desc")
+		out = {"name": rx, "meds": frappe.db.count("Prescription Medicine", {"parent": rx}) if rx else 0}
+		print(json.dumps(out))
+		return out
 	if what == "doctor":
 		d = frappe.db.get_value("Doctor", {"user": kw["user"]}, ["name", "doctor_name"], as_dict=True)
 		print(json.dumps(d))

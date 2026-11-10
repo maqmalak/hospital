@@ -30,6 +30,9 @@ Lose at most **1 hour** of data (RPO), back online within **4 hours** (RTO).
 | 2026-11-06 | 20261106_220651-hospital-database-enc.sql.gz (16 MB) | decrypt + unzip < 1 s | Patient, OPD Slip, Prescription, Appointment, Sales Invoice, GL Entry present | Pass (decrypt check only — staging site not created yet) |
 | 2026-11-11 | 20261110_180017-hospital-database-enc.sql.gz | decrypt + unzip < 1 s | tables present (hardening audit H10-1) | Pass (decrypt check only — staging site not created yet) |
 
+## Browser tests (E2E)
+`cd apps/hospital_vvs/frontend && npm run e2e` — Playwright with the installed Google Chrome against http://hospital.localhost:8011 (`E2E_BASE_URL`, `E2E_SITE`, `E2E_BENCH` to change). Sessions are created on the server; set `E2E_PASSWORD` to include the login-form test. Report: `frontend/e2e-report/`.
+
 ## Security audit
 Before every release: `bench --site hospital execute hospital_vvs.devtools.qa_hardening.run` (roles, hidden fields, public endpoints, brute force, audit trail, branch lock, performance, backups, docs) → `docs/QA-HARDENING.md`.
 Fresh demo / training data: `bench --site <site> execute hospital_vvs.setup.demo.seed_all`.

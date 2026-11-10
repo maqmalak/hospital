@@ -13,7 +13,8 @@ from hospital_vvs.utils import require_roles
 def collect():
 	now = now_datetime()
 	since = add_to_date(now, hours=-24)
-	last_job = frappe.db.sql("select max(creation) from `tabScheduled Job Log`")[0][0]
+	# frequent cron jobs keep no log rows, so read each job type's last run (QA 2026-11-11: the log made a running scheduler look stale)
+	last_job = frappe.db.sql("select max(last_execution) from `tabScheduled Job Type` where stopped=0")[0][0]
 	failed_jobs = frappe.db.count("Scheduled Job Log", {"status": "Failed", "creation": [">=", since]})
 	try:
 		from frappe.utils.background_jobs import get_queue

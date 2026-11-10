@@ -61,10 +61,16 @@ test("doctor opens the patient from the pending list, prescribes and signs", asy
   await expect(p.getByText("128/84").first()).toBeVisible();  // nurse's vitals reach the doctor
   const search = p.getByPlaceholder("Medicine — brand or generic");
   await search.fill("Panadol");
-  await expect(p.locator("button", { hasText: /Panadol/ }).first()).toBeVisible();
-  await search.press("Enter");
+  const hit = p.locator("div.absolute button", { hasText: /Panadol/ }).first();  // the search drop-down
+  await expect(hit).toBeVisible();
+  await hit.dispatchEvent("mousedown");
+  await expect(p.getByText(/Panadol/).first()).toBeVisible();
+  await expect(p.getByPlaceholder("Qty").first()).toBeVisible();  // a medicine line is on the prescription
+  await expect(p.getByPlaceholder("Qty").first()).not.toHaveValue("");  // quantity worked out (D-51)
   await p.locator("button", { hasText: /^\+ / }).first().click();  // one-click diagnosis chip
   await p.getByRole("button", { name: /Sign & print/ }).click();
   await expect(p.getByText(/Signed — this prescription can no longer be edited/)).toBeVisible();
   await expect(p.getByRole("button", { name: /^Print$/ })).toBeVisible();
+  const rx = benchJson<{ meds: number }>("last_rx", { patient: mr });
+  expect(rx.meds).toBeGreaterThan(0);  // the signed prescription really carries the medicine
 });
