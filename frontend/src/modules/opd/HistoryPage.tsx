@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { BedDouble, CalendarClock, FileText, History, Pill as PillIcon, ShieldAlert, Stethoscope } from "lucide-react";
-import { useApi } from "@/lib/api";
+import { Printer, BedDouble, CalendarClock, FileText, History, Pill as PillIcon, ShieldAlert, Stethoscope } from "lucide-react";
+import { humanizeError, useApi } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { printPrescription } from "@/lib/rxprint";
 import { hhmm } from "@/utils/dates";
 import { axisProps, Legend, TipBox, useViz } from "@/lib/viz";
 import { Empty, PageHeader, PatientPicker, Pill, Section, Tabs } from "@/components/common";
@@ -66,22 +69,25 @@ export default function HistoryPage() {
             {e.kind === "visit" ? <Section>
               <div className="flex flex-wrap items-center gap-2"><b>{e.v.posting_date}</b><span className="text-sm text-muted-foreground">{e.v.doctor_name} · {e.v.purpose} · {e.v.branch}</span><span className="ms-auto font-mono text-xs text-muted-foreground">{e.v.name}</span></div>
               {e.v.chief_complaint && <div className="mt-1 text-sm">{e.v.chief_complaint}</div>}
-              {rxByVisit(e.v.posting_date).map((r) => <RxCard key={r.name} r={r} compact />)}
+              {rxByVisit(e.v.posting_date).map((r) => <RxCard key={r.name} r={r} mr={p.name} compact />)}
             </Section> : <div className="rounded-xl border border-border bg-card p-3 text-sm"><b>{e.date}</b> · Bed {e.b.bed} ({e.b.ward}) → {e.b.to_status}</div>}
           </li>))}
       </ol> : <Empty title="No visits yet" />)}
-      {tab === "rx" && <div className="space-y-3">{data.prescriptions.map((r) => <Section key={r.name}><RxCard r={r} /></Section>)}{!data.prescriptions.length && <Empty title="No prescriptions" icon={FileText} />}</div>}
+      {tab === "rx" && <div className="space-y-3">{data.prescriptions.map((r) => <Section key={r.name}><RxCard r={r} mr={p.name} /></Section>)}{!data.prescriptions.length && <Empty title="No prescriptions" icon={FileText} />}</div>}
       {tab === "appointments" && <Section>{data.appointments.map((a) => <div key={a.name} className="flex items-center gap-3 border-b border-border/60 py-2 text-sm last:border-0"><CalendarClock className="h-4 w-4 text-muted-foreground" /><span className="flex-1">{a.appointment_date} {hhmm(a.start_time)} · {a.doctor_name}</span><Pill value={a.source_channel} /><Pill value={a.status} /></div>)}
         {!data.appointments.length && <Empty title="No appointments" />}</Section>}
     </div>
   );
 }
 
-function RxCard({ r, compact }: { r: H["prescriptions"][number]; compact?: boolean }) {
+function RxCard({ r, mr, compact }: { r: H["prescriptions"][number]; mr: string; compact?: boolean }) {
+  const { boot } = useAuth();
   return (
     <div className={compact ? "mt-2 rounded-xl bg-muted/60 p-3" : ""}>
       <div className="flex flex-wrap items-center gap-2 text-sm"><PillIcon className="h-4 w-4 text-rose-500" /><b className="font-mono text-xs">{r.name}</b><Pill value={r.status} />{r.version_no > 1 && <span className="text-xs text-orange-700">v{r.version_no} · {r.amendment_reason}</span>}
-        {!compact && <span className="text-muted-foreground">{r.prescription_date} · {r.doctor_name}</span>}{r.has_overrides ? <span className="text-xs font-semibold text-rose-600">safety override</span> : null}</div>
+        {!compact && <span className="text-muted-foreground">{r.prescription_date} · {r.doctor_name}</span>}{r.has_overrides ? <span className="text-xs font-semibold text-rose-600">safety override</span> : null}
+        <span className="ms-auto flex gap-1"><button title="Reprint" onClick={() => void printPrescription(r.name, mr, boot).catch((e) => toast.error(humanizeError(e)))} className="flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-xs font-semibold hover:bg-muted"><Printer className="h-3 w-3" />Print</button>
+          <Link to={`/pw-prescription?rx=${r.name}`} className="rounded-md border border-border px-2 py-0.5 text-xs font-semibold hover:bg-muted">Open</Link></span></div>
       {r.diagnoses.length > 0 && <div className="mt-1 text-xs text-violet-700 dark:text-violet-300">{r.diagnoses.map((d) => `${d.diagnosis_name} (${d.diagnosis})`).join(" · ")}</div>}
       <div className="mt-1 grid gap-0.5 text-sm">{r.medicines.map((m, i) => <div key={i}>• {m.item_name} <span className="text-muted-foreground">{m.dose} · {m.frequency} · {m.duration}</span>{m.override_reason && <span className="text-xs text-rose-600"> — override: {m.override_reason}</span>}</div>)}</div>
       {r.lab_tests.length > 0 && <div className="mt-1 text-xs text-sky-700 dark:text-sky-300">Tests: {r.lab_tests.map((l) => l.test_name).join(", ")}</div>}

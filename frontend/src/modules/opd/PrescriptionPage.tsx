@@ -5,13 +5,12 @@ import { AlertOctagon, AlertTriangle, Copy, FileText, Mic, MicOff, PenLine, Plus
 import toast from "react-hot-toast";
 import { useAuth } from "@/lib/auth";
 import { call, getCall, humanizeError, useApi } from "@/lib/api";
-import { printDoc } from "@/lib/print";
-import { prescriptionHtml, type RxPrint } from "@/lib/templates";
 import { Field, inputCls, PatientPicker, Pill, Section, Avatarish, type PatientHit } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
 import { rxQty } from "@/lib/rxqty";
+import { printPrescription } from "@/lib/rxprint";
 
 interface Med { qtyManual?: boolean; item: string; item_name: string; generic?: string; strength?: string; form?: string; dose: string; frequency: string; route: string; duration: string; qty: number | string; instructions: string; no_substitution: number; override_reason?: string }
 interface Alert { type: string; severity: string; message: string }
@@ -117,10 +116,7 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
     } catch (e) { toast.error(humanizeError(e), { duration: 8000 }); } finally { setBusy(false); }
   }, [ws, alerts, meds, dx, labs, notes, advice, fuDays, name, queue, ov, amendFrom, nav]);
 
-  const printRx = async (rxName: string) => {
-    const d = await getCall<Omit<RxPrint, "mr">>("hospital_vvs.api.prescription.print_data", { name: rxName });
-    await printDoc(prescriptionHtml({ ...d, mr: ws!.patient.name }, boot?.print.prescription === "A5" ? "A5" : "A4"), "a4", { agent: !!boot?.print.agent });
-  };
+  const printRx = async (rxName: string) => { try { await printPrescription(rxName, ws!.patient.name, boot); } catch (e) { toast.error(humanizeError(e)); } };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !signed) { e.preventDefault(); void save(true); } if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); void save(false); } };
@@ -159,7 +155,8 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
         <Section title="Previous prescriptions">
           {ws.previous.length ? ws.previous.map((r) => (
             <div key={r.name} className="mb-2 rounded-xl border border-border p-2 text-xs">
-              <div className="flex justify-between font-semibold"><span>{r.prescription_date}</span><span className="text-muted-foreground">{r.doctor_name}</span></div>
+              <div className="flex items-center justify-between gap-2 font-semibold"><span>{r.prescription_date}</span><span className="flex-1 truncate text-end text-muted-foreground">{r.doctor_name}</span>
+                <button title="Reprint" onClick={() => void printRx(r.name)} className="rounded-md p-1 text-sky-700 hover:bg-sky-50 dark:hover:bg-sky-500/10"><Printer className="h-3.5 w-3.5" /></button></div>
               {r.diagnoses.length > 0 && <div className="text-muted-foreground">{r.diagnoses.join(", ")}</div>}
               {r.medicines.map((m, i) => <div key={i}>• {m.item_name} {m.frequency} {m.duration}</div>)}
             </div>)) : <p className="text-sm text-muted-foreground">First visit.</p>}

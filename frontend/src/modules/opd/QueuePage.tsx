@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import { BellRing, ClipboardList, MonitorPlay, PhoneCall, SkipForward, Stethoscope } from "lucide-react";
+import { BellRing, ClipboardList, MonitorPlay, PhoneCall, Printer, SkipForward, Stethoscope } from "lucide-react";
+import toast from "react-hot-toast";
 import { useAuth } from "@/lib/auth";
-import { useAction, useApi } from "@/lib/api";
+import { humanizeError, useAction, useApi } from "@/lib/api";
+import { printPrescription } from "@/lib/rxprint";
 import { useRealtime } from "@/lib/realtime";
 import { Avatarish, Empty, PageHeader, Pill } from "@/components/common";
 import { Button } from "@/components/ui/button";
@@ -60,7 +62,7 @@ export default function QueuePage() {
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <Pill value={r.status} />{r.priority && <Pill value={r.priority} />}{r.is_follow_up ? <Pill value="Follow-up" className="bg-teal-100 text-teal-800" /> : null}
                     {r.status === "Waiting" && <span className="text-xs text-muted-foreground">{mins(r.creation)} min</span>}
-                    {r.prescription && <Pill value="Draft" className="bg-sky-100 text-sky-800" />}
+                    {r.prescription && r.status !== "Done" && <Pill value="Draft" className="bg-sky-100 text-sky-800" />}
                     <div className="ms-auto flex gap-1">
                       {r.status === "Waiting" && <>
                         <select value={r.priority ?? ""} onChange={(e) => setStatus.mutate({ name: r.name, status: r.status, priority: e.target.value })} className="h-7 rounded-md border border-border bg-transparent px-1 text-xs"><option value="">Normal</option><option>Urgent</option><option>Elderly</option><option>Disabled</option></select>
@@ -69,6 +71,7 @@ export default function QueuePage() {
                       {["Called", "In Consultation", "Waiting"].includes(r.status) && isDoctor && <Button size="xs" variant="primary" onClick={() => nav(`/pw-prescription?queue=${r.name}`)}><Stethoscope className="h-3 w-3" />Rx</Button>}
                       {r.status === "Skipped" && <Button size="xs" variant="outline" onClick={() => setStatus.mutate({ name: r.name, status: "Waiting" })}>Return</Button>}
                       {r.status === "Vitals" && <Button size="xs" variant="outline" onClick={() => nav("/opd/vitals")}>Vitals</Button>}
+                      {r.status === "Done" && r.prescription && <Button size="xs" variant="outline" title="Reprint prescription" onClick={() => void printPrescription(r.prescription!, r.patient, boot).catch((e) => toast.error(humanizeError(e)))}><Printer className="h-3 w-3" />Print Rx</Button>}
                     </div>
                   </div>
                 </div>))}
