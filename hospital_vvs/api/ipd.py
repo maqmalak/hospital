@@ -212,6 +212,9 @@ def add_vitals(data):
 	src = frappe.get_doc("Bed Allotment" if adm else "ER Visit", adm or er)
 	check_branch(src.branch)
 	keys = ("bp_systolic", "bp_diastolic", "pulse", "temperature", "spo2", "resp_rate", "rbs", "pain_score", "gcs", "intake_ml", "output_ml", "note")
+	from hospital_vvs.utils import check_vitals
+
+	check_vitals(d)  # QA 2026-11-11: pulse 900 / 150 °F were accepted on the IPD chart
 	v = frappe.get_doc({"doctype": "Vitals Chart", "bed_allotment": adm, "er_visit": er, "patient": src.patient, "branch": src.branch,
 		**{k: d.get(k) for k in keys if d.get(k) not in (None, "")}})
 	v.insert(ignore_permissions=True)

@@ -1,0 +1,512 @@
+{
+ "run_at": "2026-11-11 02:53:57.534313",
+ "total": 70,
+ "passed": 70,
+ "failed": 0,
+ "context": {
+  "adm": "ADM-2026-00019",
+  "patient": "MR-LHR-000145",
+  "bed": "ICU-I-06",
+  "token": "hFOhHUWoueD-GEBsTWDj8EKR",
+  "ins_adm": "ADM-2026-00020",
+  "ins_bed": "Private Rooms-P-06",
+  "order": "MO-2026-000027",
+  "procedure": "PROC-2026-00004",
+  "ti": "LAB-2026-00166",
+  "disc": "DA-2026-00018",
+  "final": "ACC-SINV-2026-00703",
+  "er_adm": "ADM-2026-00021"
+ },
+ "checks": [
+  {
+   "id": "I01-1",
+   "scenario": "I01 Admission desk \u2014 admit, advance, bed and bedside link",
+   "check": "admission needs a bed",
+   "result": "PASS",
+   "detail": "KeyError"
+  },
+  {
+   "id": "I01-2",
+   "scenario": "I01 Admission desk \u2014 admit, advance, bed and bedside link",
+   "check": "an occupied bed cannot be given to a second patient",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I01-3",
+   "scenario": "I01 Admission desk \u2014 admit, advance, bed and bedside link",
+   "check": "admission created and the bed is Occupied",
+   "result": "PASS",
+   "detail": "Children Ward-C-06"
+  },
+  {
+   "id": "I01-4",
+   "scenario": "I01 Admission desk \u2014 admit, advance, bed and bedside link",
+   "check": "advance Rs 10,000 taken in the receptionist's shift",
+   "result": "PASS",
+   "detail": "10000.0"
+  },
+  {
+   "id": "I01-5",
+   "scenario": "I01 Admission desk \u2014 admit, advance, bed and bedside link",
+   "check": "the same patient cannot be admitted twice",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I01-6",
+   "scenario": "I01 Admission desk \u2014 admit, advance, bed and bedside link",
+   "check": "bedside link opens the patient's room page (first name and bed only)",
+   "result": "PASS",
+   "detail": "{'first_name': 'Kashif', 'bed': 'C-06'}"
+  },
+  {
+   "id": "I01-7",
+   "scenario": "I01 Admission desk \u2014 admit, advance, bed and bedside link",
+   "check": "lab user cannot admit a patient",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I01-8",
+   "scenario": "I01 Admission desk \u2014 admit, advance, bed and bedside link",
+   "check": "pharmacy cashier cannot open the IPD chart",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I02-0",
+   "scenario": "I02 Insurance admission \u2014 pre-auth required, payer share",
+   "check": "an insurer is set up",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I02-1",
+   "scenario": "I02 Insurance admission \u2014 pre-auth required, payer share",
+   "check": "insurance admission without an approved pre-auth is refused",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I02-2",
+   "scenario": "I02 Insurance admission \u2014 pre-auth required, payer share",
+   "check": "admitted on the approved pre-auth with the insurer's coverage",
+   "result": "PASS",
+   "detail": "PA-2026-00005 100.0"
+  },
+  {
+   "id": "I03-1",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "doctor's ward round saved and signed",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I03-2",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "nurse charts vitals",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I03-3",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "impossible vitals are refused (pulse 900, temp 150 \u00b0F)",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I03-4",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "nursing note saved",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I03-5",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "a nurse cannot order medicines",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I03-6",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "BD \u00d7 3 days makes 6 doses on the MAR",
+   "result": "PASS",
+   "detail": "6"
+  },
+  {
+   "id": "I03-7",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "ward order goes to the contract pharmacy as a signed prescription",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I03-8",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "nurse charts the first dose",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I03-9",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "the same dose cannot be charted twice",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I03-10",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "a refused dose needs a reason",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I03-11",
+   "scenario": "I03 Ward work \u2014 round, vitals, notes, medicine orders, MAR",
+   "check": "MAR board lists this patient's due doses",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I04-0",
+   "scenario": "I04 Transfer \u2014 ICU, old bed to cleaning, bed segments on the bill",
+   "check": "a free ICU bed",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I04-1",
+   "scenario": "I04 Transfer \u2014 ICU, old bed to cleaning, bed segments on the bill",
+   "check": "cannot transfer into an occupied bed",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I04-2",
+   "scenario": "I04 Transfer \u2014 ICU, old bed to cleaning, bed segments on the bill",
+   "check": "old bed goes to Cleaning, ICU bed Occupied",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I04-3",
+   "scenario": "I04 Transfer \u2014 ICU, old bed to cleaning, bed segments on the bill",
+   "check": "housekeeping marks the old bed Available",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I04-4",
+   "scenario": "I04 Transfer \u2014 ICU, old bed to cleaning, bed segments on the bill",
+   "check": "a bed cannot be set Occupied without an admission",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I04-5",
+   "scenario": "I04 Transfer \u2014 ICU, old bed to cleaning, bed segments on the bill",
+   "check": "the stay keeps one segment per bed (bed days are counted at midnight per segment)",
+   "result": "PASS",
+   "detail": "[('Children Ward-C-06', '2026-11-11 02:53'), ('ICU-I-06', 'None')]"
+  },
+  {
+   "id": "I04-6",
+   "scenario": "I04 Transfer \u2014 ICU, old bed to cleaning, bed segments on the bill",
+   "check": "bed history records the move",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I05-1",
+   "scenario": "I05 Diet, procedure with consent, charges, labs",
+   "check": "diet order reaches the kitchen list",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I05-2",
+   "scenario": "I05 Diet, procedure with consent, charges, labs",
+   "check": "procedure cannot start without signed consent",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I05-3",
+   "scenario": "I05 Diet, procedure with consent, charges, labs",
+   "check": "procedure completed after consent",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I05-4a",
+   "scenario": "I05 Diet, procedure with consent, charges, labs",
+   "check": "a nurse cannot cancel a charge",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I05-4",
+   "scenario": "I05 Diet, procedure with consent, charges, labs",
+   "check": "cancelling a charge needs a reason",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I05-5",
+   "scenario": "I05 Diet, procedure with consent, charges, labs",
+   "check": "ward lab order is billed to the admission (no payment at the lab counter)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I05-6",
+   "scenario": "I05 Diet, procedure with consent, charges, labs",
+   "check": "running bill has bed, nursing, oxygen, ad-hoc, lab and diet lines",
+   "result": "PASS",
+   "detail": "['Ad-hoc', 'Bed', 'Diet', 'Lab', 'Nursing', 'Oxygen']"
+  },
+  {
+   "id": "I06-1",
+   "scenario": "I06 Money \u2014 advances, discount approval, who may take payment",
+   "check": "a nurse cannot take payment",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I06-2",
+   "scenario": "I06 Money \u2014 advances, discount approval, who may take payment",
+   "check": "second advance by JazzCash in the shift",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I06-3",
+   "scenario": "I06 Money \u2014 advances, discount approval, who may take payment",
+   "check": "a large IPD discount waits for supervisor approval",
+   "result": "PASS",
+   "detail": "{'name': 'DA-2026-00018', 'status': 'Pending', 'percent': 45.714285714285715}"
+  },
+  {
+   "id": "I06-4",
+   "scenario": "I06 Money \u2014 advances, discount approval, who may take payment",
+   "check": "the requester cannot approve their own discount",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I06-5",
+   "scenario": "I06 Money \u2014 advances, discount approval, who may take payment",
+   "check": "approved discount attached to the admission",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I07-1",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "clearance blocks: summary not signed / labs pending",
+   "result": "PASS",
+   "detail": "['summary', 'labs', 'bill', 'dues']"
+  },
+  {
+   "id": "I07-2",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "final bill is held while clearance is open",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I07-3",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "doctor signs the discharge summary",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I07-4",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "final invoice posted, GL balanced",
+   "result": "PASS",
+   "detail": "ACC-SINV-2026-00703 gl=0.0"
+  },
+  {
+   "id": "I07-5",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "discount and advances applied on the final bill",
+   "result": "PASS",
+   "detail": "disc=4000.0 out=0.0 total=4750.0"
+  },
+  {
+   "id": "I07-6",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "final bill matches the running bill (less discount)",
+   "result": "PASS",
+   "detail": "si=4750.0 running=8750.0"
+  },
+  {
+   "id": "I07-7",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "discharge waits until the extra advance (Rs 10,250) is refunded",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I07-7b",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "cannot refund more than the extra advance",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I07-7c",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "refund paid from the shift; nothing left owed either way",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I07-8",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "patient discharged, ICU bed to Cleaning",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I07-9",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "bedside link stops working after discharge",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I07-10",
+   "scenario": "I07 Discharge \u2014 clearance, summary, final bill, settlement, bed and bedside link",
+   "check": "discharge summary print data ready (diagnosis, medicines, follow-up)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I08-1",
+   "scenario": "I08 Insurance discharge \u2014 patient and insurer invoices",
+   "check": "bill split into patient share and insurer invoice (no empty patient invoice when fully covered)",
+   "result": "PASS",
+   "detail": "patient=0 insurer=82900.0 net=82900.0"
+  },
+  {
+   "id": "I08-2",
+   "scenario": "I08 Insurance discharge \u2014 patient and insurer invoices",
+   "check": "insurer invoice is on the insurer's account",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I08-2b",
+   "scenario": "I08 Insurance discharge \u2014 patient and insurer invoices",
+   "check": "patient owes nothing on a fully covered stay",
+   "result": "PASS",
+   "detail": "0.0"
+  },
+  {
+   "id": "I08-3",
+   "scenario": "I08 Insurance discharge \u2014 patient and insurer invoices",
+   "check": "insurance patient discharged",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I09-1",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "board puts Red above Yellow above Green",
+   "result": "PASS",
+   "detail": "['ER-2026-00005', 'ER-2026-00004', 'ER-2026-00006']"
+  },
+  {
+   "id": "I09-2",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "unknown patient gets a temporary MR",
+   "result": "PASS",
+   "detail": "TMP-LHR-000002"
+  },
+  {
+   "id": "I09-3",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "an Expired disposition needs time and cause of death",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I09-3b",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "impossible triage vitals are refused",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I09-4",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "LAMA needs the signed LAMA form",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "I09-5",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "discharged from ER with the ER fee billed",
+   "result": "PASS",
+   "detail": "{'name': 'ER-2026-00004', 'bed_allotment': None, 'sales_invoice': 'ACC-SINV-2026-00705'}"
+  },
+  {
+   "id": "I09-6",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "admitted from ER: admission carries the ER charges",
+   "result": "PASS",
+   "detail": "{'name': 'ER-2026-00005', 'bed_allotment': 'ADM-2026-00021', 'sales_invoice': None}"
+  },
+  {
+   "id": "I09-7",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "referral recorded with the receiving hospital",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I09-8",
+   "scenario": "I09 Emergency \u2014 register, triage, treat, dispose (home, admit, LAMA, referral)",
+   "check": "identified patient: temporary record merged into the real one",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I10-1",
+   "scenario": "I10 Reports and access",
+   "check": "IPD report counts today's discharges",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "I10-2",
+   "scenario": "I10 Reports and access",
+   "check": "a nurse cannot make a final bill",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I10-3",
+   "scenario": "I10 Reports and access",
+   "check": "pharmacy cashier cannot see the bed map",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "I10-4",
+   "scenario": "I10 Reports and access",
+   "check": "every open admission has an occupied bed on the map",
+   "result": "PASS",
+   "detail": "occupied=19 admissions=16"
+  }
+ ]
+}

@@ -375,6 +375,8 @@ def running_bill(adm_name=None, er_visit=None, until=None):
 	patient_share = after - payer_share
 	rows, adv, settled, refunded = payments(adm.name if adm else None, er_visit)
 	inv = adm.final_invoice if adm else frappe.db.get_value("ER Visit", er_visit, "sales_invoice")
+	if adm and inv and inv == adm.get("payer_invoice"):
+		inv = None  # fully covered: the only invoice is the payer's, the patient's share is 0 (advances become a refund)
 	if inv:
 		si = frappe.db.get_value("Sales Invoice", inv, ["grand_total", "rounded_total", "outstanding_amount"], as_dict=True)
 		patient_share = flt(si.rounded_total or si.grand_total)
@@ -389,7 +391,7 @@ def running_bill(adm_name=None, er_visit=None, until=None):
 		by_type[ln["charge_type"]] = by_type.get(ln["charge_type"], 0) + ln["amount"] - ln["covered_amount"]
 	return {"lines": lines, "gross": gross, "package_covered": covered, "net": net, "discount": discount, "payer_share": payer_share,
 		"patient_share": patient_share, "advances": adv, "settled": settled, "refunded": refunded, "balance": max(balance, 0), "credit": credit,
-		"payments": rows, "by_type": by_type, "until": str(until), "final_invoice": inv,
+		"payments": rows, "by_type": by_type, "until": str(until), "final_invoice": adm.final_invoice if adm else inv,
 		"payer_type": adm.payer_type if adm else "Patient", "payer": adm.payer if adm else None}
 
 
@@ -803,6 +805,8 @@ def clearance(adm_name):
 			"items": [f"{r.name}: {frappe.format_value(r.grand_total, 'Currency')}" for r in unpaid_rx], "info": True},
 		{"key": "dues", "label": _("Patient dues cleared"), "ok": bool(adm.final_invoice) and (bill["balance"] <= 0.5 or expired),
 			"amount": bill["balance"]},
+		# QA 2026-11-11: advances above the bill must go back to the patient (or family) before the bed is released
+		{"key": "refund", "label": _("Extra advance refunded"), "ok": not adm.final_invoice or bill["credit"] <= 0.5, "amount": bill["credit"]},
 	]
 	return {"checks": checks, "hold": cint(setting("discharge_clearance_hold")), "bill": bill,
 		"ready_for_bill": all(c["ok"] for c in checks if c["key"] in ("summary", "labs", "mar", "procedures")),
@@ -908,7 +912,9 @@ def make_final_bill(adm_name, discount_amount=0, discount_authorization=None, ov
 		si.set("advances", [a for a in si.advances if flt(a.allocated_amount) > 0])
 		si.calculate_taxes_and_totals()
 
-	inv = billing.create_invoice(customer=customer, patient=adm.patient, lines=billing.split_lines(lines, fraction) if bill["payer_share"] else lines,
+	# QA 2026-11-11: an insurer / panel covering 100 % leaves no patient invoice (an empty one crashed ERPNext's totals)
+	fully_covered = bool(bill["payer_share"]) and flt(bill["patient_share"]) <= 0.004
+	inv = None if fully_covered else billing.create_invoice(customer=customer, patient=adm.patient, lines=billing.split_lines(lines, fraction) if bill["payer_share"] else lines,
 		billing_type="IPD Slip", branch=adm.branch, reference_doctype="Bed Allotment", reference_name=adm.name,
 		discount_amount=flt(bill["discount"]) * fraction, pos=False, remarks=_("Final bill · admission {0}").format(adm.name), prepare=allocate)
 	payer_inv = None
@@ -916,6 +922,7 @@ def make_final_bill(adm_name, discount_amount=0, discount_authorization=None, ov
 		payer_inv = billing.create_invoice(customer=adm.payer, patient=adm.patient, lines=billing.split_lines(lines, 1 - fraction), billing_type="IPD Slip",
 			branch=adm.branch, reference_doctype="Bed Allotment", reference_name=adm.name, pos=False, payer=True, payer_share_of=inv,
 			discount_amount=flt(bill["discount"]) * (1 - fraction), remarks=_("{0} share · admission {1}").format(adm.payer_type, adm.name))
+	inv = inv or payer_inv
 	frappe.db.sql("update `tabIPD Charge` set status='Billed', sales_invoice=%s where bed_allotment=%s and status='Open'", (inv, adm.name))
 	adm.db_set({"final_invoice": inv, "payer_invoice": payer_inv, "status": "Discharge Pending", "charges_total": bill["gross"]})
 	if discount_authorization:
@@ -930,7 +937,7 @@ def cancel_final_bill(adm_name, reason):
 		frappe.throw(_("There is no final bill."))
 	if not (reason or "").strip():
 		frappe.throw(_("Enter the reason."))
-	for inv in (adm.payer_invoice, adm.final_invoice):
+	for inv in dict.fromkeys(x for x in (adm.payer_invoice, adm.final_invoice) if x):  # the same invoice when the payer covers everything
 		if inv:
 			si = frappe.get_doc("Sales Invoice", inv)
 			if frappe.db.exists("Payment Entry Reference", {"reference_name": inv, "docstatus": 1, "parenttype": "Payment Entry"}):
@@ -995,6 +1002,8 @@ def take_payment(amount, payment_mode="Cash", purpose="Advance", adm=None, er_vi
 	customer = frappe.db.get_value("Patient", src.patient, "customer")
 	account = get_bank_cash_account(payment_mode, company).get("account")
 	invoice = reference or (src.final_invoice if adm else src.sales_invoice)
+	if adm and invoice and invoice == src.get("payer_invoice"):
+		invoice = None  # fully covered stay: the patient never pays into the insurer's invoice
 	if purpose == "Refund":
 		bill = running_bill(adm, er_visit)
 		if amount > bill["credit"] + 0.5:

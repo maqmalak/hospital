@@ -276,7 +276,10 @@ def merge(survivor, duplicate, confirm_mr):
 			moved[f"{dt}.{f}"] = len(names)
 	# Customer: move the duplicate's ledger to the survivor's customer (rename with merge)
 	if d.customer and s.customer and d.customer != s.customer and frappe.db.exists("Customer", d.customer):
-		frappe.rename_doc("Customer", d.customer, s.customer, merge=True, force=True, show_alert=False)
+		# PW Admin is checked above; the clinic admin role has no Customer write in ERPNext (QA 2026-11-11: ER identify failed)
+		from frappe.model.rename_doc import rename_doc
+
+		rename_doc("Customer", d.customer, s.customer, merge=True, force=True, show_alert=False, ignore_permissions=True)
 		moved["Customer"] = d.customer
 	elif d.customer and not s.customer:
 		s.db_set("customer", d.customer)

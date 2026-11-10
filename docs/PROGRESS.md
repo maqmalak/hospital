@@ -179,3 +179,6 @@ Recurring expenses on `/expenses` → Recurring: rent / utilities / contracts dr
 
 ## Urdu on every screen (2026-11-11) — D-55
 All screens in Urdu (RTL), including IPD / ER, pharmacy, finance and the public pages: a build-time step translates literal text, labels, placeholders, list values, statuses and template parts from one dictionary (2,301 entries checked by `npm run i18n:check`, strict in CI). Names, medicines, numbers and units stay as entered. E2E: 23 green (3 new Urdu / English cases).
+
+## IPD & ER audit (2026-11-11) — D-56
+70/70 live checks (admission desk, insurance pre-auth, rounds, vitals, MAR, transfer, diet, procedure + consent, charges, labs, advances, discount approval, discharge clearance, final bill, refund, insurer split, ER triage → disposition → admit / refer / identify, reports, access). Fixed: impossible vitals accepted, discharge without refunding the extra advance, final bill crash on 100 % insurer cover, ER identify failing for the admin. Report: [QA-IPD.md](QA-IPD.md). Tests: 114 green (4 new).

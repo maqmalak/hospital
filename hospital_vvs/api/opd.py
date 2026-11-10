@@ -239,10 +239,9 @@ def record_vitals(queue_entry, vitals, priority=None, chief_complaint=None):
 		frappe.throw(_("Token {0} is already {1}.").format(q.token_no, q.status))
 	if not any(flt(v.get(k)) for k in ("bp_systolic", "pulse", "temperature", "spo2", "weight")):
 		frappe.throw(_("Enter at least BP, pulse, temperature, SpO2 or weight."))
-	checks = {"bp_systolic": (50, 260), "bp_diastolic": (30, 160), "pulse": (25, 220), "temperature": (90, 110), "spo2": (50, 100), "weight": (0.5, 300), "height": (30, 230), "rbs": (20, 700)}
-	for k, (lo, hi) in checks.items():
-		if v.get(k) not in (None, "") and not lo <= flt(v[k]) <= hi:
-			frappe.throw(_("{0} {1} looks wrong — check the reading.").format(k.replace("_", " ").title(), v[k]))
+	from hospital_vvs.utils import check_vitals
+
+	check_vitals(v)
 	if q.opd_slip:
 		upd = {k: flt(v[k]) for k in VITALS if v.get(k) not in (None, "")}
 		w, h = flt(v.get("weight")), flt(v.get("height"))

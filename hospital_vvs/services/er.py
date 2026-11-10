@@ -52,6 +52,9 @@ def register(*, patient=None, unknown=None, branch=None, arrival_mode="Walk-in",
 
 def triage(name, level, vitals=None, chief_complaint=None):
 	er = _open(name)
+	from hospital_vvs.utils import check_vitals
+
+	check_vitals(vitals)
 	scale_name, levels = scale()
 	hit = next((lv for lv in levels if lv[0] == level), None)
 	if not hit:

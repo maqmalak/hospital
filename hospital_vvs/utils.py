@@ -156,3 +156,15 @@ def no_store(response=None, request=None):
 	if response is not None and any(path.endswith(m) for m in TOKEN_METHODS):
 		response.headers["Cache-Control"] = "no-store, max-age=0"
 		response.headers["Pragma"] = "no-cache"
+
+
+# ------------------------------------------------------------------ vitals sanity (OPD nurse, IPD chart, ER triage)
+VITAL_RANGES = {"bp_systolic": (50, 260), "bp_diastolic": (30, 160), "pulse": (25, 220), "temperature": (90, 110), "spo2": (50, 100), "weight": (0.5, 300),
+	"height": (30, 230), "rbs": (20, 700), "resp_rate": (4, 70), "gcs": (3, 15), "pain_score": (0, 10)}
+
+
+def check_vitals(v):
+	"""Refuse readings that cannot be real (typing slips such as pulse 900 or temperature 150 °F)."""
+	for k, (lo, hi) in VITAL_RANGES.items():
+		if (v or {}).get(k) not in (None, "") and not lo <= frappe.utils.flt(v[k]) <= hi:
+			frappe.throw(_("{0} {1} looks wrong — check the reading.").format(k.replace("_", " ").title(), v[k]))

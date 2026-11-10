@@ -67,6 +67,10 @@ def _seg(bed, start, end=None, rate=1000, icu=0, ward="W"):
 def free_bed(ward_type="General", exclude=()):
 	wards = frappe.get_all("Ward", filters={"branch": "Lahore Main", "ward_type": ward_type}, pluck="name")
 	beds = frappe.get_all("Hospital Bed", filters={"ward": ["in", wards], "status": "Available", "name": ["not in", list(exclude) or [""]]}, pluck="name")
+	if not beds:  # live demo data may have every bed of this type taken or being cleaned: free a cleaned one inside the test transaction
+		beds = frappe.get_all("Hospital Bed", filters={"ward": ["in", wards], "status": "Cleaning", "name": ["not in", list(exclude) or [""]]}, pluck="name")
+		for b in beds[:1]:
+			frappe.db.set_value("Hospital Bed", b, {"status": "Available", "current_patient": None})
 	if not beds:
 		frappe.throw(f"no free {ward_type} bed for tests")
 	return beds[0]
