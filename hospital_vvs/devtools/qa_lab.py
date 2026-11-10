@@ -603,7 +603,7 @@ def s16():
 	from hospital_vvs.api import lab as api
 
 	p = patients(13)[12]
-	ref = f"QA-{random.randint(10000, 99999)}"
+	ref = f"QA-{frappe.generate_hash(length=10)}"  # unique per run (the runner seeds random)
 	a = order(RECEPTION, p.name, ["Urine R/E"], client_ref=ref)
 	b = order(RECEPTION, p.name, ["Urine R/E"], client_ref=ref)
 	check("S16-1", "same client reference does not create a second order (double click / offline retry)", a["name"] == b["name"])
@@ -611,11 +611,12 @@ def s16():
 	as_user(PATH)
 	old = frappe.db.get_value("Lab Test Template", "Urine R/E", "price")
 	api.save_template(json.dumps({"name": "Urine R/E", "price": flt(old) + 50}))
-	c = order(RECEPTION, patients(14)[13].name, ["Urine R/E"])
+	other = next(x for x in patients(30)[13:] if x.name != p.name)  # a different patient (ordering re-sorts the list)
+	c = order(RECEPTION, other.name, ["Urine R/E"])
 	check("S16-2", "new price applies to new orders; existing order keeps its price", flt(c["net_total"]) == flt(old) + 50 and flt(frappe.db.get_value("Test Invoice", a["name"], "net_total")) == flt(old))
 	as_user(PATH)
 	api.save_template(json.dumps({"name": "Urine R/E", "price": old}))  # restore
-	for x in (a["name"], c["name"]):
+	for x in dict.fromkeys((a["name"], c["name"])):
 		pay(RECEPTION, x)
 		collect_receive(x)
 		enter(items(x)[0].name, "Urine R/E", "Male", abnormal={"Pus cells": "18", "Protein": "+"})

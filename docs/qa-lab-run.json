@@ -1,26 +1,26 @@
 {
- "run_at": "2026-11-10 17:22:50.059245",
+ "run_at": "2026-11-11 01:27:40.559761",
  "orders": [
-  "LAB-2026-00042",
-  "LAB-2026-00043",
-  "LAB-2026-00044",
-  "LAB-2026-00045",
-  "LAB-2026-00046",
-  "LAB-2026-00047",
-  "LAB-2026-00048",
-  "LAB-2026-00049",
-  "LAB-2026-00050",
-  "LAB-2026-00051",
-  "LAB-2026-00052",
-  "LAB-2026-00053",
-  "LAB-2026-00054",
-  "LAB-2026-00055",
-  "LAB-2026-00056",
-  "LAB-2026-00057",
-  "LAB-2026-00058",
-  "LAB-2026-00059",
-  "LAB-2026-00060",
-  "LAB-2026-00061"
+  "LAB-2026-00143",
+  "LAB-2026-00144",
+  "LAB-2026-00145",
+  "LAB-2026-00146",
+  "LAB-2026-00147",
+  "LAB-2026-00148",
+  "LAB-2026-00149",
+  "LAB-2026-00150",
+  "LAB-2026-00151",
+  "LAB-2026-00152",
+  "LAB-2026-00153",
+  "LAB-2026-00154",
+  "LAB-2026-00155",
+  "LAB-2026-00156",
+  "LAB-2026-00157",
+  "LAB-2026-00158",
+  "LAB-2026-00159",
+  "LAB-2026-00160",
+  "LAB-2026-00161",
+  "LAB-2026-00162"
  ],
  "checks": [
   {
@@ -35,7 +35,7 @@
    "scenario": "S01 Routine order → report (CBC + LFT, cash)",
    "check": "payment: POS invoice submitted in the collector's shift, status Paid, expected time set",
    "result": "PASS",
-   "detail": "Paid ACC-SINV-2026-00440"
+   "detail": "Paid ACC-SINV-2026-00657"
   },
   {
    "id": "S01-3",
@@ -49,7 +49,7 @@
    "scenario": "S01 Routine order → report (CBC + LFT, cash)",
    "check": "one sample per sample type / container (EDTA for CBC, serum for LFT)",
    "result": "PASS",
-   "detail": "['S2611100021', 'S2611100022']"
+   "detail": "['S2611110078', 'S2611110079']"
   },
   {
    "id": "S01-5",
@@ -161,7 +161,7 @@
    "scenario": "S02 Urgent order with a critical value",
    "check": "urgent sample listed before routine ones",
    "result": "PASS",
-   "detail": "{'LAB-2026-00044': 0, 'LAB-2026-00001': 2, 'LAB-2026-00038': 3, 'LAB-2026-00043': 4}"
+   "detail": "{'LAB-2026-00145': 0, 'LAB-2026-00001': 1, 'LAB-2026-00038': 2, 'LAB-2026-00144': 3}"
   },
   {
    "id": "S02-2",
@@ -336,7 +336,7 @@
    "scenario": "S08 Outsourced test with a scanned report",
    "check": "dispatch creates the outsourced batch and a purchase bill to the reference lab",
    "result": "PASS",
-   "detail": "OD-2026-0010"
+   "detail": "OD-2026-0014"
   },
   {
    "id": "S08-2",
@@ -385,7 +385,7 @@
    "scenario": "S10 Discounts within and above the limit",
    "check": "small discount within the receptionist's limit is approved at once",
    "result": "PASS",
-   "detail": "{'name': 'DA-2026-00003', 'status': 'Within Limit'}"
+   "detail": "{'name': 'DA-2026-00013', 'status': 'Within Limit'}"
   },
   {
    "id": "S10-2",
@@ -399,7 +399,7 @@
    "scenario": "S10 Discounts within and above the limit",
    "check": "large discount waits for a supervisor",
    "result": "PASS",
-   "detail": "{'name': 'DA-2026-00004', 'status': 'Pending'}"
+   "detail": "{'name': 'DA-2026-00014', 'status': 'Pending'}"
   },
   {
    "id": "S10-4",
@@ -427,7 +427,7 @@
    "scenario": "S11 Doctor's prescription orders the tests",
    "check": "signing the prescription creates the lab order for reception",
    "result": "PASS",
-   "detail": "RX-2026-000364"
+   "detail": "RX-2026-000413"
   },
   {
    "id": "S11-2",
@@ -525,7 +525,7 @@
    "scenario": "S15 Previous results and TAT",
    "check": "expected report time falls inside lab hours",
    "result": "PASS",
-   "detail": "2026-11-10 21:22:47.149301"
+   "detail": "2026-11-11 13:27:38.602132"
   },
   {
    "id": "S16-1",
@@ -553,7 +553,7 @@
    "scenario": "S17 Priority tags and date filters",
    "check": "collection queue: Urgent, then Priority, then Normal",
    "result": "PASS",
-   "detail": "['LAB-2026-00060', 'LAB-2026-00059', 'LAB-2026-00058']"
+   "detail": "['LAB-2026-00161', 'LAB-2026-00160', 'LAB-2026-00159']"
   },
   {
    "id": "S17-3",

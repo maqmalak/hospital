@@ -1,6 +1,370 @@
 {
- "run_at": "2026-11-10 18:20:41.581147",
+ "run_at": "2026-11-11 01:24:51.315633",
  "checks": [
+  {
+   "id": "O01-3",
+   "scenario": "O01 Cashier shift before money",
+   "check": "shift open at Reception 2 with the opening float",
+   "result": "PASS",
+   "detail": "Reception 2"
+  },
+  {
+   "id": "O01-4",
+   "scenario": "O01 Cashier shift before money",
+   "check": "receptionist cannot open a second shift",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "O01-5",
+   "scenario": "O01 Cashier shift before money",
+   "check": "reception@ has an open shift at Reception 1",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O02-1",
+   "scenario": "O02 Register a new patient",
+   "check": "name and gender are required",
+   "result": "PASS",
+   "detail": "MandatoryError"
+  },
+  {
+   "id": "O02-2",
+   "scenario": "O02 Register a new patient",
+   "check": "MR number given in the branch series (MR-LHR-…)",
+   "result": "PASS",
+   "detail": "MR-LHR-000119"
+  },
+  {
+   "id": "O02-3",
+   "scenario": "O02 Register a new patient",
+   "check": "phone stored in +92 format",
+   "result": "PASS",
+   "detail": "+923002821088"
+  },
+  {
+   "id": "O02-4",
+   "scenario": "O02 Register a new patient",
+   "check": "CNIC kept masked and hashed, never in clear",
+   "result": "PASS",
+   "detail": "*****-*******-1"
+  },
+  {
+   "id": "O02-5",
+   "scenario": "O02 Register a new patient",
+   "check": "customer created for billing",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O02-6",
+   "scenario": "O02 Register a new patient",
+   "check": "age converted to an estimated date of birth",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O02-7",
+   "scenario": "O02 Register a new patient",
+   "check": "same name + phone again is caught as a possible duplicate",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "O02-8",
+   "scenario": "O02 Register a new patient",
+   "check": "a genuine namesake can be registered with a reason",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O02-9",
+   "scenario": "O02 Register a new patient",
+   "check": "duplicate finder lists the existing record",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O03-MR",
+   "scenario": "O03 Find an existing patient",
+   "check": "search by MR finds the patient",
+   "result": "PASS",
+   "detail": "1"
+  },
+  {
+   "id": "O03-phone",
+   "scenario": "O03 Find an existing patient",
+   "check": "search by phone finds the patient",
+   "result": "PASS",
+   "detail": "2"
+  },
+  {
+   "id": "O03-name",
+   "scenario": "O03 Find an existing patient",
+   "check": "search by name finds the patient",
+   "result": "PASS",
+   "detail": "2"
+  },
+  {
+   "id": "O03-CNIC",
+   "scenario": "O03 Find an existing patient",
+   "check": "search by CNIC finds the patient",
+   "result": "PASS",
+   "detail": "1"
+  },
+  {
+   "id": "O03-5",
+   "scenario": "O03 Find an existing patient",
+   "check": "patient file opens with history",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O04-1",
+   "scenario": "O04 OPD slip and token",
+   "check": "consultation fee = the doctor's fee (Rs 1,500)",
+   "result": "PASS",
+   "detail": "1500.0"
+  },
+  {
+   "id": "O04-2",
+   "scenario": "O04 OPD slip and token",
+   "check": "change worked out from cash tendered (Rs 500)",
+   "result": "PASS",
+   "detail": "500.0"
+  },
+  {
+   "id": "O04-3",
+   "scenario": "O04 OPD slip and token",
+   "check": "invoice submitted in the receptionist's shift",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O04-4",
+   "scenario": "O04 OPD slip and token",
+   "check": "next token for this doctor today",
+   "result": "PASS",
+   "detail": "7 after 6"
+  },
+  {
+   "id": "O04-5",
+   "scenario": "O04 OPD slip and token",
+   "check": "queue entry Waiting for Dr. Ayesha in her room",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O04-6",
+   "scenario": "O04 OPD slip and token",
+   "check": "slip print carries token, room, doctor and amount",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O04-7",
+   "scenario": "O04 OPD slip and token",
+   "check": "vitals saved on the slip",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O04-8",
+   "scenario": "O04 OPD slip and token",
+   "check": "a doctor cannot issue OPD slips (counter only)",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "O05-1",
+   "scenario": "O05 Follow-up visit fee",
+   "check": "second visit within 7 days is a free follow-up",
+   "result": "PASS",
+   "detail": "0.0"
+  },
+  {
+   "id": "O05-2",
+   "scenario": "O05 Follow-up visit fee",
+   "check": "free follow-up still gets a token (no invoice)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O06-1",
+   "scenario": "O06 Physician queue",
+   "check": "waiting list: Urgent first, then Elderly, then by token",
+   "result": "PASS",
+   "detail": "['Urgent', 'Urgent', 'Elderly', '', '']"
+  },
+  {
+   "id": "O06-2",
+   "scenario": "O06 Physician queue",
+   "check": "Call next calls an urgent patient first (oldest urgent token)",
+   "result": "PASS",
+   "detail": "Urgent"
+  },
+  {
+   "id": "O06-3",
+   "scenario": "O06 Physician queue",
+   "check": "waiting-room display shows the called token and room",
+   "result": "PASS",
+   "detail": "['branch', 'doctors', 'clinic', 'clinic_ur']"
+  },
+  {
+   "id": "O06-4",
+   "scenario": "O06 Physician queue",
+   "check": "a skipped patient can be put back in the queue",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O06-5",
+   "scenario": "O06 Physician queue",
+   "check": "unknown queue status refused",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "O07-1",
+   "scenario": "O07 Prescription",
+   "check": "workspace opens the queued patient with today's vitals",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O07-2",
+   "scenario": "O07 Prescription",
+   "check": "saving the draft moves the patient to In Consultation",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O07-3",
+   "scenario": "O07 Prescription",
+   "check": "Panadol 1+1+1 × 5 days → quantity 15 calculated",
+   "result": "PASS",
+   "detail": "15.0"
+  },
+  {
+   "id": "O07-4",
+   "scenario": "O07 Prescription",
+   "check": "Amoxil 1+0+1 × 7 days → quantity 14 calculated",
+   "result": "PASS",
+   "detail": "14.0"
+  },
+  {
+   "id": "O07-5",
+   "scenario": "O07 Prescription",
+   "check": "signing marks the queue entry Done",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O07-6",
+   "scenario": "O07 Prescription",
+   "check": "follow-up date set from 7 days",
+   "result": "PASS",
+   "detail": "2026-11-18"
+  },
+  {
+   "id": "O07-7",
+   "scenario": "O07 Prescription",
+   "check": "pharmacy gets a draft medicine bill",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O07-8",
+   "scenario": "O07 Prescription",
+   "check": "pharmacy draft carries the full course (15 Panadol), not 1",
+   "result": "PASS",
+   "detail": "{'PANADOL-500MG': 15.0, 'AMOXIL-500MG': 14.0, 'CALPOL-SYRUP-120MG-5ML': 1.0}"
+  },
+  {
+   "id": "O07-8b",
+   "scenario": "O07 Prescription",
+   "check": "syrup 5 ml × 3 × 5 days = 75 ml → 1 bottle",
+   "result": "PASS",
+   "detail": "1.0"
+  },
+  {
+   "id": "O07-9",
+   "scenario": "O07 Prescription",
+   "check": "lab order created from the prescription",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O07-10",
+   "scenario": "O07 Prescription",
+   "check": "a signed prescription cannot be edited (amend instead)",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "O07-11",
+   "scenario": "O07 Prescription",
+   "check": "prescription print data ready (doctor, medicines, advice)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O08-1",
+   "scenario": "O08 Safety alerts",
+   "check": "penicillin allergy raises a blocking alert for Amoxil",
+   "result": "PASS",
+   "detail": "[{'alerts': [{'type': 'Allergy', 'severity': 'Allergy', 'message': 'Patient is allergic to Penicillin (drug class Penicillins).'}], 'blocking': True}]"
+  },
+  {
+   "id": "O08-2",
+   "scenario": "O08 Safety alerts",
+   "check": "cannot sign without an override reason",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "O08-3",
+   "scenario": "O08 Safety alerts",
+   "check": "signed with the override reason recorded",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "O09-1",
+   "scenario": "O09 Amendment and roles",
+   "check": "receptionist cannot write prescriptions",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "O09-2",
+   "scenario": "O09 Amendment and roles",
+   "check": "amendment needs a reason",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "O09-3",
+   "scenario": "O09 Amendment and roles",
+   "check": "amendment opens a new draft linked to the original",
+   "result": "PASS",
+   "detail": "RX-2026-000408"
+  },
+  {
+   "id": "O10-1",
+   "scenario": "O10 Doctor's pending list",
+   "check": "doctor sees today's pending patients with tokens",
+   "result": "PASS",
+   "detail": "4"
+  },
+  {
+   "id": "O10-2",
+   "scenario": "O10 Doctor's pending list",
+   "check": "each pending row links to its draft prescription if one exists",
+   "result": "PASS",
+   "detail": ""
+  },
   {
    "id": "O11-1",
    "scenario": "O11 Nurse vitals stage",

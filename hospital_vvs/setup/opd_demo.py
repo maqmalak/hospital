@@ -38,22 +38,48 @@ def _as(u):
 	frappe.set_user(u)
 
 
+def _close_at_expected(user, note="Demo: end of day"):
+	"""Close the user's open shift with the drawer exactly as expected (demo only — real staff count blind)."""
+	from hospital_vvs.services import shifts
+
+	_as(user)
+	cur = shifts.current_shift()
+	if not cur:
+		return None
+	s = shifts.summary(cur.name)
+	cash = int(round(next((m["expected"] for m in s["modes"] if m["mode_of_payment"] == "Cash"), 0)))
+	notes = {}
+	for dn in (5000, 1000, 500, 100, 50, 20, 10, 5, 2, 1):
+		if cash >= dn:
+			notes[str(dn)], cash = cash // dn, cash % dn
+	shifts.close_shift(notes, {m["mode_of_payment"]: m["expected"] for m in s["modes"] if m["mode_of_payment"] != "Cash"}, note)
+	return cur.name
+
+
+def close_stale_shifts():
+	"""Every shift still open from an earlier day (any counter) — a new day cannot start on it."""
+	closed = []
+	for r in frappe.get_all("POS Opening Entry", filters={"status": "Open", "docstatus": 1, "posting_date": ["<", today()]}, fields=["name", "user"]):
+		try:
+			_close_at_expected(r.user)
+			frappe.db.commit()
+			closed.append(f"{r.name} ({r.user})")
+		except Exception as e:
+			frappe.db.rollback()
+			print(f"could not close {r.name} ({r.user}): {e}")
+	_as("Administrator")
+	print("closed:", ", ".join(closed) or "none")
+	return closed
+
+
 def _shifts():
 	from hospital_vvs.services import shifts
 
+	close_stale_shifts()
 	for user, counter in ((REC, "Reception 1"), (REC2, "Reception 2")):
 		_as(user)
-		cur = shifts.current_shift()
-		if cur and str(cur.posting_date) == today():
+		if shifts.current_shift():
 			continue
-		if cur:  # yesterday's shift: close it at the expected amounts (demo only) so today can start
-			s = shifts.summary(cur.name)
-			cash = int(round(next((m["expected"] for m in s["modes"] if m["mode_of_payment"] == "Cash"), 0)))
-			notes = {}
-			for dn in (5000, 1000, 500, 100, 50, 20, 10, 5, 2, 1):
-				if cash >= dn:
-					notes[str(dn)], cash = cash // dn, cash % dn
-			shifts.close_shift(notes, {m["mode_of_payment"]: m["expected"] for m in s["modes"] if m["mode_of_payment"] != "Cash"}, "Demo: end of day")
 		c = frappe.get_doc("Counter", counter)
 		if not (c.open_shift and frappe.db.get_value("POS Opening Entry", c.open_shift, "status") == "Open"):
 			shifts.open_shift(counter, {"Cash": 5000})
