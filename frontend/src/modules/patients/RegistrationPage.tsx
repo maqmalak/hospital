@@ -96,14 +96,15 @@ export default function RegistrationPage() {
   return (
     <div className="mx-auto max-w-[1400px]">
       {/* hero */}
-      <div className="relative mb-5 overflow-hidden rounded-3xl bg-[#06232a] p-5 text-white shadow-lg sm:p-6">
-        <div className="absolute inset-0 bg-[radial-gradient(700px_300px_at_0%_0%,rgba(20,184,166,0.6),transparent_60%),radial-gradient(600px_300px_at_100%_100%,rgba(16,185,129,0.45),transparent_60%)]" />
+      {/* no overflow-hidden here: the patient search list must drop below the header (dark-mode fix 2026-11-11) */}
+      <div className="relative z-20 mb-5 rounded-3xl bg-[#06232a] p-5 text-white shadow-lg sm:p-6">
+        <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(700px_300px_at_0%_0%,rgba(20,184,166,0.6),transparent_60%),radial-gradient(600px_300px_at_100%_100%,rgba(16,185,129,0.45),transparent_60%)]" />
         <div className="relative flex flex-wrap items-center gap-4">
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur"><UserPlus className="h-6 w-6" /></span>
           <div className="min-w-0 flex-1"><h1 className="text-2xl font-extrabold">{t("Patient registration")}</h1>
             <p className="text-sm text-teal-50/80">Search first — scan the card QR or type MR, phone, CNIC or name. Register only if the patient is new.</p></div>
         </div>
-        <div className="relative mt-4 [&_input]:text-slate-900 [&>div>div]:bg-white/95 [&>div>div]:shadow-lg dark:[&>div>div]:bg-slate-900/90 dark:[&_input]:text-white"><PatientPicker autoFocus onPick={(p) => setFound({ name: p.name, patient_name: p.patient_name })} /></div>
+        <div className="relative mt-4 [&_input]:text-slate-900 [&>div>div]:bg-white [&>div>div]:shadow-lg dark:[&>div>div]:bg-[hsl(198_28%_15%)] dark:[&_input]:text-white"><PatientPicker autoFocus onPick={(p) => setFound({ name: p.name, patient_name: p.patient_name })} /></div>
         {found && <div className="relative mt-3 flex flex-wrap items-center gap-2 rounded-2xl bg-white/95 p-3 text-slate-900 shadow-lg dark:bg-slate-900/90 dark:text-white">
           <span className="min-w-0 flex-1 truncate"><b>{found.patient_name}</b> · <span className="font-mono text-sm">{found.name}</span> <span className="text-xs text-muted-foreground">already registered</span></span>
           <Button size="sm" variant="primary" onClick={() => nav(`/opd_slip?patient=${found.name}`)}><FilePlus2 className="h-4 w-4" />{t("OPD slip")}</Button>

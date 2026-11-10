@@ -171,7 +171,7 @@ export function PatientPicker({ onPick, autoFocus, placeholder, value, onClear }
         <ScanLine className="h-4 w-4 text-muted-foreground" aria-label="Scanner ready" />
       </div>
       {open && hits.length > 0 && (
-        <div className="absolute z-30 mt-1 max-h-80 w-full overflow-y-auto rounded-xl border border-border bg-popover shadow-xl">
+        <div className="absolute z-50 mt-1 max-h-80 w-full overflow-y-auto rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
           {hits.map((h, i) => (
             <button key={h.name} onMouseDown={(e) => { e.preventDefault(); pick(h); }} onMouseEnter={() => setActive(i)}
               className={cn("flex w-full items-center gap-3 border-b border-border/60 px-3 py-2 text-start last:border-0", i === active && "bg-accent")}>
