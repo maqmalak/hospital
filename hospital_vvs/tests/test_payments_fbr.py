@@ -51,7 +51,7 @@ class TestCardGateway(Base):
 
 		p = new_patient()
 		cust = frappe.db.get_value("Patient", p.name, "customer")
-		item = frappe.db.get_value("Item", {"is_stock_item": 0, "disabled": 0})
+		item = frappe.db.get_value("Item", {"is_stock_item": 0, "disabled": 0, "is_fixed_asset": 0, "is_sales_item": 1})
 		si = billing.create_invoice(customer=cust, patient=p.name, lines=[{"item_code": item, "rate": 2500}], billing_type="General", branch="Lahore Main",
 			reference_doctype="Patient", reference_name=p.name, pos=False)
 		r = api.create_link(si)
@@ -76,7 +76,7 @@ class TestCardGateway(Base):
 		p = new_patient()
 		from hospital_vvs.services import billing
 
-		si = billing.create_invoice(customer=frappe.db.get_value("Patient", p.name, "customer"), patient=p.name, lines=[{"item_code": frappe.db.get_value("Item", {"is_stock_item": 0, "disabled": 0}), "rate": 100}],
+		si = billing.create_invoice(customer=frappe.db.get_value("Patient", p.name, "customer"), patient=p.name, lines=[{"item_code": frappe.db.get_value("Item", {"is_stock_item": 0, "disabled": 0, "is_fixed_asset": 0, "is_sales_item": 1}), "rate": 100}],
 			billing_type="General", branch="Lahore Main", reference_doctype="Patient", reference_name=p.name, pos=False)
 		with self.assertRaises(frappe.ValidationError):
 			api.create_link(si)

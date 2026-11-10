@@ -20,7 +20,7 @@ def rule(doctor, billing_type="OPD Slip", value=30, share_type="Percent", **kw):
 
 
 def credit_bill(patient, doctor, rate=1000):
-	item = frappe.db.get_value("Item", {"item_group": ["like", "%Service%"], "is_stock_item": 0, "disabled": 0}) or frappe.db.get_value("Item", {"is_stock_item": 0, "disabled": 0})
+	item = frappe.db.get_value("Item", {"item_group": ["like", "%Service%"], "is_stock_item": 0, "disabled": 0}) or frappe.db.get_value("Item", {"is_stock_item": 0, "disabled": 0, "is_fixed_asset": 0, "is_sales_item": 1})
 	si = frappe.get_doc({"doctype": "Sales Invoice", "customer": frappe.db.get_value("Patient", patient, "customer"), "company": "VVS Hospital", "branch": "Lahore Main",
 		"hv_patient": patient, "hv_billing_type": "OPD Slip", "posting_date": today(), "due_date": today(),
 		"items": [{"item_code": item, "qty": 1, "rate": rate, "price_list_rate": rate, "hv_doctor": doctor}]})

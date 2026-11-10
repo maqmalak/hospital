@@ -188,3 +188,7 @@ All screens in Urdu (RTL), including IPD / ER, pharmacy, finance and the public 
 
 ## Users & roles (2026-11-11) — D-58
 Admin screen `/users` (Admin → Users & roles): staff accounts with roles, branch and password / reset link; roles with their people and screens; page-access grid (screen × role). No lock-out guards. Tests: 117 green (3 new); E2E 22 green; Urdu complete.
+
+## Buying, assets, consumption (2026-11-11) — D-59
+New menu group *Buying & Assets*: dashboard, suppliers, material requests, purchase orders (approve → receive by batch / location → bill), receipts, supplier invoices (pay), fixed-asset register with depreciation, consumption by department. Demo data: Pakistani pharma suppliers and medicine orders for the contract pharmacy; Rs 92.5 M of hospital machinery, plant, furniture, building works and IT as depreciating assets; consumables bought and issued weekly to OPD / Lab / IPD / OT / ER. Tests: 120 green (3 new); E2E 25 green; Urdu complete.
+Owner: confirm useful lives / depreciation rates with the auditor; real supplier list, NTNs and credit terms.

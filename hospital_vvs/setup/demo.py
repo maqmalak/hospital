@@ -407,6 +407,9 @@ def seed_all(opd_day=0):
 	steps = [("company", company.run), ("demo", seed), ("pharmacy company", pharmacy_company.run), ("phase 2", demo_phase2.seed),
 		("phase 3", demo_phase3.seed), ("phase 4", demo_phase4.seed), ("access", access.run),
 		("recurring expenses", seed_recurring)]
+	from hospital_vvs.setup import purchase_demo
+
+	steps.append(("buying, assets, consumption", purchase_demo.run))
 	if frappe.utils.cint(opd_day):
 		from hospital_vvs.setup import opd_demo
 

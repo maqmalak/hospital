@@ -53,6 +53,36 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `decide` | name, approve, note | POST |  |  |
 | `approve_with_pin` | name, approver, password | POST |  | Supervisor approves at the counter by entering their own login and password. |
 
+## buying
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `dashboard` | company |  | SEE |  |
+| `suppliers` | q, group |  | SEE |  |
+| `supplier` | name |  | SEE |  |
+| `save_supplier` | data | POST | BUY |  |
+| `items` | company, q |  | SEE |  |
+| `form_context` | company |  | SEE |  |
+| `orders` | company, status, q |  | SEE |  |
+| `order` | name |  | SEE |  |
+| `save_order` | data, submit | POST | BUY |  |
+| `approve_order` | name | POST | ACCOUNTANT |  |
+| `receive_order` | name, lines, bill_no, location | POST | STORE_KEEPER | lines: {po_item: {qty, batch_no, expiry, location}} — qty in stock units. |
+| `bill_order` | source_doctype, source_name, bill_no, bill_date | POST | ACCOUNTANT, STORE_KEEPER |  |
+| `close_order` | name, reason | POST | ACCOUNTANT |  |
+| `receipts` | company, q |  | SEE |  |
+| `invoices` | company, status, q |  | SEE |  |
+| `pay_invoice` | name, amount, mode_of_payment, reference_no | POST | ACCOUNTANT |  |
+| `material_requests` | company, status |  | SEE, NURSE, LAB_USER, REVIEWER |  |
+| `create_material_request` | company, warehouse, lines, remarks | POST | BUY, NURSE, LAB_USER, REVIEWER |  |
+| `order_from_request` | name, supplier | POST | BUY |  |
+| `assets` | category, location, q |  | ACCOUNTANT, STORE_KEEPER |  |
+| `asset` | name |  | ACCOUNTANT, STORE_KEEPER |  |
+| `move_asset` | name, location, reason | POST | STORE_KEEPER, ACCOUNTANT |  |
+| `repair_asset` | name, description, completed | POST | STORE_KEEPER, ACCOUNTANT |  |
+| `consumption` | from_date, to_date |  | STORE_KEEPER, ACCOUNTANT, NURSE |  |
+| `issue` | warehouse, cost_center, lines, remarks | POST | STORE_KEEPER |  |
+
 ## cash
 
 | Method | Params | Flags | Roles | Summary |

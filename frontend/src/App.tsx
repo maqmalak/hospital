@@ -87,7 +87,14 @@ const CheckoutPage = lazy(() => import("@/modules/finance/PaymentsPages").then((
 const OnlinePaymentsPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.OnlinePaymentsPage })));
 const FbrPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.FbrPage })));
 const LabTemplatesPage = lazy(() => import("@/modules/lab/TemplatesPage"));
-const PurchasingPage = lazy(() => import("@/modules/finance/FinancePages").then((m) => ({ default: m.PurchasingPage })));
+const BuyingDashboardPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.BuyingDashboardPage })));
+const SuppliersPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.SuppliersPage })));
+const PurchaseOrdersPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.PurchaseOrdersPage })));
+const PurchaseReceiptsPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.PurchaseReceiptsPage })));
+const PurchaseInvoicesPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.PurchaseInvoicesPage })));
+const MaterialRequestsPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.MaterialRequestsPage })));
+const AssetsPage = lazy(() => import("@/modules/buying/AssetPages").then((m) => ({ default: m.AssetsPage })));
+const ConsumptionPage = lazy(() => import("@/modules/buying/AssetPages").then((m) => ({ default: m.ConsumptionPage })));
 const FeedbackFormPage = lazy(() => import("@/modules/comms/FeedbackPages").then((m) => ({ default: m.FeedbackFormPage })));
 const MySharePage = lazy(() => import("@/modules/billing/DoctorSharePage").then((m) => ({ default: m.MySharePage })));
 const OnlineVisitPage = lazy(() => import("@/modules/public/OnlineVisitPage"));
@@ -193,8 +200,14 @@ export default function App() {
         <Route path="/finance" element={g("/finance", <FinanceOverviewPage />)} />
         <Route path="/online-payments" element={g("/online-payments", <OnlinePaymentsPage />)} />
         <Route path="/fbr" element={g("/fbr", <FbrPage />)} />
-        <Route path="/purchase_order" element={g("/purchase_order", <PurchasingPage doctype="Purchase Order" />)} />
-        <Route path="/purchase_invoice" element={g("/purchase_invoice", <PurchasingPage doctype="Purchase Invoice" />)} />
+        <Route path="/buying" element={g("/buying", <BuyingDashboardPage />)} />
+        <Route path="/suppliers" element={g("/suppliers", <SuppliersPage />)} />
+        <Route path="/material_request" element={g("/material_request", <MaterialRequestsPage />)} />
+        <Route path="/purchase_order" element={g("/purchase_order", <PurchaseOrdersPage />)} />
+        <Route path="/purchase_receipt" element={g("/purchase_receipt", <PurchaseReceiptsPage />)} />
+        <Route path="/purchase_invoice" element={g("/purchase_invoice", <PurchaseInvoicesPage />)} />
+        <Route path="/assets" element={g("/assets", <AssetsPage />)} />
+        <Route path="/consumption" element={g("/consumption", <ConsumptionPage />)} />
         <Route path="/lab/orders" element={g("/lab/orders", <LabOrdersPage />)} />
         <Route path="/lab/samples" element={g("/lab/samples", <LabSamplesPage />)} />
         <Route path="/tests" element={g("/tests", <LabTestsPage />)} />

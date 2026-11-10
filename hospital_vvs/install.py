@@ -169,7 +169,17 @@ EXTRA_PERMS = {
 		roles.NURSE, roles.LAB_USER, roles.CASH_SUPERVISOR]},
 	"Stock Entry": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN, roles.LAB_USER, roles.NURSE)},
 	"Material Request": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN, roles.REVIEWER, roles.NURSE, roles.LAB_USER)},
-	"Purchase Receipt": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN)},
+	"Purchase Receipt": {**{r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN)}, roles.ACCOUNTANT: ["read"]},
+	# D-59 buying screens: the store drafts and receives orders, the accountant approves, bills and pays; both see assets
+	"Purchase Order": {roles.STORE_KEEPER: ["read", "create", "write"], roles.ACCOUNTANT: ["read", "create", "write", "submit"], roles.ADMIN: ["read", "create", "write", "submit"],
+		roles.CASH_SUPERVISOR: ["read"]},
+	"Supplier": {r: ["read", "create", "write"] for r in (roles.STORE_KEEPER, roles.ACCOUNTANT, roles.ADMIN)},
+	"Payment Entry": {roles.ACCOUNTANT: ["read", "create", "write", "submit"]},
+	"Asset": {r: ["read", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ACCOUNTANT, roles.ADMIN)},
+	"Asset Movement": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ACCOUNTANT, roles.ADMIN)},
+	"Asset Repair": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ACCOUNTANT, roles.ADMIN)},
+	"Asset Depreciation Schedule": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ACCOUNTANT, roles.ADMIN)},
+	"Asset Activity": {r: ["read", "create"] for r in (roles.STORE_KEEPER, roles.ACCOUNTANT, roles.ADMIN)},
 	"Purchase Invoice": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN, roles.ACCOUNTANT)},
 	"Stock Reconciliation": {r: ["read", "create", "write", "submit"] for r in (roles.STORE_KEEPER, roles.ADMIN)},
 	# Phase 3: IPD / ER advances and settlements at the admission desk

@@ -2,7 +2,7 @@ import { Building2, CreditCard, FileCheck2, FileText, HandHeart, MessageSquareHe
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
   ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
   Activity, BarChart3, BedDouble, Receipt, ReceiptText, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
-  MessageCircle, MessagesSquare, UserCog, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
+  MessageCircle, MessagesSquare, UserCog, Factory, PackageMinus, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
   type LucideIcon,
 } from "lucide-react";
 
@@ -74,8 +74,16 @@ export const NAV: NavGroup[] = [
     { route: "/fbr", label: "FBR reporting", icon: FileCheck2, color: "from-emerald-700 to-green-800", desc: "Day-end FBR report, FBR numbers" },
     { route: "/welfare", label: "Welfare & zakat", icon: HandHeart, color: "from-emerald-600 to-teal-700", desc: "Schemes, approvals, donations, funds" },
     { route: "/expenses", label: "Expenses", icon: ReceiptText, color: "from-orange-500 to-rose-600", desc: "Bills with receipt and approvals" },
-    { route: "/purchase_order", label: "Purchase orders", icon: ShoppingCart, color: "from-amber-600 to-orange-700", desc: "Approve and track orders" },
-    { route: "/purchase_invoice", label: "Purchase invoices", icon: FileText, color: "from-amber-700 to-red-700", desc: "Supplier bills, unpaid" },
+  ] },
+  { label: "Buying & Assets", items: [
+    { route: "/buying", label: "Buying", icon: ShoppingCart, color: "from-amber-500 to-orange-600", desc: "Orders, deliveries, bills, payables" },
+    { route: "/suppliers", label: "Suppliers", icon: Building2, color: "from-orange-500 to-amber-600", desc: "Pharma companies, vendors, contractors" },
+    { route: "/material_request", label: "Material requests", icon: ClipboardList, color: "from-yellow-500 to-amber-600", desc: "Wards and lab ask the store to buy" },
+    { route: "/purchase_order", label: "Purchase orders", icon: ShoppingCart, color: "from-amber-600 to-orange-700", desc: "Approve, receive by batch, bill" },
+    { route: "/purchase_receipt", label: "Purchase receipts", icon: PackageCheck, color: "from-orange-600 to-red-600", desc: "Deliveries into stock" },
+    { route: "/purchase_invoice", label: "Supplier invoices", icon: FileText, color: "from-red-500 to-rose-600", desc: "Bills owed and payments" },
+    { route: "/assets", label: "Fixed assets", icon: Factory, color: "from-emerald-500 to-teal-600", desc: "Machinery, plant, building, IT" },
+    { route: "/consumption", label: "Consumption", icon: PackageMinus, color: "from-teal-500 to-emerald-600", desc: "Consumables issued to departments" },
   ] },
   { label: "Billing", items: [
     { route: "/doctor-share", label: "Doctor share", icon: HandCoins, color: "from-sky-600 to-emerald-600", desc: "Commission, owed / paid, payouts" },
