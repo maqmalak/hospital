@@ -7,7 +7,7 @@ import { Empty, Field, inputCls, Section } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
-import { FLAG_TONE, flagArrow, LabHero, StatusChip, useLabLive } from "./shared";
+import { FLAG_TONE, flagArrow, LabHero, StatusChip, useLabLive, PriorityTag } from "./shared";
 
 interface W { name: string; test_invoice: string; template: string; status: string; sample?: string; result?: string; outsourced: number; patient: string; patient_name: string;
   priority: string; expected_at?: string; department: string; test_code: string; has_critical?: number; critical_logged?: number; result_status?: string; send_back_reason?: string }
@@ -46,7 +46,7 @@ export default function TestsPage() {
         <Section key={d} title={`${d} · ${list.length}`} className="mb-4">
           <div className="divide-y divide-border/60">{list.map((r) => (
             <button key={r.name} onClick={() => setOpen(r.name)} className="flex w-full items-center gap-3 py-2.5 text-start hover:bg-muted/40">
-              {r.priority === "Urgent" ? <Siren className="h-4 w-4 shrink-0 text-rose-600" /> : <span className="w-4" />}
+              <PriorityTag p={r.priority} small />
               <span className="min-w-0 flex-1"><span className="font-semibold">{r.patient_name}</span> <span className="text-xs text-muted-foreground">{r.patient} · {r.sample}</span>
                 {r.send_back_reason && r.status === "Result Entered" && <span className="block text-xs text-amber-700">Sent back: {r.send_back_reason}</span>}</span>
               <span className="rounded-md bg-violet-50 px-2 py-0.5 text-xs font-bold text-violet-800 dark:bg-violet-500/15 dark:text-violet-200">{r.test_code}</span>

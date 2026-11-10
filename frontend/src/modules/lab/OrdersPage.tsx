@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { Banknote, Check, ExternalLink, FilePlus2, Link2, Plus, Search, Send, ShieldOff, Siren, X, HandHelping, Printer } from "lucide-react";
+import { Banknote, Check, ExternalLink, FilePlus2, Link2, Plus, Search, Send, ShieldOff, X, HandHelping, Printer } from "lucide-react";
 import toast from "react-hot-toast";
 import { call, humanizeError, useAction, useApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { todayISO } from "@/utils/dates";
 import { cn } from "@/utils/cn";
-import { LabHero, rs, StatusChip, useLabLive } from "./shared";
+import { LabHero, PriorityTag, rs, StatusChip, useLabLive } from "./shared";
+import { addDaysISO } from "@/utils/dates";
 
 export interface Template { name: string; test_code: string; department: string; price: number; sample_type: string; container: string; tat_hours: number; outsourced: number }
 interface Ctx { templates: Template[]; doctors: { name: string; doctor_name: string }[]; reference_labs: string[] }
@@ -22,12 +23,16 @@ export default function LabOrdersPage() {
   const { t } = useTranslation();
   const { branch } = useAuth();
   const [sp, setSp] = useSearchParams();
-  const [date, setDate] = useState(todayISO());
+  const [period, setPeriod] = useState<"day" | "week" | "month" | "custom">("day");
+  const [from, setFrom] = useState(todayISO());
+  const [to, setTo] = useState(todayISO());
+  const [prio, setPrio] = useState("");
+  const pick = (p: typeof period) => { setPeriod(p); const t0 = todayISO(); if (p === "day") { setFrom(t0); setTo(t0); } else if (p === "week") { setFrom(addDaysISO(t0, -6)); setTo(t0); } else if (p === "month") { setFrom(t0.slice(0, 8) + "01"); setTo(t0); } };
   const [status, setStatus] = useState("");
   const [q, setQ] = useState("");
   const [creating, setCreating] = useState(sp.get("new") === "1");
   const [open, setOpen] = useState<string | null>(sp.get("order"));
-  const { data: rows } = useApi<Row[]>("lab.orders", { date, status, q, branch }, { refetchInterval: 30_000 });
+  const { data: rows } = useApi<Row[]>("lab.orders", { from_date: from, to_date: to, status, q, branch, priority: prio || undefined }, { refetchInterval: 30_000 });
   const { data: dash } = useApi<{ overdue: number; to_verify: number; critical_open: number; tat: { n: number; on_time: number } }>("lab.dashboard", { branch });
   useLabLive(["lab.orders", "lab.dashboard", "lab.order"]);
   const total = (rows ?? []).reduce((s, r) => s + (r.patient_share || 0), 0);
@@ -43,7 +48,11 @@ export default function LabOrdersPage() {
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="relative min-w-56 flex-1"><Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" /><input className={inputCls + " ps-9"} placeholder="Name, MR or order no." value={q} onChange={(e) => setQ(e.target.value)} /></div>
-        <input type="date" className={inputCls.replace("w-full", "") + " w-40"} value={date} onChange={(e) => setDate(e.target.value)} />
+        <div className="flex rounded-xl bg-muted p-1">{([["day", "Today"], ["week", "Week"], ["month", "Month"], ["custom", "Custom"]] as const).map(([k, l]) => (
+          <button key={k} onClick={() => pick(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", period === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>))}</div>
+        {period === "custom" && <div className="flex items-center gap-1"><input type="date" className={inputCls.replace("w-full", "") + " w-36"} value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
+          <span className="text-muted-foreground">→</span><input type="date" className={inputCls.replace("w-full", "") + " w-36"} value={to} min={from} max={todayISO()} onChange={(e) => setTo(e.target.value)} /></div>}
+        <div className="flex rounded-xl bg-muted p-1">{["", "Urgent", "Priority", "Normal"].map((p) => <button key={p || "all"} onClick={() => setPrio(p)} className={cn("rounded-lg px-2.5 py-1.5 text-xs font-semibold", prio === p ? "bg-card shadow" : "text-muted-foreground")}>{p || "Any priority"}</button>)}</div>
         <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">{STATUSES.map((s) => <button key={s} onClick={() => setStatus(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "bg-card shadow" : "text-muted-foreground")}>{s || "All"}</button>)}</div>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -52,15 +61,15 @@ export default function LabOrdersPage() {
           const late = r.expected_at && !r.released_at && new Date(r.expected_at.replace(" ", "T")) < new Date();
           return (
             <button key={r.name} onClick={() => setOpen(r.name)} className="group rounded-2xl border border-border bg-card p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
-              <div className="flex items-start gap-2"><div className="min-w-0 flex-1"><div className="truncate font-bold">{r.patient_name}</div><div className="font-mono text-xs text-muted-foreground">{r.name} · {r.patient}</div></div>
-                {r.priority === "Urgent" && <span className="flex items-center gap-1 rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white"><Siren className="h-3 w-3" />URGENT</span>}<StatusChip s={r.status} /></div>
+              <div className="flex items-start gap-2"><div className="min-w-0 flex-1"><div className="truncate font-bold">{r.patient_name}</div><div className="font-mono text-xs text-muted-foreground">{r.name} · {r.patient}{period !== "day" ? ` · ${r.creation.slice(5, 10)}` : ""}</div></div>
+                <PriorityTag p={r.priority} /><StatusChip s={r.status} /></div>
               <div className="mt-2 flex flex-wrap gap-1">{r.tests.map((x, i) => <span key={i} className="rounded-md bg-violet-50 px-1.5 py-0.5 text-[11px] font-medium text-violet-800 dark:bg-violet-500/15 dark:text-violet-200">{x}</span>)}</div>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-teal-500" style={{ width: `${(done / Math.max(r.tests.length, 1)) * 100}%` }} /></div>
               <div className="mt-2 flex justify-between text-xs text-muted-foreground"><span className={cn(late && "font-bold text-rose-600")}>{r.expected_at ? `due ${r.expected_at.slice(11, 16)}` : ""}{late ? " · late" : ""}</span><span className="font-semibold text-foreground">{rs(r.patient_share || r.net_total)}</span></div>
             </button>);
         })}
       </div>
-      {rows && !rows.length && <Empty title="No orders" hint="Change the date or status filter." />}
+      {rows && !rows.length && <Empty title="No orders" hint="Change the period, priority or status filter." />}
       {creating && <NewOrderDialog onClose={() => { setCreating(false); sp.delete("new"); setSp(sp, { replace: true }); }} onDone={(n) => { setCreating(false); setOpen(n); }} />}
       {open && <OrderDialog name={open} onClose={() => { setOpen(null); sp.delete("order"); setSp(sp, { replace: true }); }} />}
     </div>
@@ -75,7 +84,7 @@ export function NewOrderDialog({ onClose, onDone, patient: initial }: { onClose:
   const [q, setQ] = useState("");
   const [doctor, setDoctor] = useState("");
   const [external, setExternal] = useState("");
-  const [priority, setPriority] = useState("Routine");
+  const [priority, setPriority] = useState("Normal");
   const [mode, setMode] = useState("Cash");
   const [tendered, setTendered] = useState("");
   const [busy, setBusy] = useState(false);
@@ -117,7 +126,7 @@ export function NewOrderDialog({ onClose, onDone, patient: initial }: { onClose:
           </div>
           <Field label="Referring doctor"><select className={inputCls} value={doctor} onChange={(e) => setDoctor(e.target.value)}><option value="">— walk-in / external —</option>{ctx?.doctors.map((d) => <option key={d.name} value={d.name}>{d.doctor_name}</option>)}</select></Field>
           {!doctor && <Field label="External referrer"><input className={inputCls} value={external} onChange={(e) => setExternal(e.target.value)} /></Field>}
-          <div className="flex gap-2">{["Routine", "Urgent"].map((p) => <button key={p} onClick={() => setPriority(p)} className={cn("flex-1 rounded-xl border py-2 text-sm font-bold", priority === p ? (p === "Urgent" ? "border-rose-600 bg-rose-600 text-white" : "border-teal-600 bg-teal-600 text-white") : "border-border")}>{p}</button>)}</div>
+          <div className="flex gap-2">{["Normal", "Priority", "Urgent"].map((p) => <button key={p} onClick={() => setPriority(p)} className={cn("flex-1 rounded-xl border py-2 text-sm font-bold", priority === p ? (p === "Urgent" ? "border-rose-600 bg-rose-600 text-white" : p === "Priority" ? "border-amber-500 bg-amber-500 text-white" : "border-teal-600 bg-teal-600 text-white") : "border-border")}>{p === "Urgent" ? "⚡ Urgent" : p === "Priority" ? "▲ Priority" : "Normal"}</button>)}</div>
           <Field label="Payment"><div className="flex flex-wrap gap-1">{["Cash", "Card", "JazzCash", "Easypaisa", "Bank Transfer"].map((m) => <button key={m} onClick={() => setMode(m)} className={cn("rounded-lg border px-2.5 py-1 text-xs font-semibold", mode === m ? "border-emerald-600 bg-emerald-600 text-white" : "border-border")}>{m}</button>)}</div></Field>
           {mode === "Cash" && <Field label="Cash tendered"><input className={inputCls + " text-end tabular-nums"} inputMode="numeric" value={tendered} onChange={(e) => setTendered(e.target.value.replace(/\D/g, ""))} />
             {Number(tendered) > total && <div className="mt-1 text-end text-sm font-bold text-emerald-600">Change {rs(Number(tendered) - total)}</div>}</Field>}
@@ -149,7 +158,7 @@ export function OrderDialog({ name, onClose }: { name: string; onClose: () => vo
   const verified = o.items.filter((i) => i.status === "Verified").length;
   return (
     <Dialog open onClose={onClose} title={`${o.patient_name} · ${o.name}`} description={`${o.patient} · ${o.priority}${o.expected_at ? ` · expected ${o.expected_at.slice(0, 16)}` : ""}`} size="lg">
-      <div className="mb-3 flex flex-wrap items-center gap-2"><StatusChip s={o.status} /><span className="text-sm">Bill {rs(o.net_total)}{o.payer_share ? ` · panel ${rs(o.payer_share)}` : ""}</span>{o.sales_invoice && <span className="font-mono text-xs text-muted-foreground">{o.sales_invoice}</span>}</div>
+      <div className="mb-3 flex flex-wrap items-center gap-2"><PriorityTag p={o.priority} /><StatusChip s={o.status} /><span className="text-sm">Bill {rs(o.net_total)}{o.payer_share ? ` · panel ${rs(o.payer_share)}` : ""}</span>{o.sales_invoice && <span className="font-mono text-xs text-muted-foreground">{o.sales_invoice}</span>}</div>
       {unpaid && <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-3 dark:bg-amber-500/10"><span className="flex-1 text-sm font-semibold">Payment due {rs(o.patient_share || o.net_total)}</span>
         <select className={inputCls.replace("w-full", "") + " w-36"} value={mode} onChange={(e) => setMode(e.target.value)}>{["Cash", "Card", "JazzCash", "Easypaisa", "Bank Transfer"].map((m) => <option key={m}>{m}</option>)}</select>
         <Button variant="submit" loading={pay.isPending} onClick={() => pay.mutate({ name, payment_mode: mode })}><Banknote className="h-4 w-4" />Collect</Button></div>}

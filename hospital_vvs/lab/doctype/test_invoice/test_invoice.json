@@ -110,12 +110,13 @@
    "label": "External Referrer"
   },
   {
-   "default": "Routine",
+   "default": "Normal",
    "fieldname": "priority",
    "fieldtype": "Select",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Priority",
-   "options": "Routine\nUrgent"
+   "options": "Normal\nPriority\nUrgent"
   },
   {
    "fieldname": "ti2",
@@ -346,7 +347,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-10 17:04:44.690875",
+ "modified": "2026-11-10 17:21:48.456917",
  "modified_by": "Administrator",
  "module": "Lab",
  "name": "Test Invoice",

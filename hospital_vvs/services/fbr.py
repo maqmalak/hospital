@@ -107,7 +107,9 @@ def scheduled():
 	"""Every 15 minutes: run once a day, after the configured time (last run date kept in the site defaults)."""
 	if not cint(setting("fbr_enabled")):
 		return
-	if str(nowtime()) < str(setting("fbr_run_time") or "23:30:00") or frappe.db.get_default("hv_fbr_last_run") == today():
+	from frappe.utils import get_time
+
+	if get_time(nowtime()) < get_time(setting("fbr_run_time") or "23:30:00") or frappe.db.get_default("hv_fbr_last_run") == today():
 		return
 	day_end()
 	frappe.db.set_default("hv_fbr_last_run", today())

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Ban, Check, Printer, ScanLine, Siren, TestTube2, Truck } from "lucide-react";
+import { Ban, Check, Printer, ScanLine, TestTube2, Truck } from "lucide-react";
 import toast from "react-hot-toast";
 import { call, humanizeError, useAction, useApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -8,7 +8,7 @@ import { Empty, Field, inputCls } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
-import { type Label, LabHero, labelsHtml, Tube, useLabLive } from "./shared";
+import { type Label, LabHero, labelsHtml, Tube, useLabLive, PriorityTag } from "./shared";
 
 interface S { name: string; test_invoice: string; patient: string; patient_name: string; sample_type: string; container: string; status: string; collected_at?: string;
   received_at?: string; rejection_reason?: string; recollect_of?: string; tests: string[]; priority?: string; creation: string }
@@ -57,11 +57,11 @@ export default function SamplesPage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {(rows ?? []).map((s) => { const on = sel.includes(s.name); return (
           <div key={s.name} onClick={() => tab !== "Rejected" && setSel((x) => (on ? x.filter((y) => y !== s.name) : [...x, s.name]))}
-            className={cn("relative cursor-pointer rounded-2xl border bg-card p-4 shadow-sm transition-all", on ? "border-violet-500 ring-2 ring-violet-500/30" : "border-border hover:border-violet-300", s.priority === "Urgent" && "border-s-4 border-s-rose-500")}>
+            className={cn("relative cursor-pointer rounded-2xl border bg-card p-4 shadow-sm transition-all", on ? "border-violet-500 ring-2 ring-violet-500/30" : "border-border hover:border-violet-300", s.priority === "Urgent" ? "border-s-4 border-s-rose-500" : s.priority === "Priority" ? "border-s-4 border-s-amber-500" : "")}>
             <div className="flex items-start gap-3"><Tube container={s.container} />
               <div className="min-w-0 flex-1"><div className="truncate font-bold">{s.patient_name}</div><div className="font-mono text-[11px] text-muted-foreground">{s.name}</div>
                 <div className="text-xs">{s.sample_type} · {s.container}</div></div>
-              {s.priority === "Urgent" && <Siren className="h-4 w-4 text-rose-600" />}</div>
+              <PriorityTag p={s.priority} small /></div>
             <div className="mt-2 flex flex-wrap gap-1">{s.tests.map((t) => <span key={t} className="rounded bg-violet-50 px-1.5 text-[11px] font-semibold text-violet-800 dark:bg-violet-500/15 dark:text-violet-200">{t}</span>)}</div>
             {s.recollect_of && <div className="mt-1 text-[11px] font-semibold text-amber-600">Recollection of {s.recollect_of}</div>}
             {s.rejection_reason && <div className="mt-1 text-xs font-semibold text-rose-600">{s.rejection_reason}</div>}

@@ -155,3 +155,6 @@ Owner: choose the card gateway and add its keys; FBR POS ID / NTN / token and sc
 
 ## Handwritten lab reports, print & hand over (2026-11-10) — D-48
 Report file (scan / photo / outside PDF) on the result screen; merged into the patient PDF; portal download of the original file; WhatsApp link on release / resend; Print & hand over with recipient recorded; wider template editor. Tests: 87 green (2 new).
+
+## Lab QA audit (2026-11-10) — D-49
+81/81 checks after fixing 3 defects (reject after result, lab-user amendment, refund not cancelling tests); priority tags Normal / Priority / Urgent; lab orders Today / Week / Month / Custom filter; ~36 realistic lab orders in every state. Report: [QA-LAB.md](QA-LAB.md). Tests: 92 green (5 new regression tests).

@@ -14,6 +14,23 @@ from hospital_vvs import roles as R
 from hospital_vvs.services import appointments as svc
 from hospital_vvs.services import safety
 
+
+# Tests must never save to the site: some paths (wrong PIN / OTP, FBR run) commit on purpose, so block commits for the whole module.
+_commit_patch = None
+
+
+def setUpModule():
+	global _commit_patch
+	from unittest.mock import patch
+
+	_commit_patch = patch.object(frappe.db, "commit", lambda *a, **k: None)
+	_commit_patch.start()
+
+
+def tearDownModule():
+	if _commit_patch:
+		_commit_patch.stop()
+
 DEMO = "Demo@1234"
 
 

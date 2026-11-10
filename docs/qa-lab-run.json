@@ -1,0 +1,594 @@
+{
+ "run_at": "2026-11-10 17:22:50.059245",
+ "orders": [
+  "LAB-2026-00042",
+  "LAB-2026-00043",
+  "LAB-2026-00044",
+  "LAB-2026-00045",
+  "LAB-2026-00046",
+  "LAB-2026-00047",
+  "LAB-2026-00048",
+  "LAB-2026-00049",
+  "LAB-2026-00050",
+  "LAB-2026-00051",
+  "LAB-2026-00052",
+  "LAB-2026-00053",
+  "LAB-2026-00054",
+  "LAB-2026-00055",
+  "LAB-2026-00056",
+  "LAB-2026-00057",
+  "LAB-2026-00058",
+  "LAB-2026-00059",
+  "LAB-2026-00060",
+  "LAB-2026-00061"
+ ],
+ "checks": [
+  {
+   "id": "S01-1",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "order created as Ordered with 2 tests and the right total",
+   "result": "PASS",
+   "detail": "Ordered 2300.0"
+  },
+  {
+   "id": "S01-2",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "payment: POS invoice submitted in the collector's shift, status Paid, expected time set",
+   "result": "PASS",
+   "detail": "Paid ACC-SINV-2026-00440"
+  },
+  {
+   "id": "S01-3",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "lab income booked on the Lab POS profile income account",
+   "result": "PASS",
+   "detail": "Laboratory Income - VVSH"
+  },
+  {
+   "id": "S01-4",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "one sample per sample type / container (EDTA for CBC, serum for LFT)",
+   "result": "PASS",
+   "detail": "['S2611100021', 'S2611100022']"
+  },
+  {
+   "id": "S01-5",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "thank-you message queued",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-6",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "barcode labels carry MR, name, tests, container",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-7",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "barcode scan finds the sample and its tests",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-8",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "result entry refused before the sample reaches the lab",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S01-9",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "both tests on the result worklist after receiving",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-10",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "order In Progress, tests Result Entered",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-11",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "lab user cannot verify",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "S01-12",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "release refused before anything is verified",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S01-13",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "released: status Released, WhatsApp report link queued",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-14",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "portal asks for the last 4 digits first (no data before verification)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-15",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "wrong digits refused",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S01-16",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "right digits show both tests with values and interpretation",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-17",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "patient PDF downloads",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-18",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "printed copy handed over and recorded",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S01-19",
+   "scenario": "S01 Routine order → report (CBC + LFT, cash)",
+   "check": "referring doctor can view the report (access logged)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S02-1",
+   "scenario": "S02 Urgent order with a critical value",
+   "check": "urgent sample listed before routine ones",
+   "result": "PASS",
+   "detail": "{'LAB-2026-00044': 0, 'LAB-2026-00001': 2, 'LAB-2026-00038': 3, 'LAB-2026-00043': 4}"
+  },
+  {
+   "id": "S02-2",
+   "scenario": "S02 Urgent order with a critical value",
+   "check": "urgent test first on the worklist",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S02-3",
+   "scenario": "S02 Urgent order with a critical value",
+   "check": "potassium 6.9 flagged Critical High",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S02-4",
+   "scenario": "S02 Urgent order with a critical value",
+   "check": "verification blocked until the critical value is phoned to the doctor",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S02-5",
+   "scenario": "S02 Urgent order with a critical value",
+   "check": "critical value log written (who, how, read back)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S02-6",
+   "scenario": "S02 Urgent order with a critical value",
+   "check": "urgent report released",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S02-7",
+   "scenario": "S02 Urgent order with a critical value",
+   "check": "dashboard shows today's tests and TAT figures",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S03-1",
+   "scenario": "S03 Rejected sample → recollection",
+   "check": "rejection needs a reason",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S03-2",
+   "scenario": "S03 Rejected sample → recollection",
+   "check": "rejected sample keeps the reason; a new sample is waiting for collection",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S03-3",
+   "scenario": "S03 Rejected sample → recollection",
+   "check": "test moved to the new sample",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S03-4",
+   "scenario": "S03 Rejected sample → recollection",
+   "check": "report released after recollection",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S04-1",
+   "scenario": "S04 Reject after a result was entered",
+   "check": "the draft result of a rejected sample is withdrawn (not left waiting for verification)",
+   "result": "PASS",
+   "detail": "{'status': 'Cancelled', 'docstatus': 0}"
+  },
+  {
+   "id": "S04-2",
+   "scenario": "S04 Reject after a result was entered",
+   "check": "pathologist no longer sees the old result to verify",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S05-1",
+   "scenario": "S05 Sent back by the pathologist",
+   "check": "sent back: test returns to the worklist with the reason",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S05-2",
+   "scenario": "S05 Sent back by the pathologist",
+   "check": "corrected value is flagged High (6.5 > 5.6)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S06-1",
+   "scenario": "S06 Amendment after release",
+   "check": "a lab user cannot amend a verified result (pathologist only)",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "S06-2",
+   "scenario": "S06 Amendment after release",
+   "check": "amendment needs a reason",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S06-3",
+   "scenario": "S06 Amendment after release",
+   "check": "old version Superseded, new version 2",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S06-4",
+   "scenario": "S06 Amendment after release",
+   "check": "old report link stops working; 'report updated' message sent",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S06-5",
+   "scenario": "S06 Amendment after release",
+   "check": "report marks the test AMENDED v2",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S07-1",
+   "scenario": "S07 Partial release",
+   "check": "full release refused while one test is pending",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S07-2",
+   "scenario": "S07 Partial release",
+   "check": "partial release: status Partially Released",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S07-3",
+   "scenario": "S07 Partial release",
+   "check": "patient report shows the pending test as pending",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S07-4",
+   "scenario": "S07 Partial release",
+   "check": "qualitative 'Positive' against 'Negative' flagged Abnormal",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S07-5",
+   "scenario": "S07 Partial release",
+   "check": "second release completes the report",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S08-1",
+   "scenario": "S08 Outsourced test with a scanned report",
+   "check": "dispatch creates the outsourced batch and a purchase bill to the reference lab",
+   "result": "PASS",
+   "detail": "OD-2026-0010"
+  },
+  {
+   "id": "S08-2",
+   "scenario": "S08 Outsourced test with a scanned report",
+   "check": "dispatched samples listed as awaiting results",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S08-3",
+   "scenario": "S08 Outsourced test with a scanned report",
+   "check": "patient sees a downloadable report file for both outsourced tests",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S08-4",
+   "scenario": "S08 Outsourced test with a scanned report",
+   "check": "patient downloads the original reference-lab PDF",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S08-5",
+   "scenario": "S08 Outsourced test with a scanned report",
+   "check": "full report PDF includes the reference-lab pages",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S09-1",
+   "scenario": "S09 Panel patient — split bill",
+   "check": "panel share computed on the order (Pakistan Telecom 80 %)",
+   "result": "PASS",
+   "detail": "Panel 1120.0/1400.0"
+  },
+  {
+   "id": "S09-2",
+   "scenario": "S09 Panel patient — split bill",
+   "check": "patient pays 20 % at the counter; 80 % credit invoice to the panel",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S10-1",
+   "scenario": "S10 Discounts within and above the limit",
+   "check": "small discount within the receptionist's limit is approved at once",
+   "result": "PASS",
+   "detail": "{'name': 'DA-2026-00003', 'status': 'Within Limit'}"
+  },
+  {
+   "id": "S10-2",
+   "scenario": "S10 Discounts within and above the limit",
+   "check": "discount without a reason refused",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S10-3",
+   "scenario": "S10 Discounts within and above the limit",
+   "check": "large discount waits for a supervisor",
+   "result": "PASS",
+   "detail": "{'name': 'DA-2026-00004', 'status': 'Pending'}"
+  },
+  {
+   "id": "S10-4",
+   "scenario": "S10 Discounts within and above the limit",
+   "check": "cannot pay with a pending discount",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S10-5",
+   "scenario": "S10 Discounts within and above the limit",
+   "check": "paid with the approved discount; invoice net reduced",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S10-6",
+   "scenario": "S10 Discounts within and above the limit",
+   "check": "discount authorization marked used on this order",
+   "result": "PASS",
+   "detail": "Used"
+  },
+  {
+   "id": "S11-1",
+   "scenario": "S11 Doctor's prescription orders the tests",
+   "check": "signing the prescription creates the lab order for reception",
+   "result": "PASS",
+   "detail": "RX-2026-000364"
+  },
+  {
+   "id": "S11-2",
+   "scenario": "S11 Doctor's prescription orders the tests",
+   "check": "order carries the referring doctor and both tests",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S11-3",
+   "scenario": "S11 Doctor's prescription orders the tests",
+   "check": "doctor sees the result with previous-value column",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S12-1",
+   "scenario": "S12 Refund of a lab order",
+   "check": "refunded order is cancelled (tests and samples stop)",
+   "result": "PASS",
+   "detail": "Cancelled ['Cancelled']"
+  },
+  {
+   "id": "S12-2",
+   "scenario": "S12 Refund of a lab order",
+   "check": "its pending sample leaves the collection queue",
+   "result": "PASS",
+   "detail": "['Cancelled']"
+  },
+  {
+   "id": "S13-1",
+   "scenario": "S13 Roles and access",
+   "check": "receptionist cannot open the verification list",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "S13-2",
+   "scenario": "S13 Roles and access",
+   "check": "receptionist cannot enter results",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "S13-3",
+   "scenario": "S13 Roles and access",
+   "check": "pharmacy cashier cannot see lab orders",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "S13-4",
+   "scenario": "S13 Roles and access",
+   "check": "lab user cannot edit test templates (pathologist only)",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "S13-5",
+   "scenario": "S13 Roles and access",
+   "check": "pathologist can open a template for editing",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S14-1",
+   "scenario": "S14 Portal security",
+   "check": "made-up link refused",
+   "result": "PASS",
+   "detail": "ValidationError"
+  },
+  {
+   "id": "S14-2",
+   "scenario": "S14 Portal security",
+   "check": "5 wrong tries lock the link for 15 minutes",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S14-3",
+   "scenario": "S14 Portal security",
+   "check": "revoked links stop working",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S15-1",
+   "scenario": "S15 Previous results and TAT",
+   "check": "result form shows the previous CBC values and date",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S15-2",
+   "scenario": "S15 Previous results and TAT",
+   "check": "expected report time falls inside lab hours",
+   "result": "PASS",
+   "detail": "2026-11-10 21:22:47.149301"
+  },
+  {
+   "id": "S16-1",
+   "scenario": "S16 Repeat submit and template price change",
+   "check": "same client reference does not create a second order (double click / offline retry)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S16-2",
+   "scenario": "S16 Repeat submit and template price change",
+   "check": "new price applies to new orders; existing order keeps its price",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S17-1",
+   "scenario": "S17 Priority tags and date filters",
+   "check": "order keeps its priority tag (Normal / Priority / Urgent)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S17-2",
+   "scenario": "S17 Priority tags and date filters",
+   "check": "collection queue: Urgent, then Priority, then Normal",
+   "result": "PASS",
+   "detail": "['LAB-2026-00060', 'LAB-2026-00059', 'LAB-2026-00058']"
+  },
+  {
+   "id": "S17-3",
+   "scenario": "S17 Priority tags and date filters",
+   "check": "day ⊆ week ⊆ month filters",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S17-4",
+   "scenario": "S17 Priority tags and date filters",
+   "check": "priority filter returns only urgent orders",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S17-5",
+   "scenario": "S17 Priority tags and date filters",
+   "check": "legacy 'Routine' requests are stored as Normal",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "S18-1",
+   "scenario": "S18 Partial refund keeps verified tests",
+   "check": "refunding TSH cancels only TSH; the verified CBC stays",
+   "result": "PASS",
+   "detail": "{'Complete Blood Count': 'Verified', 'TSH': 'Cancelled'}"
+  },
+  {
+   "id": "S18-2",
+   "scenario": "S18 Partial refund keeps verified tests",
+   "check": "order can still be released with the remaining test",
+   "result": "PASS",
+   "detail": ""
+  }
+ ]
+}

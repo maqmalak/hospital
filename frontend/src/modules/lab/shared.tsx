@@ -58,3 +58,13 @@ export function labelsHtml(labels: Label[]) {
   ${labels.map((l) => `<div class="l">${qrSvg(l.barcode, 0.55)}<div class="t"><div class="m">${esc(l.barcode)}</div><div class="b">${esc(l.name)}</div><div>${esc(l.mr)}</div>
   <div>${esc(l.sample_type)} · ${esc(l.container)}</div><div><b>${esc(l.tests.join(", "))}</b></div><div>${esc(l.time)}</div></div></div>`).join("")}</body></html>`;
 }
+
+
+/** Lab order priority tag (QA 2026-11-10): Urgent red, Priority amber, Normal grey. */
+export function PriorityTag({ p, small }: { p?: string; small?: boolean }) {
+  const v = p === "Routine" || !p ? "Normal" : p;
+  const tone = v === "Urgent" ? "bg-rose-600 text-white" : v === "Priority" ? "bg-amber-500 text-white" : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200";
+  return <span className={`inline-flex items-center gap-1 rounded-full font-bold uppercase tracking-wide ${small ? "px-1.5 text-[9px]" : "px-2 py-0.5 text-[10px]"} ${tone}`}>{v === "Urgent" ? "⚡ " : v === "Priority" ? "▲ " : ""}{v}</span>;
+}
+export const PRIORITY_RANK: Record<string, number> = { Urgent: 0, Priority: 1, Normal: 2, Routine: 2 };
+

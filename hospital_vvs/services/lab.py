@@ -40,9 +40,13 @@ def match_template(name):
 
 
 # ------------------------------------------------------------------ orders
-def create_order(patient, tests, branch, referring_doctor=None, prescription=None, opd_slip=None, priority="Routine", external_referrer=None):
+PRIORITIES = ("Normal", "Priority", "Urgent")  # QA 2026-11-10: three levels, Urgent first
+
+
+def create_order(patient, tests, branch, referring_doctor=None, prescription=None, opd_slip=None, priority="Normal", external_referrer=None):
 	if not tests:
 		frappe.throw(_("Choose at least one test."))
+	priority = {"Routine": "Normal"}.get(priority, priority) if priority in (*PRIORITIES, "Routine") else "Normal"
 	ti = frappe.get_doc({"doctype": "Test Invoice", "patient": patient, "branch": branch, "posting_date": today(), "referring_doctor": referring_doctor,
 		"external_referrer": external_referrer, "prescription": prescription, "opd_slip": opd_slip, "priority": priority, "status": "Ordered",
 		"items": [{"template": t} for t in tests]})
@@ -168,8 +172,11 @@ def reject(sample_name, reason, note=None):
 	if not reason:
 		frappe.throw(_("Choose the rejection reason."))
 	s = frappe.get_doc("Lab Sample", sample_name)
-	if s.status in ("Rejected",):
-		frappe.throw(_("Already rejected."))
+	if s.status in ("Rejected", "Cancelled"):
+		frappe.throw(_("Sample {0} is {1}.").format(s.name, s.status))
+	verified = [t.test_code for t in s.tests if frappe.db.get_value("Test Invoice Item", t.invoice_item, "status") in ("Verified", "Released")]
+	if verified:
+		frappe.throw(_("{0} already verified on this sample — amend the result instead of rejecting the sample.").format(", ".join(verified)))
 	new = frappe.copy_doc(s)
 	new.update({"status": "Pending", "collected_by": None, "collected_at": None, "received_by": None, "received_at": None, "rejection_reason": None,
 		"rejection_note": None, "recollect_of": s.name, "recollect_sample": None})
@@ -177,7 +184,11 @@ def reject(sample_name, reason, note=None):
 	s.update({"status": "Rejected", "rejection_reason": reason, "rejection_note": note, "recollect_sample": new.name})
 	s.save(ignore_permissions=True)
 	for t in new.tests:
-		frappe.db.set_value("Test Invoice Item", t.invoice_item, {"sample": new.name, "status": "Ordered"})
+		# QA defect 1: a draft result of the rejected sample must not stay waiting for verification
+		draft = frappe.db.get_value("Lab Result", {"invoice_item": t.invoice_item, "docstatus": 0, "status": ["in", ["Result Entered", "Sent Back", "Draft"]]}, "name")
+		if draft:
+			frappe.db.set_value("Lab Result", draft, {"status": "Cancelled", "send_back_reason": f"Sample {s.name} rejected: {reason}"})
+		frappe.db.set_value("Test Invoice Item", t.invoice_item, {"sample": new.name, "status": "Ordered", "result": None})
 	publish("lab", {"action": "rejected", "sample": s.name, "recollect": new.name}, s.branch)
 	return new
 
@@ -345,8 +356,8 @@ def send_back(result, reason):
 
 
 def amend(result, reason):
-	if not has_any_role(R.PATHOLOGIST, R.LAB_USER):
-		frappe.throw(_("Not permitted."), frappe.PermissionError)
+	if not has_any_role(R.PATHOLOGIST):  # QA defect 2: only the pathologist reopens a verified result
+		frappe.throw(_("Only the pathologist amends a verified result."), frappe.PermissionError)
 	if not (reason or "").strip():
 		frappe.throw(_("Enter the reason for the amendment."))
 	old = frappe.get_doc("Lab Result", result)
@@ -569,6 +580,39 @@ def report_pdf(ti_name):
 	out = io.BytesIO()
 	w.write(out)
 	return out.getvalue()
+
+
+def on_refund(doc, method=None):
+	"""QA defect 3: a credit note against a lab bill cancels the refunded tests that have no verified result yet, and their samples."""
+	if not doc.is_return or not doc.return_against:
+		return
+	ref = frappe.db.get_value("Sales Invoice", doc.return_against, ["hv_reference_doctype", "hv_reference_name", "hv_is_payer_share"], as_dict=True)
+	if not ref or ref.hv_reference_doctype != "Test Invoice" or ref.hv_is_payer_share:
+		return
+	ti = frappe.get_doc("Test Invoice", ref.hv_reference_name)
+	refunded = {i.item_code for i in doc.items}
+	kept = []
+	for r in ti.items:
+		item = frappe.db.get_value("Lab Test Template", r.template, "item")
+		if item not in refunded or r.status == "Cancelled":
+			continue
+		if r.status in ("Verified", "Released"):
+			kept.append(r.template)
+			continue
+		frappe.db.set_value("Test Invoice Item", r.name, "status", "Cancelled")
+		draft = frappe.db.get_value("Lab Result", {"invoice_item": r.name, "docstatus": 0}, "name")
+		if draft:
+			frappe.db.set_value("Lab Result", draft, "status", "Cancelled")
+	ti.reload()
+	for sname in {r.sample for r in ti.items if r.sample}:
+		live = [t for t in frappe.get_all("Lab Sample Test", filters={"parent": sname}, pluck="invoice_item") if frappe.db.get_value("Test Invoice Item", t, "status") != "Cancelled"]
+		if not live and frappe.db.get_value("Lab Sample", sname, "status") in ("Pending", "Collected", "Received"):
+			frappe.db.set_value("Lab Sample", sname, "status", "Cancelled")
+	if all(r.status == "Cancelled" for r in ti.items):
+		ti.db_set("status", "Cancelled")
+	if kept:
+		frappe.msgprint(_("Already verified, kept on the report: {0}").format(", ".join(kept)))
+	publish("lab", {"action": "refunded", "test_invoice": ti.name}, ti.branch)
 
 
 def hand_over(name, to):

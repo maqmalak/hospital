@@ -12,6 +12,23 @@ from hospital_vvs.services import er, ipd, shifts
 from hospital_vvs.setup.company import ABBR
 from hospital_vvs.tests.test_phase2 import as_user, receive, test_item
 
+
+# Tests must never save to the site: some paths (wrong PIN / OTP, FBR run) commit on purpose, so block commits for the whole module.
+_commit_patch = None
+
+
+def setUpModule():
+	global _commit_patch
+	from unittest.mock import patch
+
+	_commit_patch = patch.object(frappe.db, "commit", lambda *a, **k: None)
+	_commit_patch.start()
+
+
+def tearDownModule():
+	if _commit_patch:
+		_commit_patch.stop()
+
 IPD_WH = f"IPD Dispensing LHR - {ABBR}"
 DESK = "ipd.desk.test@vvs.demo"
 

@@ -32,7 +32,7 @@ def create_order(data):
 		done = frappe.db.get_value("Test Invoice", {"client_ref": d["client_ref"]})
 		if done:
 			return order(done)
-	ti = lab.create_order(d["patient"], d["tests"], branch, referring_doctor=d.get("referring_doctor"), priority=d.get("priority") or "Routine",
+	ti = lab.create_order(d["patient"], d["tests"], branch, referring_doctor=d.get("referring_doctor"), priority=d.get("priority") or "Normal",
 		external_referrer=d.get("external_referrer"))
 	if d.get("client_ref"):
 		ti.db_set("client_ref", d["client_ref"])
@@ -59,16 +59,23 @@ def request_discount(name, amount, reason):
 
 
 @frappe.whitelist()
-def orders(date=None, status=None, q=None, branch=None):
+def orders(date=None, status=None, q=None, branch=None, from_date=None, to_date=None, priority=None):
+	"""Lab orders by day / week / month / custom range (from_date..to_date), status, priority, or search (any date)."""
 	require_roles(*ORDERING, R.PATHOLOGIST, R.NURSE)
 	filters = {"branch": branch or default_branch()}
-	if date:
+	if from_date and to_date:
+		filters["posting_date"] = ["between", [from_date, to_date]]
+	elif date:
 		filters["posting_date"] = date
+	if priority:
+		filters["priority"] = priority
+	if q:
+		filters.pop("posting_date", None)
 	if status:
 		filters["status"] = status
 	or_filters = {"patient_name": ["like", f"%{q}%"], "patient": ["like", f"%{q}%"], "name": ["like", f"%{q}%"]} if q else None
 	rows = frappe.get_all("Test Invoice", filters=filters, or_filters=or_filters, fields=["name", "patient", "patient_name", "status", "net_total", "patient_share",
-		"priority", "posting_date", "expected_at", "referring_doctor", "released_at", "sales_invoice", "creation"], order_by="creation desc", limit=200)
+		"priority", "posting_date", "expected_at", "referring_doctor", "released_at", "sales_invoice", "creation", "handed_over_to"], order_by="creation desc", limit=500)
 	names = [r.name for r in rows] or [""]
 	items = frappe.get_all("Test Invoice Item", filters={"parent": ["in", names]}, fields=["parent", "template", "status"])
 	for r in rows:
@@ -104,7 +111,8 @@ def samples(status="Pending", branch=None):
 	for r in rows:
 		r["tests"] = frappe.get_all("Lab Sample Test", filters={"parent": r.name}, pluck="test_code")
 		r["priority"] = pri.get(r.test_invoice)
-	rows.sort(key=lambda r: (r["priority"] != "Urgent", str(r["creation"])))
+	rank = {"Urgent": 0, "Priority": 1}
+	rows.sort(key=lambda r: (rank.get(r["priority"], 2), str(r["creation"])))
 	return rows
 
 
@@ -155,7 +163,7 @@ def worklist(status=None, department=None, branch=None):
 		ti.priority, ti.expected_at, t.department, t.test_code, r.has_critical, r.critical_logged, r.status result_status, r.send_back_reason
 		from `tabTest Invoice Item` tii join `tabTest Invoice` ti on ti.name=tii.parent join `tabLab Test Template` t on t.name=tii.template
 		left join `tabLab Result` r on r.name=tii.result
-		where ti.branch=%(b)s and tii.status in %(s)s {dept} order by ti.priority='Urgent' desc, ti.creation""".format(dept="and t.department=%(d)s" if department else ""),
+		where ti.branch=%(b)s and tii.status in %(s)s {dept} order by field(ti.priority, 'Urgent', 'Priority') = 0, field(ti.priority, 'Urgent', 'Priority'), ti.creation""".format(dept="and t.department=%(d)s" if department else ""),
 		{"b": branch, "s": statuses, "d": department}, as_dict=True)
 	return rows
 
@@ -208,6 +216,9 @@ def verify_list(branch=None):
 			order_by="idx")
 		r["text_result"] = frappe.db.get_value("Lab Result", r.name, "text_result")
 		r["attachment"] = frappe.db.get_value("Lab Result", r.name, "attachment")
+		r["priority"] = frappe.db.get_value("Test Invoice", r.test_invoice, "priority") or "Normal"
+	rank = {"Urgent": 0, "Priority": 1}
+	rows.sort(key=lambda r: (not r.has_critical, rank.get(r["priority"], 2), str(r.entered_at)))
 	return rows
 
 

@@ -32,7 +32,7 @@ doc_events = {
 	"Sales Invoice": {
 		"validate": ["hospital_vvs.services.pharmacy.validate_invoice", "hospital_vvs.services.doctor_share.fill_line_doctors"],
 		"on_submit": ["hospital_vvs.services.pharmacy.on_invoice_submit", "hospital_vvs.services.doctor_share.on_invoice_change",
-			"hospital_vvs.services.fbr.on_invoice_submit"],
+			"hospital_vvs.services.fbr.on_invoice_submit", "hospital_vvs.services.lab.on_refund"],
 		"on_cancel": ["hospital_vvs.services.billing.on_invoice_cancel", "hospital_vvs.services.doctor_share.on_invoice_change"],
 	},
 	# doctor share is earned as bills are paid (D-43)

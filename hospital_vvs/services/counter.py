@@ -267,7 +267,7 @@ def checkout(data, counter=None):
 	ti = None
 	if lab_lines:
 		ti = lab.create_order(patient, [x["template"] for x in lab_lines], branch, referring_doctor=d.get("referring_doctor"),
-			priority="Urgent" if cint(d.get("lab_urgent")) else "Routine")
+			priority="Urgent" if cint(d.get("lab_urgent")) else "Normal")
 		ti.discount_amount = sum(flt(x.get("discount")) for x in lab_lines)
 		ti.run_method("validate")
 	svc_lines = [x for x in lines if x.get("kind") == "Service"]

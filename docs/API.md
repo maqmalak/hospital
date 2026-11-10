@@ -225,7 +225,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `create_order` | data | POST | ORDERING |  |
 | `pay` | name, payment_mode, cash_tendered, discount_amount, discount_authorization | POST | LAB_USER, RECEPTIONIST |  |
 | `request_discount` | name, amount, reason | POST | LAB_USER, RECEPTIONIST |  |
-| `orders` | date, status, q, branch |  | ORDERING, PATHOLOGIST, NURSE |  |
+| `orders` | date, status, q, branch, from_date, to_date, priority |  | ORDERING, PATHOLOGIST, NURSE | Lab orders by day / week / month / custom range (from_date..to_date), status, priority, or search (any date). |
 | `order` | name |  |  |  |
 | `samples` | status, branch |  | LAB_STAFF, NURSE |  |
 | `sample_action` | name, action, reason, note | POST | LAB_STAFF, NURSE |  |
