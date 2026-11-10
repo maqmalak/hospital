@@ -250,6 +250,10 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `report_open` | token | guest |  |  |
 | `report_verify` | token, answer | guest POST |  |  |
 | `report_pdf` | token | guest |  |  |
+| `report_file` | token, index | guest |  | The scanned / outside-lab report file of one test, for the patient (same link + verification rules as the PDF). |
+| `print_pdf` | name |  | LAB_USER, RECEPTIONIST, PATHOLOGIST | Staff copy of the released report as PDF (scanned pages included) for printing and handing to the patient. |
+| `hand_over` | name, to | POST | LAB_USER, RECEPTIONIST | Printed report handed over at the counter (to the patient or an attendant). |
+| `upload_report_file` | invoice_item, filename, filedata | POST | LAB_USER, PATHOLOGIST | Scan / photo of a handwritten report (or an outside lab's PDF) for one ordered test: private file on the result. |
 | `templates` | q, department |  | PATHOLOGIST, LAB_USER |  |
 | `template` | name |  | PATHOLOGIST, LAB_USER |  |
 | `save_template` | data | POST | PATHOLOGIST | Create / update a test template with its parameters (pathologist). Price changes apply to new orders only. |

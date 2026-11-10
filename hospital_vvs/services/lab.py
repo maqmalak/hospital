@@ -479,6 +479,7 @@ def report_data(ti_name, include_all=False):
 		res = frappe.get_doc("Lab Result", r.result) if r.result else None
 		tests.append({"test_name": res.test_name if res else r.template, "status": r.status, "pending": False, "department": res.department if res else "",
 			"values": [v.as_dict() for v in res.get("values")] if res else [], "text_result": res.text_result if res else "", "attachment": res.attachment if res else None,
+			"attachment_kind": _kind(res.attachment) if res and res.attachment else None,
 			"interpretation": res.interpretation if res else "", "verified_by": frappe.db.get_value("User", res.verified_by, "full_name") if res and res.verified_by else "",
 			"verified_at": str(res.verified_at or "") if res else "", "version": res.version_no if res else 1, "amended": bool(res and res.amended_from)})
 	branch = frappe.db.get_value("Branch", ti.branch, ["hv_address", "hv_phone"], as_dict=True) or {}
@@ -487,6 +488,32 @@ def report_data(ti_name, include_all=False):
 		"referring_doctor": frappe.db.get_value("Doctor", ti.referring_doctor, "doctor_name") if ti.referring_doctor else ti.external_referrer,
 		"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "address": branch.get("hv_address") or s.address, "phone": branch.get("hv_phone") or s.phone},
 		"tests": tests}
+
+
+def _kind(url):
+	u = (url or "").lower()
+	return "pdf" if u.endswith(".pdf") else "image" if u.rsplit(".", 1)[-1] in ("jpg", "jpeg", "png", "webp", "gif") else "file"
+
+
+def attachment_bytes(url):
+	"""Content of a report file (private or public) by its URL."""
+	name = frappe.db.get_value("File", {"file_url": url}, "name")
+	if not name:
+		frappe.throw(_("Report file not found."))
+	f = frappe.get_doc("File", name)
+	return f.get_content(), f.file_name
+
+
+def _img_tag(url):
+	import base64
+	import mimetypes
+
+	try:
+		data, fname = attachment_bytes(url)
+	except Exception:
+		return ""
+	mime = mimetypes.guess_type(fname)[0] or "image/jpeg"
+	return f"<div style='margin-top:6px'><img src='data:{mime};base64,{base64.b64encode(data).decode()}' style='max-width:100%;max-height:900px;border:1px solid #e2e8f0'></div>"
 
 
 def report_html(d):
@@ -505,6 +532,8 @@ def report_html(d):
 		parts.append(f"<div class='t'><h3>{esc(t['test_name'])} <span class='muted'>{esc(t.get('department') or '')}</span>"
 			f"{' · <b style=\"color:#b91c1c\">AMENDED v' + str(t['version']) + '</b>' if t.get('amended') else ''}</h3>{table}"
 			f"{('<div class=\"txt\">' + esc(t.get('text_result') or '').replace(chr(10), '<br>') + '</div>') if t.get('text_result') else ''}"
+			f"{_img_tag(t['attachment']) if t.get('attachment_kind') == 'image' else ''}"
+			f"{('<p class=\'muted\'>Report document attached on the following page(s).</p>') if t.get('attachment_kind') == 'pdf' else ''}"
 			f"{('<p><b>Interpretation:</b> ' + esc(t['interpretation']) + '</p>') if t.get('interpretation') else ''}"
 			f"<p class='muted'>Verified by {esc(t.get('verified_by') or '')} · {esc(t.get('verified_at')[:16])}</p></div>")
 	p, c = d["patient"], d["clinic"]
@@ -521,9 +550,35 @@ def report_html(d):
 
 
 def report_pdf(ti_name):
+	"""Report PDF; scanned images are inside it, attached PDFs (handwritten / outside lab) are appended after it."""
+	import io
+
 	from frappe.utils.pdf import get_pdf
 
-	return get_pdf(report_html(report_data(ti_name)))
+	d = report_data(ti_name)
+	main = get_pdf(report_html(d))
+	extra = [t["attachment"] for t in d["tests"] if t.get("attachment_kind") == "pdf"]
+	if not extra:
+		return main
+	from pypdf import PdfReader, PdfWriter
+
+	w = PdfWriter()
+	for src in [main] + [attachment_bytes(u)[0] for u in extra]:
+		for page in PdfReader(io.BytesIO(src)).pages:
+			w.add_page(page)
+	out = io.BytesIO()
+	w.write(out)
+	return out.getvalue()
+
+
+def hand_over(name, to):
+	if not (to or "").strip():
+		frappe.throw(_("Who received the printed report?"))
+	ti = frappe.get_doc("Test Invoice", name)
+	if ti.status not in ("Released", "Partially Released"):
+		frappe.throw(_("Release the report first."))
+	ti.db_set({"handed_over_to": to.strip(), "handed_over_at": now_datetime(), "handed_over_by": frappe.session.user})
+	return ti
 
 
 # ------------------------------------------------------------------ outsourcing

@@ -185,7 +185,7 @@ def result_form(invoice_item):
 
 
 @frappe.whitelist(methods=["POST"])
-def save_result(invoice_item, values=None, text_result=None, attachment=None):
+def save_result(invoice_item, values=None, text_result=None, attachment=None):  # attachment = report file URL (scan / outside lab)
 	require_roles(*LAB_STAFF)
 	res = lab.enter_results(invoice_item, frappe.parse_json(values) if values else {}, text_result, attachment)
 	return result_form(invoice_item) | {"saved": res.name, "has_critical": res.has_critical}
@@ -351,6 +351,65 @@ def report_pdf(token):
 	frappe.local.response.filename = f"{t.test_invoice}.pdf"
 	frappe.local.response.filecontent = lab.report_pdf(t.test_invoice)
 	frappe.local.response.type = "pdf"
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=20, seconds=600)
+def report_file(token, index):
+	"""The scanned / outside-lab report file of one test, for the patient (same link + verification rules as the PDF)."""
+	t, err = lab.token_doc(token)
+	if err:
+		frappe.throw(_(err))
+	if cint(frappe.db.get_single_value("Clinic Settings", "report_require_verification")) and not t.verified:
+		frappe.throw(_("Verify first."), frappe.PermissionError)
+	tests = lab.report_data(t.test_invoice)["tests"]
+	i = cint(index)
+	if i < 0 or i >= len(tests) or not tests[i].get("attachment"):
+		frappe.throw(_("No report file for this test."))
+	data, fname = lab.attachment_bytes(tests[i]["attachment"])
+	lab.log_token_access(t, "file")
+	frappe.local.response.filename = fname
+	frappe.local.response.filecontent = data
+	frappe.local.response.type = "download"
+
+
+@frappe.whitelist()
+def print_pdf(name):
+	"""Staff copy of the released report as PDF (scanned pages included) for printing and handing to the patient."""
+	require_roles(R.LAB_USER, R.RECEPTIONIST, R.PATHOLOGIST)
+	ti = frappe.get_doc("Test Invoice", name)
+	if ti.status not in ("Released", "Partially Released"):
+		frappe.throw(_("Release the report first."))
+	log_access("Lab report printed", patient=ti.patient, reference_doctype="Test Invoice", reference_name=ti.name)
+	frappe.local.response.filename = f"{ti.name}.pdf"
+	frappe.local.response.filecontent = lab.report_pdf(ti.name)
+	frappe.local.response.type = "pdf"
+
+
+@frappe.whitelist(methods=["POST"])
+def hand_over(name, to):
+	"""Printed report handed over at the counter (to the patient or an attendant)."""
+	require_roles(R.LAB_USER, R.RECEPTIONIST)
+	return lab.hand_over(name, to).as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
+def upload_report_file(invoice_item, filename, filedata):
+	"""Scan / photo of a handwritten report (or an outside lab's PDF) for one ordered test: private file on the result."""
+	require_roles(R.LAB_USER, R.PATHOLOGIST)
+	import base64
+
+	from frappe.utils.file_manager import save_file
+
+	ext = (filename or "").lower().rsplit(".", 1)[-1]
+	if ext not in ("pdf", "jpg", "jpeg", "png", "webp"):
+		frappe.throw(_("Upload a PDF or a photo (JPG / PNG)."))
+	raw = base64.b64decode(filedata.split(",", 1)[-1])
+	if len(raw) > 10 * 1024 * 1024:
+		frappe.throw(_("The file is larger than 10 MB."))
+	ti = frappe.db.get_value("Test Invoice Item", invoice_item, "parent")
+	f = save_file(filename, raw, "Test Invoice", ti, is_private=1)
+	return f.file_url
 
 
 # ------------------------------------------------------------------ test templates (/lab/templates)

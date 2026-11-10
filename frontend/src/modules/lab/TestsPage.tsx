@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertOctagon, CheckCircle2, History, PhoneCall, Save, Siren } from "lucide-react";
+import { AlertOctagon, CheckCircle2, History, PhoneCall, Save, Siren, FileUp } from "lucide-react";
 import toast from "react-hot-toast";
 import { call, humanizeError, useApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -14,7 +14,7 @@ interface W { name: string; test_invoice: string; template: string; status: stri
 interface Param { parameter: string; unit: string; normal_low?: number; normal_high?: number; critical_low?: number; critical_high?: number; normal_text?: string; previous?: string }
 interface Form { item: { name: string; status: string }; order: { name: string; patient: string; patient_name: string; gender: string; age?: number; priority: string };
   template: { name: string; test_code: string; department: string; result_type: string; text_template?: string; outsourced: number; method?: string };
-  parameters: Param[]; previous_date: string; result: null | { name: string; values: { parameter: string; value: string; flag?: string }[]; text_result?: string; has_critical: number; critical_logged: number; send_back_reason?: string; docstatus: number };
+  parameters: Param[]; previous_date: string; result: null | { name: string; values: { parameter: string; value: string; flag?: string }[]; text_result?: string; attachment?: string; has_critical: number; critical_logged: number; send_back_reason?: string; docstatus: number };
   critical_logs: { parameter: string; notified_person: string; method: string; notified_at: string }[]; saved?: string; has_critical?: number }
 
 function localFlag(v: string, p: Param) {
@@ -66,8 +66,11 @@ export function ResultDialog({ item, onClose }: { item: string; onClose: () => v
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [critical, setCritical] = useState(false);
+  const [file, setFile] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
   useEffect(() => {
     if (!data) return;
+    setFile(data.result?.attachment ?? "");
     setVals(Object.fromEntries((data.result?.values ?? []).map((v) => [v.parameter, v.value ?? ""])));
     setText(data.result?.text_result ?? data.template.text_template ?? "");
   }, [data]);
@@ -78,7 +81,7 @@ export function ResultDialog({ item, onClose }: { item: string; onClose: () => v
   const save = async () => {
     setBusy(true);
     try {
-      const r = await call<Form>("lab.save_result", { invoice_item: item, values: vals, text_result: textual ? text : undefined });
+      const r = await call<Form>("lab.save_result", { invoice_item: item, values: vals, text_result: textual ? text : undefined, attachment: file || undefined });
       if (r.has_critical && !r.result?.critical_logged) { setCritical(true); toast.error("Critical value — notify the doctor now", { duration: 8000 }); }
       else { toast.success("Result saved for verification"); onClose(); }
       void refetch();
@@ -102,6 +105,18 @@ export function ResultDialog({ item, onClose }: { item: string; onClose: () => v
               <td className="text-xs text-muted-foreground">{p.normal_text || (p.normal_high ? `${p.normal_low ?? 0} – ${p.normal_high}` : "")}{f && <b className={cn("ms-2", FLAG_TONE[f])}>{f}{flagArrow(f)}</b>}</td>
               <td className="text-xs text-muted-foreground">{p.previous ?? "–"}</td></tr>); })}</tbody></table></div>)}
       {textual && <Field label="Report text" className="mt-3"><textarea disabled={locked} className={inputCls + " h-40 py-2 font-mono text-xs"} value={text} onChange={(e) => setText(e.target.value)} /></Field>}
+      <div className={cn("mt-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-dashed p-3", file ? "border-emerald-400 bg-emerald-50/60 dark:bg-emerald-500/10" : "border-border")}>
+        <FileUp className="h-5 w-5 text-violet-600" />
+        <div className="min-w-0 flex-1 text-sm"><b>Report file</b> <span className="text-muted-foreground">— scan / photo of a handwritten report, or an outside lab's PDF. The patient gets it with the report (WhatsApp link and portal download).</span>
+          {file && <a href={file} target="_blank" rel="noreferrer" className="block truncate text-xs font-semibold text-sky-700 underline">{file.split("/").pop()}</a>}</div>
+        {!locked && <label className="cursor-pointer rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold hover:bg-muted">{uploading ? "Uploading…" : file ? "Replace" : "Upload / take photo"}
+          <input type="file" accept="image/*,application/pdf" capture="environment" className="hidden" onChange={async (e) => {
+            const f = e.target.files?.[0]; if (!f) return; setUploading(true);
+            try { const data64 = await new Promise<string>((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.readAsDataURL(f); });
+              setFile(await call<string>("lab.upload_report_file", { invoice_item: item, filename: f.name, filedata: data64 })); toast.success("Report file attached — save the result"); }
+            catch (er) { toast.error(humanizeError(er)); } finally { setUploading(false); } }} /></label>}
+        {!locked && file && <button className="text-xs font-semibold text-rose-600 underline" onClick={() => setFile("")}>remove</button>}
+      </div>
       {data.critical_logs.length > 0 && <div className="mt-3 rounded-xl bg-rose-50 p-2 text-xs text-rose-800 dark:bg-rose-500/10 dark:text-rose-200">{data.critical_logs.map((c, i) => <div key={i}>Notified {c.notified_person} by {c.method} · {c.notified_at.slice(0, 16)}{c.parameter ? ` · ${c.parameter}` : ""}</div>)}</div>}
       {!locked && <div className="mt-4 flex items-center gap-2">
         {anyCritical && <span className="flex items-center gap-1 text-sm font-bold text-rose-600"><AlertOctagon className="h-4 w-4" />Critical value</span>}

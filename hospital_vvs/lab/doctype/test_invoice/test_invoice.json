@@ -40,6 +40,9 @@
   "ti7",
   "whatsapp_opt_in",
   "whatsapp_number",
+  "handed_over_to",
+  "handed_over_at",
+  "handed_over_by",
   "ti8",
   "released_at",
   "report_version",
@@ -269,6 +272,25 @@
    "label": "Whatsapp Number"
   },
   {
+   "fieldname": "handed_over_to",
+   "fieldtype": "Data",
+   "label": "Printed report handed to",
+   "read_only": 1
+  },
+  {
+   "fieldname": "handed_over_at",
+   "fieldtype": "Datetime",
+   "label": "Handed Over At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "handed_over_by",
+   "fieldtype": "Link",
+   "label": "Handed Over By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
    "fieldname": "ti8",
    "fieldtype": "Column Break"
   },
@@ -324,7 +346,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-09 18:00:57.207924",
+ "modified": "2026-11-10 17:04:44.690875",
  "modified_by": "Administrator",
  "module": "Lab",
  "name": "Test Invoice",

@@ -8,7 +8,7 @@ import { PublicShell } from "./shared";
 
 const M = (x: string) => `hospital_vvs.api.lab.${x}`;
 interface V { parameter: string; value: string; unit?: string; normal_range?: string; flag?: string; previous_value?: string }
-interface T { test_name: string; status: string; pending: boolean; department?: string; values?: V[]; text_result?: string; interpretation?: string; verified_by?: string; verified_at?: string; version?: number; amended?: boolean }
+interface T { test_name: string; status: string; pending: boolean; department?: string; attachment_kind?: string | null; values?: V[]; text_result?: string; interpretation?: string; verified_by?: string; verified_at?: string; version?: number; amended?: boolean }
 interface Report { name: string; status: string; posting_date: string; released_at: string; patient: { mr: string; name: string; name_ur?: string; gender: string; age?: number };
   referring_doctor?: string; clinic: { name: string; name_ur?: string; address?: string; phone?: string }; tests: T[] }
 interface Open { error?: string; clinic: string; phone?: string; needs_verification?: boolean; method?: string; downloads_left?: number; expires_at?: string; report?: Report }
@@ -60,6 +60,7 @@ export default function LabReportPage() {
                 {t.values?.some((v) => String(v.value ?? "").trim()) && <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-border text-xs uppercase text-muted-foreground"><th className="py-2 text-start">Test</th><th className="text-start">Result</th><th className="text-start">Unit</th><th className="text-start">Reference</th></tr></thead>
                   <tbody>{t.values.filter((v) => String(v.value ?? "").trim()).map((v) => <tr key={v.parameter} className="border-b border-border/50"><td className="py-1.5">{v.parameter}</td><td className={cn("font-bold tabular-nums", TONE[v.flag ?? ""])}>{v.value}{v.flag?.includes("High") ? " ▲" : v.flag?.includes("Low") ? " ▼" : ""}</td><td className="text-xs text-muted-foreground">{v.unit}</td><td className="text-xs text-muted-foreground">{v.normal_range}</td></tr>)}</tbody></table></div>}
                 {t.text_result && <div className="whitespace-pre-wrap mt-2  ">{t.text_result}</div>}
+                {t.attachment_kind && <a href={`/api/method/${M("report_file")}?token=${encodeURIComponent(token)}&index=${i}`} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white"><Download className="h-4 w-4" />{t.attachment_kind === "image" ? "Download report (photo)" : "Download report document"}</a>}
                 {t.interpretation && <p className="mt-2 text-sm"><b>Interpretation:</b> {t.interpretation}</p>}
                 <p className="mt-2 text-xs text-muted-foreground">Verified by {t.verified_by} · {t.verified_at?.slice(0, 16)}</p></>}
             </div>))}

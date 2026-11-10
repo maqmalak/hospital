@@ -152,3 +152,6 @@ Not built / owner: recurring expense templates. (Card gateway and FBR: see D-47.
 ## Card gateway (mock), FBR day-end, WhatsApp templates (2026-11-10) — D-47
 Online Payment + mock checkout `/pay/:token`, Pay by card on the online visit status page, payment links for unpaid bills (`/online-payments`), Card Gateway Clearing account + mode *Card (online)*; FBR Invoice log, day-end run (scheduler + Report now on `/fbr`), FBR number + QR on pharmacy receipt reprints; 38 Meta-ready WhatsApp templates in `docs/whatsapp/`. Site: gateway on (Mock), FBR on (Mock, Medicine). Tests: 85 green (5 new).
 Owner: choose the card gateway and add its keys; FBR POS ID / NTN / token and scope from the tax advisor; submit the WhatsApp templates in Meta.
+
+## Handwritten lab reports, print & hand over (2026-11-10) — D-48
+Report file (scan / photo / outside PDF) on the result screen; merged into the patient PDF; portal download of the original file; WhatsApp link on release / resend; Print & hand over with recipient recorded; wider template editor. Tests: 87 green (2 new).

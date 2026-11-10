@@ -56,12 +56,12 @@ function TemplateDialog({ name, ctx, canEdit, onClose, onSaved }: { name?: strin
   const setP = (i: number, p: Partial<Param>) => set({ parameters: cur.parameters.map((x, j) => (j === i ? { ...x, ...p } : x)) });
   const save = async () => { setBusy(true); try { await call("lab.save_template", { data: JSON.stringify(cur) }); toast.success("Template saved"); onSaved(); } catch (e) { toast.error(humanizeError(e), { duration: 8000 }); } finally { setBusy(false); } };
   const ro = !canEdit;
-  const numCell = (i: number, k: keyof Param, w = "w-16") => <input disabled={ro} className={inputCls + ` h-8 ${w} px-1 text-end text-xs`} inputMode="decimal" value={(cur.parameters[i][k] as number | null | undefined) ?? ""} onChange={(e) => setP(i, { [k]: num(e.target.value.replace(/[^\d.-]/g, "")) } as Partial<Param>)} />;
+  const numCell = (i: number, k: keyof Param, w = "w-24") => <input disabled={ro} className={inputCls + ` h-9 ${w} px-2 text-end text-sm tabular-nums`} inputMode="decimal" value={(cur.parameters[i][k] as number | null | undefined) ?? ""} onChange={(e) => setP(i, { [k]: num(e.target.value.replace(/[^\d.-]/g, "")) } as Partial<Param>)} />;
   return (
-    <Dialog open onClose={onClose} size="xl" className="max-w-6xl" title={name ? cur.test_name : "New test"} description={ro ? "Read only — the pathologist edits templates." : "Price and range changes apply to new orders; reports already verified keep their values."}>
+    <Dialog open onClose={onClose} size="xl" className="mt-2 max-w-[min(1700px,98vw)] sm:mt-3" title={name ? cur.test_name : "New test"} description={ro ? "Read only — the pathologist edits templates." : "Price and range changes apply to new orders; reports already verified keep their values."}>
       <fieldset disabled={ro} className="space-y-4">
-        <div className="grid gap-2 md:grid-cols-4">
-          <Field label="Test name" required><input className={inputCls} disabled={!!name || ro} value={cur.test_name} onChange={(e) => set({ test_name: e.target.value })} /></Field>
+        <div className="grid gap-2 md:grid-cols-4 xl:grid-cols-8">
+          <Field label="Test name" required className="xl:col-span-2"><input className={inputCls} disabled={!!name || ro} value={cur.test_name} onChange={(e) => set({ test_name: e.target.value })} /></Field>
           <Field label="Code" required><input className={inputCls} value={cur.test_code} onChange={(e) => set({ test_code: e.target.value.toUpperCase() })} /></Field>
           <Field label="Department"><select className={inputCls} value={cur.department} onChange={(e) => set({ department: e.target.value })}>{ctx.departments.map((d) => <option key={d}>{d}</option>)}</select></Field>
           <Field label="Result"><select className={inputCls} value={cur.result_type} onChange={(e) => set({ result_type: e.target.value })}>{["Numeric", "Text", "Both"].map((d) => <option key={d}>{d}</option>)}</select></Field>
@@ -72,16 +72,16 @@ function TemplateDialog({ name, ctx, canEdit, onClose, onSaved }: { name?: strin
         </div>
         {cur.result_type !== "Text" && <section className="rounded-2xl border border-border">
           <div className="flex items-center justify-between border-b border-border px-3 py-2"><b className="text-sm">Parameters & reference ranges</b>{!ro && <Button size="xs" variant="menu" onClick={() => set({ parameters: [...cur.parameters, { parameter: "", gender: "All", decimals: 1 }] })}><Plus className="h-3 w-3" />Parameter</Button>}</div>
-          <div className="overflow-x-auto"><table className="w-full text-xs"><thead className="bg-muted/60 text-[10px] uppercase text-muted-foreground"><tr><th className="px-2 py-1.5 text-start">Parameter</th><th className="text-start">Unit</th><th>Sex</th><th>Age from–to</th><th>Normal low–high</th><th>Critical low–high</th><th className="text-start">Normal text</th><th>Dec.</th><th /></tr></thead>
+          <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-muted/60 text-[11px] uppercase text-muted-foreground"><tr><th className="px-2 py-1.5 text-start">Parameter</th><th className="text-start">Unit</th><th>Sex</th><th>Age from–to</th><th>Normal low–high</th><th>Critical low–high</th><th className="text-start">Normal text</th><th>Dec.</th><th /></tr></thead>
             <tbody>{cur.parameters.map((p, i) => <tr key={i} className="border-t border-border">
-              <td className="px-2 py-1"><input className={inputCls + " h-8 min-w-36 text-xs"} value={p.parameter} onChange={(e) => setP(i, { parameter: e.target.value })} /></td>
-              <td><input className={inputCls + " h-8 w-20 text-xs"} value={p.unit ?? ""} onChange={(e) => setP(i, { unit: e.target.value })} /></td>
-              <td><select className={inputCls + " h-8 w-24 text-xs"} value={p.gender ?? "All"} onChange={(e) => setP(i, { gender: e.target.value })}>{["All", "Male", "Female"].map((g) => <option key={g}>{g}</option>)}</select></td>
-              <td><div className="flex gap-1">{numCell(i, "age_from", "w-12")}{numCell(i, "age_to", "w-12")}</div></td>
+              <td className="px-2 py-1"><input className={inputCls + " h-9 min-w-56 text-sm font-semibold"} value={p.parameter} onChange={(e) => setP(i, { parameter: e.target.value })} /></td>
+              <td><input className={inputCls + " h-9 w-28 text-sm"} value={p.unit ?? ""} onChange={(e) => setP(i, { unit: e.target.value })} /></td>
+              <td><select className={inputCls + " h-9 w-32 pe-7 text-sm"} value={p.gender ?? "All"} onChange={(e) => setP(i, { gender: e.target.value })}>{["All", "Male", "Female"].map((g) => <option key={g}>{g}</option>)}</select></td>
+              <td><div className="flex gap-1">{numCell(i, "age_from", "w-16")}{numCell(i, "age_to", "w-16")}</div></td>
               <td><div className="flex gap-1">{numCell(i, "normal_low")}{numCell(i, "normal_high")}</div></td>
               <td><div className="flex gap-1">{numCell(i, "critical_low")}{numCell(i, "critical_high")}</div></td>
-              <td><input className={inputCls + " h-8 w-28 text-xs"} value={p.normal_text ?? ""} onChange={(e) => setP(i, { normal_text: e.target.value })} placeholder="e.g. Negative" /></td>
-              <td>{numCell(i, "decimals", "w-10")}</td>
+              <td><input className={inputCls + " h-9 w-44 text-sm"} value={p.normal_text ?? ""} onChange={(e) => setP(i, { normal_text: e.target.value })} placeholder="e.g. Negative" /></td>
+              <td>{numCell(i, "decimals", "w-14")}</td>
               <td>{!ro && <button type="button" className="p-1 text-rose-600" onClick={() => set({ parameters: cur.parameters.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></button>}</td></tr>)}</tbody></table></div>
           <div className="px-3 py-2 text-[11px] text-muted-foreground">Add one row per sex / age band when ranges differ (e.g. Hb: Male 13–17, Female 12–15). Values outside the critical range alert the pathologist.</div></section>}
         {cur.result_type !== "Numeric" && <Field label="Starting text for the report"><textarea className={inputCls + " min-h-24"} value={cur.text_template ?? ""} onChange={(e) => set({ text_template: e.target.value })} /></Field>}

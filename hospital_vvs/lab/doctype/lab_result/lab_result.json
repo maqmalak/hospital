@@ -177,10 +177,10 @@
    "label": "Text Result"
   },
   {
-   "description": "Outsourced report PDF",
+   "description": "Scanned / photographed handwritten report or an outside lab's PDF; given to the patient with the report",
    "fieldname": "attachment",
    "fieldtype": "Attach",
-   "label": "Attachment"
+   "label": "Report file"
   },
   {
    "fieldname": "lr4",
@@ -246,7 +246,7 @@
  "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-10 17:04:44.691697",
  "modified_by": "Administrator",
  "module": "Lab",
  "name": "Lab Result",

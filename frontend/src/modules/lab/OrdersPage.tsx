@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { Banknote, Check, ExternalLink, FilePlus2, Link2, Plus, Search, Send, ShieldOff, Siren, X } from "lucide-react";
+import { Banknote, Check, ExternalLink, FilePlus2, Link2, Plus, Search, Send, ShieldOff, Siren, X, HandHelping, Printer } from "lucide-react";
 import toast from "react-hot-toast";
 import { call, humanizeError, useAction, useApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -133,7 +133,7 @@ interface Order { name: string; patient: string; patient_name: string; status: s
   payer_share: number; sales_invoice?: string; expected_at?: string; referring_doctor?: string; items: { name: string; template: string; status: string; price: number; sample?: string; result?: string; outsourced: number }[];
   samples: { name: string; sample_type: string; container: string; status: string; collected_at?: string; rejection_reason?: string }[];
   links: { name: string; expires_at: string; download_count: number; max_downloads: number; revoked: number; version: number; last_accessed_at?: string }[];
-  messages: { name: string; event: string; status: string; channel: string; creation: string }[] }
+  messages: { name: string; event: string; status: string; channel: string; creation: string }[]; handed_over_to?: string; handed_over_at?: string; whatsapp_number?: string; whatsapp_opt_in?: number }
 
 export function OrderDialog({ name, onClose }: { name: string; onClose: () => void }) {
   const { data: o, refetch } = useApi<Order>("lab.order", { name });
@@ -142,6 +142,7 @@ export function OrderDialog({ name, onClose }: { name: string; onClose: () => vo
   const release = useAction<{ link?: string }>("lab.release", { invalidate: ["lab.orders"], success: "Report released — link sent", onSuccess: () => void refetch() });
   const resend = useAction<{ link: string }>("lab.resend_link", { success: "New link sent", onSuccess: () => void refetch() });
   const revoke = useAction("lab.revoke", { success: "All links revoked", onSuccess: () => void refetch() });
+  const handOver = useAction("lab.hand_over", { success: "Hand-over recorded", onSuccess: () => void refetch() });
   const preview = async () => { try { const html = await call<string>("lab.report_preview", { name }); const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); } catch (e) { toast.error(humanizeError(e)); } };
   if (!o) return <Dialog open onClose={onClose} title={name} size="lg"><div className="h-60 animate-pulse rounded-2xl bg-muted" /></Dialog>;
   const unpaid = ["Draft", "Ordered"].includes(o.status);
@@ -164,9 +165,13 @@ export function OrderDialog({ name, onClose }: { name: string; onClose: () => vo
         {verified > 0 && <Button variant="workflow" loading={release.isPending} onClick={() => release.mutate({ name, partial: verified < o.items.length ? 1 : 0 })}><Send className="h-4 w-4" />Release {verified < o.items.length ? "verified tests" : "report"}</Button>}
         {["Released", "Partially Released"].includes(o.status) && <>
           <Button variant="outline" onClick={() => void preview()}><ExternalLink className="h-4 w-4" />View report</Button>
-          <Button variant="outline" loading={resend.isPending} onClick={() => resend.mutate({ name })}><Link2 className="h-4 w-4" />Resend link</Button>
+          <Button variant="outline" loading={resend.isPending} onClick={() => resend.mutate({ name })}><Link2 className="h-4 w-4" />Send on WhatsApp</Button>
+          <Button variant="save" onClick={() => { window.open(`/api/method/hospital_vvs.api.lab.print_pdf?name=${encodeURIComponent(name)}`, "_blank");
+            setTimeout(() => { const to = prompt("Print copy handed to (name / relation):", o.patient_name); if (to) handOver.mutate({ name, to }); }, 800); }}><Printer className="h-4 w-4" />Print & hand over</Button>
+          <Button variant="outline" loading={handOver.isPending} onClick={() => { const to = prompt("Printed report handed to (name / relation):", o.patient_name); if (to) handOver.mutate({ name, to }); }}><HandHelping className="h-4 w-4" />Mark handed over</Button>
           <Button variant="danger" onClick={() => { if (confirm("Revoke every link for this report?")) revoke.mutate({ name }); }}><ShieldOff className="h-4 w-4" />Revoke links</Button></>}
       </div>
+      {o.handed_over_to && <div className="mt-3 rounded-xl bg-emerald-50 p-2 text-xs text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-200">Printed report handed to <b>{o.handed_over_to}</b> · {o.handed_over_at?.slice(0, 16)}</div>}
       {o.messages.length > 0 && <div className="mt-3 text-xs text-muted-foreground">{o.messages.map((mm) => <div key={mm.name}>{mm.creation.slice(0, 16)} · {mm.event} · {mm.channel} · {mm.status}</div>)}</div>}
     </Dialog>
   );
