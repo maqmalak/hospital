@@ -43,7 +43,7 @@ Six billing types (Fee, Medicine, Lab, General, OPD Slip, IPD Slip), each with i
 Use ERPNext Purchase Order / Purchase Receipt / Purchase Invoice (store keeper workspace, `04-pharmacy.md`); React screens `/purchase_order`, `/purchase_invoice` for approvals and lists.
 
 ## FBR / tax compliance (check before building)
-Ask the clinic's tax advisor whether **FBR POS integration** (real-time reporting of retail invoices) applies to the pharmacy or other counters, and whether provincial sales tax on services applies. If required, add an adapter that reports each submitted invoice after commit, stores the FBR invoice number, and prints it with its QR on the receipt; queue and retry when offline. **Do not build until I confirm**; record in `DECISIONS.md`.
+Ask the clinic's tax advisor whether **FBR POS integration** (real-time reporting of retail invoices) applies to the pharmacy or other counters, and whether provincial sales tax on services applies. If required, add an adapter that reports each submitted invoice after commit, stores the FBR invoice number, and prints it with its QR on the receipt; queue and retry when offline. **Built on owner instruction (2026-11-10) on a day-end basis — see D-47**; scope and keys still to be confirmed with the tax advisor.
 
 ## Settings (Clinic Settings → Billing)
 Discount rules, approver roles, panel/insurance switches, pre-auth required services, rejected-claim billing rule, doctor share accrual basis, welfare approval role, refund rules per department.

@@ -147,4 +147,8 @@ Single branch (Lahore Main). Everything Islamabad deleted or moved to Lahore; st
 
 ## Phase 6 — finance (2026-11-10) — D-46
 Built: shared payer rule (panel / insurer / welfare) in OPD, lab and IPD billing; Welfare Scheme + Welfare Approval, donations, fund balances (`/welfare`); panels & insurers setup, statements, payments with deductions, ageing (`/panels`); Insurance Claim workflow with deductions or billing the patient (`/claims`); Expenses with receipt and amount-based approval levels → Journal Entry (`/expenses`); purchase order / invoice lists with approval (`/purchase_order`, `/purchase_invoice`); `/finance` overview; Script Reports Revenue Analysis, Payer Ageing, Welfare Fund Utilization, Expenses by Category; pending task done: **lab template editor `/lab/templates`** (tests, parameters, normal / critical ranges by sex and age, price, turnaround, outsourcing). Demo: State Life and Pakistan Telecom panel show their balances; "Zakat Welfare Fund" linked to a scheme. Tests: W8, W11 (welfare), W12 (panel + insurance) — full suite 80 green.
-Not built / owner: FBR POS integration (waiting for tax advisor), recurring expense templates, online card gateway.
+Not built / owner: recurring expense templates. (Card gateway and FBR: see D-47.)
+
+## Card gateway (mock), FBR day-end, WhatsApp templates (2026-11-10) — D-47
+Online Payment + mock checkout `/pay/:token`, Pay by card on the online visit status page, payment links for unpaid bills (`/online-payments`), Card Gateway Clearing account + mode *Card (online)*; FBR Invoice log, day-end run (scheduler + Report now on `/fbr`), FBR number + QR on pharmacy receipt reprints; 38 Meta-ready WhatsApp templates in `docs/whatsapp/`. Site: gateway on (Mock), FBR on (Mock, Medicine). Tests: 85 green (5 new).
+Owner: choose the card gateway and add its keys; FBR POS ID / NTN / token and scope from the tax advisor; submit the WhatsApp templates in Meta.

@@ -66,12 +66,14 @@ export default function OnlineVisitStatusPage() {
           {v.can_pay && <div className="mt-3 space-y-2">
             {v.payment_instructions && <div className="whitespace-pre-wrap rounded-xl bg-muted p-3 text-sm" dir="ltr">{v.payment_instructions}</div>}
             <div className="flex flex-wrap gap-1.5">{v.methods.map((m) => <button key={m} onClick={() => setPay({ ...pay, method: m })} className={cn("rounded-lg border px-3 py-1.5 text-sm font-semibold", pay.method === m ? "border-teal-600 bg-teal-600 text-white" : "border-border")}>{m}</button>)}</div>
+            {pay.method === "Card (online)" ? <button disabled={busy} onClick={async () => { try { const r = await postCall<{ url: string }>(M("pay_card"), { token }); window.location.href = r.url; } catch (er) { toast.error(humanizeError(er)); } }}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 font-bold text-white"><Wallet className="h-5 w-5" />{t("Pay by card")} {rs(v.fee)}</button> : <>
             <input className="h-11 w-full rounded-xl border border-input bg-[hsl(var(--input-bg))] px-3" dir="ltr" placeholder={t("Transaction ID")} value={pay.ref} onChange={(e) => setPay({ ...pay, ref: e.target.value })} />
             <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold"><ImagePlus className="h-4 w-4" />{pay.proof ? "✓ " : ""}{t("Upload receipt")}<input type="file" accept="image/*,application/pdf" className="hidden" onChange={async (e) => {
               const f = e.target.files?.[0]; if (!f) return; const data = await new Promise<string>((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.readAsDataURL(f); });
               try { setPay((x) => ({ ...x, proof: "" })); const url = await postCall<string>(M("upload"), { filename: f.name, filedata: data }); setPay((x) => ({ ...x, proof: url })); } catch (er) { toast.error(humanizeError(er)); } }} /></label>
             <button disabled={!pay.method || (!pay.ref && !pay.proof) || busy} onClick={() => void act(() => postCall<View>(M("pay"), { token, payment_method: pay.method, payment_reference: pay.ref || undefined, payment_proof: pay.proof || undefined }))}
-              className="h-11 w-full rounded-xl bg-teal-600 font-bold text-white disabled:opacity-40">{t("Pay now")}</button></div>}
+              className="h-11 w-full rounded-xl bg-teal-600 font-bold text-white disabled:opacity-40">{t("Pay now")}</button></>}</div>}
         </div>
 
         {v.has_prescription && <div className="rounded-3xl bg-card p-5 shadow-xl">

@@ -39,6 +39,8 @@ DEFAULT_ROUTES = [
 	("/purchase_order", "Purchase orders", [STORE_KEEPER, ACCOUNTANT], ""),
 	("/purchase_invoice", "Purchase invoices", [STORE_KEEPER, ACCOUNTANT], ""),
 	("/finance", "Finance overview", [ACCOUNTANT, CASH_SUPERVISOR], ""),
+	("/online-payments", "Online card payments", [ACCOUNTANT, CASH_SUPERVISOR, RECEPTIONIST], ""),
+	("/fbr", "FBR reporting", [ACCOUNTANT, CASH_SUPERVISOR], ""),
 	("/my-share", "My commission", [DOCTOR], "enable_doctor_share"),
 	("/messages", "Message log", [RECEPTIONIST], ""),
 	("/er", "Emergency", [DOCTOR, NURSE, RECEPTIONIST], "enable_emergency"),

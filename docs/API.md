@@ -279,6 +279,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `status` | token | guest |  |  |
 | `verify` | token, answer | guest POST |  |  |
 | `pay` | token, payment_method, payment_reference, payment_proof | guest POST |  |  |
+| `pay_card` | token | guest POST |  | Card payment link for the online visit fee (gateway or mock page, D-47). |
 | `cancel_request` | token, reason | guest POST |  |  |
 | `queue` | status, date, mine |  | STAFF, DOCS, MONEY |  |
 | `get` | name |  | STAFF, DOCS, MONEY |  |
@@ -329,6 +330,18 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `merge` | survivor, duplicate, confirm_mr | POST | ADMIN | Move every linked record and the Customer to the survivor; disable the duplicate. Cannot be undone automatically. |
 | `board` | q, category, gender, branch, sort, start, limit |  | REGISTER_ROLES | Patients screen: a page of patients with visit counts, last visit, allergy flag and upcoming booking, plus totals. |
 | `file` | name |  | REGISTER_ROLES, ACCOUNTANT, CASH_SUPERVISOR | Patient file: reception visits (with appointment + check-up status), invoices, payments, treatment costs, amount owed, |
+
+## payments
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `checkout` | token | guest |  |  |
+| `mock_pay` | token, success | guest POST |  |  |
+| `create_link` | sales_invoice, send | POST | RECEPTIONIST, ACCOUNTANT, CASH_SUPERVISOR | Payment link for a bill's outstanding amount; optionally sent to the patient by WhatsApp / SMS. |
+| `online_payments` | status |  | ACCOUNTANT, CASH_SUPERVISOR, RECEPTIONIST |  |
+| `fbr_status` | date, status |  | ACCOUNTANT, CASH_SUPERVISOR |  |
+| `fbr_run` | date | POST | ACCOUNTANT, CASH_SUPERVISOR | Day-end report now (also retries failures). |
+| `meta_templates` |  |  | ADMIN |  |
 
 ## pharmacy
 

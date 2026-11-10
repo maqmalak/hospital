@@ -36,7 +36,10 @@ def fee_item():
 
 
 def methods():
-	return [m.strip() for m in (setting("ov_payment_methods") or "Payment Proof").split("\n") if m.strip()]
+	out = [m.strip() for m in (setting("ov_payment_methods") or "Payment Proof").split("\n") if m.strip()]
+	if cint(setting("card_gateway_enabled")) and "Card (online)" not in out:
+		out.insert(0, "Card (online)")  # D-47
+	return out
 
 
 def link(token):

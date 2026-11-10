@@ -97,6 +97,8 @@ CUSTOM_FIELDS = {
 		{"fieldname": "hv_is_payer_share", "fieldtype": "Check", "label": "Is Payer Share", "insert_after": "hv_payer_share_of",
 			"read_only": 1},
 		{"fieldname": "hv_prescription", "fieldtype": "Link", "options": "Prescription", "label": "Prescription", "insert_after": "hv_is_payer_share"},
+		{"fieldname": "hv_fbr_invoice_no", "fieldtype": "Data", "label": "FBR Invoice No.", "insert_after": "hv_prescription", "read_only": 1, "no_copy": 1,
+			"description": "Given by FBR at the day-end report (D-47)"},
 		{"fieldname": "hv_paper_rx", "fieldtype": "Check", "label": "Paper / Outside Prescription", "insert_after": "hv_prescription", "read_only": 1},
 		{"fieldname": "hv_paper_rx_doctor", "fieldtype": "Data", "label": "Prescribing Doctor (paper)", "insert_after": "hv_paper_rx", "read_only": 1,
 			"depends_on": "hv_paper_rx"},
@@ -253,3 +255,6 @@ def after_migrate():
 
 	payers.ensure_setup()
 	expenses.ensure_setup()
+	from hospital_vvs.services import gateway
+
+	gateway.ensure_setup()

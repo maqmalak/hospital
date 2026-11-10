@@ -31,7 +31,8 @@ hv_on_prescription_signed = [
 doc_events = {
 	"Sales Invoice": {
 		"validate": ["hospital_vvs.services.pharmacy.validate_invoice", "hospital_vvs.services.doctor_share.fill_line_doctors"],
-		"on_submit": ["hospital_vvs.services.pharmacy.on_invoice_submit", "hospital_vvs.services.doctor_share.on_invoice_change"],
+		"on_submit": ["hospital_vvs.services.pharmacy.on_invoice_submit", "hospital_vvs.services.doctor_share.on_invoice_change",
+			"hospital_vvs.services.fbr.on_invoice_submit"],
 		"on_cancel": ["hospital_vvs.services.billing.on_invoice_cancel", "hospital_vvs.services.doctor_share.on_invoice_change"],
 	},
 	# doctor share is earned as bills are paid (D-43)
@@ -59,6 +60,7 @@ scheduler_events = {
 		],
 		"*/15 * * * *": [
 			"hospital_vvs.services.patient_comms.queue_feedback_requests",
+			"hospital_vvs.services.fbr.scheduled",
 		],
 	},
 	"daily": [

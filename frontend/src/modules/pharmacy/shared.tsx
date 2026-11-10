@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Pill as PillIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRealtime } from "@/lib/realtime";
-import { esc } from "@/lib/print";
+import { esc, qrSvg } from "@/lib/print";
 import { cn } from "@/utils/cn";
 
 export const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
@@ -39,7 +39,7 @@ export function PriorityBadge({ p }: { p?: string }) {
 }
 
 export interface Receipt { name: string; docstatus: number; token?: string; ticket?: string; posting_date: string; posting_time: string; customer: string; patient?: string; prescription?: string;
-  counter?: string; cashier: string; is_return?: number; return_against?: string; company?: string; pending_sync?: boolean; paper_rx?: { doctor: string; reg_no?: string; rx_date?: string; patient_name?: string; image?: string } | null; items: { item_code?: string; item_name: string; generic?: string; qty: number; uom: string; rate: number; amount: number; batch_no?: string; expiry?: string; substitute_for?: string | null }[];
+  counter?: string; cashier: string; is_return?: number; return_against?: string; company?: string; fbr_invoice_no?: string; pending_sync?: boolean; paper_rx?: { doctor: string; reg_no?: string; rx_date?: string; patient_name?: string; image?: string } | null; items: { item_code?: string; item_name: string; generic?: string; qty: number; uom: string; rate: number; amount: number; batch_no?: string; expiry?: string; substitute_for?: string | null }[];
   total: number; discount: number; grand_total: number; paid: number; tendered: number; change: number; mode: string; clinic: { name: string; name_ur?: string; address?: string; phone?: string } }
 
 /** 80 mm thermal receipt with the big collection token. */
@@ -56,5 +56,6 @@ export function receiptHtml(r: Receipt) {
   <table><tr><td>Total</td><td class="r">${Math.round(r.total).toLocaleString()}</td></tr>${r.discount ? `<tr><td>Discount</td><td class="r">-${Math.round(r.discount).toLocaleString()}</td></tr>` : ""}
   <tr class="b"><td style="font-size:13pt">Net payable</td><td class="r" style="font-size:13pt">Rs ${Math.round(r.grand_total).toLocaleString()}</td></tr>
   <tr><td>${esc(r.mode)}</td><td class="r">${Math.round(r.tendered).toLocaleString()}</td></tr>${r.change ? `<tr><td>Change</td><td class="r">${Math.round(r.change).toLocaleString()}</td></tr>` : ""}</table><hr>
+  ${r.fbr_invoice_no ? `<div class="c" style="margin-top:2mm">${qrSvg(r.fbr_invoice_no, 0.6)}<div class="m">FBR Invoice No. ${esc(r.fbr_invoice_no)}</div></div>` : ""}
   <div class="c m">Cashier: ${esc(r.cashier)} · Medicines once sold are returnable only with this receipt within 7 days, sealed and unexpired.</div></body></html>`;
 }

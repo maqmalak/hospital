@@ -1,0 +1,822 @@
+[
+ {
+  "name": "vvs_appointment_cancelled",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, appointment {{3}} at {{2}} has been cancelled.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_cancelled",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں آپ کی اپوائنٹمنٹ {{3}} منسوخ کر دی گئی ہے۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_confirmed",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Dear {{1}}, your appointment {{3}} with {{4}} at {{2}} is confirmed for {{5}} {{6}}. Manage: {{7}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Dr. Ayesha Siddiqui",
+       "12-11-2026",
+       "10:30 AM",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_confirmed",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں {{4}} کے ساتھ آپ کی اپوائنٹمنٹ {{3}} کی تصدیق ہو گئی ہے: {{5}} {{6}}۔ تفصیل: {{7}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Dr. Ayesha Siddiqui",
+       "12-11-2026",
+       "10:30 AM",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_rejected",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, we could not confirm appointment {{3}} at {{2}}. Please call us to book another time.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_rejected",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں اپوائنٹمنٹ {{3}} کی تصدیق نہیں ہو سکی۔ براہ کرم دوسرا وقت لینے کے لیے رابطہ کریں۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_reminder",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Reminder: {{1}}, your appointment {{3}} with {{4}} at {{2}} is on {{5}} at {{6}}. Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Dr. Ayesha Siddiqui",
+       "12-11-2026",
+       "10:30 AM"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_reminder",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "یاد دہانی: {{1}}، {{2}} میں {{4}} کے ساتھ آپ کی اپوائنٹمنٹ {{3}} {{5}} کو {{6}} بجے ہے۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Dr. Ayesha Siddiqui",
+       "12-11-2026",
+       "10:30 AM"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_requested",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Dear {{1}}, {{2}} received your appointment request {{3}} with {{4}} for {{5}} {{6}}. Reception will confirm it on WhatsApp shortly. Help: {{7}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Dr. Ayesha Siddiqui",
+       "12-11-2026",
+       "10:30 AM",
+       "042-35000000"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_requested",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} کو {{4}} کے ساتھ {{5}} {{6}} کے لیے آپ کی اپوائنٹمنٹ کی درخواست {{3}} موصول ہو گئی ہے۔ استقبالیہ جلد واٹس ایپ پر تصدیق کرے گا۔ رابطہ: {{7}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Dr. Ayesha Siddiqui",
+       "12-11-2026",
+       "10:30 AM",
+       "042-35000000"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_rescheduled",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, appointment {{3}} at {{2}} is moved to {{4}} {{5}}. Manage: {{6}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "12-11-2026",
+       "10:30 AM",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_appointment_rescheduled",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں آپ کی اپوائنٹمنٹ {{3}} اب {{4}} {{5}} پر ہے۔ تفصیل: {{6}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "12-11-2026",
+       "10:30 AM",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_lab_report_ready",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, your report {{3}} from {{2}} is ready: {{4}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_lab_report_ready",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} سے آپ کی رپورٹ {{3}} تیار ہے: {{4}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_lab_report_updated",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, report {{3}} from {{2}} was updated. New link: {{4}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_lab_report_updated",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} سے رپورٹ {{3}} اپ ڈیٹ ہوئی ہے۔ نیا لنک: {{4}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_lab_thank_you",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Thank you {{1}}. Your lab order {{3}} at {{2}} is received. Expected report time: {{4}}. Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "6 hours"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_lab_thank_you",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "شکریہ {{1}}۔ {{2}} میں آپ کا لیب آرڈر {{3}} موصول ہو گیا۔ متوقع رپورٹ وقت: {{4}}۔ شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "6 hours"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_otp_code",
+  "language": "en",
+  "category": "AUTHENTICATION",
+  "components": [
+   {
+    "type": "BODY",
+    "add_security_recommendation": true
+   },
+   {
+    "type": "FOOTER",
+    "code_expiration_minutes": 10
+   },
+   {
+    "type": "BUTTONS",
+    "buttons": [
+     {
+      "type": "OTP",
+      "otp_type": "COPY_CODE",
+      "text": "Copy code"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "name": "vvs_otp_code",
+  "language": "ur",
+  "category": "AUTHENTICATION",
+  "components": [
+   {
+    "type": "BODY",
+    "add_security_recommendation": true
+   },
+   {
+    "type": "FOOTER",
+    "code_expiration_minutes": 10
+   },
+   {
+    "type": "BUTTONS",
+    "buttons": [
+     {
+      "type": "OTP",
+      "otp_type": "COPY_CODE",
+      "text": "کوڈ کاپی کریں"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_accepted",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, your online consultation {{3}} with {{4}} ({{2}}) is on {{5}} at {{6}}. Video link: {{7}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Dr. Ayesha Siddiqui",
+       "12-11-2026",
+       "10:30 AM",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_accepted",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں {{4}} کے ساتھ آپ کی آن لائن مشاورت {{3}} {{5}} کو {{6}} بجے ہے۔ ویڈیو لنک: {{7}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Dr. Ayesha Siddiqui",
+       "12-11-2026",
+       "10:30 AM",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_cancelled",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, online consultation {{3}} at {{2}} has been cancelled.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_cancelled",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں آن لائن مشاورت {{3}} منسوخ کر دی گئی ہے۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_completed",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, your online consultation {{3}} at {{2}} is complete. Open your link to see the prescription.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_completed",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں آپ کی آن لائن مشاورت {{3}} مکمل ہو گئی۔ نسخہ دیکھنے کے لیے اپنا لنک کھولیں۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_received",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Dear {{1}}, {{2}} received your online consultation request {{3}}. Track it here: {{4}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_received",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} کو آپ کی آن لائن مشاورت کی درخواست {{3}} موصول ہو گئی ہے۔ صورتحال یہاں دیکھیں: {{4}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_refunded",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, {{2}} refunded {{4}} for online consultation {{3}}. Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Rs 1,500"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_refunded",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} نے آن لائن مشاورت {{3}} کے {{4}} واپس کر دیے ہیں۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123",
+       "Rs 1,500"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_rejected",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, {{2}} could not take online request {{3}}. Please visit the clinic or call us. Any fee paid will be refunded.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_ov_rejected",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} آن لائن درخواست {{3}} قبول نہیں کر سکا۔ براہ کرم کلینک تشریف لائیں یا رابطہ کریں۔ ادا شدہ فیس واپس کر دی جائے گی۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "APT-2026-00123"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_payment_link",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Dear {{1}}, please pay {{3}} for {{4}} at {{2}} securely by card: {{5}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "Rs 1,500",
+       "APT-2026-00123",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_payment_link",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں {{4}} کے {{3}} کارڈ سے محفوظ طریقے سے ادا کریں: {{5}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "Rs 1,500",
+       "APT-2026-00123",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_pharmacy_order_ready",
+  "language": "en",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, your medicines (token {{3}}) are ready at {{2}} pharmacy.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "P-014"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_pharmacy_order_ready",
+  "language": "ur",
+  "category": "UTILITY",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، آپ کی ادویات (ٹوکن {{3}}) {{2}} فارمیسی پر تیار ہیں۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "P-014"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_visit_feedback",
+  "language": "en",
+  "category": "MARKETING",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "Hello {{1}}, how was your visit to {{2}}? Rate us 1-5: {{3}} Thank you.",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ {
+  "name": "vvs_visit_feedback",
+  "language": "ur",
+  "category": "MARKETING",
+  "components": [
+   {
+    "type": "BODY",
+    "text": "محترم {{1}}، {{2}} میں آپ کا تجربہ کیسا رہا؟ 1 سے 5 تک ریٹنگ دیں: {{3}} شکریہ۔",
+    "example": {
+     "body_text": [
+      [
+       "Ali",
+       "VVS Hospital",
+       "https://hospital.example.pk/hms/r/Ab12Cd"
+      ]
+     ]
+    }
+   }
+  ]
+ }
+]

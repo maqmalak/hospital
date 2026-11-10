@@ -426,7 +426,7 @@ def receipt(si_name, cash_tendered=None):
 	return {"name": si.name, "docstatus": si.docstatus, "token": si.hv_token, "ticket": si.hv_dispense_ticket, "posting_date": str(si.posting_date),
 		"posting_time": str(si.posting_time)[:5], "customer": si.customer_name, "patient": si.hv_patient, "prescription": si.hv_prescription,
 		"counter": si.hv_counter, "cashier": frappe.db.get_value("User", si.owner, "full_name"),
-		"is_return": si.is_return, "return_against": si.return_against, "company": si.company,
+		"is_return": si.is_return, "return_against": si.return_against, "company": si.company, "fbr_invoice_no": si.get("hv_fbr_invoice_no"),
 		"paper_rx": {"doctor": si.get("hv_paper_rx_doctor"), "reg_no": si.get("hv_paper_rx_reg"), "rx_date": str(si.get("hv_paper_rx_date") or ""),
 			"patient_name": si.get("hv_paper_rx_patient"), "image": si.get("hv_paper_rx_image")} if si.get("hv_paper_rx") else None,
 		"items": [{"item_code": i.item_code, "item_name": i.item_name, "generic": frappe.get_cached_value("Item", i.item_code, "hv_generic"), "qty": i.qty, "uom": i.uom,

@@ -118,6 +118,16 @@ def pay(token, payment_method, payment_reference=None, payment_proof=None):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=600)
+def pay_card(token):
+	"""Card payment link for the online visit fee (gateway or mock page, D-47)."""
+	from hospital_vvs.services import gateway
+
+	ov = svc.by_token(token)
+	return gateway.start("Online Visit Request", ov.name, return_url=frappe.utils.get_url(f"/hms/online-visit/{token}"))
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=5, seconds=600)
 def cancel_request(token, reason=None):
 	ov = svc.by_token(token)

@@ -80,6 +80,9 @@ const PanelsPage = fin("PanelsPage");
 const ClaimsPage = fin("ClaimsPage");
 const ExpensesPage = fin("ExpensesPage");
 const FinanceOverviewPage = fin("FinanceOverviewPage");
+const CheckoutPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.CheckoutPage })));
+const OnlinePaymentsPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.OnlinePaymentsPage })));
+const FbrPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.FbrPage })));
 const LabTemplatesPage = lazy(() => import("@/modules/lab/TemplatesPage"));
 const PurchasingPage = lazy(() => import("@/modules/finance/FinancePages").then((m) => ({ default: m.PurchasingPage })));
 const FeedbackFormPage = lazy(() => import("@/modules/comms/FeedbackPages").then((m) => ({ default: m.FeedbackFormPage })));
@@ -121,6 +124,7 @@ export default function App() {
         <Route path="/lab-report/:token" element={<LabReportPage />} />
         <Route path="/patient/:token" element={<PatientRoomPage />} />
         <Route path="/feedback/:token" element={<FeedbackFormPage />} />
+        <Route path="/pay/:token" element={<CheckoutPage />} />
         <Route path="/online-visit" element={<OnlineVisitPage />} />
         <Route path="/online-visit/:token" element={<OnlineVisitStatusPage />} />
         <Route path="/display/counter/:key" element={<DevicePage />} />
@@ -181,6 +185,8 @@ export default function App() {
         <Route path="/claims" element={g("/claims", <ClaimsPage />)} />
         <Route path="/expenses" element={g("/expenses", <ExpensesPage />)} />
         <Route path="/finance" element={g("/finance", <FinanceOverviewPage />)} />
+        <Route path="/online-payments" element={g("/online-payments", <OnlinePaymentsPage />)} />
+        <Route path="/fbr" element={g("/fbr", <FbrPage />)} />
         <Route path="/purchase_order" element={g("/purchase_order", <PurchasingPage doctype="Purchase Order" />)} />
         <Route path="/purchase_invoice" element={g("/purchase_invoice", <PurchasingPage doctype="Purchase Invoice" />)} />
         <Route path="/lab/orders" element={g("/lab/orders", <LabOrdersPage />)} />

@@ -127,6 +127,29 @@ DOCTYPES += [
 	], istable=1),
 ]
 
+# ------------------------------------------------------------------ online card payments & FBR (D-47)
+DOCTYPES += [
+	doctype("Online Payment", B, [
+		f("reference_doctype", "Link", "DocType", reqd=1, list=1, filter=1), f("reference_name", "Dynamic Link", "reference_doctype", reqd=1, list=1),
+		f("patient", "Link", "Patient", list=1), f("description", "Data"), cb("o1"),
+		f("amount", "Currency", reqd=1, list=1), f("status", "Select", ["Initiated", "Paid", "Failed", "Cancelled", "Refunded"], default="Initiated", list=1, filter=1),
+		f("provider", "Data", ro=1, list=1), f("gateway_mode", "Data", ro=1, label="Mode"),
+		sb("o2", "Gateway"), f("provider_ref", "Data", ro=1, label="Gateway transaction id"), f("paid_at", "Datetime", ro=1), f("error", "Small Text", ro=1),
+		cb("o3"), f("sales_invoice", "Link", "Sales Invoice", ro=1), f("payment_entry", "Link", "Payment Entry", ro=1), f("return_url", "Data", ro=1),
+		f("token_hash", "Data", hidden=1, search_index=1), f("expires_at", "Datetime", ro=1),
+	], [p("System Manager", "rwcd"), p(ADMIN, "rR"), p(ACCOUNTANT, "rR"), p(CASH_SUPERVISOR, "r"), p(RECEPTIONIST, "r")],
+		autoname="OPAY-.YYYY.-.######", track_changes=1, sort_field="creation", sort_order="DESC"),
+	doctype("FBR Invoice", B, [
+		f("sales_invoice", "Link", "Sales Invoice", reqd=1, unique=1, list=1), f("company", "Link", "Company", filter=1), f("posting_date", "Date", list=1, filter=1),
+		f("billing_type", "Data", filter=1), cb("fb1"),
+		f("status", "Select", ["Pending", "Reported", "Failed", "Skipped"], default="Pending", list=1, filter=1), f("fbr_invoice_no", "Data", ro=1, list=1, label="FBR invoice no."),
+		f("is_return", "Check", ro=1), f("amount", "Currency", ro=1, list=1), f("tax", "Currency", ro=1),
+		sb("fb2", "Reporting"), f("attempts", "Int", ro=1), f("reported_at", "Datetime", ro=1), f("batch", "Data", ro=1, description="Day-end run"), f("gateway_mode", "Data", ro=1, label="Mode"),
+		f("last_error", "Small Text", ro=1), f("request", "Code", ro=1, options="JSON"), f("response", "Code", ro=1, options="JSON"),
+	], [p("System Manager", "rwcd"), p(ADMIN, "rR"), p(ACCOUNTANT, "rR"), p(CASH_SUPERVISOR, "r")],
+		autoname="FBR-.YYYY.-.######", in_create=1, sort_field="creation", sort_order="DESC"),
+]
+
 SETTINGS_FIELDS = [
 	tab("doctor_share_tab", "Doctor Share"),
 	f("doctor_share_expense_account", "Link", "Account", label="Doctor Share Expense Account", description="Debited when commission is earned (the doctor's supplier account is credited)"),
@@ -137,6 +160,21 @@ SETTINGS_FIELDS = [
 	f("payer_deduction_account", "Link", "Account", description="Panel / insurance deductions and write-offs are booked here"),
 	f("bill_rejected_to_patient", "Check", label="Rejected Claim Amount Billed to Patient", description="On settling a claim, the disallowed part moves to the patient's account instead of being written off"),
 	cb("pw1"), f("welfare_customer_group", "Link", "Customer Group", description="Group for welfare / zakat fund accounts"),
+	tab("gateway_tab", "Online Card Payments"),
+	f("card_gateway_enabled", "Check", label="Online Card Payments", description="Patients can pay online visit fees and bills by card through a payment link"),
+	f("card_gateway_provider", "Select", ["Mock (testing)", "PayFast", "JazzCash Card", "Easypaisa Card", "HBL Pay", "Stripe", "Other"], default="Mock (testing)", label="Gateway",
+		description="Owner decides later; until then Mock simulates payments. Keys for a real gateway go in site_config.json (card_gateway_key / card_gateway_secret / card_gateway_merchant_id)"),
+	f("card_gateway_mode", "Select", ["Mock", "Sandbox", "Live"], default="Mock"), cb("cg1"),
+	f("card_gateway_account", "Link", "Account", label="Gateway Clearing Account", description="Card money is received here until the gateway settles to the bank"),
+	f("card_link_hours", "Int", default="48", label="Payment Link Valid (hours)"),
+	f("card_gateway_branch", "Link", "Branch", description="Branch whose books get online card payments"),
+	tab("fbr_tab", "FBR"),
+	f("fbr_enabled", "Check", label="Report Invoices to FBR", description="Day-end batch: every submitted invoice in scope is sent to FBR once; the FBR number is printed on reprints"),
+	f("fbr_mode", "Select", ["Mock", "Sandbox", "Production"], default="Mock", description="Mock gives test FBR numbers; Sandbox / Production need fbr_token in site_config.json"),
+	f("fbr_pos_id", "Data", label="FBR POS ID"), f("fbr_ntn", "Data", label="Seller NTN"), cb("fbr1"),
+	f("fbr_billing_types", "Small Text", default="Medicine", description="One per line (Medicine, OPD Slip, Lab, IPD Slip, Fee, General). Empty = all"),
+	f("fbr_companies", "Small Text", description="One company per line; empty = all"),
+	f("fbr_run_time", "Time", default="23:30:00", label="Day-end Run Time"),
 	tab("expense_tab", "Expenses"),
 	f("expense_levels", "Table", "Expense Approval Level", description="Approvals needed by amount; e.g. level 1 Cash Supervisor from 0, level 2 Accountant from 10,000, level 3 Admin from 50,000"),
 ]

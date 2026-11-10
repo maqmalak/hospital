@@ -59,6 +59,9 @@ DEFAULTS = {
 	"visit_feedback": ("first_name,clinic,link",
 		"{first_name}, how was your visit to {clinic}? Rate us 1-5: {link}",
 		"{first_name}، {clinic} میں آپ کا تجربہ کیسا رہا؟ 1 سے 5 تک ریٹنگ دیں: {link}", 0),
+	"payment_link": ("first_name,clinic,amount,ref,link",
+		"Dear {first_name}, please pay {amount} for {ref} at {clinic} securely by card: {link}",
+		"محترم {first_name}، {clinic} میں {ref} کے {amount} کارڈ سے محفوظ طریقے سے ادا کریں: {link}", 0),
 }
 
 

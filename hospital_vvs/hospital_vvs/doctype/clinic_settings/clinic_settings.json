@@ -226,6 +226,23 @@
   "bill_rejected_to_patient",
   "pw1",
   "welfare_customer_group",
+  "gateway_tab",
+  "card_gateway_enabled",
+  "card_gateway_provider",
+  "card_gateway_mode",
+  "cg1",
+  "card_gateway_account",
+  "card_link_hours",
+  "card_gateway_branch",
+  "fbr_tab",
+  "fbr_enabled",
+  "fbr_mode",
+  "fbr_pos_id",
+  "fbr_ntn",
+  "fbr1",
+  "fbr_billing_types",
+  "fbr_companies",
+  "fbr_run_time",
   "expense_tab",
   "expense_levels",
   "security_tab",
@@ -1532,6 +1549,108 @@
    "options": "Customer Group"
   },
   {
+   "fieldname": "gateway_tab",
+   "fieldtype": "Tab Break",
+   "label": "Online Card Payments"
+  },
+  {
+   "description": "Patients can pay online visit fees and bills by card through a payment link",
+   "fieldname": "card_gateway_enabled",
+   "fieldtype": "Check",
+   "label": "Online Card Payments"
+  },
+  {
+   "default": "Mock (testing)",
+   "description": "Owner decides later; until then Mock simulates payments. Keys for a real gateway go in site_config.json (card_gateway_key / card_gateway_secret / card_gateway_merchant_id)",
+   "fieldname": "card_gateway_provider",
+   "fieldtype": "Select",
+   "label": "Gateway",
+   "options": "Mock (testing)\nPayFast\nJazzCash Card\nEasypaisa Card\nHBL Pay\nStripe\nOther"
+  },
+  {
+   "default": "Mock",
+   "fieldname": "card_gateway_mode",
+   "fieldtype": "Select",
+   "label": "Card Gateway Mode",
+   "options": "Mock\nSandbox\nLive"
+  },
+  {
+   "fieldname": "cg1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Card money is received here until the gateway settles to the bank",
+   "fieldname": "card_gateway_account",
+   "fieldtype": "Link",
+   "label": "Gateway Clearing Account",
+   "options": "Account"
+  },
+  {
+   "default": "48",
+   "fieldname": "card_link_hours",
+   "fieldtype": "Int",
+   "label": "Payment Link Valid (hours)"
+  },
+  {
+   "description": "Branch whose books get online card payments",
+   "fieldname": "card_gateway_branch",
+   "fieldtype": "Link",
+   "label": "Card Gateway Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "fbr_tab",
+   "fieldtype": "Tab Break",
+   "label": "FBR"
+  },
+  {
+   "description": "Day-end batch: every submitted invoice in scope is sent to FBR once; the FBR number is printed on reprints",
+   "fieldname": "fbr_enabled",
+   "fieldtype": "Check",
+   "label": "Report Invoices to FBR"
+  },
+  {
+   "default": "Mock",
+   "description": "Mock gives test FBR numbers; Sandbox / Production need fbr_token in site_config.json",
+   "fieldname": "fbr_mode",
+   "fieldtype": "Select",
+   "label": "Fbr Mode",
+   "options": "Mock\nSandbox\nProduction"
+  },
+  {
+   "fieldname": "fbr_pos_id",
+   "fieldtype": "Data",
+   "label": "FBR POS ID"
+  },
+  {
+   "fieldname": "fbr_ntn",
+   "fieldtype": "Data",
+   "label": "Seller NTN"
+  },
+  {
+   "fieldname": "fbr1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Medicine",
+   "description": "One per line (Medicine, OPD Slip, Lab, IPD Slip, Fee, General). Empty = all",
+   "fieldname": "fbr_billing_types",
+   "fieldtype": "Small Text",
+   "label": "Fbr Billing Types"
+  },
+  {
+   "description": "One company per line; empty = all",
+   "fieldname": "fbr_companies",
+   "fieldtype": "Small Text",
+   "label": "Fbr Companies"
+  },
+  {
+   "default": "23:30:00",
+   "fieldname": "fbr_run_time",
+   "fieldtype": "Time",
+   "label": "Day-end Run Time"
+  },
+  {
    "fieldname": "expense_tab",
    "fieldtype": "Tab Break",
    "label": "Expenses"
@@ -1590,7 +1709,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 01:34:29.366350",
+ "modified": "2026-11-10 16:50:04.890486",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",
