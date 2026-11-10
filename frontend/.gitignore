@@ -2,3 +2,4 @@ node_modules
 .e2e-state/
 e2e-report/
 test-results/
+scripts/i18n-missing.json

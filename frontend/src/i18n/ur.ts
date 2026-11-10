@@ -1,4 +1,7 @@
+import { urScreens } from "./ur-screens";
+
 export const ur: Record<string, string> = {
+  ...urScreens,
   "Control board": "کنٹرول بورڈ", "Dashboard": "ڈیش بورڈ", "Patient registration": "مریض کا اندراج", "Patients": "مریض",
   "Merge patients": "مریض ریکارڈ ضم کریں", "Appointments": "اپوائنٹمنٹس", "WhatsApp inbox": "واٹس ایپ ان باکس", "Physician queue": "ڈاکٹر کی قطار",
   "OPD slip": "او پی ڈی پرچی", "Prescription workspace": "نسخہ", "Patient history": "مریض کی ہسٹری", "Doctors": "ڈاکٹرز",

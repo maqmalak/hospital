@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import i18nJsx from "./scripts/i18n-jsx";
 import path from "node:path";
 
 // Every Frappe site on this bench uses the same cookie names (sid …) and browsers share cookies across ports, so the
@@ -31,7 +32,7 @@ export default defineConfig(({ mode, command }) => {
   const proxy = { target, changeOrigin: true, headers: { Host: SITE, "X-Frappe-Site-Name": SITE }, cookieDomainRewrite: "", secure: false };
   return {
     base: command === "build" ? "/assets/hospital_vvs/frontend/" : "/",
-    plugins: [react(), ownHostname()],
+    plugins: [react({ babel: { plugins: [i18nJsx] } }), ownHostname()],
     resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
     server: {
       port: PORT,

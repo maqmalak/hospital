@@ -7,6 +7,13 @@ import "@/styles/globals.css";
 import "@/i18n";
 import { AuthProvider } from "@/lib/auth";
 import App from "@/App";
+import { useTranslation } from "react-i18next";
+
+/** Screen texts are translated at render time (scripts/i18n-jsx.ts), so a language switch redraws the whole app. */
+function LanguageRoot() {
+  const { i18n } = useTranslation();
+  return <App key={i18n.language} />;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 15_000, refetchOnWindowFocus: false, retry: 1 } },
@@ -22,7 +29,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter basename="/hms">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <App />
+          <LanguageRoot />
           <Toaster position="top-center" toastOptions={{ duration: 3500, style: { borderRadius: 12 } }} />
         </AuthProvider>
       </QueryClientProvider>

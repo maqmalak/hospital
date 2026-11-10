@@ -122,7 +122,7 @@ Billing at handover is now on (Collect payment at = Handover counter). Full jour
 - Playwright E2E: 20 browser tests (`frontend/e2e`, D-54) for the main workflows; IPD, online visit and pharmacy pipeline screens are covered by backend tests only. Vitest has one unit file.
 - Sentry/uptime: hooks documented, not wired (needs DSN / monitoring host).
 - Thermal label / receipt printing tested through the browser print dialog only (QZ Tray silent print untested on real printers).
-- Urdu/Arabic: navigation, actions and main clinical/billing terms translated; long help texts still English. Phase 3 screens are English-first (labels go through i18n where shared components are used).
+- Urdu: every screen text, list value, status and menu label (2,301) — D-55, checked in CI. Arabic falls back to English for most screens (128 translated).
 - Phase 4: no online card gateway (Frappe Payments) yet — patients pay by wallet / bank transfer and staff confirm it; video calls are external links (no recording). Older Phase 2 lab test runs left a few test lab orders on patient MR-LHR-000057 (LAB-2026-00009 … 00022) — not removed, waiting for the owner's OK.
 - Phase 3: bedside room portal `/patient/:token` and nursing stations are Phase 5 (the token is created now); insurance claims, doctor share on IPD bills and welfare funds are Phase 6; feedback after discharge waits for a `ipd_feedback` message template (Phase 5); LAMA / consent scans are linked by file URL (upload in the desk).
 
@@ -176,3 +176,6 @@ Owner: switch on 2FA; shorter desk sessions (12 h) and stricter lockout (5 / 300
 ## E2E tests + recurring expenses (2026-11-11) — D-54
 Playwright drives the installed Chrome against the running site (`cd frontend && npm run e2e`; `E2E_PASSWORD=… npm run e2e` adds the real login): 20 green — W1 OPD end to end (register → token → nurse vitals → doctor → signed prescription with medicine), W15, W17, POS, lab filters, public pages, recurring expenses. Found on the way: the health check called a running scheduler stale (fixed); the first E2E runs signed 5 prescriptions without medicine on E2E test patients RX-2026-000414…418 (test bug, fixed; records left as signed diagnosis-only prescriptions).
 Recurring expenses on `/expenses` → Recurring: rent / utilities / contracts drafted automatically when due (standing bill → straight to approval). Demo: Building rent Rs 350,000 and Internet Rs 18,500 from 1 Dec. Tests: 110 green (3 new).
+
+## Urdu on every screen (2026-11-11) — D-55
+All screens in Urdu (RTL), including IPD / ER, pharmacy, finance and the public pages: a build-time step translates literal text, labels, placeholders, list values, statuses and template parts from one dictionary (2,301 entries checked by `npm run i18n:check`, strict in CI). Names, medicines, numbers and units stay as entered. E2E: 23 green (3 new Urdu / English cases).
