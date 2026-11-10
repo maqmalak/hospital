@@ -11,8 +11,9 @@ import { Field, inputCls, PatientPicker, Pill, Section, Avatarish, type PatientH
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
+import { rxQty } from "@/lib/rxqty";
 
-interface Med { item: string; item_name: string; generic?: string; strength?: string; form?: string; dose: string; frequency: string; route: string; duration: string; qty: number | string; instructions: string; no_substitution: number; override_reason?: string }
+interface Med { qtyManual?: boolean; item: string; item_name: string; generic?: string; strength?: string; form?: string; dose: string; frequency: string; route: string; duration: string; qty: number | string; instructions: string; no_substitution: number; override_reason?: string }
 interface Alert { type: string; severity: string; message: string }
 interface WS {
   patient: { name: string; patient_name: string; patient_name_ur?: string; gender: string; age?: number; phone: string; photo?: string; blood_group?: string; category: string;
@@ -38,7 +39,10 @@ export default function PrescriptionPage() {
   const [patientPick, setPatientPick] = useState<PatientHit | null>(null);
   const patient = params.get("patient") || patientPick?.name;
   if (!queue && !rxParam && !patient && !ov) {
-    return <div className="mx-auto max-w-2xl"><Section title="Choose a patient"><PatientPicker autoFocus onPick={(p) => { setPatientPick(p); setParams({ patient: p.name }); }} /></Section></div>;
+    return <div className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[1fr_380px]">
+      <PendingPatients onOpen={(q) => setParams({ queue: q })} />
+      <Section title="Any patient"><PatientPicker autoFocus onPick={(p) => { setPatientPick(p); setParams({ patient: p.name }); }} />
+        <p className="mt-2 text-xs text-muted-foreground">Search by name, MR, mobile or CNIC to write a prescription without a token.</p></Section></div>;
   }
   return <Workspace key={`${queue}-${rxParam}-${patient}-${ov}`} queue={queue} rx={rxParam} ov={ov} patient={queue || rxParam || ov ? undefined : patient} />;
 }
@@ -80,10 +84,18 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
     return () => clearTimeout(id);
   }, [meds.map((m) => m.item + m.dose + m.frequency).join("|"), ws?.patient.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const autoQty = (m: Med) => rxQty(m.dose, m.frequency, m.duration, m.form ?? "", m.item_name);
   const addMed = (m: Partial<Med> & { item: string; item_name: string }) =>
-    setMeds((ls) => [...ls, { dose: "1", frequency: "1+0+1", route: m.form === "Injection" ? "IV" : m.form === "Inhaler" ? "Inhalation" : m.form === "Cream" || m.form === "Ointment" ? "Topical" : "Oral",
-      duration: "5 days", qty: "", instructions: "", no_substitution: 0, ...m } as Med]);
-  const upd = (i: number, patch: Partial<Med>) => setMeds((ls) => ls.map((m, j) => (j === i ? { ...m, ...patch } : m)));
+    setMeds((ls) => { const row = { dose: "1", frequency: "1+0+1", route: m.form === "Injection" ? "IV" : m.form === "Inhaler" ? "Inhalation" : m.form === "Cream" || m.form === "Ointment" ? "Topical" : "Oral",
+      duration: "5 days", qty: "", instructions: "", no_substitution: 0, ...m } as Med; return [...ls, { ...row, qty: row.qty || (autoQty(row)?.qty ?? "") }]; });
+  // quantity follows dose × frequency × duration until the doctor types a quantity by hand
+  const upd = (i: number, patch: Partial<Med>) => setMeds((ls) => ls.map((m, j) => {
+    if (j !== i) return m;
+    const n = { ...m, ...patch };
+    if ("qty" in patch) return { ...n, qtyManual: patch.qtyManual ?? String(patch.qty ?? "") !== "" };
+    if (!n.qtyManual && ("dose" in patch || "frequency" in patch || "duration" in patch)) n.qty = autoQty(n)?.qty ?? "";
+    return n;
+  }));
 
   const save = useCallback(async (sign: boolean) => {
     if (!ws) return;
@@ -121,6 +133,7 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
     <div className="mx-auto grid max-w-[1500px] gap-4 xl:grid-cols-[320px_1fr]">
       {/* patient summary */}
       <aside className="space-y-3">
+        {queue && <PendingPatients compact current={queue} doctor={ws.doctor?.name} onOpen={(q) => nav(`/pw-prescription?queue=${q}`)} />}
         <Section>
           <div className="flex items-center gap-3"><Avatarish name={p.patient_name} src={p.photo} size={14} />
             <div className="min-w-0"><div className="truncate text-lg font-bold">{p.patient_name}</div><div className="font-urdu text-sm text-muted-foreground">{p.patient_name_ur}</div>
@@ -191,7 +204,9 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
                     <input disabled={signed} list="freqs" className="h-9 w-24 rounded-md border border-input bg-transparent px-2 text-sm" value={m.frequency} onChange={(e) => upd(i, { frequency: e.target.value })} title={t("Frequency")} />
                     <select disabled={signed} className="h-9 rounded-md border border-input bg-transparent px-1 text-sm" value={m.route} onChange={(e) => upd(i, { route: e.target.value })}>{ROUTES.map((r) => <option key={r}>{r}</option>)}</select>
                     <input disabled={signed} className="h-9 w-24 rounded-md border border-input bg-transparent px-2 text-sm" value={m.duration} onChange={(e) => upd(i, { duration: e.target.value })} title={t("Duration")} />
-                    <input disabled={signed} className="h-9 w-16 rounded-md border border-input bg-transparent px-2 text-sm" placeholder="Qty" value={m.qty} onChange={(e) => upd(i, { qty: e.target.value })} />
+                    <div className="flex items-center gap-1"><input disabled={signed} className={cn("h-9 w-16 rounded-md border bg-transparent px-2 text-sm font-bold tabular-nums", m.qtyManual ? "border-amber-400" : "border-input")} placeholder="Qty"
+                      title={m.qtyManual ? "Typed by hand" : "Worked out from dose × frequency × duration"} value={m.qty} onChange={(e) => upd(i, { qty: e.target.value.replace(/[^\d.]/g, "") })} />
+                      <span className="text-[10px] leading-tight text-muted-foreground">{autoQty(m)?.unit ?? ""}{!m.qtyManual && m.qty ? <span className="block text-teal-600">auto</span> : m.qtyManual ? <button className="block text-sky-700 underline" onClick={() => upd(i, { qtyManual: false, qty: autoQty(m)?.qty ?? "" } as Partial<Med>)}>re-calc</button> : null}</span></div>
                     {!signed && <button onClick={() => setMeds((ls) => ls.filter((_, j) => j !== i))} className="p-1 text-destructive"><Trash2 className="h-4 w-4" /></button>}
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -333,3 +348,41 @@ function AmendDialog({ open, onClose, onAmend }: { open: boolean; onClose: () =>
     </Dialog>
   );
 }
+
+
+interface QRow { name: string; token_no: number; patient: string; patient_name: string; status: string; priority?: string; is_follow_up?: number; creation: string; called_at?: string; prescription?: string; doctor: string; doctor_name: string }
+const PRIO_TONE: Record<string, string> = { Urgent: "bg-rose-600 text-white", Elderly: "bg-amber-500 text-white", Disabled: "bg-sky-600 text-white" };
+/** Today's pending patients for the doctor (Waiting / Called / In consultation), urgent and elderly first — opens the workspace on a click. */
+function PendingPatients({ onOpen, compact, current, doctor: forDoctor }: { onOpen: (queue: string) => void; compact?: boolean; current?: string; doctor?: string }) {
+  const { boot } = useAuth();
+  const [pick, setPick] = useState<string>("");
+  const doctor = forDoctor || boot?.doctor?.name || pick;
+  const { data, refetch } = useApi<{ rows: QRow[]; doctors: { name: string; doctor_name: string; consultation_room?: string }[] }>("opd.queue", { doctor: doctor || undefined }, { refetchInterval: 15_000 });
+  const rows = (data?.rows ?? []).filter((r) => ["Waiting", "Called", "In Consultation"].includes(r.status));
+  const mins = (s: string) => Math.max(0, Math.round((Date.now() - new Date(s.replace(" ", "T")).getTime()) / 60000));
+  const callNext = async () => { try { const r = await call<{ name: string; token_no: number }>("opd.call_next", { doctor }); toast.success(`Token ${r.token_no} called`); void refetch(); onOpen(r.name); } catch (e) { toast.error(humanizeError(e)); } };
+  if (compact) {
+    const next = rows.filter((r) => r.name !== current).slice(0, 6);
+    if (!next.length) return null;
+    return <Section title={`Next patients · ${next.length}`}><div className="space-y-1">{next.map((r) => (
+      <button key={r.name} onClick={() => onOpen(r.name)} className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start text-sm hover:bg-muted">
+        <span className="w-8 rounded-md bg-primary/10 text-center text-xs font-black text-primary">{r.token_no}</span><span className="min-w-0 flex-1 truncate">{r.patient_name}</span>
+        {r.priority && <span className={cn("rounded px-1 text-[9px] font-bold", PRIO_TONE[r.priority])}>{r.priority}</span>}<span className="text-[10px] text-muted-foreground">{mins(r.creation)}m</span></button>))}</div></Section>;
+  }
+  return (
+    <Section title={<span className="flex items-center gap-2"><Stethoscope className="h-4 w-4" />Pending patients{boot?.doctor ? ` · ${boot.doctor.doctor_name}` : ""}</span>}
+      actions={doctor ? <Button size="sm" variant="save" onClick={() => void callNext()} disabled={!rows.some((r) => r.status === "Waiting")}>Call next</Button> : undefined}>
+      {!boot?.doctor && <select className={inputCls + " mb-3"} value={pick} onChange={(e) => setPick(e.target.value)}><option value="">All doctors</option>{(data?.doctors ?? []).map((d) => <option key={d.name} value={d.name}>{d.doctor_name}{d.consultation_room ? ` · ${d.consultation_room}` : ""}</option>)}</select>}
+      <div className="space-y-2">{rows.map((r) => (
+        <button key={r.name} onClick={() => onOpen(r.name)} className={cn("flex w-full items-center gap-3 rounded-2xl border p-3 text-start transition-all hover:-translate-y-0.5 hover:shadow-md",
+          r.status === "In Consultation" ? "border-teal-400 bg-teal-50/60 dark:bg-teal-500/10" : r.status === "Called" ? "border-sky-400 bg-sky-50/60 dark:bg-sky-500/10" : "border-border bg-card")}>
+          <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-sky-600 text-white"><span className="text-[9px] uppercase opacity-80">Token</span><span className="text-lg font-black leading-none">{r.token_no}</span></span>
+          <span className="min-w-0 flex-1"><b className="block truncate">{r.patient_name}</b><span className="text-xs text-muted-foreground">{r.patient}{!boot?.doctor && !pick ? ` · ${r.doctor_name}` : ""}{r.is_follow_up ? " · follow-up" : ""}{r.prescription ? " · draft Rx" : ""}</span></span>
+          <span className="flex flex-col items-end gap-1">{r.priority && <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold", PRIO_TONE[r.priority])}>{r.priority}</span>}
+            <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", r.status === "Waiting" ? "bg-amber-100 text-amber-800" : r.status === "Called" ? "bg-sky-100 text-sky-800" : "bg-teal-100 text-teal-800")}>{r.status}</span>
+            <span className="text-[10px] text-muted-foreground">{mins(r.creation)} min</span></span></button>))}
+        {!rows.length && <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No patient waiting{doctor ? "" : " — choose a doctor"}.</div>}</div>
+    </Section>
+  );
+}
+

@@ -292,6 +292,10 @@ def close_shift(counts, other_modes=None, explanation=None, user=None):
 	if existing and sc.status == "Pending Approval":
 		frappe.throw(_("The count is waiting for the supervisor."))
 	summ = summary(shift.name)
+	allowed = set(denominations())
+	bad = [d for d in (counts or {}) if flt(d) not in allowed or cint((counts or {})[d]) < 0]
+	if bad:  # QA 2026-11-10: "Cash: 5500" used to count as zero
+		frappe.throw(_("Enter the number of notes for each denomination ({0}); not valid: {1}").format(", ".join(str(int(x)) for x in sorted(allowed, reverse=True)), ", ".join(map(str, bad))))
 	cash_counted = sum(flt(d) * cint(n) for d, n in (counts or {}).items())
 	other_modes = other_modes or {}
 	sc.update({"opening_entry": shift.name, "counter": shift.hv_counter, "branch": shift.hv_branch, "user": user,

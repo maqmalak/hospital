@@ -336,6 +336,8 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `merge` | survivor, duplicate, confirm_mr | POST | ADMIN | Move every linked record and the Customer to the survivor; disable the duplicate. Cannot be undone automatically. |
 | `board` | q, category, gender, branch, sort, start, limit |  | REGISTER_ROLES | Patients screen: a page of patients with visit counts, last visit, allergy flag and upcoming booking, plus totals. |
 | `file` | name |  | REGISTER_ROLES, ACCOUNTANT, CASH_SUPERVISOR | Patient file: reception visits (with appointment + check-up status), invoices, payments, treatment costs, amount owed, |
+| `urdu_words` |  |  |  | Every correction staff have taught: {english: urdu}. Cached; the browser merges it with its built-in name list. |
+| `learn_urdu` | pairs | POST | REGISTER_ROLES, ADMIN | pairs: [[english, urdu], …] — a corrected word replaces the old spelling for everyone. |
 
 ## payments
 

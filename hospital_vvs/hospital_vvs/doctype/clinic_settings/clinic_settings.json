@@ -117,6 +117,7 @@
   "discount_rules",
   "discount_approvers",
   "b1",
+  "default_bottle_ml",
   "doctor_share_basis",
   "lab_tab",
   "lab_send_thank_you",
@@ -913,6 +914,12 @@
   {
    "fieldname": "b1",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "120",
+   "fieldname": "default_bottle_ml",
+   "fieldtype": "Int",
+   "label": "Syrup Bottle (ml) for Quantity"
   },
   {
    "default": "On payment",
@@ -1774,7 +1781,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 17:37:06.257390",
+ "modified": "2026-11-10 17:51:59.737185",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

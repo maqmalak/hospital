@@ -136,7 +136,7 @@ SETTINGS = doctype("Clinic Settings", M, [
 
 	tab("billing_tab", "Billing"),
 	f("discount_rules", "Table", "Discount Rule"), f("discount_approvers", "Table", "Discount Approver"),
-	cb("b1"), f("doctor_share_basis", "Select", ["At invoice", "On payment"], default="On payment",
+	cb("b1"), f("default_bottle_ml", "Int", default="120", label="Syrup Bottle (ml) for Quantity"), f("doctor_share_basis", "Select", ["At invoice", "On payment"], default="On payment",
 		description="On payment: commission is earned as the bill is paid (panel / credit bills only when the money comes in)"),
 
 	*PHASE2_SETTINGS,
@@ -329,5 +329,12 @@ AUDIT = [
 ]
 
 
+URDU_WORD = doctype("Urdu Word", M, [
+	f("english", "Data", reqd=1, unique=1, list=1, description="Lower-case English / Roman spelling"), f("urdu", "Data", reqd=1, list=1),
+	f("uses", "Int", ro=1, list=1), f("learned_by", "Link", "User", ro=1),
+], [p("System Manager", "rwcd"), p(ADMIN, "rwcd"), p(RECEPTIONIST, "rwc"), p(DOCTOR, "rwc"), p(NURSE, "r"), p(DEO, "rwc")],
+	autoname="field:english", description="Corrections typed by staff: English word → Urdu spelling, used by every English-to-Urdu field (D-51)")
+
+
 def all_doctypes():
-	return CHILDREN + [SETTINGS] + MASTERS + PATIENT_CHILDREN + [PATIENT, HOUSEHOLD] + AUDIT
+	return CHILDREN + [SETTINGS] + MASTERS + PATIENT_CHILDREN + [PATIENT, HOUSEHOLD, URDU_WORD] + AUDIT

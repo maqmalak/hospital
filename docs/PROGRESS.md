@@ -162,3 +162,6 @@ Report file (scan / photo / outside PDF) on the result screen; merged into the p
 ## Lab report print (2026-11-10) — D-50
 Elegant A4 report with logo, QR verification page, signatory with digital-signature line (no stamp), remarks, previous result column with date, page numbers; result-entry history of the last 5 results. Tests: 93 green.
 Owner: upload the logo (and optionally a signature image) (Clinic Settings → General / Lab → Lab report print); set the signatory name, title, PMDC no. and licence line.
+
+## OPD QA audit (2026-11-10) — D-51
+52/52 live checks after fixing prescription quantity (blank → 1 unit) and shift-closing denominations; pending patients on `/pw-prescription`; English → Urdu field with phonetic keyboard and learned corrections; `scripts/opd_demo.sh` daily demo data. Report: [QA-OPD.md](QA-OPD.md). Tests: 97 green.

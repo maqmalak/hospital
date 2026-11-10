@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Building2, ChevronDown, Languages, LayoutGrid, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { setShell, useShell } from "@/lib/shell";
+import { loadLearned } from "@/lib/urdu";
+import { getCall } from "@/lib/api";
 import { NAV } from "@/lib/nav";
 import { LANGUAGES } from "@/i18n";
 import { cn } from "@/utils/cn";
@@ -17,6 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const shell = useShell();
   useEffect(() => setOpen(false), [loc.pathname]);
+  useEffect(() => { if (boot) void loadLearned(() => getCall<Record<string, string>>("hospital_vvs.api.patients.urdu_words")); }, [boot]); // English → Urdu corrections (D-51)
   useEffect(() => { if (shell.full) setShell({ full: false }); }, [loc.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const toggleTheme = () => {
     const next = !dark;

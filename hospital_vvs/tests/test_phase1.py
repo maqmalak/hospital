@@ -112,6 +112,11 @@ def admin_shift():
 		if c:
 			retire_stale_shift(c)
 	free = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main", "open_shift": ["is", "not set"]}, pluck="name")
+	if not free:  # every reception counter is in use today (real shifts): borrow one for this test only — the test transaction rolls it back
+		c = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main"}, fields=["name", "open_shift"], limit=1)[0]
+		frappe.db.set_value("POS Opening Entry", c.open_shift, "status", "Closed")
+		frappe.db.set_value("Counter", c.name, {"open_shift": None, "current_user": None})
+		free = [c.name]
 	from hospital_vvs.tests.test_phase2 import make_staff
 
 	make_staff(free[0])

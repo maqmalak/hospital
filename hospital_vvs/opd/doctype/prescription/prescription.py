@@ -3,7 +3,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, now_datetime
+from frappe.utils import flt, add_days, cint, now_datetime
 
 from hospital_vvs.services import safety
 from hospital_vvs.utils import publish
@@ -13,6 +13,11 @@ class Prescription(Document):
 	ignore_linked_doctypes = ("Queue Entry", "OPD Slip")
 
 	def validate(self):
+		from hospital_vvs.services.rx_qty import calc
+
+		for r in self.medicines:  # QA 2026-11-10: blank quantity = full course from dose × frequency × duration
+			if not flt(r.qty) and r.item:
+				r.qty = calc(r.dose, r.frequency, r.duration, r.item) or r.qty
 		if self.amended_from and not (self.amendment_reason or "").strip():
 			frappe.throw(_("Enter the reason for amending this prescription."))
 		if self.amended_from:

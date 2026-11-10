@@ -394,3 +394,32 @@ def file(name):
 	}
 	return {"visits": visits, "appointments": appointments, "invoices": invoices, "payments": payments, "costs": costs,
 		"procedures": procedures, "beds": beds, "totals": totals, "customer": p.customer}
+
+
+# ------------------------------------------------------------------ English → Urdu learning (D-51)
+@frappe.whitelist()
+def urdu_words():
+	"""Every correction staff have taught: {english: urdu}. Cached; the browser merges it with its built-in name list."""
+	return frappe.cache.get_value("hv_urdu_words", lambda: {r.english: r.urdu for r in frappe.get_all("Urdu Word", fields=["english", "urdu"], limit=20000)})
+
+
+@frappe.whitelist(methods=["POST"])
+def learn_urdu(pairs):
+	"""pairs: [[english, urdu], …] — a corrected word replaces the old spelling for everyone."""
+	require_roles(*REGISTER_ROLES, R.ADMIN)
+	import re
+
+	n = 0
+	for en, ur in (frappe.parse_json(pairs) or [])[:30]:
+		en = re.sub(r"[^a-z\-']", "", str(en or "").strip().lower())[:40]
+		ur = str(ur or "").strip()[:60]
+		if not en or not ur or not re.search(r"[\u0600-\u06FF]", ur):
+			continue
+		if frappe.db.exists("Urdu Word", en):
+			frappe.db.set_value("Urdu Word", en, {"urdu": ur, "uses": (frappe.db.get_value("Urdu Word", en, "uses") or 0) + 1, "learned_by": frappe.session.user})
+		else:
+			frappe.get_doc({"doctype": "Urdu Word", "english": en, "urdu": ur, "uses": 1, "learned_by": frappe.session.user}).insert(ignore_permissions=True)
+		n += 1
+	frappe.cache.delete_value("hv_urdu_words")
+	return {"learned": n}
+

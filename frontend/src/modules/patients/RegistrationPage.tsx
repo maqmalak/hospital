@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
 import { printCard } from "./shared";
-import { toUrdu } from "@/lib/urdu";
+import { UrduField } from "@/components/common/UrduField";
 
 interface Form { [k: string]: unknown; patient_name: string; patient_name_ur: string; relation_type: string; guardian_name: string; gender: string;
   dob: string; age: string; phone: string; alt_phone: string; cnic: string; address: string; city: string; category: string; blood_group: string;
@@ -45,8 +45,7 @@ export default function RegistrationPage() {
   const [payers, setPayers] = useState<{ name: string; customer_group: string }[]>([]);
   const [camera, setCamera] = useState(false);
   const [photoPreview, setPhotoPreview] = useState("");
-  const [urManual, setUrManual] = useState(false);
-  const setName = (v: string) => setF((p) => ({ ...p, patient_name: v, patient_name_ur: urManual ? p.patient_name_ur : toUrdu(v) }));
+  const setName = (v: string) => setF((p) => ({ ...p, patient_name: v }));
   const set = (k: keyof Form, v: unknown) => setF((p) => ({ ...p, [k]: v }));
 
   useEffect(() => {
@@ -78,7 +77,7 @@ export default function RegistrationPage() {
       const consents = [f.wa && "WhatsApp messages", f.sms && "SMS messages", f.data && "Data processing"].filter(Boolean).map((c) => ({ consent_type: c, status: "Given" }));
       const data = { ...f, phone: phoneNorm(f.phone), consents, branch, household_phone_link: f.household, allergies: f.allergies.filter((a) => a.allergy), photo: f.photo || undefined };
       const r = await call<{ name: string; patient_name: string }>("patients.register", { data, duplicate_reason: dupReason });
-      setDone(r); setShowDup(false); setF(EMPTY); setDups([]); setReason(""); setPhotoPreview(""); setUrManual(false);
+      setDone(r); setShowDup(false); setF(EMPTY); setDups([]); setReason(""); setPhotoPreview(""); 
       toast.success(`${r.name} registered`);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) { toast.error(humanizeError(e), { duration: 7000 }); } finally { setSaving(false); }
@@ -131,9 +130,7 @@ export default function RegistrationPage() {
               </div>
               <div className="grid flex-1 gap-3 sm:grid-cols-2">
                 <L label="Full name" req><input className={inp + " text-base font-semibold"} value={f.patient_name} onChange={(e) => setName(e.target.value)} placeholder="Muhammad Ali Khan" /></L>
-                <L label="Name (Urdu)" hint={f.patient_name_ur && !urManual ? <span className="flex items-center gap-1 text-teal-600"><Sparkles className="h-3 w-3" />Filled from the English name — correct it if needed</span> : undefined}>
-                  <input lang="ur" dir="rtl" className={inp + " urdu-input"} value={f.patient_name_ur} placeholder="محمد علی خان"
-                    onChange={(e) => { set("patient_name_ur", e.target.value); setUrManual(!!e.target.value); }} /></L>
+                <L label="Name (Urdu)"><UrduField english={f.patient_name} value={f.patient_name_ur} onChange={(v) => set("patient_name_ur", v)} placeholder="محمد علی خان" /></L>
                 <L label="Father / husband"><div className="flex gap-2">
                   <div className="flex rounded-xl bg-muted p-1">{["S/O", "D/O", "W/O"].map((r) => <button key={r} type="button" onClick={() => set("relation_type", r)} className={cn("rounded-lg px-2 text-xs font-bold", f.relation_type === r ? "bg-card shadow-sm" : "text-muted-foreground")}>{r}</button>)}</div>
                   <input className={inp} value={f.guardian_name} onChange={(e) => set("guardian_name", e.target.value)} /></div></L>
@@ -248,7 +245,7 @@ export default function RegistrationPage() {
             <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             {saving ? <RotateCcw className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}{t("Register patient")}</button>
           {missing.length > 0 && <p className="text-center text-xs text-muted-foreground">Still needed: {missing.join(", ")}</p>}
-          <button onClick={() => { setF(EMPTY); setDups([]); setPhotoPreview(""); setUrManual(false); }} className="w-full text-center text-xs text-muted-foreground hover:text-foreground">Clear form</button>
+          <button onClick={() => { setF(EMPTY); setDups([]); setPhotoPreview(""); }} className="w-full text-center text-xs text-muted-foreground hover:text-foreground">Clear form</button>
         </aside>
       </div>
 

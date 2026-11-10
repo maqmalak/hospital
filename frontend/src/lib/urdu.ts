@@ -62,6 +62,7 @@ const beforeLastSound = (rest: string) => (rest.length === 1 && !isV(rest)) || (
 export function translitWord(word: string): string {
   const w = word.toLowerCase().replace(/[^a-z]/g, "");
   if (!w) return word;
+  if (LEARNED[w]) return LEARNED[w];
   if (NAMES[w]) return NAMES[w];
   // compound endings that Pakistani names use a lot
   for (const [suf, ur] of [["uddin", "الدین"], ["ullah", "اللہ"], ["ur rehman", "الرحمان"]] as const) {
@@ -109,3 +110,28 @@ export function toUrdu(name: string): string {
 
 /** True when the text already contains Urdu/Arabic letters (then no auto-fill is needed). */
 export const hasUrdu = (s: string) => /[؀-ۿ]/.test(s);
+
+
+// ------------------------------------------------------------------ corrections staff have taught (D-51)
+/** Site-wide corrections: english word → Urdu, loaded once per session; they beat the built-in list and the phonetic rules. */
+export const LEARNED: Record<string, string> = {};
+let loaded: Promise<void> | null = null;
+export function loadLearned(fetcher: () => Promise<Record<string, string>>) {
+  loaded ??= fetcher().then((m) => { Object.assign(LEARNED, m || {}); }).catch(() => undefined);
+  return loaded;
+}
+/** Word pairs where the hand-corrected Urdu differs from what the rules gave (only when the word counts match). */
+export function correctionsFor(english: string, urdu: string): [string, string][] {
+  const en = english.trim().split(/\s+/).filter(Boolean);
+  const ur = urdu.trim().split(/\s+/).filter(Boolean);
+  if (!en.length || en.length !== ur.length) return [];
+  return en.map((w, i) => [w.toLowerCase().replace(/[^a-z\-']/g, ""), ur[i]] as [string, string]).filter(([w, u], i) => w && u && translitWord(en[i]) !== u);
+}
+
+// ------------------------------------------------------------------ phonetic Urdu keyboard on an English keyboard
+/** Urdu phonetic layout (CRULP-style): type Urdu with English keys — s س, S ص, x ش, k ک, K خ, g گ, G غ, t ت, T ٹ, d د, D ڈ, r ر, R ڑ … */
+export const PHONETIC: Record<string, string> = {
+  a: "ا", A: "آ", b: "ب", p: "پ", t: "ت", T: "ٹ", C: "ث", j: "ج", c: "چ", H: "ح", K: "خ", d: "د", D: "ڈ", Z: "ذ", r: "ر", R: "ڑ", z: "ز", X: "ژ",
+  s: "س", x: "ش", S: "ص", J: "ض", v: "ط", V: "ظ", e: "ع", G: "غ", f: "ف", q: "ق", k: "ک", g: "گ", l: "ل", m: "م", n: "ن", N: "ں", w: "و", o: "ہ",
+  h: "ھ", u: "ء", i: "ی", y: "ے", Y: "ئ", O: "ۃ", I: "ِ", E: "ٰ", ",": "،", ".": "۔", "?": "؟", ";": "؛",
+};

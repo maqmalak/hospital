@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "autoname": "field:english",
+ "creation": "2026-11-06 10:00:00.000000",
+ "description": "Corrections typed by staff: English word → Urdu spelling, used by every English-to-Urdu field (D-51)",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "english",
+  "urdu",
+  "uses",
+  "learned_by"
+ ],
+ "fields": [
+  {
+   "description": "Lower-case English / Roman spelling",
+   "fieldname": "english",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "English",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "urdu",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Urdu",
+   "reqd": 1
+  },
+  {
+   "fieldname": "uses",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Uses",
+   "read_only": 1
+  },
+  {
+   "fieldname": "learned_by",
+   "fieldtype": "Link",
+   "label": "Learned By",
+   "options": "User",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospital VVS",
+ "name": "Urdu Word",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Receptionist",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
