@@ -5,7 +5,7 @@ from frappe import _
 from frappe.utils import cint
 
 from hospital_vvs import roles as R
-from hospital_vvs.utils import default_branch, is_admin, settings, user_branches, user_roles
+from hospital_vvs.utils import fail_guard, fail_hit, fail_reset, default_branch, is_admin, settings, user_branches, user_roles
 
 MODULE_SWITCHES = ["enable_lab", "enable_medicine", "enable_ward", "enable_mar", "enable_diet", "enable_procedures", "enable_icu",
 	"enable_consent", "enable_packages", "enable_insurance", "enable_panels", "enable_emergency", "enable_shifts",
@@ -61,10 +61,13 @@ def unlock(password):
 	"""Idle lock screen: re-check the signed-in user's password without a new login."""
 	from frappe.utils.password import check_password
 
+	fail_guard("unlock", frappe.session.user)
 	try:
 		check_password(frappe.session.user, password, delete_tracker_cache=False)
 	except frappe.AuthenticationError:
+		fail_hit("unlock", frappe.session.user)
 		frappe.throw(_("Wrong password"), frappe.AuthenticationError)
+	fail_reset("unlock", frappe.session.user)
 	return True
 
 

@@ -4,13 +4,14 @@ import frappe
 from frappe.utils import add_days, getdate, today
 
 from hospital_vvs import roles as R
-from hospital_vvs.utils import require_roles
+from hospital_vvs.utils import require_roles, scope_branch
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 @frappe.whitelist()
 def board(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.RECEPTIONIST, R.DOCTOR, R.NURSE, R.DEO)
 	docs = frappe.get_all("Doctor", fields=["name", "doctor_name", "doctor_name_ur", "specialization", "department", "doctor_type", "branch",
 		"default_fee", "follow_up_fee", "consultation_room", "color", "photo", "is_active", "qualification", "registration_no", "user",

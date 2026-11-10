@@ -1,12 +1,13 @@
 """Pharmacy POS, dispense pipeline and display devices (04-pharmacy.md)."""
 
 import frappe
+from frappe.rate_limiter import rate_limit
 from frappe import _
 from frappe.utils import cint, flt, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import billing, discounts, pharmacy, shifts
-from hospital_vvs.utils import default_branch, has_any_role, is_admin, require_roles, setting
+from hospital_vvs.utils import default_branch, has_any_role, is_admin, require_roles, setting, scope_branch
 
 POS_ROLES = (R.PHARMACY_CASHIER, R.DISPENSER)
 PIPE = (R.PHARMACY_CASHIER, R.FINDER, R.REVIEWER, R.DISPENSER)
@@ -113,6 +114,7 @@ def checkout(data):
 
 @frappe.whitelist()
 def receipt(name):
+	require_roles(*POS_ROLES, R.REVIEWER, R.FINDER, R.CASH_SUPERVISOR, R.ACCOUNTANT)
 	return pharmacy.receipt(name)
 
 
@@ -145,6 +147,7 @@ STAGES = {"pick": ["Queued", "Picking"], "review": ["Picked", "Reviewing", "Exce
 
 @frappe.whitelist()
 def tickets(stage="board", branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*PIPE)
 	rows = frappe.get_all("Dispense Ticket", filters={"branch": branch or default_branch(), "ticket_date": today(), "status": ["in", STAGES.get(stage, STAGES["board"])]},
 		fields=["name", "token", "status", "priority", "patient_name", "patient", "sales_invoice", "invoice_status", "amount_due", "finder", "reviewer",
@@ -183,6 +186,7 @@ def action(name, action, **kw):
 
 @frappe.whitelist()
 def dashboard(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*PIPE, R.ADMIN)
 	branch = branch or default_branch()
 	stage = frappe.db.sql("""select status, count(*) n from `tabDispense Ticket` where branch=%s and ticket_date=%s group by status""", (branch, today()), as_dict=True)
@@ -198,6 +202,7 @@ def dashboard(branch=None):
 
 # ------------------------------------------------------------------ public displays (device key only, read-only)
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=900, seconds=600)
 def display(key):
 	d = pharmacy.device(key)
 	s = frappe.get_cached_doc("Clinic Settings")

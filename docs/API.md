@@ -42,7 +42,6 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `manage_get` | token | guest |  |  |
 | `manage_reschedule` | token, slot | guest POST |  |  |
 | `manage_cancel` | token | guest POST |  |  |
-| `shift_cond` | shift, col |  |  | SQL condition for the Day / Night filter (shift start times from Clinic Settings). |
 | `calendar` | start, end, doctor, branch, summary, shift |  | STAFF, DOCTOR, NURSE | Calendar views. Day/week: every slot (free, held, booked, blocked) with its appointment. Month (summary=1): counts per day |
 
 ## billing
@@ -154,7 +153,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `request_welfare` | patient, scheme, notes, documents | POST | RECEPTIONIST, ACCOUNTANT |  |
 | `decide_welfare` | name, approve, valid_till, notes | POST | ADMIN, ACCOUNTANT |  |
 | `donate` | scheme, amount, mode_of_payment, donor, reference_no | POST | ACCOUNTANT, CASH_SUPERVISOR |  |
-| `payer_preview` | patient, billing_type, amount |  |  | What a payer would cover on a bill of this amount (shown at the counter). |
+| `payer_preview` | patient, billing_type, amount |  | FRONT_DESK, MONEY | What a payer would cover on a bill of this amount (shown at the counter). |
 | `payer_list` |  |  | ACCOUNTANT, RECEPTIONIST, CASH_SUPERVISOR |  |
 | `save_payer` | data | POST | ADMIN, ACCOUNTANT |  |
 | `payer_statement` | payer, from_date, to_date |  | FIN, CASH_SUPERVISOR |  |
@@ -184,7 +183,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `add_note` | data | POST | CLINICAL, DEO |  |
 | `add_round` | data | POST | DOCTOR |  |
 | `add_vitals` | data | POST | CLINICAL, DEO |  |
-| `check_medicine` | patient, item, dose, frequency, bed_allotment, er_visit |  |  |  |
+| `check_medicine` | patient, item, dose, frequency, bed_allotment, er_visit |  | CLINICAL |  |
 | `order_medicine` | data | POST | DOCTOR |  |
 | `stop_order` | name, reason | POST | DOCTOR |  |
 | `chart_dose` | name, status, reason | POST | NURSE, DOCTOR |  |
@@ -303,12 +302,12 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | Method | Params | Flags | Roles | Summary |
 |---|---|---|---|---|
 | `counter_context` | branch |  |  | Doctors with fee and today's queue, service items and payment modes for the OPD counter. |
-| `preview` | data |  |  | Totals as the server computes them (free follow-up, payer split) before the cashier saves. |
+| `preview` | data |  | FRONT_DESK, CASH_SUPERVISOR | Totals as the server computes them (free follow-up, payer split) before the cashier saves. |
 | `request_discount` | data | POST | COUNTER_ROLES, LAB_USER, PHARMACY_CASHIER, DISPENSER, CASH_SUPERVISOR, ACCOUNTANT |  |
 | `create_slip` | data | POST | COUNTER_ROLES | Save + submit the slip: invoice on the OPD POS Profile (skipped when 0), token and queue entry. |
 | `slip_print` | name |  |  |  |
-| `recent_slips` | branch, limit |  |  |  |
-| `queue` | doctor, branch, date |  |  |  |
+| `recent_slips` | branch, limit |  | FRONT_DESK, CASH_SUPERVISOR, ACCOUNTANT, DEO |  |
+| `queue` | doctor, branch, date |  | ALL |  |
 | `set_queue_status` | name, status, priority | POST | DOCTOR, RECEPTIONIST, NURSE, DEO |  |
 | `call_next` | doctor, branch | POST | DOCTOR, NURSE, RECEPTIONIST |  |
 | `display` | branch |  |  | Waiting-room display: token and room only (first name when the setting allows). |
@@ -326,7 +325,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | Method | Params | Flags | Roles | Summary |
 |---|---|---|---|---|
 | `search` | q, limit, include_disabled |  |  | MR no. / QR scan, phone, CNIC (exact, via hash), legacy MR or name. |
-| `find_duplicates` | patient_name, phone, cnic, dob, age, exclude |  |  | Likely duplicates: same CNIC; same phone + similar name; same name + DOB/age within a year. |
+| `find_duplicates` | patient_name, phone, cnic, dob, age, exclude |  | FRONT_DESK, DEO | Likely duplicates: same CNIC; same phone + similar name; same name + DOB/age within a year. |
 | `register` | data, duplicate_reason | POST | REGISTER_ROLES |  |
 | `get` | name |  |  | Patient record. Clinical fields only for clinical roles and the front desk (field-level, server side). |
 | `update` | name, data | POST | REGISTER_ROLES |  |
@@ -364,7 +363,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `prescription` | code |  | POS_ROLES, REVIEWER | Load a signed prescription by Rx number or patient MR (latest). |
 | `request_discount` | gross, amount, reason, counter | POST | POS_ROLES |  |
 | `checkout` | data | POST | POS_ROLES |  |
-| `receipt` | name |  |  |  |
+| `receipt` | name |  | POS_ROLES, REVIEWER, FINDER, CASH_SUPERVISOR, ACCOUNTANT |  |
 | `display_push` | state, counter | POST | POS_ROLES | The POS mirrors its cart to the counter's customer display. |
 | `recent` | counter, limit |  | POS_ROLES, REVIEWER |  |
 | `refund` | invoice, reason, items | POST | POS_ROLES |  |
@@ -386,15 +385,15 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 |---|---|---|---|---|
 | `workspace` | queue_entry, patient, prescription, online_visit |  | DOCTOR_ROLES, NURSE, DEO |  |
 | `search_medicines` | q, limit |  |  | Brand or generic, with strength and form. |
-| `search_diagnoses` | q, limit |  |  |  |
-| `common_diagnoses` | doctor, limit |  |  | One-click diagnosis chips: this doctor's most used first, then the clinic's, then the rest of the list. |
-| `check` | patient, lines, prescription |  |  | Live safety check as lines are added (same rules as on save). |
+| `search_diagnoses` | q, limit |  | CLINICAL |  |
+| `common_diagnoses` | doctor, limit |  | CLINICAL | One-click diagnosis chips: this doctor's most used first, then the clinic's, then the rest of the list. |
+| `check` | patient, lines, prescription |  | CLINICAL | Live safety check as lines are added (same rules as on save). |
 | `save` | data, sign | POST | DOCTOR_ROLES | Create or update the draft; sign=1 submits it (blocked while a blocking alert has no override reason). |
 | `amend` | name, reason | POST | DOCTOR_ROLES | Cancel-and-keep the signed version, return a new draft (version N+1) carrying the reason. |
-| `get_template` | name |  |  |  |
+| `get_template` | name |  | CLINICAL |  |
 | `save_template` | template_name, data, shared | POST | DOCTOR_ROLES |  |
-| `copy_previous` | patient |  |  |  |
-| `print_data` | name |  |  |  |
+| `copy_previous` | patient |  | CLINICAL |  |
+| `print_data` | name |  | CLINICAL, RECEPTIONIST |  |
 
 ## roster
 
@@ -439,11 +438,11 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 
 | Method | Params | Flags | Roles | Summary |
 |---|---|---|---|---|
-| `bed_map` | branch |  |  |  |
+| `bed_map` | branch |  | DOCTOR, NURSE, RECEPTIONIST, DEO, ACCOUNTANT, CASH_SUPERVISOR |  |
 | `set_status` | bed, status, note, hours | POST | STAFF |  |
 | `assign` | bed, patient, doctor, note, days, rate, reason | POST | STAFF | Allot a bed = admit the patient (kept for the bed map's quick allot). |
 | `extend` | bed, days | POST | STAFF |  |
 | `kiosk` | branch |  |  | Ward kiosk display: per-ward counts and beds; initials only unless first names are allowed on displays. |
 | `transfer` | bed, to_bed, note | POST | NURSE, DOCTOR, RECEPTIONIST |  |
 | `release` | bed, note | POST | STAFF | Free a bed that has no admission (e.g. an ER bay). Admitted patients leave through discharge. |
-| `bed_history` | bed |  |  |  |
+| `bed_history` | bed |  | DOCTOR, NURSE, RECEPTIONIST, DEO, ACCOUNTANT, CASH_SUPERVISOR |  |

@@ -513,6 +513,9 @@ def prescription_lines(rx_name):
 	if rx.docstatus != 1:
 		frappe.throw(_("Only a signed prescription can be dispensed."))
 	out = []
+	from hospital_vvs.utils import has_any_role
+	from hospital_vvs import roles as R
+	clinical = has_any_role(*R.CLINICAL)  # alert texts name allergies / interactions — not for the cashier
 	for m in rx.medicines:
 		p = pack(m.item)
 		units = cint(m.qty) or 1
@@ -521,7 +524,7 @@ def prescription_lines(rx_name):
 		qty = units / factor(p, uom) if uom != PACK or units >= p.upp else 1
 		out.append({"item_code": m.item, "item_name": p.item_name, "uom": uom, "qty": max(qty, 1), "no_substitution": m.no_substitution,
 			"dose": m.dose, "frequency": m.frequency, "duration": m.duration, "instructions": m.instructions,
-			"alert": m.alert_message, "override": m.override_reason})
+			"alert": m.alert_message if clinical else None, "override": m.override_reason if clinical else None})
 	return {"prescription": rx.name, "patient": rx.patient, "patient_name": rx.patient_name, "doctor": rx.doctor_name, "lines": out}
 
 

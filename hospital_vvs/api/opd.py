@@ -6,7 +6,7 @@ from frappe.utils import cint, flt, now_datetime, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import discounts
-from hospital_vvs.utils import check_branch, default_branch, publish, require_roles, setting, settings, hhmm
+from hospital_vvs.utils import check_branch, default_branch, publish, require_roles, setting, settings, hhmm, scope_branch
 
 COUNTER_ROLES = (R.RECEPTIONIST,)
 
@@ -14,6 +14,7 @@ COUNTER_ROLES = (R.RECEPTIONIST,)
 @frappe.whitelist()
 def counter_context(branch=None):
 	"""Doctors with fee and today's queue, service items and payment modes for the OPD counter."""
+	branch = scope_branch(branch, required=False)
 	branch = branch or default_branch()
 	doctors = frappe.get_all("Doctor", filters={"is_active": 1, "doctor_type": ["!=", "External Referring"]},
 		fields=["name", "doctor_name", "doctor_name_ur", "specialization", "department", "default_fee", "follow_up_fee", "consultation_room",
@@ -36,6 +37,7 @@ def counter_context(branch=None):
 @frappe.whitelist()
 def preview(data):
 	"""Totals as the server computes them (free follow-up, payer split) before the cashier saves."""
+	require_roles(*R.FRONT_DESK, R.CASH_SUPERVISOR)
 	d = frappe.parse_json(data)
 	doc = _build(d)
 	doc.run_method("validate")
@@ -112,6 +114,8 @@ def slip_print(name):
 
 @frappe.whitelist()
 def recent_slips(branch=None, limit=30):
+	require_roles(*R.FRONT_DESK, R.CASH_SUPERVISOR, R.ACCOUNTANT, R.DEO)
+	branch = scope_branch(branch, required=False)
 	branch = branch or default_branch()
 	return frappe.get_all("OPD Slip", filters={"branch": branch, "posting_date": today(), "docstatus": 1},
 		fields=["name", "patient", "patient_name", "doctor_name", "token_no", "net_total", "patient_share", "payment_mode", "posting_time",
@@ -121,6 +125,8 @@ def recent_slips(branch=None, limit=30):
 # ------------------------------------------------------------------ queue
 @frappe.whitelist()
 def queue(doctor=None, branch=None, date=None):
+	require_roles(*R.ALL)
+	branch = scope_branch(branch, required=False)
 	branch = branch or default_branch()
 	filters = {"branch": branch, "queue_date": date or today()}
 	if doctor:
@@ -164,6 +170,7 @@ def set_queue_status(name, status, priority=None):
 
 @frappe.whitelist(methods=["POST"])
 def call_next(doctor, branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.DOCTOR, R.NURSE, R.RECEPTIONIST)
 	data = queue(doctor=doctor, branch=branch)
 	waiting = [r for r in data["rows"] if r.status == "Waiting"]
@@ -175,6 +182,7 @@ def call_next(doctor, branch=None):
 @frappe.whitelist()
 def display(branch=None):
 	"""Waiting-room display: token and room only (first name when the setting allows)."""
+	branch = scope_branch(branch, required=False)
 	branch = branch or default_branch()
 	show_name = cint(setting("show_first_name_on_display"))
 	rows = frappe.get_all("Queue Entry", filters={"branch": branch, "queue_date": today(), "status": ["in", ["Waiting", "Called",
@@ -201,6 +209,7 @@ VITALS = ("bp_systolic", "bp_diastolic", "pulse", "temperature", "spo2", "rbs", 
 @frappe.whitelist()
 def vitals_queue(branch=None):
 	"""Tokens waiting for the nurse, urgent / elderly first, then by arrival."""
+	branch = scope_branch(branch, required=False)
 	require_roles(R.NURSE, R.DOCTOR, R.RECEPTIONIST)
 	branch = branch or default_branch()
 	rows = frappe.get_all("Queue Entry", filters={"branch": branch, "queue_date": today(), "status": "Vitals"},

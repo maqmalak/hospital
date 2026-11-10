@@ -63,6 +63,11 @@ def p(role, letters="rwcd", permlevel=0, **kw):
 	return d
 
 
+# Append-only logs and token rows: their rows are never edited, so no version history.
+NO_TRACK = {"Clinical Access Log", "Patient Merge Log", "Bed Status Log", "Message Log", "Comms Message", "Station Broadcast",
+	"WhatsApp Conversation", "Urdu Word", "Lab Report Access Token", "Time Slot"}
+
+
 def doctype(name, module, fields, perms=None, **kw):
 	"""kw: autoname, naming_rule, istable, issingle, is_submittable, track_changes, title_field, search_fields,
 	sort_field, sort_order, description, quick_entry, allow_rename, image_field, show_title_field_in_link."""
@@ -88,6 +93,8 @@ def doctype(name, module, fields, perms=None, **kw):
 	}
 	if kw.get("istable"):
 		d["editable_grid"] = 1
+	elif not kw.get("issingle") and name not in NO_TRACK:
+		kw.setdefault("track_changes", 1)  # Phase 7: every document keeps a version history, except append-only logs
 	if kw.get("is_submittable"):
 		names = {x["fieldname"] for x in fields}
 		if "amended_from" not in names:

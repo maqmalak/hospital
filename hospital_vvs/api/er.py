@@ -5,7 +5,7 @@ from frappe.utils import cint
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import er
-from hospital_vvs.utils import check_branch, log_access, module_enabled, require_roles
+from hospital_vvs.utils import check_branch, log_access, module_enabled, require_roles, scope_branch
 
 STAFF = (R.DOCTOR, R.NURSE, R.RECEPTIONIST)
 
@@ -17,6 +17,7 @@ def _on():
 
 @frappe.whitelist()
 def board(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*STAFF)
 	_on()
 	return er.board(branch)

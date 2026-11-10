@@ -30,6 +30,7 @@ export default function QueuePage() {
   const next = useAction<QRow>("opd.call_next", { invalidate: ["opd.queue"], success: (r) => `Token ${r.token_no} called` });
   const rows = data?.rows ?? [];
   const isDoctor = hasRole("PW Doctor");
+  const canPrintRx = hasRole("PW Doctor", "PW Nurse", "PW Receptionist", "PW DEO", "PW Reviewer", "OV Doctor"); // same roles as print_data on the server
   const col = (s: string[]) => rows.filter((r) => s.includes(r.status));
   const columns = [
     { key: "Vitals", list: col(["Vitals"]), tone: "border-rose-400" },
@@ -71,7 +72,7 @@ export default function QueuePage() {
                       {["Called", "In Consultation", "Waiting"].includes(r.status) && isDoctor && <Button size="xs" variant="primary" onClick={() => nav(`/pw-prescription?queue=${r.name}`)}><Stethoscope className="h-3 w-3" />Rx</Button>}
                       {r.status === "Skipped" && <Button size="xs" variant="outline" onClick={() => setStatus.mutate({ name: r.name, status: "Waiting" })}>Return</Button>}
                       {r.status === "Vitals" && <Button size="xs" variant="outline" onClick={() => nav("/opd/vitals")}>Vitals</Button>}
-                      {r.status === "Done" && r.prescription && <Button size="xs" variant="outline" title="Reprint prescription" onClick={() => void printPrescription(r.prescription!, r.patient, boot).catch((e) => toast.error(humanizeError(e)))}><Printer className="h-3 w-3" />Print Rx</Button>}
+                      {r.status === "Done" && r.prescription && canPrintRx && <Button size="xs" variant="outline" title="Reprint prescription" onClick={() => void printPrescription(r.prescription!, r.patient, boot).catch((e) => toast.error(humanizeError(e)))}><Printer className="h-3 w-3" />Print Rx</Button>}
                     </div>
                   </div>
                 </div>))}

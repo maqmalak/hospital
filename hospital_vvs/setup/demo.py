@@ -375,3 +375,24 @@ def today_activity(rnd, patients):
 			wapi.set_status(b.name, "Maintenance", "Bed rail repair")
 	for b in frappe.get_all("Hospital Bed", filters={"status": "Occupied"}, pluck="name", limit=3):
 		wapi.release(b)
+
+
+def seed_all(opd_day=0):
+	"""One command for a fresh demo / training site (re-run safe): company, pharmacy company, every phase's demo data, branch +
+	counter access. opd_day=1 also runs one day of live OPD traffic (scripts/opd_demo.sh does the same daily).
+
+	bench --site training.hospital execute hospital_vvs.setup.demo.seed_all --kwargs "{'opd_day': 1}"
+	"""
+	from hospital_vvs.setup import access, company, demo_phase2, demo_phase3, demo_phase4, pharmacy_company
+
+	steps = [("company", company.run), ("demo", seed), ("pharmacy company", pharmacy_company.run), ("phase 2", demo_phase2.seed),
+		("phase 3", demo_phase3.seed), ("phase 4", demo_phase4.seed), ("access", access.run)]
+	if frappe.utils.cint(opd_day):
+		from hospital_vvs.setup import opd_demo
+
+		steps.append(("OPD day", opd_demo.run))
+	for label, fn in steps:
+		print(f"→ {label}")
+		fn()
+		frappe.db.commit()
+	print("demo ready")

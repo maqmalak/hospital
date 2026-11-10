@@ -7,7 +7,7 @@ from frappe.utils import cint, flt, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import discounts, lab
-from hospital_vvs.utils import check_branch, default_branch, log_access, require_roles
+from hospital_vvs.utils import check_branch, default_branch, log_access, require_roles, scope_branch
 
 LAB_STAFF = (R.LAB_USER, R.PATHOLOGIST)
 ORDERING = (R.LAB_USER, R.RECEPTIONIST, R.DOCTOR)
@@ -61,6 +61,7 @@ def request_discount(name, amount, reason):
 @frappe.whitelist()
 def orders(date=None, status=None, q=None, branch=None, from_date=None, to_date=None, priority=None):
 	"""Lab orders by day / week / month / custom range (from_date..to_date), status, priority, or search (any date)."""
+	branch = scope_branch(branch, required=False)
 	require_roles(*ORDERING, R.PATHOLOGIST, R.NURSE)
 	filters = {"branch": branch or default_branch()}
 	if from_date and to_date:
@@ -102,6 +103,7 @@ def order(name):
 # ------------------------------------------------------------------ samples
 @frappe.whitelist()
 def samples(status="Pending", branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*LAB_STAFF, R.NURSE)
 	branch = branch or default_branch()
 	statuses = {"Pending": ["Pending"], "Collected": ["Collected"], "Received": ["Received"], "Rejected": ["Rejected"]}.get(status, [status])
@@ -156,6 +158,7 @@ def labels(samples):
 # ------------------------------------------------------------------ results
 @frappe.whitelist()
 def worklist(status=None, department=None, branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*LAB_STAFF)
 	branch = branch or default_branch()
 	statuses = [status] if status else ["Received", "Result Entered", "Report Received", "Dispatched"]
@@ -208,6 +211,7 @@ def critical_log(result, notified_person, method, read_back=0, note=None, parame
 
 @frappe.whitelist()
 def verify_list(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.PATHOLOGIST)
 	rows = frappe.get_all("Lab Result", filters={"status": "Result Entered", "docstatus": 0, "branch": branch or default_branch()},
 		fields=["name", "test_invoice", "test_name", "department", "patient", "patient_name", "gender", "age", "has_critical", "critical_logged", "entered_by",
@@ -277,6 +281,7 @@ def report_preview(name):
 # ------------------------------------------------------------------ outsourced
 @frappe.whitelist()
 def outsourced(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*LAB_STAFF)
 	branch = branch or default_branch()
 	ready = frappe.db.sql("""select distinct s.name, s.patient_name, s.test_invoice, s.status, s.sample_type, s.creation from `tabLab Sample` s
@@ -307,6 +312,7 @@ def receive_outsourced(invoice_item, attachment=None, values=None, text_result=N
 
 @frappe.whitelist()
 def dashboard(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*LAB_STAFF)
 	branch = branch or default_branch()
 	t = today()

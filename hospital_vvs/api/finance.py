@@ -61,6 +61,7 @@ def donate(scheme, amount, mode_of_payment, donor=None, reference_no=None):
 @frappe.whitelist()
 def payer_preview(patient, billing_type="OPD Slip", amount=1000):
 	"""What a payer would cover on a bill of this amount (shown at the counter)."""
+	require_roles(*R.FRONT_DESK, *R.MONEY)
 	return payers.resolve(patient, billing_type, flt(amount))
 
 

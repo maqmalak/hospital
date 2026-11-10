@@ -87,6 +87,9 @@ OPD_CHILDREN = [
 _rx_perm = [
 	p("System Manager", "rwcdsxa"), p(ADMIN, "rwcdsxaeR"), p(DOCTOR, "rwcsxap"), p(OV_DOCTOR, "rwcsxap"),
 	p(NURSE, "r"), p(DEO, "rwc"), p(REVIEWER, "r"), p(FINDER, "r"),
+	# permlevel 1 = diagnoses, tests and examination notes: clinical roles only (the finder picks medicines, 09-security-ops.md)
+	p("System Manager", "rw", permlevel=1), p(ADMIN, "rw", permlevel=1), p(DOCTOR, "rw", permlevel=1), p(OV_DOCTOR, "rw", permlevel=1),
+	p(NURSE, "r", permlevel=1), p(DEO, "rw", permlevel=1), p(REVIEWER, "r", permlevel=1),
 ]
 PRESCRIPTION = doctype("Prescription", OPD, [
 	f("patient", "Link", "Patient", reqd=1, list=1, filter=1), f("patient_name", "Data", fetch_from="patient.patient_name", ro=1, list=1),
@@ -98,8 +101,9 @@ PRESCRIPTION = doctype("Prescription", OPD, [
 	f("source", "Select", ["OPD", "IPD", "ER", "Online Visit"], default="OPD"), f("online_visit", "Link", "Online Visit Request", ro=1), f("round_no", "Int", label="Round No. (IPD)"),
 	f("version_no", "Int", default="1", ro=1), f("status", "Select", ["Draft", "Signed", "Superseded", "Cancelled"], default="Draft", ro=1, list=1, filter=1),
 	sb("med_sec", "Medicines"), f("medicines", "Table", "Prescription Medicine"),
-	sb("dx_sec", "Diagnosis & tests"), f("diagnoses", "Table", "Prescription Diagnosis"), cb("r3"), f("lab_tests", "Table", "Prescription Lab Test"),
-	sb("notes_sec", "Notes"), f("examination_notes", "Text"), cb("r4"), f("advice", "Text"),
+	sb("dx_sec", "Diagnosis & tests", permlevel=1), f("diagnoses", "Table", "Prescription Diagnosis", permlevel=1), cb("r3"),
+	f("lab_tests", "Table", "Prescription Lab Test", permlevel=1),
+	sb("notes_sec", "Notes"), f("examination_notes", "Text", permlevel=1), cb("r4"), f("advice", "Text"),
 	f("follow_up_days", "Int"), f("follow_up_date", "Date"),
 	sb("sign_sec", "Signature"), f("signed_by", "Link", "User", ro=1), f("signed_at", "Datetime", ro=1), cb("r5"),
 	f("amendment_reason", "Small Text", description="Required when amending a signed prescription"),

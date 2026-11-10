@@ -147,7 +147,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-11 01:06:08.249642",
  "modified_by": "Administrator",
  "module": "Billing",
  "name": "FBR Invoice",
@@ -179,5 +179,6 @@
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

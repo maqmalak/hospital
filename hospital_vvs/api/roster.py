@@ -4,7 +4,7 @@ import frappe
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import roster
-from hospital_vvs.utils import require_roles
+from hospital_vvs.utils import require_roles, scope_branch
 
 
 def _head():
@@ -18,6 +18,7 @@ def _head():
 
 @frappe.whitelist()
 def week(branch=None, start=None, days=7):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.NURSE, R.DOCTOR)
 	return roster.week(branch, start, int(days or 7))
 
@@ -37,6 +38,7 @@ def unassign(name):
 @frappe.whitelist(methods=["POST"])
 def copy_week(branch, start, to_start):
 	"""Repeat one week's roster a week later (skips shifts already planned)."""
+	branch = scope_branch(branch, required=False)
 	_head()
 	from frappe.utils import add_days, date_diff
 
@@ -54,5 +56,6 @@ def copy_week(branch, start, to_start):
 
 @frappe.whitelist()
 def on_duty(ward=None, branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.NURSE, R.DOCTOR, R.RECEPTIONIST)
 	return roster.on_duty(ward, branch=branch)

@@ -48,7 +48,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-11 01:06:08.200634",
  "modified_by": "Administrator",
  "module": "OPD",
  "name": "Prescription Template",
@@ -81,5 +81,6 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "title_field": "template_name"
+ "title_field": "template_name",
+ "track_changes": 1
 }

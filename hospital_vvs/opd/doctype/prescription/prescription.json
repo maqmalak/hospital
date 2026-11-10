@@ -161,13 +161,15 @@
   {
    "fieldname": "dx_sec",
    "fieldtype": "Section Break",
-   "label": "Diagnosis & tests"
+   "label": "Diagnosis & tests",
+   "permlevel": 1
   },
   {
    "fieldname": "diagnoses",
    "fieldtype": "Table",
    "label": "Diagnoses",
-   "options": "Prescription Diagnosis"
+   "options": "Prescription Diagnosis",
+   "permlevel": 1
   },
   {
    "fieldname": "r3",
@@ -177,7 +179,8 @@
    "fieldname": "lab_tests",
    "fieldtype": "Table",
    "label": "Lab Tests",
-   "options": "Prescription Lab Test"
+   "options": "Prescription Lab Test",
+   "permlevel": 1
   },
   {
    "fieldname": "notes_sec",
@@ -187,7 +190,8 @@
   {
    "fieldname": "examination_notes",
    "fieldtype": "Text",
-   "label": "Examination Notes"
+   "label": "Examination Notes",
+   "permlevel": 1
   },
   {
    "fieldname": "r4",
@@ -263,7 +267,7 @@
  "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-09 18:44:40.078580",
+ "modified": "2026-11-11 01:06:08.199196",
  "modified_by": "Administrator",
  "module": "OPD",
  "name": "Prescription",
@@ -329,6 +333,46 @@
   {
    "read": 1,
    "role": "PW Finder"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Doctor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "OV Doctor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Nurse"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW DEO",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "PW Reviewer"
   }
  ],
  "row_format": "Dynamic",

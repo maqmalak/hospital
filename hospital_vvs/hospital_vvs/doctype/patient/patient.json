@@ -146,6 +146,7 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Registered at Branch",
    "options": "Branch",
@@ -418,7 +419,7 @@
  "image_field": "photo",
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-10 01:34:29.368636",
+ "modified": "2026-11-11 01:10:53.829268",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Patient",

@@ -6,7 +6,7 @@ from frappe.utils import add_days, cint, flt, getdate, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import billing, shifts
-from hospital_vvs.utils import check_branch, default_branch, has_any_role, require_roles, setting
+from hospital_vvs.utils import check_branch, default_branch, has_any_role, require_roles, setting, scope_branch
 
 CASH_ROLES = (R.RECEPTIONIST, R.LAB_USER, R.PHARMACY_CASHIER, R.DISPENSER, R.CASH_SUPERVISOR)
 
@@ -81,6 +81,7 @@ def closing_view(name):
 
 @frappe.whitelist()
 def approvals(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.CASH_SUPERVISOR)
 	filters = {"status": "Pending Approval"}
 	if branch:

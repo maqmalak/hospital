@@ -168,3 +168,7 @@ Owner: upload the logo (and optionally a signature image) (Clinic Settings → G
 
 ## OPD nurse vitals stage (2026-11-10) — D-52
 Register → token → **nurse vitals** (`/opd/vitals`) → waiting for doctor → with doctor → done; queue in four columns; OPD audit 61/61 (9 new nurse checks). Tests: 97 green.
+
+## Phase 7 — hardening (2026-11-11) — D-53
+Live audit 97/98 (first run 36/79): 12 defects fixed — clinical endpoints and Rx print limited to clinical roles (+ reception reprint), Prescription diagnoses / tests / notes at permlevel 1, cashier POS lines without allergy alert text, role checks on bed map / slips / payer preview / receipts / duplicate search, branch argument checked on 39 endpoints, internal SQL helper no longer an API, wrong-password limit on lock screen and counter approval, display endpoint rate-limited, version history on 17 more DocTypes (Controlled Drug Register, Doctor Share Ledger, FBR Invoice …), patients shared across branches (W17), API.md regenerated. Performance targets all met (search 3–7 ms, history 20 ms, POS item add 30 ms, lab PDF 0.6 s, /hms 54 ms). Added staging anonymize and `setup.demo.seed_all`. Report: [QA-HARDENING.md](QA-HARDENING.md). Tests: 107 green (10 new, W15 + W17).
+Owner: switch on 2FA; shorter desk sessions (12 h) and stricter lockout (5 / 300 s); create `staging.hospital` for the full restore drill (needs MariaDB root); analyzer interface only if wanted.

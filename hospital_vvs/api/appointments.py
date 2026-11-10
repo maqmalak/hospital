@@ -11,7 +11,7 @@ from hospital_vvs import roles as R
 from hospital_vvs.hospital_vvs.doctype.patient.patient import normalize_phone
 from hospital_vvs.services import appointments as svc
 from hospital_vvs.services import messaging
-from hospital_vvs.utils import default_branch, require_roles, setting, settings, hhmm
+from hospital_vvs.utils import default_branch, require_roles, setting, settings, hhmm, scope_branch
 
 STAFF = (R.RECEPTIONIST, R.DEO)
 PUBLIC_FIELDS = ["name", "doctor_name", "doctor_name_ur", "specialization", "default_fee", "photo", "qualification", "branch", "color",
@@ -21,6 +21,7 @@ PUBLIC_FIELDS = ["name", "doctor_name", "doctor_name_ur", "specialization", "def
 # ------------------------------------------------------------------ staff
 @frappe.whitelist()
 def board(date=None, branch=None, status=None, channel=None, doctor=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*STAFF, R.DOCTOR, R.NURSE)
 	filters = {"appointment_date": date or today(), "branch": branch or default_branch()}
 	if status:
@@ -50,11 +51,13 @@ def board(date=None, branch=None, status=None, channel=None, doctor=None):
 
 @frappe.whitelist()
 def slots(doctor, date, branch=None):
+	branch = scope_branch(branch, required=False)
 	return svc.available_slots(doctor, date, branch)
 
 
 @frappe.whitelist()
 def dates(doctor, branch=None):
+	branch = scope_branch(branch, required=False)
 	return svc.available_dates(doctor, branch)
 
 
@@ -71,6 +74,7 @@ def book(data):
 @frappe.whitelist()
 def first_available(specialization=None, date=None, branch=None):
 	"""Suggest the doctor and slot for "any available doctor" (by shift, earliest slot, lighter load)."""
+	branch = scope_branch(branch, required=False)
 	require_roles(*STAFF)
 	return svc.first_available(specialization, date, branch)
 
@@ -318,7 +322,6 @@ def manage_cancel(token):
 	return manage_get(token)
 
 
-@frappe.whitelist()
 def shift_cond(shift, col):
 	"""SQL condition for the Day / Night filter (shift start times from Clinic Settings)."""
 	if shift not in ("day", "night"):
@@ -338,6 +341,7 @@ def shift_cond(shift, col):
 def calendar(start, end, doctor=None, branch=None, summary=0, shift=None):
 	"""Calendar views. Day/week: every slot (free, held, booked, blocked) with its appointment. Month (summary=1): counts per day
 	and doctor. Leave and blocked dates are included so the calendar can shade them."""
+	branch = scope_branch(branch, required=False)
 	require_roles(*STAFF, R.DOCTOR, R.NURSE)
 	branch = branch or default_branch()
 	args = {"start": start, "end": end, "branch": branch, "doctor": doctor}

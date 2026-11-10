@@ -6,7 +6,7 @@ from frappe.utils import flt
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import doctor_share as svc
-from hospital_vvs.utils import require_roles, settings
+from hospital_vvs.utils import require_roles, settings, scope_branch
 
 FIN = (R.ACCOUNTANT, R.CASH_SUPERVISOR)
 
@@ -18,6 +18,7 @@ def _company(company=None):
 @frappe.whitelist()
 def overview(company=None, branch=None):
 	"""Every doctor with commission: earned, taken back, paid, unpaid (what we owe now)."""
+	branch = scope_branch(branch, required=False)
 	require_roles(*FIN)
 	rows = svc.balances(_company(company), branch)
 	return {"doctors": rows, "company": _company(company), "basis": settings().get("doctor_share_basis") or "On payment",
@@ -42,6 +43,7 @@ def my_statement(from_date=None, to_date=None):
 
 @frappe.whitelist()
 def unpaid(doctor, company=None, from_date=None, to_date=None, branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*FIN)
 	rows = svc.unpaid_rows(doctor, _company(company), from_date, to_date, branch)
 	return {"rows": rows, "total": flt(sum(r.amount for r in rows), 2)}
@@ -50,6 +52,7 @@ def unpaid(doctor, company=None, from_date=None, to_date=None, branch=None):
 @frappe.whitelist(methods=["POST"])
 def pay(doctor, mode_of_payment, company=None, from_date=None, to_date=None, branch=None, reference_no=None, remarks=None):
 	"""Payout run: all unpaid commission of the period → Doctor Share Payout (submitted) → Payment Entry to the doctor's supplier."""
+	branch = scope_branch(branch, required=False)
 	require_roles(R.ACCOUNTANT)
 	p = svc.make_payout(doctor, _company(company), mode_of_payment, from_date, to_date, branch, reference_no, remarks)
 	p.flags.ignore_permissions = True

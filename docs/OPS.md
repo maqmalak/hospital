@@ -21,13 +21,18 @@ Lose at most **1 hour** of data (RPO), back online within **4 hours** (RTO).
    bench new-site staging.hospital --admin-password <x>                  # needs MariaDB root, once
    bench --site staging.hospital restore <db-enc.sql.gz> --with-public-files <files> --with-private-files <pfiles> --encryption-key <key>
    bench --site staging.hospital migrate
-   bench --site staging.hospital execute hospital_vvs.setup.anonymize.run   # Phase 7: anonymize patient data on staging
+   bench --site staging.hospital execute hospital_vvs.setup.anonymize.run   # anonymize patients (refuses on non-staging / training sites)
    ```
    Then log in, open a patient history, an invoice and the dashboard.
 
 | Date | Backup file | Time to restore | Checks | Result |
 |---|---|---|---|---|
 | 2026-11-06 | 20261106_220651-hospital-database-enc.sql.gz (16 MB) | decrypt + unzip < 1 s | Patient, OPD Slip, Prescription, Appointment, Sales Invoice, GL Entry present | Pass (decrypt check only — staging site not created yet) |
+| 2026-11-11 | 20261110_180017-hospital-database-enc.sql.gz | decrypt + unzip < 1 s | tables present (hardening audit H10-1) | Pass (decrypt check only — staging site not created yet) |
+
+## Security audit
+Before every release: `bench --site hospital execute hospital_vvs.devtools.qa_hardening.run` (roles, hidden fields, public endpoints, brute force, audit trail, branch lock, performance, backups, docs) → `docs/QA-HARDENING.md`.
+Fresh demo / training data: `bench --site <site> execute hospital_vvs.setup.demo.seed_all`.
 
 ## Environments
 | Env | Site | Notes |

@@ -7,7 +7,7 @@ from frappe.utils import cint, now_datetime, today
 from hospital_vvs import roles as R
 from hospital_vvs.api.patients import age_of
 from hospital_vvs.services import safety
-from hospital_vvs.utils import log_access, publish, require_roles, setting
+from hospital_vvs.utils import has_any_role, log_access, publish, require_roles, setting
 
 DOCTOR_ROLES = (R.DOCTOR, R.OV_DOCTOR)
 LINE_FIELDS = ("item", "dose", "frequency", "route", "duration", "qty", "instructions", "no_substitution", "override_reason")
@@ -88,6 +88,7 @@ def search_medicines(q="", limit=15):
 
 @frappe.whitelist()
 def search_diagnoses(q="", limit=15):
+	require_roles(*R.CLINICAL)
 	like = f"%{(q or '').strip()}%"
 	return frappe.get_all("Diagnosis", or_filters={"name": ["like", like], "diagnosis_name": ["like", like]},
 		fields=["name", "diagnosis_name", "category"], limit=cint(limit) or 15, order_by="diagnosis_name")
@@ -96,6 +97,7 @@ def search_diagnoses(q="", limit=15):
 @frappe.whitelist()
 def common_diagnoses(doctor=None, limit=16):
 	"""One-click diagnosis chips: this doctor's most used first, then the clinic's, then the rest of the list."""
+	require_roles(*R.CLINICAL)
 	doctor = doctor or my_doctor()
 	out, seen = [], set()
 
@@ -116,6 +118,7 @@ def common_diagnoses(doctor=None, limit=16):
 @frappe.whitelist()
 def check(patient, lines, prescription=None):
 	"""Live safety check as lines are added (same rules as on save)."""
+	require_roles(*R.CLINICAL)
 	lines = frappe.parse_json(lines)
 	return safety.check(patient, lines, exclude_prescription=prescription)
 
@@ -189,6 +192,7 @@ def amend(name, reason):
 
 @frappe.whitelist()
 def get_template(name):
+	require_roles(*R.CLINICAL)
 	t = frappe.get_doc("Prescription Template", name)
 	return {"medicines": [m.as_dict() for m in t.medicines], "diagnoses": [x.as_dict() for x in t.diagnoses], "advice": t.advice}
 
@@ -206,6 +210,7 @@ def save_template(template_name, data, shared=0):
 
 @frappe.whitelist()
 def copy_previous(patient):
+	require_roles(*R.CLINICAL)
 	name = frappe.db.get_value("Prescription", {"patient": patient, "docstatus": 1, "status": "Signed"}, "name", order_by="creation desc")
 	if not name:
 		frappe.throw(_("No previous prescription."))
@@ -216,8 +221,10 @@ def copy_previous(patient):
 
 @frappe.whitelist()
 def print_data(name):
+	require_roles(*R.CLINICAL, R.RECEPTIONIST)  # reception reprints for the patient; money / pharmacy-floor roles do not see diagnoses
 	rx = frappe.get_doc("Prescription", name)
-	rx.check_permission("read")
+	if not has_any_role(R.RECEPTIONIST):
+		rx.check_permission("read")
 	log_access("Prescription print", patient=rx.patient, reference_doctype="Prescription", reference_name=name)
 	p = frappe.db.get_value("Patient", rx.patient, ["patient_name", "patient_name_ur", "gender", "dob", "phone", "relation_type",
 		"guardian_name"], as_dict=True)

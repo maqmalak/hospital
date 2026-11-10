@@ -1,0 +1,696 @@
+{
+ "run_at": "2026-11-11 01:08:22.160595",
+ "site": "hospital",
+ "total": 98,
+ "passed": 97,
+ "failed": 0,
+ "warnings": 1,
+ "checks": [
+  {
+   "id": "H01-cashier-1",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: copy previous prescription (diagnoses) is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-cashier-2",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: live allergy / interaction check is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-cashier-3",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: prescription print data is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-cashier-4",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: patient history is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-cashier-5",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: IPD medicine safety check is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-cashier-6",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: diagnosis suggestions are refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-1",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: copy previous prescription (diagnoses) is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-2",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: live allergy / interaction check is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-3",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: prescription print data is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-4",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: patient history is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-5",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: IPD medicine safety check is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-6",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: diagnosis suggestions are refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-accounts-1",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "accounts: copy previous prescription (diagnoses) is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-accounts-2",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "accounts: live allergy / interaction check is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-accounts-3",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "accounts: prescription print data is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-accounts-4",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "accounts: patient history is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-accounts-5",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "accounts: IPD medicine safety check is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-accounts-6",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "accounts: diagnosis suggestions are refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-dispenser-1",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "dispenser: copy previous prescription (diagnoses) is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-dispenser-2",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "dispenser: live allergy / interaction check is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-dispenser-3",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "dispenser: prescription print data is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-dispenser-4",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "dispenser: patient history is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-dispenser-5",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "dispenser: IPD medicine safety check is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-dispenser-6",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "dispenser: diagnosis suggestions are refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-cashier-7",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: bed map (admission reasons) is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-cashier-8",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: bed history is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-cashier-9",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier: today's OPD slips list is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-7",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: bed map (admission reasons) is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-8",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: bed history is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-9",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: today's OPD slips list is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-finder-10",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "finder: payer preview (panel / insurance of a patient) is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-nurse-11",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "nurse: pharmacy receipt (money) is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H01-12",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "doctor copies the previous prescription",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H01-13",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "receptionist can reprint a prescription for the patient",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H01-14",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "nurse opens patient history",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H01-15",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier opens a pharmacy receipt",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H01-16",
+   "scenario": "H01 role guards \u2014 cashiers, finders and accounts cannot reach clinical data",
+   "check": "cashier loads the signed prescription into the POS",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H02-1",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "finder reads a prescription without diagnoses",
+   "result": "PASS",
+   "detail": "0 diagnoses returned"
+  },
+  {
+   "id": "H02-2",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "finder reads a prescription without examination notes",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H02-3",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "finder still sees the medicines to pick",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H02-4",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "nurse (clinical) sees the diagnoses",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H02-5",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "cashier reads the patient without allergies / chronic conditions / blood group",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H02-6",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "POS prescription lines carry no allergy / interaction alert text for the cashier",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H02-7",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "patient search returns no clinical fields",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H02-8",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "cashier cannot read a lab result",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H02-9",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "accountant reads an OPD slip without vitals or complaint",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H02-10",
+   "scenario": "H02 field-level \u2014 hidden fields are missing from API responses",
+   "check": "over HTTP too: finder's prescription has no diagnoses",
+   "result": "PASS",
+   "detail": "200"
+  },
+  {
+   "id": "H03-1",
+   "scenario": "H03 public surface \u2014 Guest reaches only the reviewed public endpoints",
+   "check": "no new public (Guest) endpoint outside the reviewed list",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H03-2",
+   "scenario": "H03 public surface \u2014 Guest reaches only the reviewed public endpoints",
+   "check": "every public endpoint is rate-limited",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H03-3",
+   "scenario": "H03 public surface \u2014 Guest reaches only the reviewed public endpoints",
+   "check": "all 284 staff endpoints refuse a Guest over HTTP",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H03-4",
+   "scenario": "H03 public surface \u2014 Guest reaches only the reviewed public endpoints",
+   "check": "token links with a made-up token return nothing",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H03-5",
+   "scenario": "H03 public surface \u2014 Guest reaches only the reviewed public endpoints",
+   "check": "the mock card page rejects an unknown payment",
+   "result": "PASS",
+   "detail": "403"
+  },
+  {
+   "id": "H04-1",
+   "scenario": "H04 endpoint audit \u2014 every staff endpoint checks role, permission or branch",
+   "check": "no staff endpoint without a server-side check (or a reviewed reason)",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H04-2",
+   "scenario": "H04 endpoint audit \u2014 every staff endpoint checks role, permission or branch",
+   "check": "internal SQL helper shift_cond is not callable from outside",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H05-1",
+   "scenario": "H05 brute force \u2014 wrong passwords are limited on the lock screen and counter approval",
+   "check": "lock screen: the 6th wrong password in 10 min is blocked",
+   "result": "PASS",
+   "detail": "['AuthenticationError', 'AuthenticationError', 'AuthenticationError', 'AuthenticationError', 'AuthenticationError', 'TooManyRequestsError']"
+  },
+  {
+   "id": "H05-2",
+   "scenario": "H05 brute force \u2014 wrong passwords are limited on the lock screen and counter approval",
+   "check": "counter approval: the 6th wrong supervisor password in 10 min is blocked",
+   "result": "PASS",
+   "detail": "['AuthenticationError', 'AuthenticationError', 'AuthenticationError', 'AuthenticationError', 'AuthenticationError', 'TooManyRequestsError']"
+  },
+  {
+   "id": "H05-3",
+   "scenario": "H05 brute force \u2014 wrong passwords are limited on the lock screen and counter approval",
+   "check": "login lockout after repeated failures is on",
+   "result": "PASS",
+   "detail": "attempts=10, wait=60s"
+  },
+  {
+   "id": "H06-1",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "2FA flag set on Admin, Accountant, Cash Supervisor, Pathologist roles",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H06-2",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "2FA switched on for the site",
+   "result": "WARN",
+   "detail": "off on this demo site \u2014 turn on before go-live (Clinic Settings \u2192 Enforce two-factor; System Settings \u2192 Enable 2FA)"
+  },
+  {
+   "id": "H06-3",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "idle lock minutes reach the browser (lock screen)",
+   "result": "PASS",
+   "detail": "200 15 min"
+  },
+  {
+   "id": "H06-4",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "password strength policy",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H06-5",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "opening a patient's history writes the access log (who, what, when)",
+   "result": "PASS",
+   "detail": "{'name': 'g8di2l9t4e', 'action': 'Patient history'}"
+  },
+  {
+   "id": "H06-6",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "admin audit screen shows who viewed the history",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H06-7",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "access log cannot be deleted (even by an admin)",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H06-8",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "access log cannot be edited",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H06-9",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "a doctor cannot open the audit screen",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H06-10",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "cashier cannot reveal a full CNIC (and the try is logged)",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H06-11",
+   "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
+   "check": "denied CNIC reveal is in the access log",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H07-1",
+   "scenario": "H07 audit trail \u2014 clinical and financial documents keep a version history",
+   "check": "every app document (except append-only logs) tracks changes",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H07-2",
+   "scenario": "H07 audit trail \u2014 clinical and financial documents keep a version history",
+   "check": "ERPNext money documents track changes",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H08-1",
+   "scenario": "H08 branch lock \u2014 users stay inside their branch",
+   "check": "strict branch access is on",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H08-2",
+   "scenario": "H08 branch lock \u2014 users stay inside their branch",
+   "check": "all 22 staff users are tied to a branch",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H08-reception:",
+   "scenario": "H08 branch lock \u2014 users stay inside their branch",
+   "check": "reception: another branch's OPD queue is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H08-reception:",
+   "scenario": "H08 branch lock \u2014 users stay inside their branch",
+   "check": "reception: another branch's OPD slips is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H08-lab: anoth",
+   "scenario": "H08 branch lock \u2014 users stay inside their branch",
+   "check": "lab: another branch's orders is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H08-cashier: a",
+   "scenario": "H08 branch lock \u2014 users stay inside their branch",
+   "check": "cashier: any other branch is refused",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H08-6",
+   "scenario": "H08 branch lock \u2014 users stay inside their branch",
+   "check": "cashier is offered only counters whose POS profile lists them",
+   "result": "PASS",
+   "detail": "['Pharmacy 1'] of 7"
+  },
+  {
+   "id": "H08-7",
+   "scenario": "H08 branch lock \u2014 users stay inside their branch",
+   "check": "cashier cannot open a shift on another counter (Handover 3)",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H09-1",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "patient search by MR under 500 ms",
+   "result": "PASS",
+   "detail": "3 ms"
+  },
+  {
+   "id": "H09-2",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "patient search by name under 500 ms",
+   "result": "PASS",
+   "detail": "7 ms"
+  },
+  {
+   "id": "H09-3",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "patient search by phone under 500 ms",
+   "result": "PASS",
+   "detail": "3 ms"
+  },
+  {
+   "id": "H09-4",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "OPD queue (whole branch) under 1000 ms",
+   "result": "PASS",
+   "detail": "6 ms"
+  },
+  {
+   "id": "H09-6",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "patient history under 2000 ms",
+   "result": "PASS",
+   "detail": "20 ms"
+  },
+  {
+   "id": "H09-7",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "POS item search under 300 ms",
+   "result": "PASS",
+   "detail": "37 ms"
+  },
+  {
+   "id": "H09-8",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "POS item add (price + stock) under 300 ms",
+   "result": "PASS",
+   "detail": "30 ms"
+  },
+  {
+   "id": "H09-9",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "lab report PDF under 3000 ms",
+   "result": "PASS",
+   "detail": "564 ms"
+  },
+  {
+   "id": "H09-10",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "React app page load (/hms) under 2000 ms",
+   "result": "PASS",
+   "detail": "200 54 ms"
+  },
+  {
+   "id": "H09-5",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "session boot over HTTP under 1000 ms",
+   "result": "PASS",
+   "detail": "200 13 ms"
+  },
+  {
+   "id": "H09-11",
+   "scenario": "H09 performance \u2014 09-security-ops.md targets",
+   "check": "OPD queue over HTTP under 1000 ms",
+   "result": "PASS",
+   "detail": "200 15 ms"
+  },
+  {
+   "id": "H10-1",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "newest database backup decrypts and contains the tables (restore quick check)",
+   "result": "PASS",
+   "detail": "['tabGL Entry          2 insert statements']"
+  },
+  {
+   "id": "H10-2",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "a backup was taken in the last 26 hours",
+   "result": "PASS",
+   "detail": "20261110_180017-hospital-database-enc.sql.gz (7.1 h)"
+  },
+  {
+   "id": "H10-3",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "scheduler is on and running",
+   "result": "PASS",
+   "detail": "{'scheduler_enabled': True, 'scheduler_last_run': '2026-11-11 01:05:01.363589'}"
+  },
+  {
+   "id": "H10-4",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "health check reports disk, DB size and queues",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H10-5",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "receptionist cannot open the health check",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H10-6",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "anonymize refuses to run on this (non-staging) site",
+   "result": "PASS",
+   "detail": "PermissionError"
+  },
+  {
+   "id": "H10-7",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "docs/API.md lists every whitelisted method",
+   "result": "PASS",
+   "detail": "[]"
+  },
+  {
+   "id": "H10-8",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "one-command demo seeder exists (setup.demo.seed_all)",
+   "result": "PASS",
+   "detail": ""
+  },
+  {
+   "id": "H10-9",
+   "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
+   "check": "docs folder has ops, API, decisions, progress and QA reports",
+   "result": "PASS",
+   "detail": ""
+  }
+ ]
+}

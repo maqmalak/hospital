@@ -79,6 +79,38 @@ def check_branch(branch):
 		frappe.throw(_("You do not have access to branch {0}.").format(branch), frappe.PermissionError)
 
 
+def scope_branch(branch, required=False):
+	"""Whitelisted methods that take a branch: refuse a branch the user is not in (strict branch lock, W17)."""
+	if branch or required:
+		check_branch(branch)
+	return branch
+
+
+# ------------------------------------------------------------------ wrong-password limiter (lock screen, counter approval)
+FAIL_LIMIT, FAIL_WINDOW = 5, 600
+
+
+def _fail_key(kind, who):
+	return f"hv_fail:{kind}:{who}"
+
+
+def fail_guard(kind, who):
+	"""Refuse when `who` already had FAIL_LIMIT wrong passwords for `kind` in the last FAIL_WINDOW seconds."""
+	if frappe.utils.cint(frappe.cache.get_value(_fail_key(kind, who))) >= FAIL_LIMIT:
+		frappe.throw(_("Too many wrong passwords. Wait 10 minutes or ask the admin."), frappe.TooManyRequestsError)
+
+
+def fail_hit(kind, who):
+	key = _fail_key(kind, who)
+	n = frappe.utils.cint(frappe.cache.get_value(key)) + 1
+	frappe.cache.set_value(key, n, expires_in_sec=FAIL_WINDOW)
+	return n
+
+
+def fail_reset(kind, who):
+	frappe.cache.delete_value(_fail_key(kind, who))
+
+
 def branch_company(branch):
 	return frappe.db.get_value("Branch", branch, "hv_company") or settings().company or frappe.defaults.get_global_default("company")
 

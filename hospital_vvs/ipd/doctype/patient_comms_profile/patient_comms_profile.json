@@ -89,7 +89,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-10 01:15:05.951209",
+ "modified": "2026-11-11 01:06:08.239504",
  "modified_by": "Administrator",
  "module": "IPD",
  "name": "Patient Comms Profile",
@@ -123,5 +123,6 @@
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

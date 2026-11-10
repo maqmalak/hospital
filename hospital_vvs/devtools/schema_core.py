@@ -270,7 +270,7 @@ PATIENT = doctype("Patient", M, [
 	f("alt_phone", "Data", options="Phone", label="Alternate Phone"),
 	f("preferred_language", "Select", ["en", "ur", "ar"], default="ur"),
 	cb("p2"),
-	f("branch", "Link", "Branch", reqd=1, filter=1, label="Registered at Branch"),
+	f("branch", "Link", "Branch", reqd=1, filter=1, label="Registered at Branch", ignore_user_permissions=1),  # MR shared by all branches (W17)
 	f("category", "Select", ["Normal", "Panel", "Insurance", "Staff", "Welfare"], default="Normal", list=1, filter=1),
 	f("photo", "Attach Image"), f("blood_group", "Select", ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], permlevel=1),
 	sb("p3", "Address"), f("address", "Small Text"), cb("p4"), f("city", "Data", default="Lahore", filter=1),

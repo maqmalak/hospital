@@ -6,7 +6,7 @@ from frappe.utils import cint, today
 from hospital_vvs import roles as R
 from hospital_vvs.services import counter as svc
 from hospital_vvs.services import shifts
-from hospital_vvs.utils import check_branch, default_branch, require_roles
+from hospital_vvs.utils import check_branch, default_branch, require_roles, scope_branch
 
 ROLES = (R.RECEPTIONIST, R.CASH_SUPERVISOR)
 
@@ -94,6 +94,7 @@ def refund(name, rows=None, reason=None):
 
 @frappe.whitelist()
 def offline_bundle(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*ROLES)
 	branch = branch or default_branch()
 	cur = shifts.current_shift()

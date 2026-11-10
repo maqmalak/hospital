@@ -220,6 +220,7 @@ def add_vitals(data):
 
 @frappe.whitelist()
 def check_medicine(patient, item, dose=None, frequency=None, bed_allotment=None, er_visit=None):
+	require_roles(*R.CLINICAL)
 	from hospital_vvs.services import safety
 
 	active = frappe.get_all("IPD Medication Order", filters=dict(ipd._scope(bed_allotment, er_visit), status="Active"), fields=["item", "dose",

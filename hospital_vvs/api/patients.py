@@ -10,7 +10,7 @@ from frappe.utils import add_years, cint, flt, getdate, now_datetime, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.hospital_vvs.doctype.patient.patient import cnic_digits, cnic_hash, dob_from_age, normalize_phone
-from hospital_vvs.utils import can_see_clinical, check_branch, default_branch, has_any_role, hhmm, log_access, require_roles
+from hospital_vvs.utils import can_see_clinical, check_branch, default_branch, has_any_role, hhmm, log_access, require_roles, scope_branch
 
 LIST_FIELDS = ["name", "patient_name", "patient_name_ur", "gender", "dob", "phone", "city", "category", "cnic_masked", "photo",
 	"branch", "disabled", "merged_into", "creation"]
@@ -60,6 +60,7 @@ def _similar(a, b):
 @frappe.whitelist()
 def find_duplicates(patient_name=None, phone=None, cnic=None, dob=None, age=None, exclude=None):
 	"""Likely duplicates: same CNIC; same phone + similar name; same name + DOB/age within a year."""
+	require_roles(*R.FRONT_DESK, R.DEO)
 	matches = {}
 	digits = cnic_digits(cnic)
 	if len(digits) == 13:
@@ -296,6 +297,7 @@ def merge(survivor, duplicate, confirm_mr):
 @frappe.whitelist()
 def board(q=None, category=None, gender=None, branch=None, sort="recent", start=0, limit=24):
 	"""Patients screen: a page of patients with visit counts, last visit, allergy flag and upcoming booking, plus totals."""
+	branch = scope_branch(branch, required=False)
 	require_roles(*REGISTER_ROLES)
 	cond, args = ["p.disabled=0"], {}
 	for field, val in (("category", category), ("gender", gender), ("branch", branch)):

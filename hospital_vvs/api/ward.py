@@ -19,6 +19,11 @@ TRANSITIONS = {
 
 @frappe.whitelist()
 def bed_map(branch=None):
+	require_roles(R.DOCTOR, R.NURSE, R.RECEPTIONIST, R.DEO, R.ACCOUNTANT, R.CASH_SUPERVISOR)
+	return _bed_map(branch)
+
+
+def _bed_map(branch=None):
 	branch = branch or default_branch()
 	check_branch(branch)
 	wards = frappe.get_all("Ward", filters={"branch": branch, "is_active": 1}, fields=["name", "ward_name", "ward_name_ur", "ward_type",
@@ -116,7 +121,7 @@ def extend(bed, days=1):
 @frappe.whitelist()
 def kiosk(branch=None):
 	"""Ward kiosk display: per-ward counts and beds; initials only unless first names are allowed on displays."""
-	data = bed_map(branch)
+	data = _bed_map(branch)
 	show = cint(frappe.db.get_single_value("Clinic Settings", "show_first_name_on_display"))
 	for b in data["beds"]:
 		name = b.pop("patient_name", None) or ""
@@ -152,5 +157,6 @@ def release(bed, note=None):
 
 @frappe.whitelist()
 def bed_history(bed):
+	require_roles(R.DOCTOR, R.NURSE, R.RECEPTIONIST, R.DEO, R.ACCOUNTANT, R.CASH_SUPERVISOR)
 	return frappe.get_all("Bed Status Log", filters={"bed": bed}, fields=["from_status", "to_status", "patient", "changed_by", "changed_on",
 		"note"], order_by="changed_on desc", limit=30)

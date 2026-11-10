@@ -5,7 +5,7 @@ from frappe import _
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import discounts
-from hospital_vvs.utils import has_any_role, require_roles
+from hospital_vvs.utils import fail_guard, fail_hit, fail_reset, has_any_role, require_roles
 
 
 @frappe.whitelist()
@@ -37,8 +37,11 @@ def approve_with_pin(name, approver, password):
 	"""Supervisor approves at the counter by entering their own login and password."""
 	from frappe.utils.password import check_password
 
+	fail_guard("pin", approver)
 	try:
 		check_password(approver, password, delete_tracker_cache=False)
 	except frappe.AuthenticationError:
+		fail_hit("pin", approver)
 		frappe.throw(_("Wrong user or password."), frappe.AuthenticationError)
+	fail_reset("pin", approver)
 	return discounts.decide(name, True, _("Approved at the counter"), approver=approver).as_dict()

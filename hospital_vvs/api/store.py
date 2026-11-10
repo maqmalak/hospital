@@ -7,7 +7,7 @@ from frappe.utils import add_days, cint, date_diff, flt, nowdate, today
 from hospital_vvs import roles as R
 from hospital_vvs.services import pharmacy
 from hospital_vvs.setup.company import ABBR
-from hospital_vvs.utils import default_branch, require_roles, setting
+from hospital_vvs.utils import default_branch, require_roles, setting, scope_branch
 
 STORE = (R.STORE_KEEPER, R.REVIEWER)
 
@@ -28,6 +28,7 @@ def warehouses(branch=None):
 
 @frappe.whitelist()
 def context(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*STORE, R.PHARMACY_CASHIER)
 	return {"warehouses": warehouses(branch), "suppliers": frappe.get_all("Supplier", pluck="name"),
 		"near_expiry_days": cint(setting("near_expiry_days")) or 90, "categories": frappe.get_all("Medicine Category", pluck="name")}
@@ -56,12 +57,14 @@ def stock(warehouse, q=None, only_flags=0):
 
 @frappe.whitelist(methods=["POST"])
 def receive(supplier, warehouse, lines, bill_no=None, branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.STORE_KEEPER)
 	return pharmacy.receive_stock(supplier, warehouse, frappe.parse_json(lines), bill_no, branch or default_branch())
 
 
 @frappe.whitelist()
 def requests(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*STORE, R.NURSE, R.LAB_USER)
 	w = warehouses(branch)
 	rows = frappe.get_all("Material Request", filters={"material_request_type": "Material Transfer", "docstatus": 1, "status": ["not in", ["Transferred", "Stopped", "Cancelled"]],
@@ -103,6 +106,7 @@ def transfer(material_request):
 
 @frappe.whitelist()
 def expiry(branch=None, window=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(*STORE)
 	w = warehouses(branch)
 	window = cint(window) or cint(setting("near_expiry_days")) or 90
@@ -119,6 +123,7 @@ def expiry(branch=None, window=None):
 
 @frappe.whitelist(methods=["POST"])
 def quarantine(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.STORE_KEEPER)
 	w = warehouses(branch)
 	return pharmacy.quarantine_expired([w["Main Store"], w["Pharmacy Retail"], w["IPD Dispensing"]], w["Quarantine"])
@@ -141,6 +146,7 @@ def write_off(batch_no, qty, warehouse, reason):
 
 @frappe.whitelist()
 def counts(branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.STORE_KEEPER, R.ADMIN)
 	rows = frappe.get_all("Cycle Count", filters={"branch": branch or default_branch()}, fields=["name", "warehouse", "count_date", "scope", "status",
 		"total_variance_value", "counted_by", "approved_by", "stock_reconciliation"], order_by="creation desc", limit=50)
@@ -163,6 +169,7 @@ def count_sheet(name):
 
 @frappe.whitelist(methods=["POST"])
 def count_create(warehouse, scope="All", rack=None, category=None, branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.STORE_KEEPER)
 	return pharmacy.cycle_count_create(warehouse, branch or default_branch(), scope, rack, category).name
 
@@ -181,6 +188,7 @@ def count_approve(name, approve=1, note=None):
 @frappe.whitelist()
 def reports(kind, branch=None, from_date=None, to_date=None):
 	"""Pharmacy reports: controlled register, substitutions, sales & margin, slow-moving, reorder, returns."""
+	branch = scope_branch(branch, required=False)
 	require_roles(R.STORE_KEEPER, R.REVIEWER, R.ADMIN, R.ACCOUNTANT)
 	branch = branch or default_branch()
 	to_date = to_date or today()

@@ -6,7 +6,7 @@ from frappe.utils import add_days, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import patient_comms as svc
-from hospital_vvs.utils import require_roles, user_branches
+from hospital_vvs.utils import require_roles, user_branches, scope_branch
 
 STAFF = (R.NURSE, R.DOCTOR)
 
@@ -139,6 +139,7 @@ def feedback_follow_up(name, note, done=1):
 
 @frappe.whitelist()
 def feedback_report(from_date=None, to_date=None, branch=None):
+	branch = scope_branch(branch, required=False)
 	require_roles(R.ADMIN, R.DOCTOR, R.ACCOUNTANT)
 	return svc.feedback_report(from_date or add_days(today(), -89), to_date or today(), branch)
 
