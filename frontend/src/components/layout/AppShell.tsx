@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Building2, ChevronDown, Languages, LayoutGrid, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, X } from "lucide-react";
+import { Building2, ChevronDown, Languages, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, X , Monitor as MonitorIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { setShell, useShell } from "@/lib/shell";
 import { loadLearned } from "@/lib/urdu";
@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </Link>
       <div className="scrollbar-thin flex-1 space-y-4 overflow-y-auto px-2 pb-4">
         <NavLink to="/pw-home" className={({ isActive }) => cn("flex items-center gap-3 rounded-lg px-3 py-2 text-sm", isActive ? "bg-white/10 font-semibold" : "text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground")}>
-          <LayoutGrid className="h-4 w-4" /> {t("Control board")}
+          <MonitorIcon className="h-4 w-4" /> {t("Desktop")}
         </NavLink>
         {groups.map((g) => (
           <div key={g.label}>

@@ -7,7 +7,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Spinner } from "@/components/ui/skeleton";
 
 const LoginPage = lazy(() => import("@/modules/auth/LoginPage"));
-const HomePage = lazy(() => import("@/modules/home/HomePage"));
+const DesktopPage = lazy(() => import("@/modules/home/DesktopPage"));
 const DashboardPage = lazy(() => import("@/modules/dashboard/DashboardPage"));
 const RegistrationPage = lazy(() => import("@/modules/patients/RegistrationPage"));
 const PatientsPage = lazy(() => import("@/modules/patients/PatientsPage"));
@@ -135,7 +135,7 @@ export default function App() {
         <Route path="/display/waiting/:key" element={<DevicePage />} />
         <Route path="/display/beds/:key" element={<DevicePage />} />
         <Route path="/" element={loading ? <Loading /> : <Navigate to={boot ? "/pw-home" : "/login"} replace />} />
-        <Route path="/pw-home" element={g("/pw-home", <HomePage />)} />
+        <Route path="/pw-home" element={g("/pw-home", <DesktopPage />)} />
         <Route path="/pw-dashboard" element={g("/pw-dashboard", <DashboardPage />)} />
         <Route path="/registration" element={g("/registration", <RegistrationPage />)} />
         <Route path="/patients" element={g("/patients", <PatientsPage />)} />

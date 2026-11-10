@@ -10,7 +10,7 @@ export interface NavItem { route: string; label: string; icon: LucideIcon; color
 export interface NavGroup { label: string; items: NavItem[] }
 
 export const NAV: NavGroup[] = [
-  { label: "Front desk", items: [
+  { label: "OPD", items: [
     { route: "/registration", label: "Patient registration", icon: UserPlus, color: "from-teal-500 to-emerald-500", desc: "Register, search, duplicate check, card" },
     { route: "/counter", label: "Reception counter", icon: ReceiptText, color: "from-emerald-600 to-teal-700", desc: "One cart: OPD, services, lab, IPD, online fees, dues" },
     { route: "/opd_slip", label: "OPD slip", icon: FilePlus2, color: "from-sky-500 to-cyan-500", desc: "Fee, vitals, token and receipt" },
@@ -66,10 +66,6 @@ export const NAV: NavGroup[] = [
     { route: "/ipd_report", label: "IPD reports", icon: BarChart3, color: "from-slate-600 to-slate-800", desc: "Census, stays, revenue, dues" },
     { route: "/display/ward", label: "Ward kiosk display", icon: MonitorPlay, color: "from-cyan-600 to-blue-700", desc: "Full-screen bed status" },
   ] },
-  { label: "Online", items: [
-    { route: "/ov-staff", label: "Online visits", icon: Video, color: "from-indigo-500 to-violet-600", desc: "Video consultations: fee, accept, prescribe" },
-    { route: "/ov-staff/report", label: "Online visit report", icon: BarChart3, color: "from-violet-600 to-fuchsia-700", desc: "Requests, fees, refunds" },
-  ] },
   { label: "Finance", items: [
     { route: "/finance", label: "Finance overview", icon: TrendingUp, color: "from-indigo-600 to-violet-700", desc: "Revenue, refunds, expenses, payers" },
     { route: "/panels", label: "Panels & insurers", icon: Building2, color: "from-indigo-600 to-sky-600", desc: "Coverage, statements, payments" },
@@ -87,10 +83,12 @@ export const NAV: NavGroup[] = [
     { route: "/billing/discount-approvals", label: "Discount approvals", icon: Percent, color: "from-orange-500 to-amber-500", desc: "Requests above the limit" },
     { route: "/messages", label: "Message log", icon: MessagesSquare, color: "from-green-600 to-teal-600", desc: "WhatsApp / SMS delivery" },
   ] },
-  { label: "Insights", items: [
+  { label: "Insights & Online", items: [
     { route: "/pw-dashboard", label: "Dashboard", icon: LayoutDashboard, color: "from-indigo-500 to-blue-600", desc: "Today at a glance" },
     { route: "/reports", label: "Reports", icon: BarChart3, color: "from-blue-500 to-sky-600", desc: "MIS reports" },
     { route: "/feedback", label: "Patient feedback", icon: MessageSquareHeart, color: "from-pink-500 to-rose-600", desc: "Ratings and follow-ups" },
+    { route: "/ov-staff", label: "Online visits", icon: Video, color: "from-indigo-500 to-violet-600", desc: "Video consultations: fee, accept, prescribe" },
+    { route: "/ov-staff/report", label: "Online visit report", icon: BarChart3, color: "from-violet-600 to-fuchsia-700", desc: "Requests, fees, refunds" },
   ] },
   { label: "Admin", items: [
     { route: "/doctors", label: "Doctors", icon: Activity, color: "from-teal-600 to-cyan-700", desc: "Doctors, schedules, leave" },
@@ -101,5 +99,5 @@ export const NAV: NavGroup[] = [
   ] },
 ];
 
-export const HOME: NavItem = { route: "/pw-home", label: "Control board", icon: LayoutGrid, color: "", desc: "" };
+export const HOME: NavItem = { route: "/pw-home", label: "Desktop", icon: LayoutGrid, color: "", desc: "" };
 export const ICONS = { ScrollText, FileClock };

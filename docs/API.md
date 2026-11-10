@@ -110,6 +110,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | Method | Params | Flags | Roles | Summary |
 |---|---|---|---|---|
 | `summary` | branch, date, days |  | DOCTOR, ACCOUNTANT, CASH_SUPERVISOR |  |
+| `home` | branch |  | ALL | Post-login Desktop: what needs the user's attention (only for screens they can open), live counts per app tile, |
 
 ## doctor_share
 

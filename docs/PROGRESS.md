@@ -182,3 +182,6 @@ All screens in Urdu (RTL), including IPD / ER, pharmacy, finance and the public 
 
 ## IPD & ER audit (2026-11-11) — D-56
 70/70 live checks (admission desk, insurance pre-auth, rounds, vitals, MAR, transfer, diet, procedure + consent, charges, labs, advances, discount approval, discharge clearance, final bill, refund, insurer split, ER triage → disposition → admit / refer / identify, reports, access). Fixed: impossible vitals accepted, discharge without refunding the extra advance, final bill crash on 100 % insurer cover, ER identify failing for the admin. Report: [QA-IPD.md](QA-IPD.md). Tests: 114 green (4 new).
+
+## Desktop home (2026-11-11) — D-57
+`/pw-home` is now the Desktop in the real-estate style (glossy app icons with live counts and hover playbooks, Needs Attention, Quick Links, Recent Activity panel), fed by `dashboard.home`, role-aware. Menu: Desktop, OPD (was Front desk), Insights & Online (merged). Urdu complete; E2E 23 green.

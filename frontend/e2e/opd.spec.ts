@@ -6,7 +6,9 @@ test.describe.configure({ mode: "serial" });
 
 const stamp = Date.now().toString().slice(-6);
 const LAST = ["Raza", "Awan", "Malik", "Qureshi", "Butt", "Siddiqui", "Bhatti", "Iqbal", "Javed", "Abbasi"];
-const NAME = `Bilal ${LAST[Number(stamp[5])]} ${LAST[Number(stamp[4])]}`;
+const FIRST = ["Bilal", "Hamza", "Usman", "Faisal", "Kamran", "Naveed", "Zubair", "Asad", "Tariq", "Shahid"];
+const NAME = `${FIRST[Number(stamp[3])]} ${LAST[Number(stamp[5])]} ${LAST[Number(stamp[4])]}`;  // 1,000 combinations; age varies too (duplicate check)
+const AGE = String(20 + (Number(stamp) % 50));
 const PHONE = `300${Math.floor(1000000 + Math.random() * 8999999)}`;
 let mr = "";
 
@@ -24,7 +26,7 @@ test("reception registers a new patient and issues an OPD slip with a token", as
   await open(p, "/registration");
   await p.getByPlaceholder("Muhammad Ali Khan").fill(NAME);
   await p.locator("button", { hasText: /^Male$/ }).first().click();
-  await p.getByPlaceholder("Age").fill("34");
+  await p.getByPlaceholder("Age").fill(AGE);
   await p.getByPlaceholder("300 1234567").fill(PHONE);
   await p.getByRole("button", { name: /Register & OPD slip/ }).click();
   await expect(p).toHaveURL(/\/opd_slip\?patient=MR-/);

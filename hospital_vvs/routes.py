@@ -12,7 +12,7 @@ from hospital_vvs.roles import (
 CASH_ROLES = [RECEPTIONIST, LAB_USER, PHARMACY_CASHIER, DISPENSER, CASH_SUPERVISOR]
 
 DEFAULT_ROUTES = [
-	("/pw-home", "Control board", ALL, ""),
+	("/pw-home", "Desktop", ALL, ""),
 	("/pw-dashboard", "Dashboard", [ADMIN, DOCTOR, ACCOUNTANT], ""),
 	("/registration", "Patient registration", [RECEPTIONIST, DEO], ""),
 	("/patients", "Patients", [RECEPTIONIST, DOCTOR, NURSE, DEO], ""),

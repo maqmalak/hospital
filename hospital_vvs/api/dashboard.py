@@ -98,3 +98,146 @@ def summary(branch=None, date=None, days=14):
 		"revenue_by_type": revenue_type, "revenue_by_mode": revenue_mode, "appointments_by_channel": appts, "beds": beds,
 		"by_doctor": by_doctor, "trend": trend_rows, "top_diagnoses": top_dx, "demographics": demographics,
 	}
+
+
+# ------------------------------------------------------------------ Desktop (/pw-home), realestate-style home
+def _routes():
+	from hospital_vvs.api.session import allowed_routes
+
+	return {r["route"] for r in allowed_routes()}
+
+
+@frappe.whitelist()
+def home(branch=None):
+	"""Post-login Desktop: what needs the user's attention (only for screens they can open), live counts per app tile,
+	approvals waiting, recent activity, the last 7 days of OPD visits and documents per module."""
+	from frappe.utils import add_to_date, now_datetime
+
+	from hospital_vvs.utils import has_any_role, is_admin, scope_branch
+
+	require_roles(*R.ALL)
+	branch = scope_branch(branch) or default_branch()
+	can = _routes()
+	admin = is_admin()
+	ok = lambda route: admin or route in can  # noqa: E731
+	d0, now = today(), now_datetime()
+	ex = frappe.db.get_single_value("Clinic Settings", "pharmacy_company") or "-"
+	cnt = lambda dt, f: frappe.db.count(dt, f)  # noqa: E731
+	alerts = []
+
+	def alert(key, route, label, meta, n, amount=None):
+		if n and ok(route):
+			alerts.append({"key": key, "to": route, "label": label, "meta": meta, "n": n, "amount": amount})
+
+	b = {"branch": branch}
+	alert("critical", "/lab/verify", "Critical lab values not logged", "Tell the doctor and log the read-back", cnt("Lab Result", {**b, "has_critical": 1, "critical_logged": 0, "status": ["!=", "Cancelled"]}))
+	alert("stale_shifts", "/cash/approvals", "Shifts left open from an earlier day", "Close them before today's billing", cnt("POS Opening Entry", {"status": "Open", "docstatus": 1, "posting_date": ["<", d0]}))
+	alert("discounts", "/billing/discount-approvals", "Discount requests waiting", "Above the cashier's limit", cnt("Discount Authorization", {"status": "Pending"}))
+	alert("closings", "/cash/approvals", "Shift closings to approve", "Short or excess beyond tolerance", cnt("Shift Closing", {"status": "Pending Approval"}))
+	alert("drops", "/cash/approvals", "Cash drops to confirm", "Cash handed to the safe", cnt("Cash Movement", {"status": "Pending Confirmation"}))
+	alert("doses", "/ipd/mar", "Medicine doses overdue", "Scheduled more than 30 min ago, not charted",
+		cnt("MAR Entry", {"status": ["in", ["Scheduled", "Approved"]], "scheduled_at": ["between", [add_to_date(now, hours=-24), add_to_date(now, minutes=-30)]]}))
+	alert("er", "/er", "Emergency patients not triaged", "Waiting in ER", cnt("ER Visit", {**b, "status": "Waiting", "triage_level": ["in", ["", None]]}) if frappe.db.has_column("ER Visit", "triage_level") else 0)
+	alert("vitals", "/opd/vitals", "Patients waiting for vitals", "Token issued, nurse next", cnt("Queue Entry", {**b, "queue_date": d0, "status": "Vitals"}))
+	alert("waiting", "/physician-queue", "Patients waiting for a doctor", "Vitals done", cnt("Queue Entry", {**b, "queue_date": d0, "status": "Waiting"}))
+	alert("verify", "/lab/verify", "Lab results to verify", "Entered, waiting for the pathologist", cnt("Lab Result", {**b, "status": "Result Entered"}))
+	alert("samples", "/lab/samples", "Lab samples to collect", "Paid orders without a sample", cnt("Lab Sample", {**b, "status": "Pending"}))
+	alert("discharge", "/ipd", "Discharges pending", "Bill, summary or dues open", cnt("Bed Allotment", {**b, "status": "Discharge Pending"}))
+	alert("preauth", "/ipd/pre-auth", "Insurance pre-auths waiting", "Requested, no decision yet", cnt("Insurance Pre-Auth", {"status": "Requested"}))
+	alert("expenses", "/expenses", "Expenses waiting for approval", "Bills with receipts", cnt("Expense", {"status": "Pending Approval"}))
+	alert("pharmacy", "/pharmacy/tickets", "Pharmacy tickets in progress", "Pick → review → handover", cnt("Dispense Ticket", {**b, "status": ["in", ["Queued", "Picking", "Picked", "Reviewing", "Ready", "Exception"]]}) if frappe.db.has_column("Dispense Ticket", "branch") else 0)
+	alert("ov", "/ov-staff", "Online visit requests", "Waiting to be accepted", cnt("Online Visit Request", {"status": "Pending"}))
+	alert("feedback", "/feedback", "Low ratings to follow up", "Patients who rated 1–2", cnt("Patient Feedback", {"follow_up": "Open"}))
+
+	# approvals the user can act on
+	approvals = []
+	if has_any_role(R.CASH_SUPERVISOR, R.ACCOUNTANT):
+		for r in frappe.get_all("Discount Authorization", filters={"status": "Pending"}, fields=["name", "billing_type", "discount_amount", "reason", "requested_by", "creation"],
+			order_by="creation desc", limit=6):
+			approvals.append({"doctype": "Discount Authorization", "name": r.name, "title": f"{r.billing_type} · {r.reason or ''}", "amount": r.discount_amount,
+				"state": "Discount", "since": str(r.creation), "can_approve": r.requested_by != frappe.session.user, "to": "/billing/discount-approvals"})
+	if has_any_role(R.CASH_SUPERVISOR):
+		for r in frappe.get_all("Shift Closing", filters={"status": "Pending Approval"}, fields=["name", "cashier", "difference", "creation"], order_by="creation desc", limit=4) \
+				if frappe.db.has_column("Shift Closing", "cashier") else []:
+			approvals.append({"doctype": "Shift Closing", "name": r.name, "title": r.cashier, "amount": abs(flt(r.difference)), "state": "Shift closing",
+				"since": str(r.creation), "can_approve": False, "to": "/cash/approvals"})
+
+	# recent activity (last 7 days), only the kinds of record the user works with
+	since = add_days(d0, -6)
+	feed_src = [
+		("OPD Slip", "opd", "/opd_slip", "patient_name", "net_total", "doctor_name", {"docstatus": 1}),
+		("Prescription", "opd", "/pw-prescription", "patient_name", None, "doctor_name", {"docstatus": 1}),
+		("Test Invoice", "lab", "/lab/orders", "patient_name", "net_total", "status", {"docstatus": ["<", 2]}),
+		("Bed Allotment", "ipd", "/ipd", "patient_name", None, "status", {}),
+		("ER Visit", "ipd", "/er", "patient_name", None, "status", {}),
+		("Expense", "finance", "/expenses", "payee", "amount", "status", {}),
+	]
+	activity = []
+	for dt, cat, route, title, amount, status, extra in feed_src:
+		if not ok(route) or not frappe.db.table_exists(dt):
+			continue
+		meta = frappe.get_meta(dt)
+		fields = ["name", "owner", "creation", f"`{title}` as title"] + ([f"`{amount}` as amount"] if amount else []) + ([f"`{status}` as status"] if meta.has_field(status) else [])
+		f = {"creation": [">=", since], **extra}
+		if meta.has_field("branch"):
+			f["branch"] = branch
+		for r in frappe.get_all(dt, filters=f, fields=fields, order_by="creation desc", limit=12):
+			to = {"Prescription": f"/pw-prescription?rx={r.name}", "Bed Allotment": f"/ipd/{r.name}"}.get(dt, route)
+			activity.append({"doctype": dt, "name": r.name, "category": cat, "title": r.title, "amount": r.get("amount"), "status": r.get("status") or ("Submitted" if dt != "Bed Allotment" else ""),
+				"owner": r.owner, "at": str(r.creation), "to": to})
+	activity.sort(key=lambda a: a["at"], reverse=True)
+	activity = activity[:40]
+	names = {u.name: u.full_name for u in frappe.get_all("User", filters={"name": ["in", list({a["owner"] for a in activity}) or [""]]}, fields=["name", "full_name"])}
+	for a in activity:
+		a["owner_name"] = names.get(a["owner"], a["owner"])
+
+	# last 7 days of OPD visits
+	per_day = {str(r.d): r.n for r in frappe.db.sql("""select posting_date d, count(*) n from `tabOPD Slip` where docstatus=1 and branch=%s and posting_date>=%s
+		group by posting_date""", (branch, since), as_dict=True)}
+	days = [{"date": str(add_days(since, i)), "count": cint(per_day.get(str(add_days(since, i))))} for i in range(7)]
+
+	# documents created per module
+	MODS = {"OPD": [("OPD Slip", {"docstatus": 1}), ("Prescription", {"docstatus": 1})], "Lab": [("Test Invoice", {"docstatus": ["<", 2]})],
+		"IPD": [("Bed Allotment", {}), ("IPD Charge", {})], "ER": [("ER Visit", {})], "Pharmacy": [("Sales Invoice", {"docstatus": 1, "company": ex})],
+		"Finance": [("Expense", {}), ("Payment Entry", {"docstatus": 1})], "Appointments": [("Appointment", {})]}
+	counts = {}
+	for key, start in (("today", d0), ("week", since), ("month", add_days(d0, -29))):
+		counts[key] = {m: sum(frappe.db.count(dt, {**f, "creation": [">=", start]}) for dt, f in src if frappe.db.table_exists(dt)) for m, src in MODS.items()}
+		counts[key] = {m: n for m, n in counts[key].items() if n}
+
+	visits_today = cnt("OPD Slip", {**b, "posting_date": d0, "docstatus": 1})
+	in_hospital = cnt("Bed Allotment", {**b, "status": ["in", ["Admitted", "Discharge Pending"]]})
+	money_role = has_any_role(R.ACCOUNTANT, R.CASH_SUPERVISOR, R.RECEPTIONIST)
+	collected = _scalar("""select coalesce(sum(paid_amount),0) from `tabSales Invoice` where docstatus=1 and posting_date=%s and company!=%s and branch=%s""", (d0, ex, branch)) \
+		if money_role else None
+	stats = {"visits_today": visits_today, "in_hospital": in_hospital, "collected_today": collected,
+		"lab_today": cnt("Test Invoice", {**b, "posting_date": d0, "docstatus": ["<", 2]}) if frappe.db.has_column("Test Invoice", "posting_date") else 0}
+
+	tiles = {}
+
+	def tile(route, value, label):
+		if ok(route):
+			tiles[route] = {"value": cint(value), "label": label}
+
+	tile("/physician-queue", cnt("Queue Entry", {**b, "queue_date": d0, "status": ["in", ["Waiting", "Called", "In Consultation"]]}), "waiting")
+	tile("/opd/vitals", cnt("Queue Entry", {**b, "queue_date": d0, "status": "Vitals"}), "at vitals")
+	tile("/opd_slip", visits_today, "today")
+	tile("/registration", cnt("Patient", {**b, "creation": [">=", d0]}), "new today")
+	tile("/ipd", in_hospital, "in hospital")
+	tile("/ward", cnt("Hospital Bed", {**b, "status": "Available", "is_active": 1}), "beds free")
+	tile("/er", cnt("ER Visit", {**b, "status": ["!=", "Disposed"]}), "in ER")
+	tile("/lab/orders", stats["lab_today"], "today")
+	tile("/lab/verify", cnt("Lab Result", {**b, "status": "Result Entered"}), "to verify")
+	tile("/lab/samples", cnt("Lab Sample", {**b, "status": "Pending"}), "to collect")
+	tile("/appointments", cnt("Appointment", {"appointment_date": d0, "status": ["not in", ["Cancelled", "Rejected"]]}), "today")
+	tile("/medicine_invoice", cnt("Sales Invoice", {"posting_date": d0, "docstatus": 1, "company": ex}), "sales today")
+	tile("/billing/discount-approvals", cnt("Discount Authorization", {"status": "Pending"}), "pending")
+	tile("/expenses", cnt("Expense", {"status": "Pending Approval"}), "to approve")
+	tile("/cash/approvals", cnt("Shift Closing", {"status": "Pending Approval"}) + cnt("Cash Movement", {"status": "Pending Confirmation"}), "waiting")
+	tile("/ov-staff", cnt("Online Visit Request", {"status": "Pending"}), "new")
+	tile("/ipd/mar", cnt("MAR Entry", {"status": ["in", ["Scheduled", "Approved"]], "scheduled_at": ["between", [now, add_to_date(now, hours=1)]]}), "due in 1 h")
+
+	todos = {"open": cnt("ToDo", {"allocated_to": frappe.session.user, "status": "Open"}),
+		"overdue": cnt("ToDo", {"allocated_to": frappe.session.user, "status": "Open", "date": ["<", d0]})}
+	return {"branch": branch, "alerts": alerts, "approvals": approvals, "activity": activity, "days": days, "module_mix": {"counts": counts},
+		"stats": stats, "tiles": tiles, "todos": todos}
