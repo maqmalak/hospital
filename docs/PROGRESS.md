@@ -185,3 +185,6 @@ All screens in Urdu (RTL), including IPD / ER, pharmacy, finance and the public 
 
 ## Desktop home (2026-11-11) — D-57
 `/pw-home` is now the Desktop in the real-estate style (glossy app icons with live counts and hover playbooks, Needs Attention, Quick Links, Recent Activity panel), fed by `dashboard.home`, role-aware. Menu: Desktop, OPD (was Front desk), Insights & Online (merged). Urdu complete; E2E 23 green.
+
+## Users & roles (2026-11-11) — D-58
+Admin screen `/users` (Admin → Users & roles): staff accounts with roles, branch and password / reset link; roles with their people and screens; page-access grid (screen × role). No lock-out guards. Tests: 117 green (3 new); E2E 22 green; Urdu complete.

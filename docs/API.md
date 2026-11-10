@@ -438,6 +438,18 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `count_approve` | name, approve, note | POST |  |  |
 | `reports` | kind, branch, from_date, to_date |  | STORE_KEEPER, REVIEWER, ADMIN, ACCOUNTANT | Pharmacy reports: controlled register, substitutions, sales & margin, slow-moving, reorder, returns. |
 
+## users
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `users` | q, role, status |  | ADMIN |  |
+| `roles` |  |  | ADMIN |  |
+| `save_user` | data | POST | ADMIN | Create or update a staff account: name, email, mobile, PW roles, branches, enabled; optional new password. |
+| `set_enabled` | user, enabled | POST | ADMIN |  |
+| `send_reset_link` | user | POST | ADMIN |  |
+| `save_role_screens` | role, routes | POST | ADMIN | Which screens a role opens: rewrites that role in every Page Access Rule (PW Admin always opens everything). |
+| `save_screen_roles` | route, roles | POST | ADMIN | Page access grid: the roles that open one screen (PW Admin opens everything anyway). |
+
 ## ward
 
 | Method | Params | Flags | Roles | Summary |

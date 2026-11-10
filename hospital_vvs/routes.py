@@ -81,6 +81,7 @@ DEFAULT_ROUTES = [
 	("/ov-staff/report", "Online visit report", [OV_STAFF, ACCOUNTANT], "enable_online_visit"),
 	("/reports", "Reports", [DOCTOR, ACCOUNTANT, CASH_SUPERVISOR, STORE_KEEPER, REVIEWER], ""),
 	("/audit", "Audit log", [ADMIN], ""),
+	("/users", "Users & roles", [ADMIN], ""),
 	("/settings", "Clinic settings", [ADMIN], ""),
 	("/masters", "Clinical masters", [DOCTOR, REVIEWER], ""),
 ]

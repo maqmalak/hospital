@@ -2,7 +2,7 @@ import { Building2, CreditCard, FileCheck2, FileText, HandHeart, MessageSquareHe
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
   ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
   Activity, BarChart3, BedDouble, Receipt, ReceiptText, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
-  MessageCircle, MessagesSquare, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
+  MessageCircle, MessagesSquare, UserCog, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
   type LucideIcon,
 } from "lucide-react";
 
@@ -94,6 +94,7 @@ export const NAV: NavGroup[] = [
     { route: "/doctors", label: "Doctors", icon: Activity, color: "from-teal-600 to-cyan-700", desc: "Doctors, schedules, leave" },
     { route: "/patients/merge", label: "Merge patients", icon: Merge, color: "from-stone-500 to-stone-700", desc: "Merge duplicate records" },
     { route: "/audit", label: "Audit log", icon: ShieldCheck, color: "from-zinc-600 to-zinc-800", desc: "Who saw what, and changes" },
+    { route: "/users", label: "Users & roles", icon: UserCog, color: "from-slate-600 to-zinc-800", desc: "Staff accounts, roles, page access" },
     { route: "/settings", label: "Clinic settings", icon: Settings, color: "from-gray-500 to-gray-700", desc: "Modules, billing, messaging" },
     { route: "/display/devices", label: "Display devices", icon: MonitorSmartphone, color: "from-cyan-600 to-teal-700", desc: "Counter and queue screens" },
   ] },
