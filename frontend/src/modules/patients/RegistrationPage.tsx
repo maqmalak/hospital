@@ -41,6 +41,7 @@ export default function RegistrationPage() {
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState<{ name: string; patient_name: string } | null>(null);
+  const [found, setFound] = useState<{ name: string; patient_name: string } | null>(null);
   const [allergyList, setAllergyList] = useState<string[]>([]);
   const [payers, setPayers] = useState<{ name: string; customer_group: string }[]>([]);
   const [camera, setCamera] = useState(false);
@@ -69,7 +70,9 @@ export default function RegistrationPage() {
   const missing = [!f.patient_name.trim() && "name", !f.gender && "gender", phoneNorm(f.phone).length < 11 && "phone", !(f.dob || f.age) && "age"].filter(Boolean) as string[];
   const completeness = Math.round(([f.patient_name, f.gender, f.phone, f.dob || f.age, f.guardian_name, f.cnic, f.address, f.blood_group, f.patient_name_ur, f.photo].filter(Boolean).length / 10) * 100);
 
-  const save = async (dupReason?: string) => {
+  const [thenSlip, setThenSlip] = useState(false);
+  const save = async (dupReason?: string, slip = thenSlip) => {
+    setThenSlip(slip);
     if (missing.length) { toast.error(`Please fill: ${missing.join(", ")}`); return; }
     if (dups.length && !dupReason) { setShowDup(true); return; }
     setSaving(true);
@@ -79,6 +82,7 @@ export default function RegistrationPage() {
       const r = await call<{ name: string; patient_name: string }>("patients.register", { data, duplicate_reason: dupReason });
       setDone(r); setShowDup(false); setF(EMPTY); setDups([]); setReason(""); setPhotoPreview(""); 
       toast.success(`${r.name} registered`);
+      if (slip) { setThenSlip(false); nav(`/opd_slip?patient=${r.name}`); return; }
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) { toast.error(humanizeError(e), { duration: 7000 }); } finally { setSaving(false); }
   };
@@ -99,7 +103,12 @@ export default function RegistrationPage() {
           <div className="min-w-0 flex-1"><h1 className="text-2xl font-extrabold">{t("Patient registration")}</h1>
             <p className="text-sm text-teal-50/80">Search first — scan the card QR or type MR, phone, CNIC or name. Register only if the patient is new.</p></div>
         </div>
-        <div className="relative mt-4 [&_input]:text-slate-900 [&>div>div]:bg-white/95 [&>div>div]:shadow-lg dark:[&>div>div]:bg-slate-900/90 dark:[&_input]:text-white"><PatientPicker autoFocus onPick={(p) => nav(`/patients/${p.name}`)} /></div>
+        <div className="relative mt-4 [&_input]:text-slate-900 [&>div>div]:bg-white/95 [&>div>div]:shadow-lg dark:[&>div>div]:bg-slate-900/90 dark:[&_input]:text-white"><PatientPicker autoFocus onPick={(p) => setFound({ name: p.name, patient_name: p.patient_name })} /></div>
+        {found && <div className="relative mt-3 flex flex-wrap items-center gap-2 rounded-2xl bg-white/95 p-3 text-slate-900 shadow-lg dark:bg-slate-900/90 dark:text-white">
+          <span className="min-w-0 flex-1 truncate"><b>{found.patient_name}</b> · <span className="font-mono text-sm">{found.name}</span> <span className="text-xs text-muted-foreground">already registered</span></span>
+          <Button size="sm" variant="primary" onClick={() => nav(`/opd_slip?patient=${found.name}`)}><FilePlus2 className="h-4 w-4" />{t("OPD slip")}</Button>
+          <Button size="sm" variant="outline" onClick={() => nav(`/patients/${found.name}`)}>{t("Open file")}</Button>
+          <button onClick={() => setFound(null)} className="rounded-lg p-1 hover:bg-muted"><X className="h-4 w-4" /></button></div>}
       </div>
 
       {done && (
@@ -236,14 +245,18 @@ export default function RegistrationPage() {
                   <div className="flex items-center justify-between gap-2"><b className="truncate">{d.patient_name}</b><span className="font-mono text-[11px]">{d.name}</span></div>
                   <div className="text-xs text-muted-foreground">{d.phone} · {d.age}y · {d.gender}{d.last_visit ? ` · last ${d.last_visit}` : ""}</div>
                   <div className="mt-1 text-xs font-semibold text-amber-800 dark:text-amber-300">{d.reason}</div>
-                  <Button size="xs" variant="outline" className="mt-2" onClick={() => nav(`/patients/${d.name}`)}>{t("Use this patient")}</Button>
+                  <div className="mt-2 flex gap-1.5"><Button size="xs" variant="outline" onClick={() => nav(`/patients/${d.name}`)}>{t("Use this patient")}</Button>
+                    <Button size="xs" variant="primary" onClick={() => nav(`/opd_slip?patient=${d.name}`)}><FilePlus2 className="h-3 w-3" />{t("OPD slip")}</Button></div>
                 </div>))}</div>}
           </div>
 
-          <button onClick={() => void save()} disabled={saving}
+          <button onClick={() => void save(undefined, false)} disabled={saving}
             className="group relative flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-500 text-base font-bold text-white shadow-lg shadow-teal-700/30 transition-all hover:shadow-xl disabled:opacity-60">
             <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-            {saving ? <RotateCcw className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}{t("Register patient")}</button>
+            {saving && !thenSlip ? <RotateCcw className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}{t("Register patient")}</button>
+          <button onClick={() => void save(undefined, true)} disabled={saving}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-2 border-teal-600 bg-card text-sm font-bold text-teal-700 transition-all hover:bg-teal-50 disabled:opacity-60 dark:text-teal-300 dark:hover:bg-teal-500/10">
+            {saving && thenSlip ? <RotateCcw className="h-4 w-4 animate-spin" /> : <FilePlus2 className="h-4 w-4" />}{t("Register & OPD slip")}</button>
           {missing.length > 0 && <p className="text-center text-xs text-muted-foreground">Still needed: {missing.join(", ")}</p>}
           <button onClick={() => { setF(EMPTY); setDups([]); setPhotoPreview(""); }} className="w-full text-center text-xs text-muted-foreground hover:text-foreground">Clear form</button>
         </aside>
@@ -252,7 +265,8 @@ export default function RegistrationPage() {
       <Dialog open={showDup} onClose={() => setShowDup(false)} title={t("Possible duplicate")} size="md">
         <p className="mb-3 text-sm">{dups.length} existing record(s) look like this patient. Use one of them, or give a reason to create a new record.</p>
         {dups.slice(0, 3).map((d) => <div key={d.name} className="mb-2 flex items-center gap-2 rounded-xl border border-border p-2 text-sm"><span className="flex-1"><b>{d.patient_name}</b> · {d.name}<div className="text-xs text-muted-foreground">{d.reason}</div></span>
-          <Button size="xs" variant="outline" onClick={() => nav(`/patients/${d.name}`)}>{t("Use this patient")}</Button></div>)}
+          <Button size="xs" variant="outline" onClick={() => nav(`/patients/${d.name}`)}>{t("Use this patient")}</Button>
+          <Button size="xs" variant="primary" onClick={() => nav(`/opd_slip?patient=${d.name}`)}><FilePlus2 className="h-3 w-3" />{t("OPD slip")}</Button></div>)}
         <L label="Reason" req><input className={inp} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. different person, same family phone" /></L>
         <div className="mt-4 flex justify-end gap-2"><Button variant="outline" onClick={() => setShowDup(false)}>{t("Cancel")}</Button>
           <Button variant="primary" disabled={!reason.trim()} loading={saving} onClick={() => void save(reason)}>{t("Create new anyway")}</Button></div>
