@@ -94,6 +94,26 @@ def search_diagnoses(q="", limit=15):
 
 
 @frappe.whitelist()
+def common_diagnoses(doctor=None, limit=16):
+	"""One-click diagnosis chips: this doctor's most used first, then the clinic's, then the rest of the list."""
+	doctor = doctor or my_doctor()
+	out, seen = [], set()
+
+	def add(rows):
+		for r in rows:
+			if r.name not in seen and len(out) < cint(limit):
+				seen.add(r.name)
+				out.append({"diagnosis": r.name, "diagnosis_name": r.diagnosis_name})
+
+	if doctor:
+		add(frappe.db.sql("""select d.diagnosis name, d.diagnosis_name from `tabPrescription Diagnosis` d join tabPrescription p on p.name=d.parent
+			where p.doctor=%s and p.docstatus=1 group by d.diagnosis, d.diagnosis_name order by count(*) desc limit 12""", doctor, as_dict=True))
+	add(frappe.db.sql("""select diagnosis name, diagnosis_name from `tabPrescription Diagnosis` group by diagnosis, diagnosis_name order by count(*) desc limit 20""", as_dict=True))
+	add(frappe.get_all("Diagnosis", fields=["name", "diagnosis_name"], order_by="diagnosis_name", limit=40))
+	return out
+
+
+@frappe.whitelist()
 def check(patient, lines, prescription=None):
 	"""Live safety check as lines are added (same rules as on save)."""
 	lines = frappe.parse_json(lines)

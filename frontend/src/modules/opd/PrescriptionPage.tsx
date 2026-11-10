@@ -56,6 +56,7 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
   const [meds, setMeds] = useState<Med[]>([]);
   const [alerts, setAlerts] = useState<{ alerts: Alert[]; blocking: boolean }[]>([]);
   const [dx, setDx] = useState<{ diagnosis: string; diagnosis_name: string }[]>([]);
+  const { data: commonDx } = useApi<{ diagnosis: string; diagnosis_name: string }[]>("prescription.common_diagnoses", undefined, { staleTime: 300_000 });
   const [labs, setLabs] = useState<{ test_name: string; urgent?: number }[]>([]);
   // chips come from the lab's active test templates (signing turns them into a lab order)
   const { data: labCtx } = useApi<{ templates: { name: string; test_code: string; price: number }[] }>("lab.context", undefined, { retry: false, staleTime: 300_000 });
@@ -230,6 +231,9 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
         <div className="grid gap-4 lg:grid-cols-2">
           <Section title={t("Diagnosis") + " (ICD-10)"}>
             {!signed && <DiagnosisSearch onAdd={(d) => setDx((x) => (x.some((y) => y.diagnosis === d.diagnosis) ? x : [...x, d]))} />}
+            {!signed && <div className="mt-2 flex flex-wrap gap-1.5">{(commonDx ?? []).filter((c) => !dx.some((y) => y.diagnosis === c.diagnosis)).map((c) => (
+              <button key={c.diagnosis} onClick={() => setDx((x) => [...x, c])} title={c.diagnosis}
+                className="rounded-full border border-dashed border-border px-2.5 py-1 text-xs hover:border-violet-500 hover:bg-violet-50 hover:text-violet-700 dark:hover:bg-violet-500/10">+ {c.diagnosis_name}</button>))}</div>}
             <div className="mt-2 flex flex-wrap gap-1.5">{dx.map((d) => <span key={d.diagnosis} className="flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800 dark:bg-violet-500/15 dark:text-violet-200">{d.diagnosis_name} <span className="opacity-60">{d.diagnosis}</span>
               {!signed && <button onClick={() => setDx((x) => x.filter((y) => y.diagnosis !== d.diagnosis))}><X className="h-3 w-3" /></button>}</span>)}</div>
           </Section>

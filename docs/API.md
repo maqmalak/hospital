@@ -387,6 +387,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `workspace` | queue_entry, patient, prescription, online_visit |  | DOCTOR_ROLES, NURSE, DEO |  |
 | `search_medicines` | q, limit |  |  | Brand or generic, with strength and form. |
 | `search_diagnoses` | q, limit |  |  |  |
+| `common_diagnoses` | doctor, limit |  |  | One-click diagnosis chips: this doctor's most used first, then the clinic's, then the rest of the list. |
 | `check` | patient, lines, prescription |  |  | Live safety check as lines are added (same rules as on save). |
 | `save` | data, sign | POST | DOCTOR_ROLES | Create or update the draft; sign=1 submits it (blocked while a blocking alert has no override reason). |
 | `amend` | name, reason | POST | DOCTOR_ROLES | Cancel-and-keep the signed version, return a new draft (version N+1) carrying the reason. |
