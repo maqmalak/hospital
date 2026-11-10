@@ -158,3 +158,42 @@ class TestExpenses(Base):
 		with self.assertRaises(frappe.ValidationError):
 			api.expense_action(name, 0)
 		self.assertEqual(api.expense_action(name, 0, "Duplicate")["status"], "Rejected")
+
+
+class TestRecurringExpense(Base):
+	"""Recurring expense templates (D-54): drafted when due, one per period, into the normal approval flow."""
+
+	def template(self, **kw):
+		from hospital_vvs.services import expenses as exp
+
+		exp.ensure_setup()
+		cat = frappe.get_all("Expense Category", pluck="name", limit=1)[0]
+		return frappe.get_doc(dict({"doctype": "Recurring Expense", "title": "QA rent", "category": cat, "amount": 50000, "payee": "QA Landlord",
+			"mode_of_payment": "Cash", "branch": "Lahore Main", "frequency": "Monthly", "next_date": frappe.utils.add_months(frappe.utils.today(), -2),
+			"description": "Building rent", "requested_by": "accounts@vvs.demo"}, **kw)).insert()
+
+	def test_catches_up_missed_months_once(self):
+		from hospital_vvs.services import expenses as exp
+
+		t = self.template()
+		made = exp.run_recurring(template=t.name)
+		self.assertEqual(len(made), 3)  # two missed months + this month
+		self.assertEqual(exp.run_recurring(template=t.name), [])  # re-run makes nothing
+		rows = frappe.get_all("Expense", filters={"recurring_expense": t.name}, fields=["status", "amount", "description"])
+		self.assertTrue(all(r.status == "Draft" and r.amount == 50000 and "Building rent — " in r.description for r in rows))
+		self.assertGreater(frappe.utils.getdate(frappe.db.get_value("Recurring Expense", t.name, "next_date")), frappe.utils.getdate())
+
+	def test_standing_bill_goes_to_approval_and_end_date_stops(self):
+		from hospital_vvs.services import expenses as exp
+
+		t = self.template(receipt="/private/files/qa-rent-agreement.pdf", auto_submit=1, frequency="Weekly", next_date=frappe.utils.add_days(frappe.utils.today(), -7),
+			end_date=frappe.utils.add_days(frappe.utils.today(), -3))
+		made = exp.run_recurring(template=t.name)
+		self.assertEqual(len(made), 1)
+		self.assertEqual(frappe.db.get_value("Expense", made[0], "status"), "Pending Approval")
+		self.assertEqual(frappe.db.get_value("Recurring Expense", t.name, "is_active"), 0)
+
+	def test_only_accountant_manages_templates(self):
+		frappe.set_user("cashier@vvs.demo")
+		self.assertRaises(frappe.PermissionError, api.save_recurring_expense, "{}")
+		self.assertRaises(frappe.PermissionError, api.run_recurring_now)

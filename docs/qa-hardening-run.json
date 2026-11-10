@@ -1,9 +1,9 @@
 {
- "run_at": "2026-11-11 01:08:22.160595",
+ "run_at": "2026-11-11 01:46:32.670948",
  "site": "hospital",
  "total": 98,
- "passed": 97,
- "failed": 0,
+ "passed": 96,
+ "failed": 1,
  "warnings": 1,
  "checks": [
   {
@@ -352,7 +352,7 @@
   {
    "id": "H03-3",
    "scenario": "H03 public surface \u2014 Guest reaches only the reviewed public endpoints",
-   "check": "all 284 staff endpoints refuse a Guest over HTTP",
+   "check": "all 287 staff endpoints refuse a Guest over HTTP",
    "result": "PASS",
    "detail": "[]"
   },
@@ -438,7 +438,7 @@
    "scenario": "H06 W15 security \u2014 2FA, idle lock, access log and audit screen",
    "check": "opening a patient's history writes the access log (who, what, when)",
    "result": "PASS",
-   "detail": "{'name': 'g8di2l9t4e', 'action': 'Patient history'}"
+   "detail": "{'name': '6k9le1foff', 'action': 'Patient history'}"
   },
   {
    "id": "H06-6",
@@ -557,77 +557,77 @@
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "patient search by MR under 500 ms",
    "result": "PASS",
-   "detail": "3 ms"
+   "detail": "2 ms"
   },
   {
    "id": "H09-2",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "patient search by name under 500 ms",
    "result": "PASS",
-   "detail": "7 ms"
+   "detail": "2 ms"
   },
   {
    "id": "H09-3",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "patient search by phone under 500 ms",
    "result": "PASS",
-   "detail": "3 ms"
+   "detail": "2 ms"
   },
   {
    "id": "H09-4",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "OPD queue (whole branch) under 1000 ms",
    "result": "PASS",
-   "detail": "6 ms"
+   "detail": "37 ms"
   },
   {
    "id": "H09-6",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "patient history under 2000 ms",
    "result": "PASS",
-   "detail": "20 ms"
+   "detail": "13 ms"
   },
   {
    "id": "H09-7",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "POS item search under 300 ms",
    "result": "PASS",
-   "detail": "37 ms"
+   "detail": "11 ms"
   },
   {
    "id": "H09-8",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "POS item add (price + stock) under 300 ms",
    "result": "PASS",
-   "detail": "30 ms"
+   "detail": "10 ms"
   },
   {
    "id": "H09-9",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "lab report PDF under 3000 ms",
    "result": "PASS",
-   "detail": "564 ms"
+   "detail": "471 ms"
   },
   {
    "id": "H09-10",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "React app page load (/hms) under 2000 ms",
    "result": "PASS",
-   "detail": "200 54 ms"
+   "detail": "200 55 ms"
   },
   {
    "id": "H09-5",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "session boot over HTTP under 1000 ms",
    "result": "PASS",
-   "detail": "200 13 ms"
+   "detail": "200 10 ms"
   },
   {
    "id": "H09-11",
    "scenario": "H09 performance \u2014 09-security-ops.md targets",
    "check": "OPD queue over HTTP under 1000 ms",
    "result": "PASS",
-   "detail": "200 15 ms"
+   "detail": "200 55 ms"
   },
   {
    "id": "H10-1",
@@ -641,13 +641,13 @@
    "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
    "check": "a backup was taken in the last 26 hours",
    "result": "PASS",
-   "detail": "20261110_180017-hospital-database-enc.sql.gz (7.1 h)"
+   "detail": "20261110_180017-hospital-database-enc.sql.gz (7.8 h)"
   },
   {
    "id": "H10-3",
    "scenario": "H10 operations \u2014 backups, health, staging anonymize, docs, demo seeder",
    "check": "scheduler is on and running",
-   "result": "PASS",
+   "result": "FAIL",
    "detail": "{'scheduler_enabled': True, 'scheduler_last_run': '2026-11-11 01:05:01.363589'}"
   },
   {

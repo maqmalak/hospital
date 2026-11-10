@@ -377,6 +377,25 @@ def today_activity(rnd, patients):
 		wapi.release(b)
 
 
+def seed_recurring():
+	"""Demo recurring expenses (D-54): building rent and internet, first one due on the 1st of next month."""
+	from frappe.utils import add_months, get_first_day, today
+
+	from hospital_vvs.services import expenses as exp
+
+	exp.ensure_setup()
+	cats = frappe.get_all("Expense Category", filters={"is_active": 1}, pluck="name")
+	pick = lambda *words: next((c for c in cats if any(w in c.lower() for w in words)), cats[0])
+	first = get_first_day(add_months(today(), 1))
+	for title, cat, amount, payee, desc in (("Building rent", pick("rent"), 350000, "Gulberg Properties", "Monthly rent, 12-B Main Boulevard"),
+			("Internet & phone lines", pick("utilit", "internet", "phone"), 18500, "Nayatel", "Fibre internet + PTCL lines")):
+		if not frappe.db.exists("Recurring Expense", {"title": title}):
+			frappe.get_doc({"doctype": "Recurring Expense", "title": title, "category": cat, "amount": amount, "payee": payee, "mode_of_payment": "Bank Transfer"
+				if frappe.db.exists("Mode of Payment", "Bank Transfer") else "Cash", "branch": "Lahore Main", "frequency": "Monthly", "next_date": first,
+				"description": desc, "requested_by": "accounts@vvs.demo"}).insert(ignore_permissions=True)
+	frappe.db.commit()
+
+
 def seed_all(opd_day=0):
 	"""One command for a fresh demo / training site (re-run safe): company, pharmacy company, every phase's demo data, branch +
 	counter access. opd_day=1 also runs one day of live OPD traffic (scripts/opd_demo.sh does the same daily).
@@ -386,7 +405,8 @@ def seed_all(opd_day=0):
 	from hospital_vvs.setup import access, company, demo_phase2, demo_phase3, demo_phase4, pharmacy_company
 
 	steps = [("company", company.run), ("demo", seed), ("pharmacy company", pharmacy_company.run), ("phase 2", demo_phase2.seed),
-		("phase 3", demo_phase3.seed), ("phase 4", demo_phase4.seed), ("access", access.run)]
+		("phase 3", demo_phase3.seed), ("phase 4", demo_phase4.seed), ("access", access.run),
+		("recurring expenses", seed_recurring)]
 	if frappe.utils.cint(opd_day):
 		from hospital_vvs.setup import opd_demo
 

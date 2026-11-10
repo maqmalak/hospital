@@ -23,7 +23,8 @@
   "journal_entry",
   "company",
   "e4",
-  "approvals"
+  "approvals",
+  "recurring_expense"
  ],
  "fields": [
   {
@@ -144,11 +145,20 @@
    "fieldtype": "Table",
    "label": "Approvals",
    "options": "Expense Approval"
+  },
+  {
+   "description": "Drafted automatically from this template",
+   "fieldname": "recurring_expense",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Recurring Expense",
+   "options": "Recurring Expense",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 10:00:00.000000",
+ "modified": "2026-11-11 01:42:40.442692",
  "modified_by": "Administrator",
  "module": "Billing",
  "name": "Expense",

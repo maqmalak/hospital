@@ -165,6 +165,9 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `expenses` | status, mine |  | ACCOUNTANT, CASH_SUPERVISOR, STORE_KEEPER, RECEPTIONIST |  |
 | `save_expense` | data, submit | POST | ACCOUNTANT, CASH_SUPERVISOR, STORE_KEEPER, RECEPTIONIST |  |
 | `expense_action` | name, approve, note | POST |  |  |
+| `recurring_expenses` |  |  | ACCOUNTANT, CASH_SUPERVISOR |  |
+| `save_recurring_expense` | data | POST | ACCOUNTANT |  |
+| `run_recurring_now` | name | POST | ACCOUNTANT | Draft whatever has fallen due now (the daily job does the same). |
 | `purchasing` | doctype, status |  | STORE_KEEPER, ACCOUNTANT, ADMIN |  |
 | `approve_purchase` | doctype, name | POST | ACCOUNTANT, ADMIN | Approve = submit a draft purchase document (accountant / admin). |
 | `overview` | from_date, to_date |  | ACCOUNTANT, ADMIN, CASH_SUPERVISOR |  |

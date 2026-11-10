@@ -255,7 +255,7 @@ function ClaimDialog({ c, modes, toPatient, onClose, onDone }: { c: Claim; modes
 interface Exp { name: string; category: string; amount: number; posting_date: string; payee: string; mode_of_payment: string; reference_no?: string; status: string; current_level?: number; description: string; receipt?: string; requested_by: string; journal_entry?: string;
   approvals: { level: number; role: string; approver?: string; action?: string; acted_on?: string; note?: string }[]; can_act: boolean }
 export function ExpensesPage() {
-  const [tab, setTab] = useState<"todo" | "all" | "mine">("todo");
+  const [tab, setTab] = useState<"todo" | "all" | "mine" | "recurring">("todo");
   const { data, refetch } = useApi<{ rows: Exp[]; categories: { name: string }[]; modes: string[]; month: { category: string; amount: number; n: number }[]; levels: { level: number; role: string; min_amount: number }[] }>("finance.expenses", tab === "mine" ? { mine: 1 } : undefined);
   const [form, setForm] = useState(false);
   const [rej, setRej] = useState<string | null>(null);
@@ -266,7 +266,8 @@ export function ExpensesPage() {
       <PageHeader title="Expenses" icon={Receipt} color="from-orange-500 to-rose-600" subtitle={`Approvals: ${data.levels.map((l) => `${l.role.replace("PW ", "")} from ${rs(l.min_amount)}`).join(" → ")}`} actions={<Button variant="save" onClick={() => setForm(true)}><Plus className="h-4 w-4" />New expense</Button>} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4"><StatCard label="Waiting for you" value={data.rows.filter((r) => r.can_act).length} icon={ClipboardList} tone="amber" />
         <StatCard label="Approved this month" value={rs(data.month.reduce((a, m) => a + m.amount, 0))} icon={CheckCircle2} tone="teal" />{data.month.slice(0, 2).map((m) => <StatCard key={m.category} label={m.category} value={rs(m.amount)} hint={`${m.n} bills`} icon={Landmark} tone="blue" />)}</div>
-      <div className="flex rounded-xl bg-muted p-1 sm:w-fit">{([["todo", "To approve"], ["all", "All"], ["mine", "Mine"]] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", tab === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
+      <div className="flex rounded-xl bg-muted p-1 sm:w-fit">{([["todo", "To approve"], ["all", "All"], ["mine", "Mine"], ["recurring", "Recurring"]] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", tab === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
+      {tab === "recurring" ? <RecurringExpenses cats={data.categories.map((c) => c.name)} modes={data.modes} onRun={() => void refetch()} /> :
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{rows.map((e) => (
         <div key={e.name} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-start justify-between gap-2"><div className="min-w-0"><b className="block truncate">{e.payee}</b><span className="text-xs text-muted-foreground">{e.category} · {e.posting_date} · {e.mode_of_payment}</span></div><div className="text-end"><div className="text-lg font-black tabular-nums">{rs(e.amount)}</div><Pill s={e.status} /></div></div>
@@ -275,12 +276,65 @@ export function ExpensesPage() {
           <div className="mt-3 flex items-center gap-2 text-xs">{e.receipt && <a href={e.receipt} target="_blank" rel="noreferrer" className="font-semibold text-sky-700 underline">Receipt</a>}{e.journal_entry && <span className="text-muted-foreground">{e.journal_entry}</span>}<div className="flex-1" />
             {e.can_act && <><Button size="sm" variant="save" onClick={() => void act(() => call("finance.expense_action", { name: e.name, approve: 1 }), "Approved", () => void refetch())}><BadgeCheck className="h-4 w-4" />Approve</Button>
               <Button size="sm" variant="danger" onClick={() => setRej(e.name)}><XCircle className="h-4 w-4" /></Button></>}</div></div>))}
-        {!rows.length && <Empty title={tab === "todo" ? "Nothing waiting for you" : "No expenses"} icon={Receipt} />}</div>
+        {!rows.length && <Empty title={tab === "todo" ? "Nothing waiting for you" : "No expenses"} icon={Receipt} />}</div>}
       {form && <ExpenseForm cats={data.categories.map((c) => c.name)} modes={data.modes} onClose={() => setForm(false)} onDone={() => { setForm(false); void refetch(); }} />}
       {rej && <RejectDialog onClose={() => setRej(null)} onReject={(note) => void act(() => call("finance.expense_action", { name: rej, approve: 0, note }), "Rejected", () => { setRej(null); void refetch(); })} />}
     </div>
   );
 }
+interface Rex { name?: string; title: string; category: string; amount: number | string; payee: string; mode_of_payment: string; frequency: string; next_date: string;
+  end_date?: string; is_active: number; description: string; receipt?: string; auto_submit: number; last_expense?: string; last_run?: string }
+
+/** Rent, salaries of contractors, utilities…: drafted automatically when due into the normal approval flow. */
+function RecurringExpenses({ cats, modes, onRun }: { cats: string[]; modes: string[]; onRun: () => void }) {
+  const { data, refetch } = useApi<Rex[]>("finance.recurring_expenses");
+  const [edit, setEdit] = useState<Rex | null>(null);
+  const blank: Rex = { title: "", category: cats[0] ?? "", amount: "", payee: "", mode_of_payment: modes.includes("Bank Transfer") ? "Bank Transfer" : modes[0], frequency: "Monthly",
+    next_date: todayISO(), is_active: 1, description: "", auto_submit: 0 };
+  const runNow = () => void act(() => call("finance.run_recurring_now", {}), "Due expenses drafted", () => { void refetch(); onRun(); });
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2"><p className="flex-1 text-sm text-muted-foreground">Drafted every morning when due; with a standing bill and <i>send for approval</i> they go straight to the approvers.</p>
+        <Button variant="outline" onClick={runNow}>Draft due now</Button><Button variant="save" onClick={() => setEdit(blank)}><Plus className="h-4 w-4" />New recurring</Button></div>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{(data ?? []).map((t) => (
+        <button key={t.name} onClick={() => setEdit(t)} className={cn("rounded-2xl border bg-card p-4 text-start shadow-sm transition-all hover:shadow-md", t.is_active ? "border-border" : "border-dashed opacity-60")}>
+          <div className="flex items-start justify-between gap-2"><div className="min-w-0"><b className="block truncate">{t.title}</b><span className="text-xs text-muted-foreground">{t.category} · {t.payee}</span></div>
+            <div className="text-end"><div className="text-lg font-black tabular-nums">{rs(Number(t.amount))}</div><span className="text-[11px] font-semibold text-orange-700">{t.frequency}</span></div></div>
+          <div className="mt-2 text-xs text-muted-foreground">{t.is_active ? <>Next <b className="text-foreground">{t.next_date}</b></> : "Stopped"}{t.end_date ? ` · until ${t.end_date}` : ""}{t.last_expense ? ` · last ${t.last_expense}` : ""}</div>
+          <div className="mt-1 text-[11px]">{t.auto_submit ? <span className="text-emerald-700">Sent for approval automatically</span> : <span className="text-muted-foreground">Waits as a draft for its bill</span>}</div></button>))}
+        {data && !data.length && <Empty title="No recurring expenses" icon={Receipt} />}</div>
+      {edit && <RecurringForm t={edit} cats={cats} modes={modes} onClose={() => setEdit(null)} onDone={() => { setEdit(null); void refetch(); }} />}
+    </div>
+  );
+}
+
+function RecurringForm({ t, cats, modes, onClose, onDone }: { t: Rex; cats: string[]; modes: string[]; onClose: () => void; onDone: () => void }) {
+  const [d, setD] = useState<Rex>(t);
+  const [busy, setBusy] = useState(false);
+  const up = async (f?: File) => { if (!f) return; setBusy(true); try { const r = await uploadFile(f, { isPrivate: true }); setD((x) => ({ ...x, receipt: r.file_url })); } catch (e) { toast.error(humanizeError(e)); } finally { setBusy(false); } };
+  const save = () => void act(() => call("finance.save_recurring_expense", { data: JSON.stringify(d) }), "Saved", onDone);
+  return (
+    <Dialog open onClose={onClose} size="md" title={t.name ? t.title : "New recurring expense"}>
+      <div className="space-y-3">
+        <Field label="Name" required><input className={inputCls} value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} placeholder="e.g. Building rent" /></Field>
+        <div className="grid grid-cols-2 gap-2"><Field label="Category"><select className={inputCls} value={d.category} onChange={(e) => setD({ ...d, category: e.target.value })}>{cats.map((c) => <option key={c}>{c}</option>)}</select></Field>
+          <Field label="Amount" required><input className={inputCls + " text-end font-bold"} inputMode="numeric" value={d.amount} onChange={(e) => setD({ ...d, amount: e.target.value.replace(/\D/g, "") })} /></Field></div>
+        <div className="grid grid-cols-2 gap-2"><Field label="Paid to" required><input className={inputCls} value={d.payee} onChange={(e) => setD({ ...d, payee: e.target.value })} /></Field>
+          <Field label="Paid by"><select className={inputCls} value={d.mode_of_payment} onChange={(e) => setD({ ...d, mode_of_payment: e.target.value })}>{modes.map((m) => <option key={m}>{m}</option>)}</select></Field></div>
+        <div className="grid grid-cols-3 gap-2"><Field label="Every"><select className={inputCls} value={d.frequency} onChange={(e) => setD({ ...d, frequency: e.target.value })}>{["Monthly", "Weekly", "Quarterly", "Yearly"].map((f) => <option key={f}>{f}</option>)}</select></Field>
+          <Field label="Next date"><input type="date" className={inputCls} value={d.next_date} onChange={(e) => setD({ ...d, next_date: e.target.value })} /></Field>
+          <Field label="Until (optional)"><input type="date" className={inputCls} value={d.end_date ?? ""} onChange={(e) => setD({ ...d, end_date: e.target.value })} /></Field></div>
+        <Field label="What for" required><textarea className={inputCls + " min-h-16"} value={d.description} onChange={(e) => setD({ ...d, description: e.target.value })} placeholder="The month is added to each expense" /></Field>
+        <label className={cn("flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed p-3 text-sm", d.receipt ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10" : "border-border")}><Upload className="h-5 w-5" /><span className="flex-1">{d.receipt ? "Standing bill attached" : "Standing bill / agreement (optional)"}</span>{busy && <Spinner />}
+          <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => void up(e.target.files?.[0])} /></label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!d.auto_submit} disabled={!d.receipt} onChange={(e) => setD({ ...d, auto_submit: e.target.checked ? 1 : 0 })} />Send for approval automatically (needs the standing bill)</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!d.is_active} onChange={(e) => setD({ ...d, is_active: e.target.checked ? 1 : 0 })} />Active</label>
+        <Button variant="save" className="w-full" disabled={!d.title || !d.amount || !d.payee || !d.description} onClick={save}>Save</Button>
+      </div>
+    </Dialog>
+  );
+}
+
 function ExpenseForm({ cats, modes, onClose, onDone }: { cats: string[]; modes: string[]; onClose: () => void; onDone: () => void }) {
   const [d, setD] = useState({ category: cats[0] ?? "", amount: "", payee: "", mode_of_payment: modes.includes("Cash") ? "Cash" : modes[0], reference_no: "", description: "", receipt: "", posting_date: todayISO() });
   const [busy, setBusy] = useState(false);

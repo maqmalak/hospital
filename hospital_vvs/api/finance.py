@@ -7,7 +7,7 @@ from frappe.utils import add_days, cint, flt, get_first_day, today
 from hospital_vvs import roles as R
 from hospital_vvs.services import expenses as exp
 from hospital_vvs.services import payers
-from hospital_vvs.utils import has_any_role, require_roles, settings, user_branches
+from hospital_vvs.utils import has_any_role, require_roles, scope_branch, settings, user_branches
 
 FIN = (R.ACCOUNTANT,)
 
@@ -200,6 +200,40 @@ def save_expense(data, submit=0):
 @frappe.whitelist(methods=["POST"])
 def expense_action(name, approve=1, note=None):
 	return exp.act(name, cint(approve), note).as_dict()
+
+
+@frappe.whitelist()
+def recurring_expenses():
+	require_roles(R.ACCOUNTANT, R.CASH_SUPERVISOR)
+	return frappe.get_all("Recurring Expense", fields=["name", "title", "category", "amount", "payee", "mode_of_payment", "branch", "frequency", "next_date",
+		"end_date", "is_active", "description", "receipt", "auto_submit", "requested_by", "last_expense", "last_run"], order_by="is_active desc, next_date asc")
+
+
+@frappe.whitelist(methods=["POST"])
+def save_recurring_expense(data):
+	require_roles(R.ACCOUNTANT)
+	d = frappe.parse_json(data)
+	t = frappe.get_doc("Recurring Expense", d["name"]) if d.get("name") else frappe.new_doc("Recurring Expense")
+	for k in ("title", "category", "amount", "payee", "mode_of_payment", "branch", "frequency", "next_date", "end_date", "is_active", "description", "receipt",
+			"auto_submit", "requested_by"):
+		if k in d:
+			t.set(k, d[k] or None if k in ("end_date", "receipt", "branch", "requested_by") else d[k])
+	if t.branch:
+		scope_branch(t.branch)
+	t.branch = t.branch or (user_branches() or [None])[0]
+	t.requested_by = t.requested_by or frappe.session.user
+	if cint(t.auto_submit) and not t.receipt:
+		frappe.throw(_("Attach the standing bill to send expenses for approval automatically."))
+	t.flags.ignore_permissions = True
+	t.save()
+	return t.name
+
+
+@frappe.whitelist(methods=["POST"])
+def run_recurring_now(name=None):
+	"""Draft whatever has fallen due now (the daily job does the same)."""
+	require_roles(R.ACCOUNTANT)
+	return exp.run_recurring(template=name)
 
 
 # ------------------------------------------------------------------ purchasing (ERPNext documents)

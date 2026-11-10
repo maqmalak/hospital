@@ -7,7 +7,7 @@ account of the payment mode. Petty cash out of a drawer stays a Cash Movement (0
 
 import frappe
 from frappe import _
-from frappe.utils import flt, now_datetime, nowdate
+from frappe.utils import cint, flt, getdate, now_datetime, nowdate, today
 
 from hospital_vvs.utils import is_admin, setting, user_roles
 
@@ -114,3 +114,64 @@ def ensure_setup():
 			s.append("expense_levels", {"level": lvl, "role": role, "min_amount": amt})
 		s.flags.ignore_permissions = True
 		s.save()
+
+
+# ------------------------------------------------------------------ recurring expenses
+STEP = {"Weekly": ("days", 7), "Monthly": ("months", 1), "Quarterly": ("months", 3), "Yearly": ("years", 1)}
+
+
+def _advance(d, frequency):
+	from frappe.utils import add_days, add_months, add_years
+
+	unit, n = STEP.get(frequency, ("months", 1))
+	return add_days(d, n) if unit == "days" else add_months(d, n) if unit == "months" else add_years(d, n)
+
+
+def _period(d, frequency):
+	d = getdate(d)
+	return {"Weekly": f"week of {d.strftime('%d %b %Y')}", "Quarterly": f"Q{(d.month - 1) // 3 + 1} {d.year}", "Yearly": str(d.year)}.get(frequency, d.strftime("%B %Y"))
+
+
+def run_recurring(on=None, template=None):
+	"""Daily: draft every expense that has fallen due (one per missed period, at most 12 per template per run). Safe to re-run."""
+	on = getdate(on or today())
+	filters = {"is_active": 1, "next_date": ["<=", on]}
+	if template:
+		filters["name"] = template
+	made = []
+	for name in frappe.get_all("Recurring Expense", filters=filters, pluck="name"):
+		t = frappe.get_doc("Recurring Expense", name)
+		for _ in range(12):
+			due = getdate(t.next_date)
+			if due > on or (t.end_date and due > getdate(t.end_date)):
+				break
+			exists = frappe.db.get_value("Expense", {"recurring_expense": t.name, "posting_date": due}, "name")
+			e = frappe.get_doc("Expense", exists) if exists else frappe.get_doc({"doctype": "Expense", "category": t.category, "amount": t.amount,
+				"posting_date": due, "payee": t.payee, "mode_of_payment": t.mode_of_payment, "branch": t.branch, "receipt": t.receipt,
+				"description": f"{t.description} — {_period(due, t.frequency)}", "requested_by": t.requested_by or t.owner, "recurring_expense": t.name,
+				"status": "Draft"}).insert(ignore_permissions=True)
+			if not exists:
+				made.append(e.name)
+				if cint(t.auto_submit) and t.receipt:
+					submit(e.name)
+				_tell(t, e)
+			t.db_set({"next_date": _advance(due, t.frequency), "last_expense": e.name, "last_run": on})
+			t.reload()
+		if t.end_date and getdate(t.next_date) > getdate(t.end_date):
+			t.db_set("is_active", 0)
+	if made and not frappe.in_test:
+		frappe.db.commit()
+	return made
+
+
+def _tell(t, e):
+	user = t.requested_by or t.owner
+	if not user or user == "Administrator":
+		return
+	waiting = e.status == "Draft"
+	frappe.get_doc({"doctype": "Notification Log", "for_user": user, "type": "Alert", "document_type": "Expense", "document_name": e.name,
+		"subject": f"{t.title}: {e.name} {'is waiting for its bill' if waiting else 'was sent for approval'} ({e.amount:,.0f})"}).insert(ignore_permissions=True)
+
+
+def scheduled():
+	run_recurring()
