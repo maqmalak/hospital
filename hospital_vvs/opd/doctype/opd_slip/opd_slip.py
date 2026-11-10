@@ -65,15 +65,11 @@ class OPDSlip(Document):
 			self.change_amount = max(flt(self.cash_tendered) - flt(self.patient_share), 0)
 
 	def _payer(self):
-		pat = frappe.db.get_value("Patient", self.patient, ["category", "panel", "insurance_provider"], as_dict=True) or {}
-		if self.payer_type == "Patient" and pat.get("category") in ("Panel", "Insurance"):
-			self.payer_type = pat.category
-			self.payer = pat.panel if pat.category == "Panel" else pat.insurance_provider
-		if self.payer_type == "Patient" or not self.payer:
-			self.payer_share, self.patient_share = 0, self.net_total
-			return
-		cover = flt(frappe.db.get_value("Customer", self.payer, "hv_coverage_percent"))
-		self.payer_share = round(self.net_total * cover / 100)
+		"""Panel / insurance / welfare share — one rule for every bill (services/payers.py, D-46)."""
+		from hospital_vvs.services.payers import resolve
+
+		r = resolve(self.patient, "OPD Slip", self.net_total, self.posting_date, self.payer_type, self.payer)
+		self.payer_type, self.payer, self.payer_share = r["payer_type"], r["payer"], r["share"]
 		self.patient_share = self.net_total - self.payer_share
 
 	def before_submit(self):

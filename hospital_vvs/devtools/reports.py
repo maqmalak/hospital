@@ -15,6 +15,10 @@ REPORTS = [
 	("Discount Report", "Billing", [R.ADMIN, R.ACCOUNTANT, R.CASH_SUPERVISOR]),
 	("Message Delivery", "Messaging", [R.ADMIN, R.RECEPTIONIST]),
 	("Day End Collection", "Billing", [R.ADMIN, R.ACCOUNTANT, R.CASH_SUPERVISOR]),
+	("Revenue Analysis", "Billing", [R.ADMIN, R.ACCOUNTANT]),
+	("Payer Ageing", "Billing", [R.ADMIN, R.ACCOUNTANT, R.CASH_SUPERVISOR]),
+	("Welfare Fund Utilization", "Billing", [R.ADMIN, R.ACCOUNTANT]),
+	("Expenses by Category", "Billing", [R.ADMIN, R.ACCOUNTANT, R.CASH_SUPERVISOR]),
 ]
 
 
@@ -33,8 +37,12 @@ def run():
 			d["ref_doctype"] = "Appointment"
 		if name == "Discount Report":
 			d["ref_doctype"] = "Discount Authorization"
-		if name == "Day End Collection":
+		if name in ("Day End Collection", "Revenue Analysis", "Payer Ageing"):
 			d["ref_doctype"] = "Sales Invoice"
+		if name == "Welfare Fund Utilization":
+			d["ref_doctype"] = "Welfare Scheme"
+		if name == "Expenses by Category":
+			d["ref_doctype"] = "Expense"
 		with open(os.path.join(folder, frappe.scrub(name) + ".json"), "w") as fh:
 			fh.write(json.dumps(d, indent=1, sort_keys=True) + "\n")
 	print("reports written")

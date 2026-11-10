@@ -351,3 +351,49 @@ def report_pdf(token):
 	frappe.local.response.filename = f"{t.test_invoice}.pdf"
 	frappe.local.response.filecontent = lab.report_pdf(t.test_invoice)
 	frappe.local.response.type = "pdf"
+
+
+# ------------------------------------------------------------------ test templates (/lab/templates)
+TPL_FIELDS = ("test_name", "test_code", "department", "sample_type", "container", "volume", "tat_hours", "price", "is_active", "result_type", "method",
+	"text_template", "outsourced", "reference_lab", "outsource_cost", "auto_verify")
+PARAM_FIELDS = ("parameter", "unit", "gender", "age_from", "age_to", "normal_low", "normal_high", "critical_low", "critical_high", "normal_text", "decimals", "analyzer_code")
+
+
+@frappe.whitelist()
+def templates(q=None, department=None):
+	require_roles(R.PATHOLOGIST, R.LAB_USER)
+	f = {"department": department} if department else {}
+	or_f = {"test_name": ["like", f"%{q}%"], "test_code": ["like", f"%{q}%"]} if q else None
+	rows = frappe.get_all("Lab Test Template", filters=f, or_filters=or_f, fields=["name", "test_name", "test_code", "department", "sample_type", "price", "tat_hours",
+		"is_active", "outsourced", "result_type"], order_by="department, test_name", limit=500)
+	counts = {r.parent: r.n for r in frappe.db.sql("select parent, count(*) n from `tabLab Test Parameter` where parenttype='Lab Test Template' group by parent", as_dict=True)}
+	for r in rows:
+		r["parameters"] = counts.get(r.name, 0)
+	meta = frappe.get_meta("Lab Test Template")
+	return {"rows": rows, "departments": (meta.get_field("department").options or "").split("\n"), "sample_types": (meta.get_field("sample_type").options or "").split("\n"),
+		"containers": (meta.get_field("container").options or "").split("\n"), "labs": frappe.get_all("Supplier", fields=["name", "supplier_name"], limit=200)}
+
+
+@frappe.whitelist()
+def template(name):
+	require_roles(R.PATHOLOGIST, R.LAB_USER)
+	return frappe.get_doc("Lab Test Template", name).as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
+def save_template(data):
+	"""Create / update a test template with its parameters (pathologist). Price changes apply to new orders only."""
+	require_roles(R.PATHOLOGIST)
+	d = frappe.parse_json(data)
+	doc = frappe.get_doc("Lab Test Template", d["name"]) if d.get("name") and frappe.db.exists("Lab Test Template", d["name"]) else frappe.new_doc("Lab Test Template")
+	for k in TPL_FIELDS:
+		if k in d and not (k == "test_name" and not doc.is_new()):
+			doc.set(k, d[k])
+	if "parameters" in d:
+		doc.set("parameters", [{k: p.get(k) for k in PARAM_FIELDS} for p in d["parameters"] if (p.get("parameter") or "").strip()])
+	for p in doc.parameters:
+		if p.normal_low is not None and p.normal_high is not None and flt(p.normal_high) and flt(p.normal_low) > flt(p.normal_high):
+			frappe.throw(_("{0}: normal low is above normal high.").format(p.parameter))
+	doc.flags.ignore_permissions = True
+	doc.save()
+	return doc.as_dict()

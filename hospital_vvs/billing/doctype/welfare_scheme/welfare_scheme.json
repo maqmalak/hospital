@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "autoname": "field:scheme_name",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "scheme_name",
+  "fund_type",
+  "is_active",
+  "w1",
+  "fund_customer",
+  "approval_required",
+  "w2",
+  "coverage_percent",
+  "covered_billing_types",
+  "w3",
+  "cap_per_visit",
+  "cap_per_month",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "scheme_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Scheme Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "Welfare",
+   "fieldname": "fund_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fund Type",
+   "options": "Welfare\nZakat\nDonor-specific",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "w1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The fund's account: covered shares are invoiced here, donations are received here",
+   "fieldname": "fund_customer",
+   "fieldtype": "Link",
+   "label": "Fund Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "description": "The patient needs an approved Welfare Approval before the scheme pays",
+   "fieldname": "approval_required",
+   "fieldtype": "Check",
+   "label": "Approval Required"
+  },
+  {
+   "fieldname": "w2",
+   "fieldtype": "Section Break",
+   "label": "Coverage"
+  },
+  {
+   "default": "100",
+   "fieldname": "coverage_percent",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Coverage Percent",
+   "reqd": 1
+  },
+  {
+   "default": "OPD Slip\nLab\nIPD Slip",
+   "description": "One per line: OPD Slip, Lab, IPD Slip, Fee, General. Empty = all",
+   "fieldname": "covered_billing_types",
+   "fieldtype": "Small Text",
+   "label": "Covered Billing Types"
+  },
+  {
+   "fieldname": "w3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Most the fund pays on one bill (0 = no cap)",
+   "fieldname": "cap_per_visit",
+   "fieldtype": "Currency",
+   "label": "Cap Per Visit"
+  },
+  {
+   "description": "Most the fund pays for one patient in a calendar month (0 = no cap)",
+   "fieldname": "cap_per_month",
+   "fieldtype": "Currency",
+   "label": "Cap Per Month"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing",
+ "name": "Welfare Scheme",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "PW Accountant",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  },
+  {
+   "read": 1,
+   "role": "PW Cash Supervisor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

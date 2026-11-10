@@ -1,4 +1,4 @@
-import { MessageSquareHeart, Radio,
+import { Building2, FileCheck2, FileText, HandHeart, MessageSquareHeart, Radio, TrendingUp,
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
   ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
   Activity, BarChart3, BedDouble, Receipt, ReceiptText, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
@@ -30,6 +30,7 @@ export const NAV: NavGroup[] = [
     { route: "/tests", label: "Lab results", icon: FlaskConical, color: "from-indigo-500 to-violet-600", desc: "Result entry and release" },
     { route: "/lab/verify", label: "Lab verification", icon: Microscope, color: "from-violet-500 to-purple-600", desc: "Pathologist sign-off" },
     { route: "/lab/outsourced", label: "Outsourced tests", icon: Send, color: "from-slate-500 to-slate-700", desc: "Reference lab dispatch" },
+    { route: "/lab/templates", label: "Test templates", icon: FlaskConical, color: "from-fuchsia-600 to-purple-700", desc: "Tests, ranges, prices, turnaround" },
   ] },
   { label: "Pharmacy", items: [
     { route: "/medicine_invoice", label: "Pharmacy POS", icon: ShoppingCart, color: "from-emerald-500 to-teal-600", desc: "Bill medicines with FEFO batches" },
@@ -67,6 +68,15 @@ export const NAV: NavGroup[] = [
   { label: "Online", items: [
     { route: "/ov-staff", label: "Online visits", icon: Video, color: "from-indigo-500 to-violet-600", desc: "Video consultations: fee, accept, prescribe" },
     { route: "/ov-staff/report", label: "Online visit report", icon: BarChart3, color: "from-violet-600 to-fuchsia-700", desc: "Requests, fees, refunds" },
+  ] },
+  { label: "Finance", items: [
+    { route: "/finance", label: "Finance overview", icon: TrendingUp, color: "from-indigo-600 to-violet-700", desc: "Revenue, refunds, expenses, payers" },
+    { route: "/panels", label: "Panels & insurers", icon: Building2, color: "from-indigo-600 to-sky-600", desc: "Coverage, statements, payments" },
+    { route: "/claims", label: "Insurance claims", icon: FileCheck2, color: "from-sky-600 to-indigo-700", desc: "Submit, query, settle, deductions" },
+    { route: "/welfare", label: "Welfare & zakat", icon: HandHeart, color: "from-emerald-600 to-teal-700", desc: "Schemes, approvals, donations, funds" },
+    { route: "/expenses", label: "Expenses", icon: ReceiptText, color: "from-orange-500 to-rose-600", desc: "Bills with receipt and approvals" },
+    { route: "/purchase_order", label: "Purchase orders", icon: ShoppingCart, color: "from-amber-600 to-orange-700", desc: "Approve and track orders" },
+    { route: "/purchase_invoice", label: "Purchase invoices", icon: FileText, color: "from-amber-700 to-red-700", desc: "Supplier bills, unpaid" },
   ] },
   { label: "Billing", items: [
     { route: "/doctor-share", label: "Doctor share", icon: HandCoins, color: "from-sky-600 to-emerald-600", desc: "Commission, owed / paid, payouts" },

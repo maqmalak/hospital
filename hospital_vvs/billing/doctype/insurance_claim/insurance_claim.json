@@ -1,0 +1,261 @@
+{
+ "actions": [],
+ "autoname": "CLM-.YYYY.-.#####",
+ "creation": "2026-11-06 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "insurer",
+  "patient",
+  "patient_name",
+  "c1",
+  "status",
+  "claim_no",
+  "policy_no",
+  "pre_auth",
+  "source_doctype",
+  "source_name",
+  "branch",
+  "c2",
+  "claimed_amount",
+  "approved_amount",
+  "received_amount",
+  "c3",
+  "deduction_amount",
+  "deduction_reason",
+  "rejected_to_patient",
+  "c4",
+  "submitted_on",
+  "query_note",
+  "decided_on",
+  "settled_on",
+  "payment_entry",
+  "journal_entry",
+  "c5",
+  "invoices",
+  "documents"
+ ],
+ "fields": [
+  {
+   "fieldname": "insurer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Insurer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nSubmitted\nUnder Query\nApproved\nPartially Approved\nRejected\nSettled"
+  },
+  {
+   "fieldname": "claim_no",
+   "fieldtype": "Data",
+   "label": "Insurer claim no."
+  },
+  {
+   "fieldname": "policy_no",
+   "fieldtype": "Data",
+   "label": "Policy No."
+  },
+  {
+   "fieldname": "pre_auth",
+   "fieldtype": "Link",
+   "label": "Pre Auth",
+   "options": "Insurance Pre-Auth"
+  },
+  {
+   "fieldname": "source_doctype",
+   "fieldtype": "Link",
+   "label": "Source Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Admission / visit",
+   "options": "source_doctype"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "c2",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "fieldname": "claimed_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Claimed Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approved_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Approved Amount"
+  },
+  {
+   "fieldname": "received_amount",
+   "fieldtype": "Currency",
+   "label": "Received Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "c3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "deduction_amount",
+   "fieldtype": "Currency",
+   "label": "Deduction Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deduction_reason",
+   "fieldtype": "Small Text",
+   "label": "Deduction Reason"
+  },
+  {
+   "description": "The disallowed amount was moved to the patient's account",
+   "fieldname": "rejected_to_patient",
+   "fieldtype": "Check",
+   "label": "Rejected To Patient",
+   "read_only": 1
+  },
+  {
+   "fieldname": "c4",
+   "fieldtype": "Section Break",
+   "label": "Progress"
+  },
+  {
+   "fieldname": "submitted_on",
+   "fieldtype": "Date",
+   "label": "Submitted On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "query_note",
+   "fieldtype": "Small Text",
+   "label": "Query Note"
+  },
+  {
+   "fieldname": "decided_on",
+   "fieldtype": "Date",
+   "label": "Decided On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "settled_on",
+   "fieldtype": "Date",
+   "label": "Settled On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "c5",
+   "fieldtype": "Section Break",
+   "label": "Bills and documents"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "label": "Invoices",
+   "options": "Insurance Claim Invoice"
+  },
+  {
+   "description": "File links: discharge summary, lab reports, bills",
+   "fieldname": "documents",
+   "fieldtype": "Small Text",
+   "label": "Documents"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-06 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing",
+ "name": "Insurance Claim",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "PW Accountant",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "PW Receptionist"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name",
+ "track_changes": 1
+}

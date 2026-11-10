@@ -11,7 +11,7 @@ Status as of **2026-11-09**. Phases from `docs/CLAUDE.md` §8.
 | 3 IPD + ER | **Done** (2026-11-09) — W4, W18 green; full suite 37 green |
 | 4 Online Visit | **Done** (2026-11-09) — W5 green; full suite 41 green |
 | 5 | Done 2026-11-10 — patient comms + feedback (D-44) |
-| 6 | Doctor share built early (D-43); rest (panels / claims, welfare, expenses, purchasing, MIS) not started |
+| 6 | Done 2026-11-10 — doctor share (D-43), welfare, panels, claims, expenses, purchasing, finance reports (D-46) |
 | 7 | Not started |
 
 ## How to run
@@ -121,7 +121,6 @@ Billing at handover is now on (Collect payment at = Handover counter). Full jour
 - **CI**: workflow file written (`.github/workflows/ci.yml`); no remote repo yet.
 - Playwright E2E not written yet (backend tests cover the workflows); Vitest has one unit file.
 - Sentry/uptime: hooks documented, not wired (needs DSN / monitoring host).
-- Lab template editor screen (`/lab/templates`) not built yet — templates are edited in the desk for now.
 - Thermal label / receipt printing tested through the browser print dialog only (QZ Tray silent print untested on real printers).
 - Urdu/Arabic: navigation, actions and main clinical/billing terms translated; long help texts still English. Phase 3 screens are English-first (labels go through i18n where shared components are used).
 - Phase 4: no online card gateway (Frappe Payments) yet — patients pay by wallet / bank transfer and staff confirm it; video calls are external links (no recording). Older Phase 2 lab test runs left a few test lab orders on patient MR-LHR-000057 (LAB-2026-00009 … 00022) — not removed, waiting for the owner's OK.
@@ -145,3 +144,7 @@ Pending / owner: Meta approval of `visit_feedback` (EN/UR); bedside tablets per 
 
 ## Islamabad branch removed (2026-11-10) — D-45
 Single branch (Lahore Main). Everything Islamabad deleted or moved to Lahore; stock reversed to Main Store LHR; all users on Lahore Main. Tests: 72 green.
+
+## Phase 6 — finance (2026-11-10) — D-46
+Built: shared payer rule (panel / insurer / welfare) in OPD, lab and IPD billing; Welfare Scheme + Welfare Approval, donations, fund balances (`/welfare`); panels & insurers setup, statements, payments with deductions, ageing (`/panels`); Insurance Claim workflow with deductions or billing the patient (`/claims`); Expenses with receipt and amount-based approval levels → Journal Entry (`/expenses`); purchase order / invoice lists with approval (`/purchase_order`, `/purchase_invoice`); `/finance` overview; Script Reports Revenue Analysis, Payer Ageing, Welfare Fund Utilization, Expenses by Category; pending task done: **lab template editor `/lab/templates`** (tests, parameters, normal / critical ranges by sex and age, price, turnaround, outsourcing). Demo: State Life and Pakistan Telecom panel show their balances; "Zakat Welfare Fund" linked to a scheme. Tests: W8, W11 (welfare), W12 (panel + insurance) — full suite 80 green.
+Not built / owner: FBR POS integration (waiting for tax advisor), recurring expense templates, online card gateway.

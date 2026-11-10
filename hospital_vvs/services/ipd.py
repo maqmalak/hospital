@@ -86,8 +86,10 @@ def admit(patient, bed, doctor, *, reason=None, diagnosis=None, planned_days=1, 
 	if not pat or pat.disabled:
 		frappe.throw(_("Patient {0} is not active.").format(patient))
 	if not payer_type or payer_type == "Patient":
-		payer_type = pat.category if pat.category in ("Panel", "Insurance") else "Patient"
-		payer = pat.panel if pat.category == "Panel" else pat.insurance_provider if pat.category == "Insurance" else None
+		from hospital_vvs.services.payers import resolve  # one payer rule (D-46)
+
+		r = resolve(patient, "IPD Slip", 100, payer_type=payer_type, payer=payer)
+		payer_type, payer = r["payer_type"], r["payer"]
 	check_pre_auth(payer_type, payer, pre_auth, patient)
 	now = get_datetime(admit_at) if admit_at else now_datetime()
 	ward, wtype, rate, icu, nursing = ward_rates(bed)
@@ -326,8 +328,9 @@ def apply_package(lines, package_name):
 def payer_split(adm, net):
 	if adm.payer_type == "Patient" or not adm.payer:
 		return 0.0
-	cover = flt(frappe.db.get_value("Customer", adm.payer, "hv_coverage_percent"))
-	share = round(net * cover / 100)
+	from hospital_vvs.services.payers import resolve
+
+	share = resolve(adm.patient, "IPD Slip", net, None, adm.payer_type, adm.payer)["share"]
 	if adm.pre_auth:
 		approved = flt(frappe.db.get_value("Insurance Pre-Auth", adm.pre_auth, "approved_amount"))
 		if approved:

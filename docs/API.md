@@ -145,6 +145,31 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `dispose` | name, disposition, note, referred_to, death_datetime, cause_of_death, admit, payment_mode, lama_form | POST | DOCTOR, RECEPTIONIST |  |
 | `identify` | name, patient | POST | ADMIN | Unknown patient identified: merge the temporary record into the real one (Admin; uses the patient merge tool). |
 
+## finance
+
+| Method | Params | Flags | Roles | Summary |
+|---|---|---|---|---|
+| `welfare` |  |  | ACCOUNTANT, RECEPTIONIST, CASH_SUPERVISOR |  |
+| `save_scheme` | data | POST | ADMIN, ACCOUNTANT |  |
+| `request_welfare` | patient, scheme, notes, documents | POST | RECEPTIONIST, ACCOUNTANT |  |
+| `decide_welfare` | name, approve, valid_till, notes | POST | ADMIN, ACCOUNTANT |  |
+| `donate` | scheme, amount, mode_of_payment, donor, reference_no | POST | ACCOUNTANT, CASH_SUPERVISOR |  |
+| `payer_preview` | patient, billing_type, amount |  |  | What a payer would cover on a bill of this amount (shown at the counter). |
+| `payer_list` |  |  | ACCOUNTANT, RECEPTIONIST, CASH_SUPERVISOR |  |
+| `save_payer` | data | POST | ADMIN, ACCOUNTANT |  |
+| `payer_statement` | payer, from_date, to_date |  | FIN, CASH_SUPERVISOR |  |
+| `payer_receive` | payer, amount, mode_of_payment, deduction, deduction_reason, reference_no, invoices | POST | FIN |  |
+| `claims` | status |  | FIN, RECEPTIONIST |  |
+| `claim` | name |  | FIN, RECEPTIONIST |  |
+| `make_claim` | source_doctype, source_name | POST | FIN |  |
+| `claim_action` | name, action, claim_no, note, approved_amount, reason, received_amount, mode_of_payment, reference_no, documents | POST | FIN |  |
+| `expenses` | status, mine |  | ACCOUNTANT, CASH_SUPERVISOR, STORE_KEEPER, RECEPTIONIST |  |
+| `save_expense` | data, submit | POST | ACCOUNTANT, CASH_SUPERVISOR, STORE_KEEPER, RECEPTIONIST |  |
+| `expense_action` | name, approve, note | POST |  |  |
+| `purchasing` | doctype, status |  | STORE_KEEPER, ACCOUNTANT, ADMIN |  |
+| `approve_purchase` | doctype, name | POST | ACCOUNTANT, ADMIN | Approve = submit a draft purchase document (accountant / admin). |
+| `overview` | from_date, to_date |  | ACCOUNTANT, ADMIN, CASH_SUPERVISOR |  |
+
 ## ipd
 
 | Method | Params | Flags | Roles | Summary |
@@ -225,6 +250,9 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `report_open` | token | guest |  |  |
 | `report_verify` | token, answer | guest POST |  |  |
 | `report_pdf` | token | guest |  |  |
+| `templates` | q, department |  | PATHOLOGIST, LAB_USER |  |
+| `template` | name |  | PATHOLOGIST, LAB_USER |  |
+| `save_template` | data | POST | PATHOLOGIST | Create / update a test template with its parameters (pathologist). Price changes apply to new orders only. |
 
 ## messaging
 

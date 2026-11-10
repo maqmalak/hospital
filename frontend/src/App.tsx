@@ -74,6 +74,14 @@ const NursingStationPage = lazy(() => import("@/modules/comms/StationPages").the
 const AssignPage = lazy(() => import("@/modules/comms/StationPages").then((m) => ({ default: m.AssignPage })));
 const ResponseReportPage = lazy(() => import("@/modules/comms/StationPages").then((m) => ({ default: m.ResponseReportPage })));
 const FeedbackAdminPage = lazy(() => import("@/modules/comms/FeedbackPages"));
+const fin = (n: string) => lazy(() => import("@/modules/finance/FinancePages").then((m) => ({ default: (m as unknown as Record<string, React.ComponentType>)[n] })));
+const WelfarePage = fin("WelfarePage");
+const PanelsPage = fin("PanelsPage");
+const ClaimsPage = fin("ClaimsPage");
+const ExpensesPage = fin("ExpensesPage");
+const FinanceOverviewPage = fin("FinanceOverviewPage");
+const LabTemplatesPage = lazy(() => import("@/modules/lab/TemplatesPage"));
+const PurchasingPage = lazy(() => import("@/modules/finance/FinancePages").then((m) => ({ default: m.PurchasingPage })));
 const FeedbackFormPage = lazy(() => import("@/modules/comms/FeedbackPages").then((m) => ({ default: m.FeedbackFormPage })));
 const MySharePage = lazy(() => import("@/modules/billing/DoctorSharePage").then((m) => ({ default: m.MySharePage })));
 const OnlineVisitPage = lazy(() => import("@/modules/public/OnlineVisitPage"));
@@ -167,6 +175,14 @@ export default function App() {
         <Route path="/pc-assign" element={g("/pc-assign", <AssignPage />)} />
         <Route path="/pc-report" element={g("/pc-report", <ResponseReportPage />)} />
         <Route path="/feedback" element={g("/feedback", <FeedbackAdminPage />)} />
+        <Route path="/lab/templates" element={g("/lab/templates", <LabTemplatesPage />)} />
+        <Route path="/welfare" element={g("/welfare", <WelfarePage />)} />
+        <Route path="/panels" element={g("/panels", <PanelsPage />)} />
+        <Route path="/claims" element={g("/claims", <ClaimsPage />)} />
+        <Route path="/expenses" element={g("/expenses", <ExpensesPage />)} />
+        <Route path="/finance" element={g("/finance", <FinanceOverviewPage />)} />
+        <Route path="/purchase_order" element={g("/purchase_order", <PurchasingPage doctype="Purchase Order" />)} />
+        <Route path="/purchase_invoice" element={g("/purchase_invoice", <PurchasingPage doctype="Purchase Invoice" />)} />
         <Route path="/lab/orders" element={g("/lab/orders", <LabOrdersPage />)} />
         <Route path="/lab/samples" element={g("/lab/samples", <LabSamplesPage />)} />
         <Route path="/tests" element={g("/tests", <LabTestsPage />)} />

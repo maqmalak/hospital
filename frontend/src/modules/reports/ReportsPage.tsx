@@ -16,6 +16,10 @@ const REPORTS = [
   { name: "Appointments by Channel", desc: "Web / WhatsApp / Reception bookings, no-show rate", group: "Daily / operational" },
   { name: "Day End Collection", desc: "By counter, cashier and payment mode", group: "Financial" },
   { name: "Discount Report", desc: "By user, reason and billing type", group: "Financial" },
+  { name: "Revenue Analysis", desc: "Net revenue by billing type, department, doctor and service", group: "Financial" },
+  { name: "Payer Ageing", desc: "Panels, insurers and welfare funds: what is owed, by age", group: "Financial" },
+  { name: "Welfare Fund Utilization", desc: "Donations, use and balance per welfare / zakat fund", group: "Financial" },
+  { name: "Expenses by Category", desc: "Approved expenses by category and month", group: "Financial" },
   { name: "Disease Statistics", desc: "ICD-10 by age group and gender (health department)", group: "Clinical / statutory" },
   { name: "Message Delivery", desc: "WhatsApp / SMS success rate by event", group: "Quality" },
 ];

@@ -221,6 +221,13 @@
   "doctor_supplier_group",
   "dsh1",
   "doctor_share_on_payer_bills",
+  "payers_tab",
+  "payer_deduction_account",
+  "bill_rejected_to_patient",
+  "pw1",
+  "welfare_customer_group",
+  "expense_tab",
+  "expense_levels",
   "security_tab",
   "enforce_two_factor",
   "idle_lock_minutes",
@@ -1496,6 +1503,47 @@
    "label": "Share on Panel / Insurance Bills"
   },
   {
+   "fieldname": "payers_tab",
+   "fieldtype": "Tab Break",
+   "label": "Panels, Insurance & Welfare"
+  },
+  {
+   "description": "Panel / insurance deductions and write-offs are booked here",
+   "fieldname": "payer_deduction_account",
+   "fieldtype": "Link",
+   "label": "Payer Deduction Account",
+   "options": "Account"
+  },
+  {
+   "description": "On settling a claim, the disallowed part moves to the patient's account instead of being written off",
+   "fieldname": "bill_rejected_to_patient",
+   "fieldtype": "Check",
+   "label": "Rejected Claim Amount Billed to Patient"
+  },
+  {
+   "fieldname": "pw1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Group for welfare / zakat fund accounts",
+   "fieldname": "welfare_customer_group",
+   "fieldtype": "Link",
+   "label": "Welfare Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "expense_tab",
+   "fieldtype": "Tab Break",
+   "label": "Expenses"
+  },
+  {
+   "description": "Approvals needed by amount; e.g. level 1 Cash Supervisor from 0, level 2 Accountant from 10,000, level 3 Admin from 50,000",
+   "fieldname": "expense_levels",
+   "fieldtype": "Table",
+   "label": "Expense Levels",
+   "options": "Expense Approval Level"
+  },
+  {
    "fieldname": "security_tab",
    "fieldtype": "Tab Break",
    "label": "Security"
@@ -1542,7 +1590,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 01:15:05.946823",
+ "modified": "2026-11-10 01:34:29.366350",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

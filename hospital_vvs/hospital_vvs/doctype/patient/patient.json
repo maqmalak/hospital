@@ -287,8 +287,9 @@
   {
    "depends_on": "eval:doc.category=='Welfare'",
    "fieldname": "welfare_scheme",
-   "fieldtype": "Data",
-   "label": "Welfare Scheme"
+   "fieldtype": "Link",
+   "label": "Welfare Scheme",
+   "options": "Welfare Scheme"
   },
   {
    "fieldname": "clinical_tab",
@@ -417,7 +418,7 @@
  "image_field": "photo",
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-09 18:08:30.057497",
+ "modified": "2026-11-10 01:34:29.368636",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Patient",

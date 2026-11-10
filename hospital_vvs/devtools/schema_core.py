@@ -284,7 +284,7 @@ PATIENT = doctype("Patient", M, [
 	f("insurance_provider", "Link", "Customer", depends_on="eval:doc.category=='Insurance'"),
 	f("policy_no", "Data", depends_on="eval:doc.category=='Insurance'"),
 	f("policy_valid_till", "Date", depends_on="eval:doc.category=='Insurance'"),
-	f("welfare_scheme", "Data", depends_on="eval:doc.category=='Welfare'"),
+	f("welfare_scheme", "Link", "Welfare Scheme", depends_on="eval:doc.category=='Welfare'"),
 	tab("clinical_tab", "Clinical"),
 	f("allergies", "Table", "Patient Allergy", permlevel=1), f("chronic_conditions", "Table", "Patient Condition", permlevel=1),
 	f("long_term_medicines", "Table", "Patient Long Term Medicine", permlevel=1),

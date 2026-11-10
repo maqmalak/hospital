@@ -77,6 +77,10 @@ CUSTOM_FIELDS = {
 			"read_only": 1},
 		{"fieldname": "hv_coverage_percent", "fieldtype": "Percent", "label": "Payer Coverage %", "insert_after": "customer_group",
 			"description": "Panel / insurance / welfare fund: share of the bill the payer covers", "depends_on": "eval:!doc.hv_patient"},
+		{"fieldname": "hv_covered_billing_types", "fieldtype": "Small Text", "label": "Covered Billing Types", "insert_after": "hv_coverage_percent",
+			"description": "Panel / insurance: one per line (OPD Slip, Lab, IPD Slip, Fee, General). Empty = all", "depends_on": "eval:!doc.hv_patient"},
+		{"fieldname": "hv_contract_valid_till", "fieldtype": "Date", "label": "Contract Valid Till", "insert_after": "hv_covered_billing_types",
+			"description": "Panel / insurance contract end; no payer share after this date", "depends_on": "eval:!doc.hv_patient"},
 		{"fieldname": "hv_pharmacy_credit", "fieldtype": "Check", "label": "Pharmacy Credit Customer", "insert_after": "hv_coverage_percent",
 			"description": "May buy medicines on account at the contract pharmacy (credit limit per company applies)"},
 	],
@@ -245,3 +249,7 @@ def after_migrate():
 	from hospital_vvs.services.patient_comms import ensure_stations
 
 	ensure_stations()
+	from hospital_vvs.services import expenses, payers
+
+	payers.ensure_setup()
+	expenses.ensure_setup()

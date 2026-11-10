@@ -24,12 +24,10 @@ class TestInvoice(Document):
 		self.gross_total = sum(flt(r.price) for r in self.items if r.status != "Cancelled")
 		self.discount_amount = min(flt(self.discount_amount), self.gross_total)
 		self.net_total = self.gross_total - flt(self.discount_amount)
-		pat = frappe.db.get_value("Patient", self.patient, ["category", "panel", "insurance_provider"], as_dict=True) or {}
-		if self.payer_type == "Patient" and pat.get("category") in ("Panel", "Insurance"):
-			self.payer_type = pat.category
-			self.payer = pat.panel if pat.category == "Panel" else pat.insurance_provider
-		cover = flt(frappe.db.get_value("Customer", self.payer, "hv_coverage_percent")) if self.payer and self.payer_type != "Patient" else 0
-		self.payer_share = round(self.net_total * cover / 100)
+		from hospital_vvs.services.payers import resolve  # one payer rule (D-46)
+
+		r = resolve(self.patient, "Lab", self.net_total, self.get("posting_date"), self.payer_type, self.payer)
+		self.payer_type, self.payer, self.payer_share = r["payer_type"], r["payer"], r["share"]
 		self.patient_share = self.net_total - self.payer_share
 
 	def on_trash(self):
