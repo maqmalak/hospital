@@ -133,7 +133,6 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
     <div className="mx-auto grid max-w-[1500px] gap-4 xl:grid-cols-[320px_1fr]">
       {/* patient summary */}
       <aside className="space-y-3">
-        {queue && <PendingPatients compact current={queue} doctor={ws.doctor?.name} onOpen={(q) => nav(`/pw-prescription?queue=${q}`)} />}
         <Section>
           <div className="flex items-center gap-3"><Avatarish name={p.patient_name} src={p.photo} size={14} />
             <div className="min-w-0"><div className="truncate text-lg font-bold">{p.patient_name}</div><div className="font-urdu text-sm text-muted-foreground">{p.patient_name_ur}</div>
@@ -164,6 +163,7 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
               {r.medicines.map((m, i) => <div key={i}>• {m.item_name} {m.frequency} {m.duration}</div>)}
             </div>)) : <p className="text-sm text-muted-foreground">First visit.</p>}
         </Section>
+        {queue && <PendingPatients compact current={queue} doctor={ws.doctor?.name} onOpen={(q) => nav(`/pw-prescription?queue=${q}`)} />}
       </aside>
 
       {/* prescription */}
