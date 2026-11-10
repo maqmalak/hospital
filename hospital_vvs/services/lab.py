@@ -593,16 +593,6 @@ def _monogram(name):
 		<text x="32" y="41" font-family="Helvetica,Arial" font-size="22" font-weight="700" text-anchor="middle" fill="#fff">{frappe.utils.escape_html(letters)}</text></svg>""")
 
 
-def _stamp(clinic, date):
-	c = frappe.utils.escape_html((clinic or "").upper())[:22]
-	return _svg_uri(f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"><g transform="rotate(-12 80 80)" font-family="Helvetica,Arial" fill="#1d4ed8" text-anchor="middle">
-		<circle cx="80" cy="80" r="74" fill="none" stroke="#1d4ed8" stroke-width="4" opacity=".8"/><circle cx="80" cy="80" r="64" fill="none" stroke="#1d4ed8" stroke-width="1.5" opacity=".8"/>
-		<text x="80" y="52" font-size="13" font-weight="700" opacity=".85">{c}</text>
-		<rect x="18" y="64" width="124" height="30" rx="4" fill="none" stroke="#1d4ed8" stroke-width="2.5" opacity=".85"/>
-		<text x="80" y="86" font-size="20" font-weight="800" letter-spacing="3" opacity=".9">VERIFIED</text>
-		<text x="80" y="112" font-size="11" font-weight="700" opacity=".85">LABORATORY</text><text x="80" y="126" font-size="11" font-weight="700" opacity=".85">{frappe.utils.escape_html(date)}</text></g></svg>""")
-
-
 def print_extras(ti, tests):
 	"""Header / footer / signatory data for the printed report (D-50)."""
 	s = frappe.get_cached_doc("Clinic Settings")
@@ -613,7 +603,6 @@ def print_extras(ti, tests):
 	vuser = next((v for v in reversed(verifiers) if v and v != "Administrator"), None)
 	doc = frappe.db.get_value("Doctor", {"user": vuser}, ["doctor_name", "qualification", "registration_no", "signature"], as_dict=True) if vuser else None
 	name = (doc.doctor_name if doc else None) or s.get("lab_signatory_name") or (frappe.db.get_value("User", vuser, "full_name") if vuser else None) or "Pathologist"
-	released = getdate(ti.released_at) if ti.released_at else getdate()
 	return {"collected_at": str(col or "")[:16], "received_at": str(rec or "")[:16], "verify_url": verify_url(ti.name),
 		"print": {"department": s.get("lab_report_department") or "Department of Pathology & Laboratory Medicine", "accreditation": s.get("lab_accreditation"),
 			"footer": s.get("lab_report_footer"), "show_previous": cint(s.get("lab_show_previous") if s.get("lab_show_previous") is not None else 1),
@@ -621,7 +610,7 @@ def print_extras(ti, tests):
 			"title": (doc.qualification if doc and doc.qualification else None) or s.get("lab_signatory_title") or "Consultant Pathologist",
 			"reg": (doc.registration_no if doc else None) or s.get("lab_signatory_reg"),
 			"signature": _image_uri(doc.signature if doc and doc.signature else s.get("lab_signature")),
-			"stamp": _image_uri(s.get("lab_stamp")) or _stamp(s.clinic_name, released.strftime("%d-%m-%Y"))}}
+			"signed_at": max((str(frappe.db.get_value("Lab Result", r.result, "verified_at") or "") for r in ti.items if r.result and r.status in ("Verified", "Released")), default="")[:16]}}
 
 
 def _dmy(d):
@@ -680,7 +669,6 @@ def report_html(d):
 	remarks = f"<div class='remarks'><b>Remarks</b><br>{esc(d['remarks']).replace(chr(10), '<br>')}</div>" if d.get("remarks") else ""
 	qr = qr_data_uri(d.get("verify_url") or d["name"])
 	sig = f"<img class='sig' src='{P['signature']}'>" if P.get("signature") else "<div class='sigline'></div>"
-	stamp = f"<img class='stamp' src='{P['stamp']}'>" if P.get("stamp") else ""
 	info = [("Patient", f"<b>{esc(p['name'])}</b>"), ("MR No.", esc(p["mr"])),
 		("Age / Sex", f"{p.get('age') if p.get('age') is not None else '-'} y / {esc(p.get('gender') or '-')}"), ("Referred by", esc(d.get("referring_doctor") or "Self")),
 		("Order no.", f"{esc(d['name'])} {pr_tag}"), ("Registered", esc(d["posting_date"])), ("Collected", esc(d.get("collected_at") or "-")),
@@ -714,7 +702,7 @@ def report_html(d):
 	.remarks {{ margin: 10px 0; padding: 7px 9px; border: 1px dashed #0369a1; border-radius: 8px; background: #f0f9ff; line-height: 1.5; }}
 	.sign {{ display: table; width: 100%; margin-top: 18px; page-break-inside: avoid; }} .sign > div {{ display: table-cell; vertical-align: bottom; }}
 	.sigbox {{ text-align: center; width: 260px; position: relative; }} .sig {{ max-height: 48px; max-width: 170px; }} .sigline {{ height: 40px; }}
-	.stampc {{ width: 130px; text-align: center; }} .stamp {{ width: 112px; height: 112px; }}
+	.dsig {{ margin-top: 3px; font-size: 8.5px; font-weight: 700; color: #0f766e; }}
 	.sigbox .nm {{ border-top: 1px solid #0f172a; padding-top: 3px; font-weight: 800; font-size: 11px; }} .sigbox .tt {{ font-size: 9px; color: #475569; }}
 	.legend {{ font-size: 8.5px; color: #64748b; }}
 	.foot {{ margin-top: 14px; border-top: 2px solid #0f766e; padding-top: 5px; font-size: 8.5px; color: #475569; display: table; width: 100%; }} .foot > div {{ display: table-cell; vertical-align: top; }}
@@ -730,7 +718,8 @@ def report_html(d):
 	{''.join(parts)}
 	{remarks}
 	<div class="sign"><div class="legend">Flags: <b style="color:#b45309">H</b> high · <b style="color:#b45309">L</b> low · <b style="color:#b91c1c">HH / LL</b> critical · <b style="color:#b45309">A</b> abnormal</div>
-		<div class="stampc">{stamp}</div><div class="sigbox">{sig}<div class="nm">{esc(P.get('signatory') or '')}</div><div class="tt">{esc(P.get('title') or '')}{(' · PMDC ' + esc(P['reg'])) if P.get('reg') else ''}</div></div></div>
+		<div class="sigbox">{sig}<div class="nm">{esc(P.get('signatory') or '')}</div><div class="tt">{esc(P.get('title') or '')}{(' · PMDC ' + esc(P['reg'])) if P.get('reg') else ''}</div>
+		<div class="dsig">&#10003; Digitally signed{(' · ' + esc(P['signed_at'])) if P.get('signed_at') else ''}</div></div></div>
 	<div class="foot"><div>{esc(P.get('footer') or '')}</div><div style="text-align:right;width:180px">Printed {frappe.utils.now_datetime().strftime('%d-%m-%Y %H:%M')}<br>{esc(c['name'])}</div></div>
 	<div class="end">— END OF REPORT —</div>
 	</body></html>"""

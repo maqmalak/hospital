@@ -141,7 +141,6 @@
   "lab_signatory_reg",
   "lbp1",
   "lab_signature",
-  "lab_stamp",
   "lab_report_footer",
   "lab_show_previous",
   "pharmacy_tab",
@@ -1044,15 +1043,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Optional scanned signature; the report is digitally signed in any case",
    "fieldname": "lab_signature",
    "fieldtype": "Attach Image",
    "label": "Signature Image"
-  },
-  {
-   "description": "Empty = a round VERIFIED stamp is drawn",
-   "fieldname": "lab_stamp",
-   "fieldtype": "Attach Image",
-   "label": "Stamp Image"
   },
   {
    "default": "Results relate only to the sample tested. Please correlate clinically. This report is electronically verified; scan the QR code to confirm it.",
@@ -1780,7 +1774,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 17:27:11.452292",
+ "modified": "2026-11-10 17:37:06.257390",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

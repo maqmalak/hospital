@@ -253,7 +253,7 @@ SETTINGS_FIELDS = [
 	f("lab_accreditation", "Data", label="Accreditation / licence line", description="e.g. PHC Licence No. … (printed under the header)"),
 	f("lab_signatory_name", "Data", label="Signatory (if the verifier has no doctor record)"), f("lab_signatory_title", "Data", default="Consultant Pathologist"),
 	f("lab_signatory_reg", "Data", label="Signatory PMDC No."), cb("lbp1"),
-	f("lab_signature", "Attach Image", label="Signature Image"), f("lab_stamp", "Attach Image", label="Stamp Image", description="Empty = a round VERIFIED stamp is drawn"),
+	f("lab_signature", "Attach Image", label="Signature Image", description="Optional scanned signature; the report is digitally signed in any case"),
 	f("lab_report_footer", "Small Text", default="Results relate only to the sample tested. Please correlate clinically. This report is electronically verified; scan the QR code to confirm it.",
 		label="Report Footer Note"),
 	f("lab_show_previous", "Check", default="1", label="Print Previous Result Column"),

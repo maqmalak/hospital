@@ -160,5 +160,5 @@ Report file (scan / photo / outside PDF) on the result screen; merged into the p
 81/81 checks after fixing 3 defects (reject after result, lab-user amendment, refund not cancelling tests); priority tags Normal / Priority / Urgent; lab orders Today / Week / Month / Custom filter; ~36 realistic lab orders in every state. Report: [QA-LAB.md](QA-LAB.md). Tests: 92 green (5 new regression tests).
 
 ## Lab report print (2026-11-10) — D-50
-Elegant A4 report with logo, QR verification page, signatory / stamp, remarks, previous result column with date, page numbers; result-entry history of the last 5 results. Tests: 93 green.
-Owner: upload the logo, signature and stamp (Clinic Settings → General / Lab → Lab report print); set the signatory name, title, PMDC no. and licence line.
+Elegant A4 report with logo, QR verification page, signatory with digital-signature line (no stamp), remarks, previous result column with date, page numbers; result-entry history of the last 5 results. Tests: 93 green.
+Owner: upload the logo (and optionally a signature image) (Clinic Settings → General / Lab → Lab report print); set the signatory name, title, PMDC no. and licence line.
