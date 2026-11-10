@@ -64,6 +64,7 @@ export default function LabReportPage() {
                 {t.interpretation && <p className="mt-2 text-sm"><b>Interpretation:</b> {t.interpretation}</p>}
                 <p className="mt-2 text-xs text-muted-foreground">Verified by {t.verified_by} · {t.verified_at?.slice(0, 16)}</p></>}
             </div>))}
+          {(r as { remarks?: string }).remarks && <div className="whitespace-pre-wrap rounded-2xl border border-dashed border-sky-400 bg-sky-50 p-3 text-sm dark:bg-sky-500/10"><b>Remarks:</b> {(r as { remarks?: string }).remarks}</div>}
           <p className="text-center text-xs text-muted-foreground">This report is for the patient's own use. Please discuss abnormal values with your doctor.</p>
         </div>
       </div>

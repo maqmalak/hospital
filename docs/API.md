@@ -252,6 +252,8 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `report_pdf` | token | guest |  |  |
 | `report_file` | token, index | guest |  | The scanned / outside-lab report file of one test, for the patient (same link + verification rules as the PDF). |
 | `print_pdf` | name |  | LAB_USER, RECEPTIONIST, PATHOLOGIST | Staff copy of the released report as PDF (scanned pages included) for printing and handing to the patient. |
+| `set_remarks` | name, remarks | POST | PATHOLOGIST, LAB_USER | Pathologist's remarks printed on the report. |
+| `verify_report` | name, sig | guest |  | Public QR check: is this report genuine (no results shown). |
 | `hand_over` | name, to | POST | LAB_USER, RECEPTIONIST | Printed report handed over at the counter (to the patient or an attendant). |
 | `upload_report_file` | invoice_item, filename, filedata | POST | LAB_USER, PATHOLOGIST | Scan / photo of a handwritten report (or an outside lab's PDF) for one ordered test: private file on the result. |
 | `templates` | q, department |  | PATHOLOGIST, LAB_USER |  |

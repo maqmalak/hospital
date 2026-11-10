@@ -82,3 +82,49 @@ class TestLabQA(IntegrationTestCase):
 		self.assertEqual(order, [names["Urgent"], names["Priority"], names["Normal"]])
 		rows = api.orders(from_date=frappe.utils.today(), to_date=frappe.utils.today(), priority="Urgent")
 		self.assertTrue(rows and all(r.priority == "Urgent" for r in rows))
+
+
+class TestLabPrint(IntegrationTestCase):
+	"""D-50: elegant print — QR verification, signatory / stamp, remarks, previous result with date."""
+
+	def setUp(self):
+		p = patch.object(frappe.db, "commit", lambda *a, **k: None)
+		p.start()
+		self.addCleanup(p.stop)
+		self.addCleanup(as_user, "Administrator")
+
+	def released(self, value):
+		ti = received_order(["TSH"])
+		res = lab.enter_results(ti.items[0].name, {"TSH": value})
+		as_user("pathologist@vvs.demo")
+		lab.verify(res.name, "Euthyroid.")
+		as_user("lab@vvs.demo")
+		lab.release(ti.name)
+		return ti
+
+	def test_print_qr_history_remarks(self):
+		first = self.released("2.0")
+		pat = first.patient
+		shift_for("lab@vvs.demo", "Lab Counter")
+		ti = lab.create_order(pat, ["TSH"], "Lahore Main")
+		lab.pay(ti.name, "Cash")
+		for s in frappe.get_all("Lab Sample", filters={"test_invoice": ti.name}, pluck="name"):
+			lab.receive(s)
+		ti.reload()
+		self.assertTrue(api.result_form(ti.items[0].name)["history"])  # earlier TSH shown while entering
+		res = lab.enter_results(ti.items[0].name, {"TSH": "6.2"})
+		as_user("pathologist@vvs.demo")
+		lab.verify(res.name)
+		api.set_remarks(ti.name, "Repeat TSH after 6 weeks.")
+		as_user("lab@vvs.demo")
+		lab.release(ti.name)
+		d = lab.report_data(ti.name)
+		self.assertEqual(d["tests"][0]["previous"]["values"]["TSH"][0], "2.0")
+		html = lab.report_html(d)
+		for bit in ("Repeat TSH after 6 weeks.", "data:image/svg+xml;base64", "Previous", "LABORATORY REPORT", "Consultant Pathologist"):
+			self.assertIn(bit, html)
+		self.assertTrue(lab.report_pdf(ti.name).startswith(b"%PDF"))
+		frappe.set_user("Guest")
+		ok = api.verify_report(ti.name, lab.verify_sig(ti.name))
+		self.assertTrue(ok["valid"] and ok["report"] == ti.name and "values" not in str(ok["tests"]))
+		self.assertFalse(api.verify_report(ti.name, "0" * 20)["valid"])  # forged QR

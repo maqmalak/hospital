@@ -142,7 +142,7 @@ interface Order { name: string; patient: string; patient_name: string; status: s
   payer_share: number; sales_invoice?: string; expected_at?: string; referring_doctor?: string; items: { name: string; template: string; status: string; price: number; sample?: string; result?: string; outsourced: number }[];
   samples: { name: string; sample_type: string; container: string; status: string; collected_at?: string; rejection_reason?: string }[];
   links: { name: string; expires_at: string; download_count: number; max_downloads: number; revoked: number; version: number; last_accessed_at?: string }[];
-  messages: { name: string; event: string; status: string; channel: string; creation: string }[]; handed_over_to?: string; handed_over_at?: string; whatsapp_number?: string; whatsapp_opt_in?: number }
+  messages: { name: string; event: string; status: string; channel: string; creation: string }[]; handed_over_to?: string; handed_over_at?: string; report_remarks?: string; whatsapp_number?: string; whatsapp_opt_in?: number }
 
 export function OrderDialog({ name, onClose }: { name: string; onClose: () => void }) {
   const { data: o, refetch } = useApi<Order>("lab.order", { name });
@@ -152,6 +152,8 @@ export function OrderDialog({ name, onClose }: { name: string; onClose: () => vo
   const resend = useAction<{ link: string }>("lab.resend_link", { success: "New link sent", onSuccess: () => void refetch() });
   const revoke = useAction("lab.revoke", { success: "All links revoked", onSuccess: () => void refetch() });
   const handOver = useAction("lab.hand_over", { success: "Hand-over recorded", onSuccess: () => void refetch() });
+  const saveRemarks = useAction("lab.set_remarks", { success: "Remarks saved — they print on the report", onSuccess: () => void refetch() });
+  const [remarks, setRemarks] = useState<string | null>(null);
   const preview = async () => { try { const html = await call<string>("lab.report_preview", { name }); const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); } catch (e) { toast.error(humanizeError(e)); } };
   if (!o) return <Dialog open onClose={onClose} title={name} size="lg"><div className="h-60 animate-pulse rounded-2xl bg-muted" /></Dialog>;
   const unpaid = ["Draft", "Ordered"].includes(o.status);
@@ -180,6 +182,9 @@ export function OrderDialog({ name, onClose }: { name: string; onClose: () => vo
           <Button variant="outline" loading={handOver.isPending} onClick={() => { const to = prompt("Printed report handed to (name / relation):", o.patient_name); if (to) handOver.mutate({ name, to }); }}><HandHelping className="h-4 w-4" />Mark handed over</Button>
           <Button variant="danger" onClick={() => { if (confirm("Revoke every link for this report?")) revoke.mutate({ name }); }}><ShieldOff className="h-4 w-4" />Revoke links</Button></>}
       </div>
+      <Section title="Report remarks" className="mt-3"><textarea className={inputCls + " min-h-16"} placeholder="Pathologist's note printed on the report (e.g. 'Repeat after 2 weeks', 'Sample slightly haemolysed')"
+        value={remarks ?? o.report_remarks ?? ""} onChange={(e) => setRemarks(e.target.value)} />
+        {remarks !== null && remarks !== (o.report_remarks ?? "") && <Button size="sm" variant="save" className="mt-2" loading={saveRemarks.isPending} onClick={() => saveRemarks.mutate({ name, remarks })}>Save remarks</Button>}</Section>
       {o.handed_over_to && <div className="mt-3 rounded-xl bg-emerald-50 p-2 text-xs text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-200">Printed report handed to <b>{o.handed_over_to}</b> · {o.handed_over_at?.slice(0, 16)}</div>}
       {o.messages.length > 0 && <div className="mt-3 text-xs text-muted-foreground">{o.messages.map((mm) => <div key={mm.name}>{mm.creation.slice(0, 16)} · {mm.event} · {mm.channel} · {mm.status}</div>)}</div>}
     </Dialog>

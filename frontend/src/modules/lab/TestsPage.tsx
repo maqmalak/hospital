@@ -12,7 +12,8 @@ import { FLAG_TONE, flagArrow, LabHero, StatusChip, useLabLive, PriorityTag } fr
 interface W { name: string; test_invoice: string; template: string; status: string; sample?: string; result?: string; outsourced: number; patient: string; patient_name: string;
   priority: string; expected_at?: string; department: string; test_code: string; has_critical?: number; critical_logged?: number; result_status?: string; send_back_reason?: string }
 interface Param { parameter: string; unit: string; normal_low?: number; normal_high?: number; critical_low?: number; critical_high?: number; normal_text?: string; previous?: string }
-interface Form { item: { name: string; status: string }; order: { name: string; patient: string; patient_name: string; gender: string; age?: number; priority: string };
+interface Hist { date: string; result: string; order: string; values: Record<string, [string, string | null]> }
+interface Form { history?: Hist[]; item: { name: string; status: string }; order: { name: string; patient: string; patient_name: string; gender: string; age?: number; priority: string };
   template: { name: string; test_code: string; department: string; result_type: string; text_template?: string; outsourced: number; method?: string };
   parameters: Param[]; previous_date: string; result: null | { name: string; values: { parameter: string; value: string; flag?: string }[]; text_result?: string; attachment?: string; has_critical: number; critical_logged: number; send_back_reason?: string; docstatus: number };
   critical_logs: { parameter: string; notified_person: string; method: string; notified_at: string }[]; saved?: string; has_critical?: number }
@@ -104,6 +105,13 @@ export function ResultDialog({ item, onClose }: { item: string; onClose: () => v
               <td className="ps-2 text-xs text-muted-foreground">{p.unit}</td>
               <td className="text-xs text-muted-foreground">{p.normal_text || (p.normal_high ? `${p.normal_low ?? 0} – ${p.normal_high}` : "")}{f && <b className={cn("ms-2", FLAG_TONE[f])}>{f}{flagArrow(f)}</b>}</td>
               <td className="text-xs text-muted-foreground">{p.previous ?? "–"}</td></tr>); })}</tbody></table></div>)}
+      {(data.history?.length ?? 0) > 0 && <details className="mt-3 rounded-2xl border border-border" open={(data.history?.length ?? 0) > 1}>
+        <summary className="cursor-pointer px-3 py-2 text-sm font-bold"><History className="me-1 inline h-4 w-4" />Previous results of this test · {data.history!.length}</summary>
+        <div className="overflow-x-auto"><table className="w-full text-xs"><thead className="bg-muted/50 text-[10px] uppercase text-muted-foreground"><tr><th className="px-3 py-1.5 text-start">Parameter</th>
+          {data.history!.map((h) => <th key={h.result} className="px-2 text-end">{h.date.slice(8, 10)}-{h.date.slice(5, 7)}-{h.date.slice(0, 4)}<div className="font-mono normal-case">{h.order}</div></th>)}</tr></thead>
+          <tbody>{data.parameters.map((p) => <tr key={p.parameter} className="border-t border-border/60"><td className="px-3 py-1">{p.parameter}</td>
+            {data.history!.map((h) => { const v = h.values[p.parameter]; return <td key={h.result} className={cn("px-2 text-end tabular-nums", v?.[1] && FLAG_TONE[v[1]])}>{v ? v[0] : "—"}{v?.[1] ? flagArrow(v[1]) : ""}</td>; })}</tr>)}</tbody></table></div>
+      </details>}
       {textual && <Field label="Report text" className="mt-3"><textarea disabled={locked} className={inputCls + " h-40 py-2 font-mono text-xs"} value={text} onChange={(e) => setText(e.target.value)} /></Field>}
       <div className={cn("mt-3 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-dashed p-3", file ? "border-emerald-400 bg-emerald-50/60 dark:bg-emerald-500/10" : "border-border")}>
         <FileUp className="h-5 w-5 text-violet-600" />

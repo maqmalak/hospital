@@ -133,6 +133,17 @@
   "lab_open_time",
   "lab_close_time",
   "label_size",
+  "lab_print_sb",
+  "lab_report_department",
+  "lab_accreditation",
+  "lab_signatory_name",
+  "lab_signatory_title",
+  "lab_signatory_reg",
+  "lbp1",
+  "lab_signature",
+  "lab_stamp",
+  "lab_report_footer",
+  "lab_show_previous",
   "pharmacy_tab",
   "near_expiry_days",
   "block_near_expiry",
@@ -996,6 +1007,66 @@
    "label": "Label Size"
   },
   {
+   "fieldname": "lab_print_sb",
+   "fieldtype": "Section Break",
+   "label": "Lab report print"
+  },
+  {
+   "default": "Department of Pathology & Laboratory Medicine",
+   "fieldname": "lab_report_department",
+   "fieldtype": "Data",
+   "label": "Report Sub-heading"
+  },
+  {
+   "description": "e.g. PHC Licence No. … (printed under the header)",
+   "fieldname": "lab_accreditation",
+   "fieldtype": "Data",
+   "label": "Accreditation / licence line"
+  },
+  {
+   "fieldname": "lab_signatory_name",
+   "fieldtype": "Data",
+   "label": "Signatory (if the verifier has no doctor record)"
+  },
+  {
+   "default": "Consultant Pathologist",
+   "fieldname": "lab_signatory_title",
+   "fieldtype": "Data",
+   "label": "Lab Signatory Title"
+  },
+  {
+   "fieldname": "lab_signatory_reg",
+   "fieldtype": "Data",
+   "label": "Signatory PMDC No."
+  },
+  {
+   "fieldname": "lbp1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lab_signature",
+   "fieldtype": "Attach Image",
+   "label": "Signature Image"
+  },
+  {
+   "description": "Empty = a round VERIFIED stamp is drawn",
+   "fieldname": "lab_stamp",
+   "fieldtype": "Attach Image",
+   "label": "Stamp Image"
+  },
+  {
+   "default": "Results relate only to the sample tested. Please correlate clinically. This report is electronically verified; scan the QR code to confirm it.",
+   "fieldname": "lab_report_footer",
+   "fieldtype": "Small Text",
+   "label": "Report Footer Note"
+  },
+  {
+   "default": "1",
+   "fieldname": "lab_show_previous",
+   "fieldtype": "Check",
+   "label": "Print Previous Result Column"
+  },
+  {
    "fieldname": "pharmacy_tab",
    "fieldtype": "Tab Break",
    "label": "Pharmacy"
@@ -1709,7 +1780,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 16:50:04.890486",
+ "modified": "2026-11-10 17:27:11.452292",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

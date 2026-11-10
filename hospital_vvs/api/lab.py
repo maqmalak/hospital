@@ -189,7 +189,8 @@ def result_form(invoice_item):
 		"parameters": [{"parameter": p, "unit": r.unit if r else "", "normal_low": r.normal_low if r else None, "normal_high": r.normal_high if r else None,
 			"critical_low": r.critical_low if r else None, "critical_high": r.critical_high if r else None, "normal_text": r.normal_text if r else None,
 			"previous": prev.get(p)} for p, r in rngs.items()], "previous_date": str(prev_date or ""), "result": existing,
-		"critical_logs": frappe.get_all("Critical Value Log", filters={"lab_result": row.result}, fields=["parameter", "notified_person", "method", "notified_at"]) if row.result else []}
+		"critical_logs": frappe.get_all("Critical Value Log", filters={"lab_result": row.result}, fields=["parameter", "notified_person", "method", "notified_at"]) if row.result else [],
+		"history": lab.history(ti.patient, row.template, exclude=row.result, limit=5)}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -395,6 +396,20 @@ def print_pdf(name):
 	frappe.local.response.filename = f"{ti.name}.pdf"
 	frappe.local.response.filecontent = lab.report_pdf(ti.name)
 	frappe.local.response.type = "pdf"
+
+
+@frappe.whitelist(methods=["POST"])
+def set_remarks(name, remarks=None):
+	"""Pathologist's remarks printed on the report."""
+	require_roles(R.PATHOLOGIST, R.LAB_USER)
+	return {"remarks": lab.set_remarks(name, remarks).report_remarks}
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=600)
+def verify_report(name, sig):
+	"""Public QR check: is this report genuine (no results shown)."""
+	return lab.public_check(name, sig)
 
 
 @frappe.whitelist(methods=["POST"])

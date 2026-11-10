@@ -1,6 +1,7 @@
 """Laboratory (03-lab.md): orders, samples, results, critical values, verification, release, report links, outsourcing."""
 
 import hashlib
+import io
 import hmac
 import json
 import secrets
@@ -238,6 +239,20 @@ def previous_values(patient, template, exclude=None):
 		return {}, None
 	d = frappe.get_doc("Lab Result", name)
 	return {v.parameter: v.value for v in d.get("values")}, getdate(d.verified_at) if d.verified_at else None
+
+
+def history(patient, template, before=None, exclude=None, limit=5):
+	"""Earlier verified results of the same test for this patient, newest first: [{date, result, values{param: (value, flag)}}]."""
+	f = {"patient": patient, "template": template, "docstatus": 1, "status": "Verified"}
+	if exclude:
+		f["name"] = ["!=", exclude]
+	if before:
+		f["verified_at"] = ["<", before]
+	out = []
+	for n in frappe.get_all("Lab Result", filters=f, fields=["name", "verified_at", "test_invoice"], order_by="verified_at desc", limit=limit):
+		vals = {v.parameter: (v.value, v.flag) for v in frappe.get_all("Lab Result Value", filters={"parent": n.name}, fields=["parameter", "value", "flag"]) if str(v.value or "").strip()}
+		out.append({"date": str(n.verified_at or "")[:10], "result": n.name, "order": n.test_invoice, "values": vals})
+	return out
 
 
 def result_for(invoice_item):
@@ -491,6 +506,7 @@ def report_data(ti_name, include_all=False):
 		tests.append({"test_name": res.test_name if res else r.template, "status": r.status, "pending": False, "department": res.department if res else "",
 			"values": [v.as_dict() for v in res.get("values")] if res else [], "text_result": res.text_result if res else "", "attachment": res.attachment if res else None,
 			"attachment_kind": _kind(res.attachment) if res and res.attachment else None,
+			"previous": (history(ti.patient, r.template, before=res.verified_at or res.creation, exclude=res.name, limit=1) or [None])[0] if res else None,
 			"interpretation": res.interpretation if res else "", "verified_by": frappe.db.get_value("User", res.verified_by, "full_name") if res and res.verified_by else "",
 			"verified_at": str(res.verified_at or "") if res else "", "version": res.version_no if res else 1, "amended": bool(res and res.amended_from)})
 	branch = frappe.db.get_value("Branch", ti.branch, ["hv_address", "hv_phone"], as_dict=True) or {}
@@ -498,7 +514,7 @@ def report_data(ti_name, include_all=False):
 		"patient": {"mr": ti.patient, "name": pat.patient_name, "name_ur": pat.patient_name_ur, "gender": pat.gender, "age": age_of(pat.dob)},
 		"referring_doctor": frappe.db.get_value("Doctor", ti.referring_doctor, "doctor_name") if ti.referring_doctor else ti.external_referrer,
 		"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "address": branch.get("hv_address") or s.address, "phone": branch.get("hv_phone") or s.phone},
-		"tests": tests}
+		"tests": tests, "priority": ti.priority or "Normal", "remarks": ti.get("report_remarks"), **print_extras(ti, tests)}
 
 
 def _kind(url):
@@ -527,37 +543,197 @@ def _img_tag(url):
 	return f"<div style='margin-top:6px'><img src='data:{mime};base64,{base64.b64encode(data).decode()}' style='max-width:100%;max-height:900px;border:1px solid #e2e8f0'></div>"
 
 
+def verify_sig(name):
+	"""Short signature for the public report check (QR): HMAC of the order with the site's secret."""
+	import hmac as _h
+
+	key = (frappe.local.conf.get("encryption_key") or frappe.local.site).encode()
+	return _h.new(key, f"lab-report:{name}".encode(), hashlib.sha256).hexdigest()[:20]
+
+
+def verify_url(name):
+	from frappe.utils import get_url
+
+	return get_url(f"/hms/verify-report/{name}/{verify_sig(name)}")
+
+
+def qr_data_uri(text):
+	import base64
+
+	import pyqrcode
+
+	buf = io.BytesIO()
+	pyqrcode.create(text, error="M").svg(buf, scale=4, quiet_zone=1, module_color="#0f172a")
+	return "data:image/svg+xml;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def _image_uri(url):
+	import base64
+	import mimetypes
+
+	if not url:
+		return None
+	try:
+		data, fname = attachment_bytes(url)
+	except Exception:
+		return None
+	return f"data:{mimetypes.guess_type(fname)[0] or 'image/png'};base64,{base64.b64encode(data).decode()}"
+
+
+def _svg_uri(svg):
+	import base64
+
+	return "data:image/svg+xml;base64," + base64.b64encode(svg.encode()).decode()
+
+
+def _monogram(name):
+	letters = "".join(w[0] for w in (name or "Lab").split()[:2]).upper()
+	return _svg_uri(f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f766e"/><stop offset="1" stop-color="#0369a1"/></linearGradient></defs>
+		<rect width="64" height="64" rx="16" fill="url(#g)"/><path d="M28 14h8v12h12v8H36v12h-8V34H16v-8h12z" fill="#fff" opacity=".22"/>
+		<text x="32" y="41" font-family="Helvetica,Arial" font-size="22" font-weight="700" text-anchor="middle" fill="#fff">{frappe.utils.escape_html(letters)}</text></svg>""")
+
+
+def _stamp(clinic, date):
+	c = frappe.utils.escape_html((clinic or "").upper())[:22]
+	return _svg_uri(f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"><g transform="rotate(-12 80 80)" font-family="Helvetica,Arial" fill="#1d4ed8" text-anchor="middle">
+		<circle cx="80" cy="80" r="74" fill="none" stroke="#1d4ed8" stroke-width="4" opacity=".8"/><circle cx="80" cy="80" r="64" fill="none" stroke="#1d4ed8" stroke-width="1.5" opacity=".8"/>
+		<text x="80" y="52" font-size="13" font-weight="700" opacity=".85">{c}</text>
+		<rect x="18" y="64" width="124" height="30" rx="4" fill="none" stroke="#1d4ed8" stroke-width="2.5" opacity=".85"/>
+		<text x="80" y="86" font-size="20" font-weight="800" letter-spacing="3" opacity=".9">VERIFIED</text>
+		<text x="80" y="112" font-size="11" font-weight="700" opacity=".85">LABORATORY</text><text x="80" y="126" font-size="11" font-weight="700" opacity=".85">{frappe.utils.escape_html(date)}</text></g></svg>""")
+
+
+def print_extras(ti, tests):
+	"""Header / footer / signatory data for the printed report (D-50)."""
+	s = frappe.get_cached_doc("Clinic Settings")
+	samples = frappe.get_all("Lab Sample", filters={"test_invoice": ti.name, "status": ["!=", "Rejected"]}, fields=["collected_at", "received_at"])
+	col = min((x.collected_at for x in samples if x.collected_at), default=None)
+	rec = max((x.received_at for x in samples if x.received_at), default=None)
+	verifiers = [frappe.db.get_value("Lab Result", r.result, "verified_by") for r in ti.items if r.result and r.status in ("Verified", "Released")]
+	vuser = next((v for v in reversed(verifiers) if v and v != "Administrator"), None)
+	doc = frappe.db.get_value("Doctor", {"user": vuser}, ["doctor_name", "qualification", "registration_no", "signature"], as_dict=True) if vuser else None
+	name = (doc.doctor_name if doc else None) or s.get("lab_signatory_name") or (frappe.db.get_value("User", vuser, "full_name") if vuser else None) or "Pathologist"
+	released = getdate(ti.released_at) if ti.released_at else getdate()
+	return {"collected_at": str(col or "")[:16], "received_at": str(rec or "")[:16], "verify_url": verify_url(ti.name),
+		"print": {"department": s.get("lab_report_department") or "Department of Pathology & Laboratory Medicine", "accreditation": s.get("lab_accreditation"),
+			"footer": s.get("lab_report_footer"), "show_previous": cint(s.get("lab_show_previous") if s.get("lab_show_previous") is not None else 1),
+			"logo": _image_uri(s.get("logo")) or _monogram(s.clinic_name), "signatory": name,
+			"title": (doc.qualification if doc and doc.qualification else None) or s.get("lab_signatory_title") or "Consultant Pathologist",
+			"reg": (doc.registration_no if doc else None) or s.get("lab_signatory_reg"),
+			"signature": _image_uri(doc.signature if doc and doc.signature else s.get("lab_signature")),
+			"stamp": _image_uri(s.get("lab_stamp")) or _stamp(s.clinic_name, released.strftime("%d-%m-%Y"))}}
+
+
+def _dmy(d):
+	return f"{d[8:10]}-{d[5:7]}-{d[:4]}" if d and len(d) >= 10 else (d or "")
+
+
+def _prev_cell(pv, FLAG):
+	if not pv:
+		return "<td class='u'>—</td>"
+	val, fl = pv
+	c = FLAG.get(fl or "", ("#475569", "", ""))[0]
+	return f"<td class='u' style='color:{c}'>{frappe.utils.escape_html(str(val))}{(' ' + FLAG[fl][2]) if fl in FLAG else ''}</td>"
+
+
 def report_html(d):
 	esc = frappe.utils.escape_html
-	flag_color = {"Low": "#b45309", "High": "#b45309", "Critical Low": "#b91c1c", "Critical High": "#b91c1c", "Abnormal": "#b45309"}
-	parts = []
+	P = d.get("print") or {}
+	FLAG = {"Low": ("#b45309", "#fef3c7", "L"), "High": ("#b45309", "#fef3c7", "H"), "Critical Low": ("#b91c1c", "#fee2e2", "LL"),
+		"Critical High": ("#b91c1c", "#fee2e2", "HH"), "Abnormal": ("#b45309", "#fef3c7", "A")}
+	show_prev = P.get("show_previous", 1)
+	groups = {}
 	for t in d["tests"]:
-		if t.get("pending"):
-			parts.append(f"<div class='t'><h3>{esc(t['test_name'])}</h3><p class='muted'>Result pending ({esc(t['status'])})</p></div>")
-			continue
-		rows = "".join(
-			f"<tr><td>{esc(v['parameter'])}</td><td style='font-weight:700;color:{flag_color.get(v.get('flag') or '', '#0f172a')}'>{esc(v.get('value') or '')}"
-			f"{' ▲' if 'High' in (v.get('flag') or '') else ' ▼' if 'Low' in (v.get('flag') or '') else ''}</td><td>{esc(v.get('unit') or '')}</td>"
-			f"<td class='muted'>{esc(v.get('normal_range') or '')}</td><td class='muted'>{esc(v.get('previous_value') or '')}</td></tr>" for v in t["values"] if str(v.get("value") or "").strip())
-		table = f"<table><tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference range</th><th>Previous</th></tr>{rows}</table>" if rows else ""
-		parts.append(f"<div class='t'><h3>{esc(t['test_name'])} <span class='muted'>{esc(t.get('department') or '')}</span>"
-			f"{' · <b style=\"color:#b91c1c\">AMENDED v' + str(t['version']) + '</b>' if t.get('amended') else ''}</h3>{table}"
-			f"{('<div class=\"txt\">' + esc(t.get('text_result') or '').replace(chr(10), '<br>') + '</div>') if t.get('text_result') else ''}"
-			f"{_img_tag(t['attachment']) if t.get('attachment_kind') == 'image' else ''}"
-			f"{('<p class=\'muted\'>Report document attached on the following page(s).</p>') if t.get('attachment_kind') == 'pdf' else ''}"
-			f"{('<p><b>Interpretation:</b> ' + esc(t['interpretation']) + '</p>') if t.get('interpretation') else ''}"
-			f"<p class='muted'>Verified by {esc(t.get('verified_by') or '')} · {esc(t.get('verified_at')[:16])}</p></div>")
+		groups.setdefault(t.get("department") or "Results", []).append(t)
+	parts = []
+	for dept, tests in groups.items():
+		parts.append(f"<div class='dept'>{esc(dept)}</div>")
+		for t in tests:
+			if t.get("pending"):
+				parts.append(f"<div class='t'><div class='tn'>{esc(t['test_name'])}</div><div class='pend'>Result pending — {esc(t['status'])}</div></div>")
+				continue
+			prev = t.get("previous") or {}
+			pvals = prev.get("values") or {}
+			has_prev = show_prev and bool(pvals)
+			rows = []
+			for v in t["values"]:
+				val = str(v.get("value") or "").strip()
+				if not val:
+					continue
+				c, bg, tag = FLAG.get(v.get("flag") or "", ("#0f172a", "", ""))
+				pill = f"<span class='flag' style='color:{c};background:{bg}'>{tag}</span>" if tag else ""
+				rows.append(f"<tr><td>{esc(v['parameter'])}</td><td class='res' style='color:{c}'>{esc(val)} {pill}</td><td class='u'>{esc(v.get('unit') or '')}</td>"
+					f"<td class='u'>{esc(v.get('normal_range') or '')}</td>" + (_prev_cell(pvals.get(v['parameter']), FLAG) if has_prev else "") + "</tr>")
+			head = ("<tr><th>Investigation</th><th>Result</th><th>Unit</th><th>Reference interval</th>"
+				+ (f"<th>Previous<br><span style='text-transform:none;font-weight:400'>{esc(_dmy(prev.get('date')))}</span></th>" if has_prev else "") + "</tr>")
+			table = f"<table class='rt'>{head}{''.join(rows)}</table>" if rows else ""
+			amend = f"<span class='amd'>AMENDED · v{t['version']}</span>" if t.get("amended") else ""
+			txt = f"<div class='txt'>{esc(t.get('text_result') or '').replace(chr(10), '<br>')}</div>" if t.get("text_result") else ""
+			img = _img_tag(t["attachment"]) if t.get("attachment_kind") == "image" else ""
+			pdfnote = "<div class='note'>The reference / handwritten report is attached on the following page(s).</div>" if t.get("attachment_kind") == "pdf" else ""
+			interp = f"<div class='interp'><b>Interpretation</b> {esc(t['interpretation'])}</div>" if t.get("interpretation") else ""
+			parts.append(f"<div class='t'><div class='tn'>{esc(t['test_name'])} {amend}</div>{table}{txt}{img}{pdfnote}{interp}"
+				f"<div class='vb'>Verified by {esc(t.get('verified_by') or '')} · {esc((t.get('verified_at') or '')[:16])}</div></div>")
 	p, c = d["patient"], d["clinic"]
+	pr = d.get("priority") or "Normal"
+	pr_tag = f"<span class='pr pr-{esc(pr.lower())}'>{esc(pr)}</span>" if pr != "Normal" else ""
+	remarks = f"<div class='remarks'><b>Remarks</b><br>{esc(d['remarks']).replace(chr(10), '<br>')}</div>" if d.get("remarks") else ""
+	qr = qr_data_uri(d.get("verify_url") or d["name"])
+	sig = f"<img class='sig' src='{P['signature']}'>" if P.get("signature") else "<div class='sigline'></div>"
+	stamp = f"<img class='stamp' src='{P['stamp']}'>" if P.get("stamp") else ""
+	info = [("Patient", f"<b>{esc(p['name'])}</b>"), ("MR No.", esc(p["mr"])),
+		("Age / Sex", f"{p.get('age') if p.get('age') is not None else '-'} y / {esc(p.get('gender') or '-')}"), ("Referred by", esc(d.get("referring_doctor") or "Self")),
+		("Order no.", f"{esc(d['name'])} {pr_tag}"), ("Registered", esc(d["posting_date"])), ("Collected", esc(d.get("collected_at") or "-")),
+		("Received", esc(d.get("received_at") or "-")), ("Reported", esc((d.get("released_at") or "")[:16] or "-"))]
+	grid = "".join(f"<div class='cell'><span>{k}</span>{v}</div>" for k, v in info)
 	return f"""<!doctype html><html><head><meta charset="utf-8"><style>
-	body{{font-family:Helvetica,Arial,sans-serif;font-size:11px;color:#0f172a;margin:24px}} .head{{display:flex;justify-content:space-between;border-bottom:3px solid #0f766e;padding-bottom:8px}}
-	.cl{{font-size:20px;font-weight:800;color:#0f766e}} .muted{{color:#64748b}} .pt{{background:#f0fdfa;padding:8px;margin:10px 0;border-radius:6px}}
-	table{{width:100%;border-collapse:collapse;margin-top:4px}} th,td{{text-align:left;padding:4px 6px;border-bottom:1px solid #e2e8f0}} th{{font-size:9px;text-transform:uppercase;color:#64748b}}
-	.t{{margin:12px 0;page-break-inside:avoid}} h3{{margin:0 0 4px;font-size:13px;color:#0f766e}} .foot{{margin-top:24px;font-size:9px;color:#64748b;border-top:1px solid #cbd5e1;padding-top:6px}}
-	</style></head><body><div class="head"><div><div class="cl">{esc(c['name'])}</div><div class="muted">{esc(c.get('address') or '')} · {esc(c.get('phone') or '')}</div></div>
-	<div style="text-align:right"><b>LABORATORY REPORT</b><div class="muted">{esc(d['name'])} · v{d.get('version') or 1}</div></div></div>
-	<div class="pt"><b>{esc(p['name'])}</b> · MR {esc(p['mr'])} · {esc(p.get('gender') or '')} · {p.get('age') or '-'} y · Ref: {esc(d.get('referring_doctor') or 'Self')}
-	· Ordered {esc(d['posting_date'])} · Released {esc(d.get('released_at', '')[:16])}</div>{''.join(parts)}
-	<div class="foot">Results relate only to the sample tested. This report was released electronically and is valid without a signature.</div></body></html>"""
+	@page {{ size: A4; margin: 12mm 12mm 16mm 12mm; }}
+	* {{ box-sizing: border-box; }}
+	body {{ font-family: Helvetica, Arial, sans-serif; font-size: 10.5px; color: #0f172a; margin: 0; }}
+	.hdr {{ display: table; width: 100%; border-bottom: 3px solid #0f766e; padding-bottom: 8px; }}
+	.hdr > div {{ display: table-cell; vertical-align: middle; }}
+	.logo {{ width: 62px; }} .logo img {{ width: 56px; height: 56px; border-radius: 12px; }}
+	.cl {{ font-size: 21px; font-weight: 800; color: #0f766e; letter-spacing: .2px; }} .cl .ur {{ font-size: 16px; color: #0369a1; margin-left: 8px; font-weight: 600; }}
+	.sub {{ font-size: 10px; color: #475569; margin-top: 1px; }} .dep {{ font-size: 11px; font-weight: 700; color: #0369a1; margin-top: 3px; text-transform: uppercase; letter-spacing: 1px; }}
+	.acc {{ font-size: 9px; color: #64748b; }}
+	.qr {{ width: 108px; text-align: center; }} .qr img {{ width: 84px; height: 84px; }} .qr div {{ font-size: 8px; color: #64748b; }}
+	.title {{ margin: 8px 0 6px; text-align: center; }} .title span {{ display: inline-block; white-space: nowrap; background: #0f766e; color: #fff; font-weight: 800; letter-spacing: 2px; padding: 4px 22px; border-radius: 20px; font-size: 11px; }}
+	.pt {{ border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; padding: 6px 8px; }}
+	.cell {{ display: inline-block; width: 32.5%; padding: 3px 4px; vertical-align: top; }} .cell span {{ display: block; font-size: 8px; text-transform: uppercase; color: #64748b; letter-spacing: .6px; }}
+	.ur {{ font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif; direction: rtl; }}
+	.pr {{ font-size: 8px; font-weight: 800; padding: 1px 6px; border-radius: 10px; color: #fff; }} .pr-urgent {{ background: #dc2626; }} .pr-priority {{ background: #f59e0b; }}
+	.dept {{ margin: 12px 0 4px; font-size: 11px; font-weight: 800; color: #fff; background: #0f766e; border-left: 6px solid #0369a1; padding: 4px 8px; border-radius: 6px; letter-spacing: 1px; text-transform: uppercase; }}
+	.t {{ margin: 6px 0 10px; page-break-inside: avoid; }} .tn {{ font-size: 12.5px; font-weight: 800; color: #0f766e; margin-bottom: 3px; }}
+	.rt {{ width: 100%; border-collapse: collapse; }} .rt th {{ text-align: left; font-size: 8.5px; text-transform: uppercase; color: #475569; border-bottom: 1.5px solid #0f766e; padding: 4px 6px; letter-spacing: .5px; }}
+	.rt td {{ padding: 4px 6px; border-bottom: 1px solid #e2e8f0; }} .rt tr:nth-child(even) td {{ background: #f8fafc; }}
+	.res {{ font-weight: 800; }} .u {{ color: #475569; }} .flag {{ font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 4px; margin-left: 4px; }}
+	.txt {{ padding: 6px 8px; background: #f8fafc; border-left: 3px solid #0f766e; margin-top: 4px; line-height: 1.5; }}
+	.interp {{ margin-top: 5px; padding: 5px 8px; background: #ecfeff; border: 1px solid #a5f3fc; border-radius: 6px; }} .interp b {{ color: #0e7490; margin-right: 6px; }}
+	.note, .pend {{ color: #64748b; font-style: italic; margin-top: 3px; }} .vb {{ font-size: 8.5px; color: #64748b; margin-top: 3px; text-align: right; }}
+	.amd {{ font-size: 8px; color: #fff; background: #dc2626; padding: 1px 6px; border-radius: 8px; margin-left: 6px; vertical-align: middle; }}
+	.remarks {{ margin: 10px 0; padding: 7px 9px; border: 1px dashed #0369a1; border-radius: 8px; background: #f0f9ff; line-height: 1.5; }}
+	.sign {{ display: table; width: 100%; margin-top: 18px; page-break-inside: avoid; }} .sign > div {{ display: table-cell; vertical-align: bottom; }}
+	.sigbox {{ text-align: center; width: 260px; position: relative; }} .sig {{ max-height: 48px; max-width: 170px; }} .sigline {{ height: 40px; }}
+	.stampc {{ width: 130px; text-align: center; }} .stamp {{ width: 112px; height: 112px; }}
+	.sigbox .nm {{ border-top: 1px solid #0f172a; padding-top: 3px; font-weight: 800; font-size: 11px; }} .sigbox .tt {{ font-size: 9px; color: #475569; }}
+	.legend {{ font-size: 8.5px; color: #64748b; }}
+	.foot {{ margin-top: 14px; border-top: 2px solid #0f766e; padding-top: 5px; font-size: 8.5px; color: #475569; display: table; width: 100%; }} .foot > div {{ display: table-cell; vertical-align: top; }}
+	.end {{ text-align: center; font-size: 9px; color: #94a3b8; letter-spacing: 3px; margin-top: 8px; }}
+	</style></head><body>
+	<div class="hdr"><div class="logo"><img src="{P.get('logo') or ''}"></div>
+		<div><div class="cl">{esc(c['name'])}</div>
+		<div class="sub">{esc(c.get('address') or '')}{(' · ' + esc(c['phone'])) if c.get('phone') else ''}</div>
+		<div class="dep">{esc(P.get('department') or '')}</div>{('<div class="acc">' + esc(P['accreditation']) + '</div>') if P.get('accreditation') else ''}</div>
+		<div class="qr"><img src="{qr}"><div>Scan to verify<br>{esc(d['name'])} · v{d.get('version') or 1}</div></div></div>
+	<div class="title"><span>LABORATORY REPORT</span></div>
+	<div class="pt">{grid}</div>
+	{''.join(parts)}
+	{remarks}
+	<div class="sign"><div class="legend">Flags: <b style="color:#b45309">H</b> high · <b style="color:#b45309">L</b> low · <b style="color:#b91c1c">HH / LL</b> critical · <b style="color:#b45309">A</b> abnormal</div>
+		<div class="stampc">{stamp}</div><div class="sigbox">{sig}<div class="nm">{esc(P.get('signatory') or '')}</div><div class="tt">{esc(P.get('title') or '')}{(' · PMDC ' + esc(P['reg'])) if P.get('reg') else ''}</div></div></div>
+	<div class="foot"><div>{esc(P.get('footer') or '')}</div><div style="text-align:right;width:180px">Printed {frappe.utils.now_datetime().strftime('%d-%m-%Y %H:%M')}<br>{esc(c['name'])}</div></div>
+	<div class="end">— END OF REPORT —</div>
+	</body></html>"""
 
 
 def report_pdf(ti_name):
@@ -567,7 +743,8 @@ def report_pdf(ti_name):
 	from frappe.utils.pdf import get_pdf
 
 	d = report_data(ti_name)
-	main = get_pdf(report_html(d))
+	main = get_pdf(report_html(d), {"margin-top": "10mm", "margin-bottom": "14mm", "margin-left": "10mm", "margin-right": "10mm",
+		"footer-center": f"{d['name']} · Page [page] of [topage]", "footer-font-size": "7", "footer-spacing": "4"})
 	extra = [t["attachment"] for t in d["tests"] if t.get("attachment_kind") == "pdf"]
 	if not extra:
 		return main
@@ -580,6 +757,29 @@ def report_pdf(ti_name):
 	out = io.BytesIO()
 	w.write(out)
 	return out.getvalue()
+
+
+def public_check(name, sig):
+	"""What the QR verification page shows: proves the report is genuine without showing results."""
+	import hmac as _h
+
+	if not name or not sig or not _h.compare_digest(str(sig), verify_sig(name)) or not frappe.db.exists("Test Invoice", name):
+		return {"valid": False}
+	ti = frappe.get_doc("Test Invoice", name)
+	pat = frappe.db.get_value("Patient", ti.patient, ["patient_name", "gender", "dob"], as_dict=True) or {}
+	initials = " ".join((w[0] + "." for w in (pat.get("patient_name") or "").split()[:3]))
+	s = frappe.get_cached_doc("Clinic Settings")
+	tests = [{"test": frappe.db.get_value("Lab Test Template", r.template, "test_name"), "status": r.status,
+		"verified_at": str(frappe.db.get_value("Lab Result", r.result, "verified_at") or "")[:16] if r.result else ""} for r in ti.items if r.status != "Cancelled"]
+	return {"valid": ti.status in ("Released", "Partially Released"), "status": ti.status, "report": ti.name, "version": ti.report_version,
+		"patient": initials, "mr": (ti.patient[:-4] + "••••") if ti.patient and len(ti.patient) > 4 else ti.patient, "gender": pat.get("gender"),
+		"registered": str(ti.posting_date), "released_at": str(ti.released_at or "")[:16], "tests": tests, "clinic": s.clinic_name, "phone": s.phone}
+
+
+def set_remarks(name, remarks):
+	ti = frappe.get_doc("Test Invoice", name)
+	ti.db_set("report_remarks", (remarks or "").strip()[:2000] or None)
+	return ti
 
 
 def on_refund(doc, method=None):

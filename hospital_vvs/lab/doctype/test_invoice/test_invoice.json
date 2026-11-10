@@ -40,6 +40,7 @@
   "ti7",
   "whatsapp_opt_in",
   "whatsapp_number",
+  "report_remarks",
   "handed_over_to",
   "handed_over_at",
   "handed_over_by",
@@ -273,6 +274,12 @@
    "label": "Whatsapp Number"
   },
   {
+   "description": "Pathologist's note printed on the report",
+   "fieldname": "report_remarks",
+   "fieldtype": "Small Text",
+   "label": "Report remarks"
+  },
+  {
    "fieldname": "handed_over_to",
    "fieldtype": "Data",
    "label": "Printed report handed to",
@@ -347,7 +354,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-10 17:21:48.456917",
+ "modified": "2026-11-10 17:27:11.457293",
  "modified_by": "Administrator",
  "module": "Lab",
  "name": "Test Invoice",

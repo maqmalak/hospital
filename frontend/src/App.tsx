@@ -80,6 +80,7 @@ const PanelsPage = fin("PanelsPage");
 const ClaimsPage = fin("ClaimsPage");
 const ExpensesPage = fin("ExpensesPage");
 const FinanceOverviewPage = fin("FinanceOverviewPage");
+const VerifyReportPage = lazy(() => import("@/modules/public/VerifyReportPage"));
 const CheckoutPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.CheckoutPage })));
 const OnlinePaymentsPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.OnlinePaymentsPage })));
 const FbrPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.FbrPage })));
@@ -125,6 +126,7 @@ export default function App() {
         <Route path="/patient/:token" element={<PatientRoomPage />} />
         <Route path="/feedback/:token" element={<FeedbackFormPage />} />
         <Route path="/pay/:token" element={<CheckoutPage />} />
+        <Route path="/verify-report/:name/:sig" element={<VerifyReportPage />} />
         <Route path="/online-visit" element={<OnlineVisitPage />} />
         <Route path="/online-visit/:token" element={<OnlineVisitStatusPage />} />
         <Route path="/display/counter/:key" element={<DevicePage />} />
