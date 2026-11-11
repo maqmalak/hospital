@@ -2341,4 +2341,5 @@ export const urScreens: Record<string, string> = {
   "Card / online (auto-filled)": "کارڈ / آن لائن (خودکار)",
   "Filled from the system. Change only if the terminal / JazzCash slip differs.": "سسٹم سے بھرا گیا۔ صرف تب بدلیں جب ٹرمینل / جاز کیش کی رسید مختلف ہو۔",
   "Reset": "دوبارہ سیٹ کریں",
+  "View only — the pathologist verifies and signs these results.": "صرف دیکھنے کے لیے — یہ نتائج پیتھالوجسٹ تصدیق کر کے دستخط کرتا ہے۔",
 };

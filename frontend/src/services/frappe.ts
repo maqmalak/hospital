@@ -107,6 +107,16 @@ http.interceptors.response.use(
   },
 );
 
+let sessionCheck: Promise<boolean> | null = null;
+/** True when the server no longer knows this browser (signed out / expired). One check at a time. */
+function sessionGone(): Promise<boolean> {
+  sessionCheck ??= axios.get(`${baseURL}/api/method/frappe.auth.get_logged_user`, { withCredentials: true })
+    .then((r) => !r.data?.message || r.data.message === "Guest")
+    .catch((e) => axios.isAxiosError(e) && [401, 403].includes(e.response?.status ?? 0))
+    .finally(() => { setTimeout(() => { sessionCheck = null; }, 2000); });
+  return sessionCheck;
+}
+
 http.interceptors.response.use(
   (res) => res,
   (error) => {
@@ -114,8 +124,11 @@ http.interceptors.response.use(
       const status = error.response?.status;
       // Session expired / not authenticated (a recovered CSRF error never
       // reaches here — see the retry interceptor above).
-      if (status === 401 || status === 403) {
+      // 403 is also "signed in but not allowed" (Frappe PermissionError): only sign out when the session is really gone.
+      if (status === 401) {
         window.dispatchEvent(new CustomEvent("micromax:session-expired"));
+      } else if (status === 403) {
+        void sessionGone().then((gone) => { if (gone) window.dispatchEvent(new CustomEvent("micromax:session-expired")); });
       }
       // Reject with the original AxiosError (not a flattened Error) so
       // humanizeError can see the full response.data payload — Frappe's real,

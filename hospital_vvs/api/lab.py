@@ -243,7 +243,7 @@ def critical_log(result, notified_person, method, read_back=0, note=None, parame
 @frappe.whitelist()
 def verify_list(branch=None):
 	branch = scope_branch(branch, required=False)
-	require_roles(R.PATHOLOGIST)
+	require_roles(R.PATHOLOGIST, R.LAB_USER)  # lab staff see the queue; verify / send back stay pathologist-only (services.lab.verify)
 	rows = frappe.get_all("Lab Result", filters={"status": "Result Entered", "docstatus": 0, "branch": branch or default_branch()},
 		fields=["name", "test_invoice", "test_name", "department", "patient", "patient_name", "gender", "age", "has_critical", "critical_logged", "entered_by",
 			"entered_at", "version_no", "amendment_reason"], order_by="has_critical desc, entered_at")

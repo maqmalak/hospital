@@ -12,7 +12,8 @@ interface R { priority?: string; name: string; test_invoice: string; test_name: 
   values: { parameter: string; value: string; unit: string; normal_range: string; flag?: string; previous_value?: string }[] }
 
 export default function VerifyPage() {
-  const { branch } = useAuth();
+  const { branch, hasRole } = useAuth();
+  const canSign = hasRole("PW Pathologist");
   const { data: rows, refetch } = useApi<R[]>("lab.verify_list", { branch }, { refetchInterval: 30_000 });
   useLabLive(["lab.verify_list"]);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -21,6 +22,7 @@ export default function VerifyPage() {
   return (
     <div className="mx-auto max-w-6xl">
       <LabHero title="Pathologist verification" sub={`${rows?.length ?? 0} results waiting · critical first`} icon={Microscope} />
+      {!canSign && <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm dark:bg-amber-500/10">View only — the pathologist verifies and signs these results.</div>}
       <div className="space-y-4">
         {(rows ?? []).map((r) => { const abnormal = r.values.filter((v) => v.flag).length; return (
           <div key={r.name} className={cn("overflow-hidden rounded-3xl border bg-card shadow-sm", r.has_critical ? "border-rose-300" : "border-border")}>
@@ -38,11 +40,11 @@ export default function VerifyPage() {
                   <td className="text-xs text-muted-foreground">{v.unit}</td><td className="text-xs text-muted-foreground">{v.normal_range}</td><td className="text-xs text-muted-foreground">{v.previous_value ?? "–"}</td></tr>)}</tbody></table>}
               {r.text_result && <div className="whitespace-pre-wrap mt-2  rounded-xl bg-muted/40 p-3 text-sm ">{r.text_result}</div>}
               {r.attachment && <a href={r.attachment} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm text-primary"><Paperclip className="h-4 w-4" />Reference lab report</a>}
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              {canSign && <div className="mt-3 flex flex-wrap items-center gap-2">
                 <input className={inputCls + " min-w-60 flex-1"} placeholder="Interpretation / comment (optional) — or the reason when sending back" value={notes[r.name] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [r.name]: e.target.value }))} />
                 <Button variant="outline" disabled={!notes[r.name]?.trim()} onClick={() => back.mutate({ result: r.name, reason: notes[r.name] })}><Undo2 className="h-4 w-4" />Send back</Button>
                 <Button variant="submit" disabled={!!r.has_critical && !r.critical_logged} onClick={() => verify.mutate({ result: r.name, interpretation: notes[r.name] || undefined })}><CheckCheck className="h-4 w-4" />Verify & sign</Button>
-              </div>
+              </div>}
             </div>
           </div>); })}
       </div>

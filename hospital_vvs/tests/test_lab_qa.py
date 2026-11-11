@@ -34,6 +34,19 @@ class TestLabQA(IntegrationTestCase):
 		as_user("pathologist@vvs.demo")
 		self.assertNotIn(res.name, [r.name for r in api.verify_list()])
 
+	def test_lab_user_sees_verify_queue_but_cannot_sign(self):
+		ti = received_order(["TSH"])
+		res = lab.enter_results(ti.items[0].name, {"TSH": "2.1"})
+		as_user("lab@vvs.demo")
+		self.assertIn(res.name, [r.name for r in api.verify_list()])  # view only (page access granted to lab staff)
+		with self.assertRaises(frappe.PermissionError):
+			api.verify(res.name)
+		with self.assertRaises(frappe.PermissionError):
+			api.send_back(res.name, "recheck")
+		as_user("reception@vvs.demo")
+		with self.assertRaises(frappe.PermissionError):
+			api.verify_list()
+
 	def test_reject_refused_after_verification(self):
 		ti = received_order(["TSH"])
 		it = ti.items[0]
