@@ -303,7 +303,7 @@ def close_shift(counts, other_modes=None, explanation=None, user=None):
 	sc.set("denominations", [{"denomination": flt(d), "count": cint(n), "amount": flt(d) * cint(n)} for d, n in (counts or {}).items() if cint(n)])
 	sc.set("modes", [])
 	for m in summ["modes"]:
-		counted = cash_counted if m["mode_of_payment"] == CASH else flt(other_modes.get(m["mode_of_payment"], m["expected"] if not other_modes else 0))
+		counted = cash_counted if m["mode_of_payment"] == CASH else flt(other_modes.get(m["mode_of_payment"], m["expected"]))  # card / wallets default to the system figure
 		sc.append("modes", dict(m, counted=counted, difference=counted - m["expected"]))
 	sc.total_expected = sum(flt(r.expected) for r in sc.modes)
 	sc.total_counted = sum(flt(r.counted) for r in sc.modes)

@@ -313,7 +313,15 @@ class TestLab(IntegrationTestCase):
 		od = lab.dispatch([s], "Chughtai Reference Lab", "TCS")
 		self.assertTrue(od.purchase_invoice)
 		item = frappe.get_all("Test Invoice Item", filters={"parent": ti.name}, pluck="name")[0]
-		res = lab.receive_outsourced(item, values={"Vitamin D 25-OH": "18"}, attachment="/files/vitd.pdf")
+		import io
+
+		from pypdf import PdfWriter
+
+		w, buf = PdfWriter(), io.BytesIO()
+		w.add_blank_page(width=200, height=200)
+		w.write(buf)
+		pdf = frappe.get_doc({"doctype": "File", "file_name": "vitd.pdf", "content": buf.getvalue(), "is_private": 1}).insert(ignore_permissions=True)
+		res = lab.receive_outsourced(item, values={"Vitamin D 25-OH": "18"}, attachment=pdf.file_url)  # a real file: a missing one logs "Error Attaching File"
 		self.assertEqual(next(v.flag for v in res.get("values")), "Low")
 		as_user("pathologist@vvs.demo")
 		lab.verify(res.name)
@@ -366,7 +374,16 @@ class TestCash(IntegrationTestCase):
 		as_user("reception2@vvs.demo")
 		make_staff("Reception 2")
 		sh2 = shifts.open_shift("Reception 2", {"Cash": 1000})
-		sc2 = shifts.close_shift({"1000": 1, "10": 3})
+		fresh = [p for p in frappe.get_all("Patient", filters={"branch": "Lahore Main", "customer": ["is", "set"]}, pluck="name", limit=200)
+			if not billing.existing_invoice("Patient", p)][:2]  # invoices are idempotent per reference
+		for (mode, rate), px in zip((("Card", 2500), ("JazzCash", 1500)), fresh):
+			billing.create_invoice(customer=frappe.db.get_value("Patient", px, "customer"), patient=px, lines=[{"item_code": "PROC-ECG", "qty": 1, "rate": rate}], billing_type="General",
+				branch="Lahore Main", reference_doctype="Patient", reference_name=px, payment_mode=mode)
+		# card / JazzCash are auto-filled: a mode the cashier did not send counts as the system figure, not as zero
+		sc2 = shifts.close_shift({"1000": 1, "10": 3}, {"Card": 2500})
+		got = {m.mode_of_payment: (m.expected, m.counted) for m in sc2.modes}
+		self.assertEqual(got["JazzCash"], (1500, 1500))
+		self.assertEqual(got["Card"], (2500, 2500))
 		self.assertEqual(sc2.status, "Within Tolerance")
 		self.assertTrue(sc2.pos_closing_entry)
 		as_user("Administrator")

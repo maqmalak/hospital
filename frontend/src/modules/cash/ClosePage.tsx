@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, EyeOff, Lock, ShieldAlert, Wallet } from "lucide-react";
 import toast from "react-hot-toast";
@@ -6,7 +6,7 @@ import { call, humanizeError, useApi } from "@/lib/api";
 import { Empty, Field, inputCls, Section } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
-import { Hero } from "./ShiftPage";
+import { Hero, ModesCard } from "./ShiftPage";
 import { type ModeRow, type MyShift, rs } from "./shared";
 
 interface Closing { name: string; status: string; total_expected: number; total_counted: number; difference: number; modes: ModeRow[]; tolerance: number; decision_note?: string; pos_closing_entry?: string; journal_entry?: string }
@@ -18,6 +18,11 @@ export default function ClosePage() {
   const [explanation, setExplanation] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Closing | null>(null);
+  // card / JazzCash / Easypaisa / bank are recorded by the system: prefill them, the cashier only corrects against the slip
+  useEffect(() => {
+    const rows = (data?.shift?.modes ?? []).filter((m) => m.mode_of_payment !== "Cash");
+    if (rows.length) setOther((o) => ({ ...Object.fromEntries(rows.map((m) => [m.mode_of_payment, String(Math.round(m.expected))])), ...o }));
+  }, [data?.shift?.shift]);
   const cashTotal = useMemo(() => (data?.denominations ?? []).reduce((s, d) => s + d * (Number(counts[d]) || 0), 0), [counts, data]);
   if (!data) return <div className="h-96 animate-pulse rounded-3xl bg-muted" />;
   if (!data.shift && !result) return <div className="mx-auto max-w-xl"><Empty title="No open shift" hint="Open a shift first." icon={Wallet} /><Link to="/cash/shift" className="mt-3 block text-center text-primary">Open shift →</Link></div>;
@@ -55,8 +60,9 @@ export default function ClosePage() {
   }
   return (
     <div className="mx-auto max-w-5xl">
-      <Hero title={`Close ${data.shift?.counter}`} sub={data.blind ? "Blind count — expected figures appear after you submit." : "Count the drawer."} />
+      <Hero title={`Close ${data.shift?.counter}`} sub="Count the drawer." />
       {data.closing?.status === "Recount" && <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm dark:bg-amber-500/10">The supervisor asked for a recount: {data.closing.decision_note}</div>}
+      {data.shift && <ModesCard modes={data.shift.modes} className="mb-4" />}
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <Section title={<span className="flex items-center gap-2">Cash by denomination {data.blind ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : null}</span>}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -74,7 +80,12 @@ export default function ClosePage() {
         </Section>
         <div className="space-y-4">
           <div className="rounded-3xl bg-gradient-to-br from-slate-800 to-slate-950 p-5 text-white shadow-lg"><div className="text-xs uppercase tracking-widest text-white/60">Cash counted</div><div className="text-4xl font-black tabular-nums">{rs(cashTotal)}</div></div>
-          {otherModes.length > 0 && <Section title="Card / online (terminal slip)">{otherModes.map((m) => <Field key={m} label={m} className="mb-2"><input className={inputCls + " text-end tabular-nums"} inputMode="numeric" value={other[m] ?? ""} onChange={(e) => setOther((o) => ({ ...o, [m]: e.target.value.replace(/\D/g, "") }))} /></Field>)}</Section>}
+          {otherModes.length > 0 && <Section title="Card / online (auto-filled)">
+            <p className="mb-2 text-xs text-muted-foreground">Filled from the system. Change only if the terminal / JazzCash slip differs.</p>
+            {otherModes.map((m) => { const exp = Math.round(data.shift?.modes.find((x) => x.mode_of_payment === m)?.expected ?? 0); const edited = other[m] !== undefined && Number(other[m] || 0) !== exp;
+              return <Field key={m} label={m} className="mb-2"><div className="flex items-center gap-2"><input className={inputCls + " text-end tabular-nums" + (edited ? " border-amber-400" : "")} inputMode="numeric" value={other[m] ?? ""} onChange={(e) => setOther((o) => ({ ...o, [m]: e.target.value.replace(/\D/g, "") }))} />
+                {edited && <button type="button" className="shrink-0 text-xs text-primary" onClick={() => setOther((o) => ({ ...o, [m]: String(exp) }))}>Reset</button>}</div></Field>; })}
+          </Section>}
           <Section><Field label="Explanation (if it does not balance)"><textarea className={inputCls + " h-20 py-2"} value={explanation} onChange={(e) => setExplanation(e.target.value)} /></Field></Section>
           <Button variant="submit" size="lg" className="h-12 w-full" loading={busy} onClick={() => void submit()}><Lock className="h-5 w-5" />Submit count</Button>
         </div>

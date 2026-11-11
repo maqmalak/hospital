@@ -17,6 +17,15 @@ Lose at most **1 hour** of data (RPO), back online within **4 hours** (RTO).
 - Off-site: set `HV_OFFSITE=user@host:/path` (rsync) or `HV_OFFSITE_S3=s3://bucket/path` in the cron line. Retention: 7 days hourly, 30 days daily
   on the server (`HV_KEEP_DAYS`), 12 monthly on the off-site bucket (lifecycle rule).
 
+## Daily jobs
+| When | Job | How |
+|---|---|---|
+| Hourly + 02:30 | Backups (automatic) | crontab, see *Backups*; check `logs/hv-backup.log`, run `scripts/verify_backup.sh` |
+| Morning | Health check | `bench --site hospital execute hospital_vvs.api.ops.health` — scheduler fresh, 0 failed jobs, last backup today. `errors_24h` counts test refusals too: look at Error Log grouped by title |
+| Morning | Yesterday's shifts | closed by the demo scripts on the demo site (`opd_demo.close_stale_shifts`); a count *Pending Approval* needs the cash supervisor (`/cash/approvals`) |
+| Demo site only | OPD demo data | `scripts/opd_demo.sh` (12 new patients, 30 visits) |
+| Demo site only, after OPD | IPD / ER demo data | `scripts/ipd_demo.sh` — cleaned beds back to Available, yesterday's ER visits closed (admit / home / referred), new ER arrivals triaged, longest stays discharged (summary → final bill → settlement or refund → bed to Cleaning), today's OPD patients admitted with an advance, vitals / nursing note / diet / due doses for every inpatient |
+
 ## Restore drill (monthly)
 1. Quick check (any time, touches no site): `./apps/hospital_vvs/scripts/verify_backup.sh` — decrypts the newest DB backup and counts tables.
 2. Full drill on staging:

@@ -2338,4 +2338,7 @@ export const urScreens: Record<string, string> = {
   "← Use a different account": "دوسرا اکاؤنٹ استعمال کریں →",
   "⚠ allergy": "⚠ الرجی",
   "✓ Paid": "✓ ادا شدہ",
+  "Card / online (auto-filled)": "کارڈ / آن لائن (خودکار)",
+  "Filled from the system. Change only if the terminal / JazzCash slip differs.": "سسٹم سے بھرا گیا۔ صرف تب بدلیں جب ٹرمینل / جاز کیش کی رسید مختلف ہو۔",
+  "Reset": "دوبارہ سیٹ کریں",
 };

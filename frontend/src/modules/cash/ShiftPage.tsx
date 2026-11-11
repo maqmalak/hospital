@@ -9,7 +9,7 @@ import { Empty, Field, inputCls, Pill, Section, StatCard } from "@/components/co
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/utils/cn";
-import { COUNTER_ICON, type MyShift, rs } from "./shared";
+import { COUNTER_ICON, type ModeRow, type MyShift, rs } from "./shared";
 
 export default function ShiftPage() {
   const { t } = useTranslation();
@@ -72,11 +72,7 @@ export default function ShiftPage() {
         <StatCard label="All modes" value={rs(s.total_expected)} icon={Wallet} tone="violet" />
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
-        <Section title="By payment mode" className="lg:col-span-2">
-          <table className="w-full text-sm"><thead><tr className="border-b border-border text-xs uppercase text-muted-foreground"><th className="py-2 text-start">Mode</th><th className="text-end">Opening</th><th className="text-end">Collections</th><th className="text-end">Pay in</th><th className="text-end">Pay out</th><th className="text-end">Drops</th><th className="text-end">Expected</th></tr></thead>
-            <tbody>{s.modes.filter((m) => m.expected || m.collections || m.opening).map((m) => <tr key={m.mode_of_payment} className="border-b border-border/60"><td className="py-2 font-semibold">{m.mode_of_payment}</td>
-              {[m.opening, m.collections, m.pay_in, m.pay_out, m.cash_drop].map((v, i) => <td key={i} className="text-end tabular-nums">{v ? rs(v) : "–"}</td>)}<td className="text-end font-bold tabular-nums">{rs(m.expected)}</td></tr>)}</tbody></table>
-        </Section>
+        <ModesCard modes={s.modes} className="lg:col-span-2" />
         <Section title="Cash movements">
           {data.movements?.length ? data.movements.map((m) => (
             <div key={m.name} className="flex items-center gap-2 border-b border-border/60 py-2 text-sm last:border-0"><span className="flex-1"><b>{m.movement_type}</b> <span className="text-muted-foreground">{m.reason}</span></span>
@@ -133,5 +129,15 @@ function RefundDialog({ invoice, onClose, onDone }: { invoice: string; onClose: 
       <Field label="Reason" required><input className={inputCls} value={reason} onChange={(e) => setReason(e.target.value)} autoFocus /></Field>
       <Button variant="destructive" className="mt-4 w-full" disabled={!reason.trim()} loading={busy} onClick={() => void save()}><RotateCcw className="h-4 w-4" />Refund in full</Button>
     </Dialog>
+  );
+}
+
+export function ModesCard({ modes, className }: { modes: ModeRow[]; className?: string }) {
+  return (
+    <Section title="By payment mode" className={className}>
+      <div className="overflow-x-auto"><table className="w-full min-w-[560px] text-sm"><thead><tr className="border-b border-border text-xs uppercase text-muted-foreground"><th className="py-2 text-start">Mode</th><th className="text-end">Opening</th><th className="text-end">Collections</th><th className="text-end">Pay in</th><th className="text-end">Pay out</th><th className="text-end">Drops</th><th className="text-end">Expected</th></tr></thead>
+        <tbody>{modes.filter((m) => m.expected || m.collections || m.opening).map((m) => <tr key={m.mode_of_payment} className="border-b border-border/60"><td className="py-2 font-semibold">{m.mode_of_payment}</td>
+          {[m.opening, m.collections, m.pay_in, m.pay_out, m.cash_drop].map((v, i) => <td key={i} className="text-end tabular-nums">{v ? rs(v) : "–"}</td>)}<td className="text-end font-bold tabular-nums">{rs(m.expected)}</td></tr>)}</tbody></table></div>
+    </Section>
   );
 }
