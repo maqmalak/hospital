@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
-  AlertTriangle, Banknote, BedDouble, CheckCircle2, CloudOff, CreditCard, Delete, FlaskConical, Globe, HandCoins, History, Keyboard, Landmark, Lock,
+  AlertTriangle, Banknote, ClipboardPlus, BedDouble, CheckCircle2, CloudOff, CreditCard, Delete, FlaskConical, Globe, HandCoins, History, Keyboard, Landmark, Lock,
   MonitorSmartphone, PauseCircle, Percent, Plus, Printer, ReceiptText, RefreshCw, Search, Smartphone, Stethoscope, Trash2, Undo2, User, UserPlus, Wallet, Wifi, X,
 } from "lucide-react";
 import { call, humanizeError, useApi } from "@/lib/api";
@@ -16,7 +16,7 @@ import { cn } from "@/utils/cn";
 import { type Bundle, type Doctor, isNetworkError, kvGet, kvSet, type LabT, loadBundle, publishDisplay, refreshBundle, type Service, useCounterSync, uuid } from "./offline";
 import { type Receipt, receiptHtml } from "./receipt";
 
-type Kind = "Consultation" | "Service" | "Lab" | "IPD Advance" | "IPD Settlement" | "Online Fee" | "Dues";
+type Kind = "Consultation" | "Service" | "Lab" | "Lab Order" | "IPD Advance" | "IPD Settlement" | "Online Fee" | "Dues";
 interface Line { key: string; kind: Kind; label: string; doctor?: string; item_code?: string; template?: string; target?: string; qty: number; rate: number; discount: number;
   amount: number; priority?: string; free?: number; payer_share?: number }
 interface Ctx { branch: string; shift: { name: string; opened_at: string; counter: string; expected: number; stale: boolean; closing: boolean } | null; counter?: string;
@@ -24,7 +24,11 @@ interface Ctx { branch: string; shift: { name: string; opened_at: string; counte
 interface Panel { patient: { name: string; patient_name: string; gender: string; age?: number; phone?: string; category?: string; temporary_record?: number };
   admission?: { name: string; ward: string; bed_no?: string; running: number; advances: number; balance: number; final_invoice?: string; outstanding: number } | null;
   online: { name: string; fee: number; fee_status: string; payment_method: string; payment_reference?: string }[];
-  dues: { name: string; posting_date: string; hv_billing_type?: string; grand_total: number; outstanding_amount: number }[] }
+  dues: { name: string; posting_date: string; hv_billing_type?: string; grand_total: number; outstanding_amount: number }[]; lab_orders?: LabOrder[] }
+/** A lab order made in the lab, waiting for payment here (D-60). */
+interface LabOrder { name: string; patient: string; patient_name: string; gross_total: number; patient_share: number; priority: string; creation: string; tests: string[]; ordered_by?: string }
+type Limits = Record<string, { percent: number; amount: number | null }>;
+const LIMIT_BT: Partial<Record<Kind, string>> = { Consultation: "OPD Slip", Lab: "Lab", "Lab Order": "Lab", Service: "General" };
 interface Tender { mode_of_payment: string; amount: number; reference_no?: string }
 interface Held { id: string; at: string; patient?: PatientHit | null; newPatient?: NewP | null; lines: Line[] }
 interface NewP { patient_name: string; gender: string; age: string; phone: string }
@@ -32,7 +36,7 @@ interface NewP { patient_name: string; gender: string; age: string; phone: strin
 const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
 const KIND_STYLE: Record<Kind, { icon: typeof Stethoscope; tone: string }> = {
   Consultation: { icon: Stethoscope, tone: "from-teal-500 to-emerald-600" }, Service: { icon: HandCoins, tone: "from-sky-500 to-blue-600" },
-  Lab: { icon: FlaskConical, tone: "from-violet-500 to-indigo-600" }, "IPD Advance": { icon: BedDouble, tone: "from-amber-500 to-orange-600" },
+  Lab: { icon: FlaskConical, tone: "from-violet-500 to-indigo-600" }, "Lab Order": { icon: FlaskConical, tone: "from-purple-600 to-fuchsia-600" }, "IPD Advance": { icon: BedDouble, tone: "from-amber-500 to-orange-600" },
   "IPD Settlement": { icon: BedDouble, tone: "from-orange-500 to-red-600" }, "Online Fee": { icon: Globe, tone: "from-fuchsia-500 to-purple-600" },
   Dues: { icon: ReceiptText, tone: "from-rose-500 to-pink-600" },
 };
@@ -55,7 +59,9 @@ export default function CounterPage() {
   const pullBundle = useCallback(async () => { try { setBundle(await refreshBundle(branch)); } catch (e) { if (isNetworkError(e)) sync.markOffline(); } }, [branch]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (live.data?.shift && sync.online) void pullBundle(); }, [live.data?.shift?.name, sync.online]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [tab, setTab] = useState<"doctors" | "services" | "lab" | "bills">("doctors");
+  const [tab, setTab] = useState<"doctors" | "services" | "lab" | "bills" | "fromlab">("doctors");
+  const fromLab = useApi<LabOrder[]>("counter.pending_lab", { branch }, { enabled: sync.online, refetchInterval: 15_000 });
+  const limits = useApi<Limits>("counter.discount_limits", undefined, { enabled: sync.online, staleTime: 300_000 });
   const [q, setQ] = useState("");
   const [dept, setDept] = useState("");
   const [patient, setPatient] = useState<PatientHit | null>(null);
@@ -79,7 +85,7 @@ export default function CounterPage() {
   useEffect(() => {
     setPanel(null);
     if (!patient || offline) return;
-    void call<Panel>("counter.patient", { name: patient.name }).then(setPanel).catch(() => undefined);
+    void call<Panel>("counter.patient", { name: patient.name }).then((p) => { setPanel(p); if (p.lab_orders?.length) toast(`${p.lab_orders.length} lab order(s) waiting for payment — see Patient bills`, { icon: "🧪" }); }).catch(() => undefined);
   }, [patient?.name, offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // server pricing (free follow-up, panel share) whenever the cart or patient changes
@@ -103,6 +109,7 @@ export default function CounterPage() {
   const add = (l: Omit<Line, "key" | "amount" | "qty" | "discount"> & { qty?: number; discount?: number }) => {
     if (l.kind === "Consultation" && lines.some((x) => x.kind === "Consultation" && x.doctor === l.doctor)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
     if (l.kind === "Lab" && lines.some((x) => x.kind === "Lab" && x.template === l.template)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
+    if (l.kind === "Lab Order" && lines.some((x) => x.kind === "Lab Order" && x.target === l.target)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
     if (l.kind === "Service") { const ex = lines.find((x) => x.kind === "Service" && x.item_code === l.item_code); if (ex) { upd(ex.key, { qty: ex.qty + 1 }); return; } }
     setLines((ls) => [...ls, { qty: 1, discount: 0, ...l, key: uuid(), amount: 0 } as Line]);
   };
@@ -166,9 +173,12 @@ export default function CounterPage() {
         <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
             <div className="relative min-w-48 flex-1"><Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" /><input ref={searchRef} className={inputCls + " ps-9"} placeholder="Search doctor, service or test (F3)" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-            <div className="flex gap-1 rounded-xl bg-muted p-1">{([["doctors", "Doctors", Stethoscope], ["services", "Services", HandCoins], ["lab", "Lab tests", FlaskConical], ["bills", "Patient bills", BedDouble]] as const).map(([k, l, I]) => (
-              <button key={k} onClick={() => setTab(k)} disabled={k === "bills" && (!patient || offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "bg-card shadow" : "text-muted-foreground")}>
-                <I className="h-4 w-4" />{l}{k === "bills" && panel && (panel.dues.length + panel.online.length + (panel.admission ? 1 : 0)) ? <span className="rounded-full bg-rose-600 px-1.5 text-[10px] text-white">{panel.dues.length + panel.online.length + (panel.admission ? 1 : 0)}</span> : null}</button>))}</div>
+            <div className="flex gap-1 rounded-xl bg-muted p-1">{([["doctors", "Doctors", Stethoscope], ["services", "Services", HandCoins], ["lab", "Lab tests", FlaskConical], ["fromlab", "From the lab", ClipboardPlus], ["bills", "Patient bills", BedDouble]] as const).map(([k, l, I]) => {
+              const billsN = panel ? panel.dues.length + panel.online.length + (panel.admission ? 1 : 0) + (panel.lab_orders?.length ?? 0) : 0;
+              const n = k === "bills" ? billsN : k === "fromlab" ? (fromLab.data?.length ?? 0) : 0;
+              return (
+              <button key={k} onClick={() => setTab(k)} disabled={(k === "bills" && (!patient || offline)) || (k === "fromlab" && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "bg-card shadow" : "text-muted-foreground")}>
+                <I className="h-4 w-4" />{l}{n ? <span className={cn("rounded-full px-1.5 text-[10px] text-white", k === "fromlab" ? "bg-fuchsia-600" : "bg-rose-600")}>{n}</span> : null}</button>); })}</div>
           </div>
           {tab === "lab" && <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">{["", ...depts].map((d) => <button key={d} onClick={() => setDept(d)} className={cn("rounded-full border px-3 py-1 text-xs font-semibold", dept === d ? "border-violet-600 bg-violet-600 text-white" : "border-border")}>{d || "All"}</button>)}</div>}
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
@@ -187,6 +197,17 @@ export default function CounterPage() {
                 <div className="line-clamp-2 text-sm font-semibold">{l.name}</div><div className="text-[11px] text-muted-foreground">{l.test_code} · {l.sample_type}{l.tat_hours ? ` · ${l.tat_hours}h` : ""}</div>
                 <div className="mt-1 font-black tabular-nums text-violet-700 dark:text-violet-300">{rs(l.price)}</div></button>); })}</div>}
             {tab === "bills" && panel && <Bills panel={panel} onAdd={add} inCart={lines} />}
+            {tab === "fromlab" && <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">Orders the lab made for walk-in patients. Collect here, give the receipt, then the lab takes the sample.</p>
+              {(fromLab.data ?? []).map((o) => { const inCart = lines.some((x) => x.kind === "Lab Order" && x.target === o.name); return (
+                <button key={o.name} disabled={inCart} onClick={() => { if (patient?.name !== o.patient) { setPatient({ name: o.patient, patient_name: o.patient_name, gender: "" } as PatientHit); setNewP(null); setLines((ls) => ls.filter((x) => !x.target || x.kind !== "Lab Order")); }
+                  add({ kind: "Lab Order", label: `Lab order ${o.name} · ${o.tests.join(", ")}`, target: o.name, rate: o.gross_total }); }}
+                  className={cn("flex w-full items-center gap-3 rounded-2xl border p-3 text-start shadow-sm", inCart ? "border-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-500/10" : "border-border bg-card hover:border-fuchsia-400")}>
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white"><FlaskConical className="h-5 w-5" /></span>
+                  <span className="min-w-0 flex-1"><span className="flex items-center gap-2"><b className="truncate">{o.patient_name}</b>{o.priority !== "Normal" && <span className="rounded-full bg-rose-600 px-2 text-[10px] font-bold text-white">{o.priority}</span>}</span>
+                    <span className="block truncate text-xs text-muted-foreground">{o.name} · {o.patient} · {o.tests.join(", ")}</span><span className="block text-[11px] text-muted-foreground">by {o.ordered_by} · {o.creation.slice(11, 16)}</span></span>
+                  <span className="text-end font-black tabular-nums">{rs(o.gross_total)}<span className="block text-[11px] font-normal text-muted-foreground">{inCart ? "in cart" : "tap to collect"}</span></span></button>); })}
+              {fromLab.data && !fromLab.data.length && <div className="py-10 text-center text-sm text-muted-foreground"><CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-emerald-500" />No lab orders waiting for payment.</div>}</div>}
           </div>
         </section>
 
@@ -205,9 +226,12 @@ export default function CounterPage() {
           </div>
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
             {!lines.length && <div className="flex h-full flex-col items-center justify-center text-center text-sm text-muted-foreground"><ReceiptText className="mb-2 h-10 w-10 opacity-40" />Pick a doctor, service or test.<br />Admission advances, online fees and dues are under Patient bills.</div>}
-            {lines.map((l) => <CartLine key={l.key} l={l} amount={amountOf(l)} free={priced?.free[l.key]} offline={offline} onChange={(p) => upd(l.key, p)} onRemove={() => setLines((ls) => ls.filter((x) => x.key !== l.key))} />)}
+            {lines.map((l) => <CartLine key={l.key} l={l} amount={amountOf(l)} free={priced?.free[l.key]} offline={offline} limit={LIMIT_BT[l.kind] ? limits.data?.[LIMIT_BT[l.kind]!] : undefined} onChange={(p) => upd(l.key, p)} onRemove={() => setLines((ls) => ls.filter((x) => x.key !== l.key))} />)}
           </div>
           <div className="space-y-1 border-t border-border p-3">
+            {!offline && lines.some((l) => LIMIT_BT[l.kind]) && <div className="flex items-center gap-1 pb-1 text-xs"><Percent className="h-3.5 w-3.5 text-muted-foreground" /><span className="text-muted-foreground">Discount all</span>
+              {[5, 10, 15, 20].map((p) => <button key={p} onClick={() => setLines((ls) => ls.map((x) => LIMIT_BT[x.kind] ? { ...x, discount: Math.round(x.rate * x.qty * p / 100) } : x))} className="rounded-md border border-border px-2 py-0.5 font-semibold hover:bg-muted">{p}%</button>)}
+              {discount > 0 && <button onClick={() => setLines((ls) => ls.map((x) => ({ ...x, discount: 0 })))} className="ms-auto text-muted-foreground underline">clear</button>}</div>}
             {discount > 0 && <div className="flex justify-between text-sm text-muted-foreground"><span>Discount</span><span className="tabular-nums">−{rs(discount)}</span></div>}
             {!!priced?.payer && <div className="flex justify-between text-sm text-violet-700 dark:text-violet-300"><span>Panel / insurer pays</span><span className="tabular-nums">{rs(priced.payer)}</span></div>}
             <div className="flex items-end justify-between"><span className="text-sm font-semibold text-muted-foreground">Total</span><span className="text-3xl font-black tabular-nums">{rs(total)}</span></div>
@@ -263,10 +287,15 @@ function NoShift({ ctx }: { ctx: Ctx }) {
   );
 }
 
-function CartLine({ l, amount, free, offline, onChange, onRemove }: { l: Line; amount: number; free?: number; offline: boolean; onChange: (p: Partial<Line>) => void; onRemove: () => void }) {
+function CartLine({ l, amount, free, offline, limit, onChange, onRemove }: { l: Line; amount: number; free?: number; offline: boolean; limit?: { percent: number; amount: number | null };
+  onChange: (p: Partial<Line>) => void; onRemove: () => void }) {
   const st = KIND_STYLE[l.kind];
   const [open, setOpen] = useState(l.kind === "IPD Advance");
-  const isCharge = ["Consultation", "Service", "Lab"].includes(l.kind);
+  const [unit, setUnit] = useState<"Rs" | "%">("Rs");
+  const isCharge = ["Consultation", "Service", "Lab", "Lab Order"].includes(l.kind);
+  const gross = l.rate * l.qty;
+  const pct = gross ? Math.round((l.discount / gross) * 1000) / 10 : 0;
+  const over = !!limit && limit.percent < 100 && (pct > limit.percent || (limit.amount != null && limit.amount > 0 && l.discount > limit.amount));
   return (
     <div className="rounded-xl border border-border bg-card p-2.5 shadow-sm">
       <div className="flex items-start gap-2">
@@ -280,9 +309,13 @@ function CartLine({ l, amount, free, offline, onChange, onRemove }: { l: Line; a
       </div>
       {l.kind === "Consultation" && <div className="mt-2 flex gap-1">{PRIORITIES.map((p) => <button key={p} onClick={() => onChange({ priority: p })} className={cn("flex-1 rounded-md border py-1 text-[11px] font-bold",
         (l.priority ?? "Normal") === p ? PRIO_TONE[p] || "border-teal-600 bg-teal-600 text-white" : "border-border text-muted-foreground")}>{p}</button>)}</div>}
-      {open && isCharge && <div className="mt-2 flex items-center gap-2 rounded-lg bg-muted/60 p-2 text-xs"><Percent className="h-3.5 w-3.5" />Discount Rs
-        <input disabled={offline} className={inputCls.replace("w-full", "") + " h-8 w-24 text-end"} inputMode="numeric" value={l.discount || ""} onChange={(e) => onChange({ discount: Math.min(Number(e.target.value.replace(/\D/g, "")) || 0, l.rate * l.qty) })} />
-        {offline ? <span className="text-amber-700">needs the server</span> : <span className="text-muted-foreground">above your limit it goes to the supervisor</span>}</div>}
+      {open && isCharge && <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-muted/60 p-2 text-xs"><Percent className="h-3.5 w-3.5" />Discount
+        <div className="flex rounded-md bg-card p-0.5">{(["Rs", "%"] as const).map((u) => <button key={u} onClick={() => setUnit(u)} className={cn("rounded px-2 py-0.5 font-bold", unit === u ? "bg-teal-600 text-white" : "text-muted-foreground")}>{u}</button>)}</div>
+        <input disabled={offline} className={inputCls.replace("w-full", "") + " h-8 w-20 text-end"} inputMode="decimal" value={unit === "Rs" ? (l.discount || "") : (pct || "")}
+          onChange={(e) => { const v = Number(e.target.value.replace(/[^\d.]/g, "")) || 0; onChange({ discount: Math.min(unit === "Rs" ? Math.round(v) : Math.round(gross * Math.min(v, 100) / 100), gross) }); }} />
+        {l.discount > 0 && <span className="font-semibold tabular-nums">{unit === "Rs" ? `${pct}%` : rs(l.discount)}</span>}
+        {offline ? <span className="text-amber-700">needs the server</span> : <span className={cn(over ? "font-semibold text-amber-700 dark:text-amber-400" : "text-muted-foreground")}>
+          {limit ? `your limit ${limit.percent >= 100 ? "none" : `${limit.percent}%${limit.amount ? ` / ${rs(limit.amount)}` : ""}`}${over ? " — needs supervisor approval" : ""}` : "above your limit it goes to the supervisor"}</span>}</div>}
       {open && !isCharge && (l.kind === "IPD Advance" || l.kind === "Dues" || l.kind === "IPD Settlement") && <div className="mt-2 flex items-center gap-2 rounded-lg bg-muted/60 p-2 text-xs">Amount Rs
         <input className={inputCls.replace("w-full", "") + " h-8 w-28 text-end"} inputMode="numeric" value={l.rate || ""} onChange={(e) => onChange({ rate: Number(e.target.value.replace(/\D/g, "")) || 0 })} /></div>}
     </div>
@@ -300,13 +333,16 @@ function Bills({ panel, onAdd, inCart }: { panel: Panel; onAdd: (l: Omit<Line, "
           <div className="rounded-lg bg-card p-2">Advances<div className="text-base font-black">{rs(a.advances)}</div></div><div className="rounded-lg bg-card p-2">{a.final_invoice ? "Due" : "Balance"}<div className="text-base font-black">{rs(a.final_invoice ? a.outstanding : a.balance)}</div></div></div>
         <div className="mt-2 flex gap-2">{!a.final_invoice ? <Button size="sm" variant="save" disabled={has(a.name, "IPD Advance")} onClick={() => onAdd({ kind: "IPD Advance", label: `IPD advance · ${a.name}`, target: a.name, rate: Math.max(Math.round(a.balance / 1000) * 1000, 5000) })} title="Change the amount on the cart line"><Plus className="h-4 w-4" />Advance</Button>
           : <Button size="sm" variant="submit" disabled={!a.outstanding || has(a.name, "IPD Settlement")} onClick={() => onAdd({ kind: "IPD Settlement", label: `IPD final bill · ${a.name}`, target: a.name, rate: a.outstanding })}><Plus className="h-4 w-4" />Settle {rs(a.outstanding)}</Button>}</div></div>}
+      {(panel.lab_orders ?? []).map((o) => <div key={o.name} className="flex items-center gap-2 rounded-2xl border border-purple-300 bg-purple-50/50 p-3 dark:bg-purple-500/5"><FlaskConical className="h-5 w-5 text-purple-600" />
+        <div className="min-w-0 flex-1"><div className="font-bold">Lab order · {o.name}</div><div className="truncate text-xs text-muted-foreground">{o.tests.join(", ")} · by {o.ordered_by}</div></div>
+        <Button size="sm" variant="save" disabled={has(o.name, "Lab Order")} onClick={() => onAdd({ kind: "Lab Order", label: `Lab order ${o.name} · ${o.tests.join(", ")}`, target: o.name, rate: o.gross_total })}>{rs(o.gross_total)}</Button></div>)}
       {panel.online.map((o) => <div key={o.name} className="flex items-center gap-2 rounded-2xl border border-fuchsia-300 bg-fuchsia-50/50 p-3 dark:bg-fuchsia-500/5"><Globe className="h-5 w-5 text-fuchsia-600" />
         <div className="min-w-0 flex-1"><div className="font-bold">Online visit fee · {o.name}</div><div className="text-xs text-muted-foreground">{o.fee_status} · {o.payment_method}{o.payment_reference ? ` · ${o.payment_reference}` : ""}</div></div>
         <Button size="sm" variant="save" disabled={has(o.name, "Online Fee")} onClick={() => onAdd({ kind: "Online Fee", label: `Online visit fee · ${o.name}`, target: o.name, rate: o.fee })}>{rs(o.fee)}</Button></div>)}
       {panel.dues.map((d) => <div key={d.name} className="flex items-center gap-2 rounded-2xl border border-rose-300 bg-rose-50/50 p-3 dark:bg-rose-500/5"><ReceiptText className="h-5 w-5 text-rose-600" />
         <div className="min-w-0 flex-1"><div className="font-bold">{d.hv_billing_type || "Invoice"} · {d.name}</div><div className="text-xs text-muted-foreground">{d.posting_date} · of {rs(d.grand_total)}</div></div>
         <Button size="sm" variant="save" disabled={has(d.name, "Dues")} onClick={() => onAdd({ kind: "Dues", label: `Dues · ${d.name}`, target: d.name, rate: d.outstanding_amount })}>{rs(d.outstanding_amount)}</Button></div>)}
-      {!a && !panel.online.length && !panel.dues.length && <div className="py-10 text-center text-sm text-muted-foreground"><CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-emerald-500" />Nothing outstanding for this patient.</div>}
+      {!a && !panel.online.length && !panel.dues.length && !(panel.lab_orders ?? []).length && <div className="py-10 text-center text-sm text-muted-foreground"><CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-emerald-500" />Nothing outstanding for this patient.</div>}
     </div>
   );
 }

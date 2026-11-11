@@ -419,7 +419,7 @@
  "image_field": "photo",
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-11 01:10:53.829268",
+ "modified": "2026-11-11 23:22:15.738314",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Patient",
@@ -510,16 +510,18 @@
    "role": "OV Doctor"
   },
   {
+   "create": 1,
+   "read": 1,
+   "role": "PW Lab User",
+   "write": 1
+  },
+  {
    "read": 1,
    "role": "PW Pharmacy Cashier"
   },
   {
    "read": 1,
    "role": "PW Dispenser"
-  },
-  {
-   "read": 1,
-   "role": "PW Lab User"
   },
   {
    "read": 1,

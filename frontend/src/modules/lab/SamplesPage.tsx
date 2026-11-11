@@ -11,7 +11,7 @@ import { cn } from "@/utils/cn";
 import { type Label, LabHero, labelsHtml, Tube, useLabLive, PriorityTag } from "./shared";
 
 interface S { name: string; test_invoice: string; patient: string; patient_name: string; sample_type: string; container: string; status: string; collected_at?: string;
-  received_at?: string; rejection_reason?: string; recollect_of?: string; tests: string[]; priority?: string; creation: string }
+  received_at?: string; rejection_reason?: string; recollect_of?: string; tests: string[]; priority?: string; creation: string; receipt?: string }
 const TABS = [{ k: "Pending", label: "To collect", icon: TestTube2 }, { k: "Collected", label: "To receive", icon: Truck }, { k: "Received", label: "In lab", icon: Check }, { k: "Rejected", label: "Rejected", icon: Ban }];
 const REASONS = ["Hemolysed", "Clotted", "Insufficient", "Wrong container", "Unlabeled", "Other"];
 
@@ -22,6 +22,7 @@ export default function SamplesPage() {
   const [scan, setScan] = useState("");
   const [reject, setReject] = useState<S | null>(null);
   const { data: rows, refetch } = useApi<S[]>("lab.samples", { status: tab, branch }, { refetchInterval: 30_000 });
+  const waiting = useApi<{ name: string; patient_name: string; tests: string[]; gross_total: number; creation: string }[]>("lab.awaiting_payment", { branch }, { refetchInterval: 20_000 });
   useLabLive(["lab.samples"]);
   const act = useAction("lab.sample_action", { invalidate: ["lab.samples"], onSuccess: () => void refetch() });
   const print = async (names: string[]) => { try { const l = await call<Label[]>("lab.labels", { samples: names }); await printDoc(labelsHtml(l), "label", { agent: true }); } catch (e) { toast.error(humanizeError(e)); } };
@@ -54,6 +55,10 @@ export default function SamplesPage() {
           {tab === "Collected" && <Button variant="workflow" onClick={() => void bulk("receive")}><Check className="h-4 w-4" />Receive in lab</Button>}
           <Button variant="outline" onClick={() => void print(sel)}><Printer className="h-4 w-4" />Labels</Button></>}
       </div>
+      {tab === "Pending" && (waiting.data ?? []).length > 0 && <div className="rounded-2xl border border-amber-300 bg-amber-50 p-3 dark:bg-amber-500/10">
+        <div className="mb-1 text-sm font-bold text-amber-800 dark:text-amber-300">Waiting for payment at reception · {waiting.data!.length}</div>
+        <p className="mb-2 text-xs text-muted-foreground">No sample until paid — each one appears below as soon as reception gives the receipt.</p>
+        <div className="flex flex-wrap gap-2">{waiting.data!.map((o) => <span key={o.name} className="rounded-xl border border-amber-300 bg-card px-2.5 py-1 text-xs"><b>{o.patient_name}</b> · <span className="font-mono">{o.name}</span> · {o.tests.join(", ")} · <span className="font-bold text-amber-700 dark:text-amber-300">Unpaid</span></span>)}</div></div>}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {(rows ?? []).map((s) => { const on = sel.includes(s.name); return (
           <div key={s.name} onClick={() => tab !== "Rejected" && setSel((x) => (on ? x.filter((y) => y !== s.name) : [...x, s.name]))}
@@ -61,7 +66,8 @@ export default function SamplesPage() {
             <div className="flex items-start gap-3"><Tube container={s.container} />
               <div className="min-w-0 flex-1"><div className="truncate font-bold">{s.patient_name}</div><div className="font-mono text-[11px] text-muted-foreground">{s.name}</div>
                 <div className="text-xs">{s.sample_type} · {s.container}</div></div>
-              <PriorityTag p={s.priority} small /></div>
+              <div className="flex flex-col items-end gap-1"><PriorityTag p={s.priority} small />
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300" title={s.receipt ? `Receipt ${s.receipt}` : "Paid"}>✓ Paid{s.receipt ? ` · ${s.receipt}` : ""}</span></div></div>
             <div className="mt-2 flex flex-wrap gap-1">{s.tests.map((t) => <span key={t} className="rounded bg-violet-50 px-1.5 text-[11px] font-semibold text-violet-800 dark:bg-violet-500/15 dark:text-violet-200">{t}</span>)}</div>
             {s.recollect_of && <div className="mt-1 text-[11px] font-semibold text-amber-600">Recollection of {s.recollect_of}</div>}
             {s.rejection_reason && <div className="mt-1 text-xs font-semibold text-rose-600">{s.rejection_reason}</div>}

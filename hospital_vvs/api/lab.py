@@ -7,7 +7,7 @@ from frappe.utils import cint, flt, today
 
 from hospital_vvs import roles as R
 from hospital_vvs.services import discounts, lab
-from hospital_vvs.utils import check_branch, default_branch, log_access, require_roles, scope_branch
+from hospital_vvs.utils import check_branch, default_branch, has_any_role, log_access, require_roles, scope_branch, setting
 
 LAB_STAFF = (R.LAB_USER, R.PATHOLOGIST)
 ORDERING = (R.LAB_USER, R.RECEPTIONIST, R.DOCTOR)
@@ -19,7 +19,8 @@ def context():
 	return {"templates": frappe.get_all("Lab Test Template", filters={"is_active": 1}, fields=["name", "test_code", "department", "price", "sample_type",
 		"container", "tat_hours", "outsourced"], order_by="department, test_name"),
 		"doctors": frappe.get_all("Doctor", filters={"is_active": 1}, fields=["name", "doctor_name", "doctor_type"], order_by="doctor_name"),
-		"reference_labs": frappe.get_all("Supplier", filters={"supplier_group": "Distributor"}, pluck="name")}
+		"reference_labs": frappe.get_all("Supplier", filters={"supplier_group": "Distributor"}, pluck="name"),
+		"payment_point": setting("lab_payment_point") or "Reception counter", "can_collect": has_any_role(R.RECEPTIONIST, R.CASH_SUPERVISOR) or setting("lab_payment_point") == "Lab counter"}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -32,6 +33,8 @@ def create_order(data):
 		done = frappe.db.get_value("Test Invoice", {"client_ref": d["client_ref"]})
 		if done:
 			return order(done)
+	if cint(d.get("pay")):
+		_payment_point_check()
 	ti = lab.create_order(d["patient"], d["tests"], branch, referring_doctor=d.get("referring_doctor"), priority=d.get("priority") or "Normal",
 		external_referrer=d.get("external_referrer"))
 	if d.get("client_ref"):
@@ -42,9 +45,16 @@ def create_order(data):
 	return order(ti.name)
 
 
+def _payment_point_check():
+	"""D-60: with payment at the reception counter, only reception (or the cash supervisor) takes lab money."""
+	if setting("lab_payment_point") != "Lab counter" and not has_any_role(R.RECEPTIONIST, R.CASH_SUPERVISOR):
+		frappe.throw(_("Lab tests are paid at the reception counter. Send the patient to reception with the order number."), frappe.PermissionError)
+
+
 @frappe.whitelist(methods=["POST"])
 def pay(name, payment_mode="Cash", cash_tendered=None, discount_amount=0, discount_authorization=None):
 	require_roles(R.LAB_USER, R.RECEPTIONIST)
+	_payment_point_check()
 	lab.pay(name, payment_mode, flt(discount_amount), None, discount_authorization, cash_tendered)
 	return order(name)
 
@@ -76,13 +86,16 @@ def orders(date=None, status=None, q=None, branch=None, from_date=None, to_date=
 		filters["status"] = status
 	or_filters = {"patient_name": ["like", f"%{q}%"], "patient": ["like", f"%{q}%"], "name": ["like", f"%{q}%"]} if q else None
 	rows = frappe.get_all("Test Invoice", filters=filters, or_filters=or_filters, fields=["name", "patient", "patient_name", "status", "net_total", "patient_share",
-		"priority", "posting_date", "expected_at", "referring_doctor", "released_at", "sales_invoice", "creation", "handed_over_to"], order_by="creation desc", limit=500)
+		"priority", "posting_date", "expected_at", "referring_doctor", "released_at", "sales_invoice", "creation", "handed_over_to", "bill_to_admission"],
+		order_by="creation desc", limit=500)
 	names = [r.name for r in rows] or [""]
 	items = frappe.get_all("Test Invoice Item", filters={"parent": ["in", names]}, fields=["parent", "template", "status"])
 	for r in rows:
 		its = [i for i in items if i.parent == r.name]
 		r["tests"] = [i.template for i in its]
 		r["progress"] = {s: sum(1 for i in its if i.status == s) for s in {i.status for i in its}}
+		# payment status for the lab (D-60): unpaid orders wait at reception, samples only after payment
+		r["payment"] = "Admission bill" if r.bill_to_admission else ("Unpaid" if r.status in ("Ordered", "Draft") else ("Cancelled" if r.status == "Cancelled" else "Paid"))
 	return rows
 
 
@@ -97,6 +110,10 @@ def order(name):
 		"revoked", "version", "last_accessed_at", "creation"], order_by="creation desc")
 	out["messages"] = frappe.get_all("Message Log", filters={"reference_doctype": "Test Invoice", "reference_name": name}, fields=["name", "event", "status",
 		"channel", "creation"], order_by="creation desc")
+	rc = frappe.db.sql("""select cr.name, cr.posted_at, cr.cashier from `tabCounter Receipt` cr join `tabCounter Receipt Line` l on l.parent=cr.name
+		where l.reference_doctype='Test Invoice' and l.reference_name=%s and cr.status!='Cancelled' order by cr.posted_at desc limit 1""", name, as_dict=True)
+	out["receipt"] = dict(rc[0], cashier_name=frappe.db.get_value("User", rc[0].cashier, "full_name")) if rc else None  # paid at reception (D-60)
+	out["payment_point"] = setting("lab_payment_point") or "Reception counter"
 	return out
 
 
@@ -115,7 +132,21 @@ def samples(status="Pending", branch=None):
 		r["priority"] = pri.get(r.test_invoice)
 	rank = {"Urgent": 0, "Priority": 1}
 	rows.sort(key=lambda r: (rank.get(r["priority"], 2), str(r["creation"])))
+	rc = {x.reference_name: x.parent for x in frappe.get_all("Counter Receipt Line", filters={"reference_doctype": "Test Invoice",
+		"reference_name": ["in", list({r.test_invoice for r in rows}) or [""]]}, fields=["reference_name", "parent"])}
+	for r in rows:
+		r["receipt"] = rc.get(r.test_invoice)
 	return rows
+
+
+@frappe.whitelist()
+def awaiting_payment(branch=None):
+	"""Orders the lab made that the patient has not paid yet (paid at the reception counter, D-60)."""
+	branch = scope_branch(branch, required=False)
+	require_roles(*LAB_STAFF, R.RECEPTIONIST)
+	from hospital_vvs.services.counter import unpaid_lab_orders
+
+	return unpaid_lab_orders(branch=branch or default_branch())
 
 
 @frappe.whitelist(methods=["POST"])

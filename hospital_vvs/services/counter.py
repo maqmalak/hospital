@@ -22,6 +22,8 @@ from hospital_vvs.utils import branch_company, check_branch, default_branch, pub
 
 CHARGE_KINDS = ("Consultation", "Lab", "Service")
 MONEY_KINDS = ("IPD Advance", "IPD Settlement", "Online Fee", "Dues")
+# D-60: a lab order made in the lab (unpaid) is collected here; its receipt lines are ordinary Lab lines (refunds work the same)
+LAB_ORDER = "Lab Order"
 GROUP_BT = {"Consultation": "OPD Slip", "Lab": "Lab", "Service": "General"}
 EXCLUDED_ITEMS = ("IPD-", "ER-FEE", "OV-CONSULT", "PKG-", "REG-FEE")
 
@@ -86,7 +88,35 @@ def patient_panel(patient):
 		where si.customer=%s and si.docstatus=1 and si.outstanding_amount > 0 and si.company=%s and si.is_return=0
 		and ifnull(si.hv_reference_doctype,'')!='Bed Allotment' order by si.posting_date""", (p.customer, hospital_company()), as_dict=True) if p.customer else []
 	recent = frappe.get_all("Counter Receipt", filters={"patient": patient}, fields=["name", "posted_at", "patient_total", "status"], order_by="posted_at desc", limit=5)
-	return {"patient": p, "admission": admission, "online": online, "dues": dues, "recent": recent}
+	return {"patient": p, "admission": admission, "online": online, "dues": dues, "recent": recent, "lab_orders": unpaid_lab_orders(patient=patient)}
+
+
+def unpaid_lab_orders(patient=None, branch=None, limit=50):
+	"""Lab orders waiting for payment at reception (made in the lab, or saved without payment)."""
+	f = {"status": ["in", ["Ordered", "Draft"]], "docstatus": ["<", 2], "bill_to_admission": 0, "er_visit": ["in", ["", None]]}
+	if patient:
+		f["patient"] = patient
+	if branch:
+		f["branch"] = branch
+	meta = frappe.get_meta("Test Invoice")
+	for k in ("bill_to_admission", "er_visit"):
+		if not meta.has_field(k):
+			f.pop(k, None)
+	rows = frappe.get_all("Test Invoice", filters=f, fields=["name", "patient", "patient_name", "gross_total", "patient_share", "payer_share", "priority", "owner",
+		"creation", "referring_doctor"], order_by="creation asc", limit=limit)
+	for r in rows:
+		r["tests"] = frappe.get_all("Test Invoice Item", filters={"parent": r.name}, pluck="template")
+		r["ordered_by"] = frappe.db.get_value("User", r.owner, "full_name")
+	return rows
+
+
+def _lab_order(name, discount=0):
+	ti = frappe.get_doc("Test Invoice", name)
+	if ti.status not in ("Ordered", "Draft"):
+		frappe.throw(_("Lab order {0} is already {1}.").format(name, ti.status))
+	ti.discount_amount = flt(discount)
+	ti.run_method("validate")
+	return ti
 
 
 # ------------------------------------------------------------------ pricing (server is the source of truth)
@@ -124,6 +154,11 @@ def price(data):
 		elif kind == "Lab":
 			r = flt(frappe.db.get_value("Lab Test Template", ln["template"], "price"))
 			row.update(rate=r, amount=max(r - disc, 0))
+		elif kind == LAB_ORDER:
+			ti = _lab_order(ln["target"], disc)
+			row.update(rate=flt(ti.gross_total), amount=flt(ti.patient_share), payer_share=flt(ti.payer_share),
+				label=_("Lab order {0} · {1}").format(ti.name, ", ".join(r.template for r in ti.items)))
+			payer += flt(ti.payer_share)
 		elif kind == "Service":
 			r = _service_rate(ln["item_code"])
 			row.update(rate=r, amount=max(r * (flt(ln.get("qty")) or 1) - disc, 0))
@@ -141,6 +176,10 @@ def request_discounts(data):
 	d = frappe.parse_json(data) if isinstance(data, str) else data
 	priced = price(d)["lines"]
 	out = {}
+	for r in [x for x in priced if x.get("kind") == LAB_ORDER and flt(x.get("discount"))]:  # one authorization per lab order
+		a = discounts.request(billing_type="Lab", gross=flt(r["rate"]), discount_amount=flt(r["discount"]), reason=d.get("discount_reason"),
+			branch=d.get("branch"), patient=d.get("patient"), reference_doctype="Test Invoice", reference_name=r["target"])
+		out[f"LabOrder:{r['target']}"] = {"name": a.name, "status": a.status, "percent": a.discount_percent}
 	for kind in CHARGE_KINDS:
 		rows = [r for r in priced if r.get("kind") == kind and flt(r.get("discount"))]
 		if not rows:
@@ -270,6 +309,7 @@ def checkout(data, counter=None):
 			priority="Urgent" if cint(d.get("lab_urgent")) else "Normal")
 		ti.discount_amount = sum(flt(x.get("discount")) for x in lab_lines)
 		ti.run_method("validate")
+	lab_orders = [(x, _lab_order(x["target"], flt(x.get("discount")))) for x in lines if x.get("kind") == LAB_ORDER]
 	svc_lines = [x for x in lines if x.get("kind") == "Service"]
 	svc_rows = [{"item_code": x["item_code"], "qty": flt(x.get("qty")) or 1, "rate": _service_rate(x["item_code"])} for x in svc_lines]
 	svc_disc = sum(flt(x.get("discount")) for x in svc_lines)
@@ -290,7 +330,8 @@ def checkout(data, counter=None):
 		if amt <= 0:
 			frappe.throw(_("{0}: nothing to collect.").format(ln.get("label") or kind))
 		money.append((ln, amt))
-	total = sum(flt(s.patient_share) for _l, s in slips) + (flt(ti.patient_share) if ti else 0) + svc_total + sum(a for _l, a in money)
+	total = sum(flt(s.patient_share) for _l, s in slips) + (flt(ti.patient_share) if ti else 0) + svc_total + sum(a for _l, a in money) \
+		+ sum(flt(o.patient_share) for _l, o in lab_orders)
 	pool = Tenders(tenders, total)
 
 	# 2. post each document with its share of the tenders
@@ -322,6 +363,19 @@ def checkout(data, counter=None):
 			price_ = flt(frappe.db.get_value("Lab Test Template", x["template"], "price"))
 			rcpt.append("lines", {"kind": "Lab", "label": x["template"], "template": x["template"], "qty": 1, "rate": price_, "discount": flt(x.get("discount")),
 				"amount": price_ - flt(x.get("discount")), "reference_doctype": "Test Invoice", "reference_name": ti.name})
+	for ln, order in lab_orders:
+		key = f"LabOrder:{order.name}"
+		auth = auths.get(key)
+		auth = auth.get("name") if isinstance(auth, dict) else auth
+		share = flt(order.patient_share)
+		lab.pay(order.name, first_mode, discount_amount=flt(ln.get("discount")), discount_authorization=auth, payments=pool.take(share))
+		order.reload()
+		gross += flt(order.gross_total); disc_total += flt(order.discount_amount); payer_total += flt(order.payer_share)
+		disc_left = flt(order.discount_amount)
+		for it in order.items:
+			d_ = min(disc_left, flt(it.price)); disc_left -= d_
+			rcpt.append("lines", {"kind": "Lab", "label": f"{it.template} · {order.name}", "template": it.template, "qty": 1, "rate": flt(it.price), "discount": d_,
+				"amount": flt(it.price) - d_, "reference_doctype": "Test Invoice", "reference_name": order.name})
 	if svc_rows:
 		auth = auths.get("Service")
 		auth = auth.get("name") if isinstance(auth, dict) else auth

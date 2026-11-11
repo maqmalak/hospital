@@ -192,3 +192,6 @@ Admin screen `/users` (Admin → Users & roles): staff accounts with roles, bran
 ## Buying, assets, consumption (2026-11-11) — D-59
 New menu group *Buying & Assets*: dashboard, suppliers, material requests, purchase orders (approve → receive by batch / location → bill), receipts, supplier invoices (pay), fixed-asset register with depreciation, consumption by department. Demo data: Pakistani pharma suppliers and medicine orders for the contract pharmacy; Rs 92.5 M of hospital machinery, plant, furniture, building works and IT as depreciating assets; consumables bought and issued weekly to OPD / Lab / IPD / OT / ER. Tests: 120 green (3 new); E2E 25 green; Urdu complete.
 Owner: confirm useful lives / depreciation rates with the auditor; real supplier list, NTNs and credit terms.
+
+## Lab payment at reception (2026-11-11) — D-60
+Both walk-in flows pay at the reception counter: lab-made orders show at the counter (*From the lab*), reception collects with Rs / % discount and prints the receipt, the lab sees Paid / Unpaid and samples only after payment. Tests: 123 green (3 new); E2E 25 green; Urdu complete. Fresh encrypted backup taken (the backup cron in OPS.md is not installed on this machine — owner to schedule).

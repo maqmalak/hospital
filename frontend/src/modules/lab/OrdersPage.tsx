@@ -14,10 +14,17 @@ import { LabHero, PriorityTag, rs, StatusChip, useLabLive } from "./shared";
 import { addDaysISO } from "@/utils/dates";
 
 export interface Template { name: string; test_code: string; department: string; price: number; sample_type: string; container: string; tat_hours: number; outsourced: number }
-interface Ctx { templates: Template[]; doctors: { name: string; doctor_name: string }[]; reference_labs: string[] }
+interface Ctx { templates: Template[]; doctors: { name: string; doctor_name: string }[]; reference_labs: string[]; payment_point?: string; can_collect?: boolean }
 interface Row { name: string; patient: string; patient_name: string; status: string; net_total: number; patient_share: number; priority: string; expected_at?: string;
-  tests: string[]; progress: Record<string, number>; sales_invoice?: string; creation: string; released_at?: string }
+  tests: string[]; progress: Record<string, number>; sales_invoice?: string; creation: string; released_at?: string; payment?: string }
 const STATUSES = ["", "Ordered", "Paid", "In Progress", "Partially Released", "Released"];
+/** D-60: payment status on every order — unpaid orders are paid at the reception counter before any sample. */
+function PayBadge({ p }: { p?: string }) {
+  if (!p) return null;
+  const tone = p === "Paid" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300" : p === "Unpaid" ? "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
+    : p === "Admission bill" ? "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300" : "bg-muted text-muted-foreground";
+  return <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold", tone)}>{p === "Paid" ? "✓ Paid" : p === "Unpaid" ? "Unpaid · pay at reception" : p === "Admission bill" ? "On admission bill" : p}</span>;
+}
 
 export default function LabOrdersPage() {
   const { t } = useTranslation();
@@ -53,7 +60,7 @@ export default function LabOrdersPage() {
         {period === "custom" && <div className="flex items-center gap-1"><input type="date" className={inputCls.replace("w-full", "") + " w-36"} value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
           <span className="text-muted-foreground">→</span><input type="date" className={inputCls.replace("w-full", "") + " w-36"} value={to} min={from} max={todayISO()} onChange={(e) => setTo(e.target.value)} /></div>}
         <div className="flex rounded-xl bg-muted p-1">{["", "Urgent", "Priority", "Normal"].map((p) => <button key={p || "all"} onClick={() => setPrio(p)} className={cn("rounded-lg px-2.5 py-1.5 text-xs font-semibold", prio === p ? "bg-card shadow" : "text-muted-foreground")}>{p || "Any priority"}</button>)}</div>
-        <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">{STATUSES.map((s) => <button key={s} onClick={() => setStatus(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "bg-card shadow" : "text-muted-foreground")}>{s || "All"}</button>)}</div>
+        <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">{STATUSES.map((s) => <button key={s} onClick={() => setStatus(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "bg-card shadow" : "text-muted-foreground")}>{s === "Ordered" ? "Unpaid" : s || "All"}</button>)}</div>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {(rows ?? []).map((r) => {
@@ -63,6 +70,7 @@ export default function LabOrdersPage() {
             <button key={r.name} onClick={() => setOpen(r.name)} className="group rounded-2xl border border-border bg-card p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
               <div className="flex items-start gap-2"><div className="min-w-0 flex-1"><div className="truncate font-bold">{r.patient_name}</div><div className="font-mono text-xs text-muted-foreground">{r.name} · {r.patient}{period !== "day" ? ` · ${r.creation.slice(5, 10)}` : ""}</div></div>
                 <PriorityTag p={r.priority} /><StatusChip s={r.status} /></div>
+              <div className="mt-1"><PayBadge p={r.payment} /></div>
               <div className="mt-2 flex flex-wrap gap-1">{r.tests.map((x, i) => <span key={i} className="rounded-md bg-violet-50 px-1.5 py-0.5 text-[11px] font-medium text-violet-800 dark:bg-violet-500/15 dark:text-violet-200">{x}</span>)}</div>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-teal-500" style={{ width: `${(done / Math.max(r.tests.length, 1)) * 100}%` }} /></div>
               <div className="mt-2 flex justify-between text-xs text-muted-foreground"><span className={cn(late && "font-bold text-rose-600")}>{r.expected_at ? `due ${r.expected_at.slice(11, 16)}` : ""}{late ? " · late" : ""}</span><span className="font-semibold text-foreground">{rs(r.patient_share || r.net_total)}</span></div>
@@ -94,12 +102,21 @@ export function NewOrderDialog({ onClose, onDone, patient: initial }: { onClose:
   const chosen = (ctx?.templates ?? []).filter((x) => sel.includes(x.name));
   const total = chosen.reduce((s, x) => s + x.price, 0);
   const tat = Math.max(0, ...chosen.map((x) => x.tat_hours || 0));
+  const atReception = ctx ? !ctx.can_collect : false;  // D-60: the patient pays at the reception counter
+  const [np, setNp] = useState<{ patient_name: string; gender: string; age: string; phone: string } | null>(null);
+  const register = async () => {
+    if (!np) return;
+    try {
+      const r = await call<{ name: string }>("patients.register", { data: JSON.stringify({ ...np, age: Number(np.age) || undefined }), duplicate_reason: "Walk-in at the laboratory" });
+      setPatient({ name: r.name, patient_name: np.patient_name, gender: np.gender, phone: np.phone } as PatientHit); setNp(null); toast.success(`Registered ${r.name}`);
+    } catch (e) { toast.error(humanizeError(e), { duration: 7000 }); }
+  };
   const save = async (pay: boolean) => {
     if (!patient) return;
     setBusy(true);
     try {
       const r = await call<{ name: string }>("lab.create_order", { data: { patient: patient.name, tests: sel, referring_doctor: doctor || undefined, external_referrer: external || undefined, priority, pay: pay ? 1 : 0, payment_mode: mode, cash_tendered: Number(tendered) || undefined, client_ref: ref } });
-      toast.success(pay ? `Paid · ${r.name}` : `Order ${r.name} saved`); onDone(r.name);
+      toast.success(pay ? `Paid · ${r.name}` : atReception ? `Order ${r.name} — send the patient to reception to pay` : `Order ${r.name} saved`, { duration: 6000 }); onDone(r.name);
     } catch (e) { toast.error(humanizeError(e), { duration: 7000 }); } finally { setBusy(false); }
   };
   return (
@@ -107,6 +124,14 @@ export function NewOrderDialog({ onClose, onDone, patient: initial }: { onClose:
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0">
           <PatientPicker value={patient} onPick={setPatient} onClear={() => setPatient(null)} autoFocus={!patient} />
+          {!patient && (np ? <div className="mt-2 grid grid-cols-6 gap-1.5 rounded-xl border border-violet-300 bg-violet-50/50 p-2 dark:bg-violet-500/5">
+            <input className={inputCls + " col-span-6 h-9"} placeholder="New patient name" value={np.patient_name} onChange={(e) => setNp({ ...np, patient_name: e.target.value })} />
+            <input className={inputCls + " col-span-3 h-9"} placeholder="Mobile 03XX XXXXXXX" value={np.phone} onChange={(e) => setNp({ ...np, phone: e.target.value })} />
+            <input className={inputCls + " col-span-1 h-9"} placeholder="Age" value={np.age} onChange={(e) => setNp({ ...np, age: e.target.value.replace(/\D/g, "") })} />
+            <div className="col-span-2 flex gap-1">{["Male", "Female"].map((g) => <button key={g} onClick={() => setNp({ ...np, gender: g })} className={cn("h-9 flex-1 rounded-lg border text-xs font-bold", np.gender === g ? "border-violet-600 bg-violet-600 text-white" : "border-border")}>{g}</button>)}</div>
+            <div className="col-span-6 flex justify-end gap-2"><Button size="sm" variant="ghost" onClick={() => setNp(null)}>Cancel</Button>
+              <Button size="sm" variant="save" disabled={!np.patient_name.trim() || !np.gender || !np.phone} onClick={() => void register()}>Register patient</Button></div></div>
+            : <button onClick={() => setNp({ patient_name: "", gender: "", age: "", phone: "" })} className="mt-2 text-xs font-semibold text-violet-700 dark:text-violet-300">+ New patient (register here)</button>)}
           <div className="mt-3 flex flex-wrap gap-2"><input className={inputCls + " max-w-xs"} placeholder="Search test or code" value={q} onChange={(e) => setQ(e.target.value)} />
             <div className="flex flex-wrap gap-1">{["", ...depts].map((d) => <button key={d} onClick={() => setDept(d)} className={cn("rounded-full border px-3 py-1 text-xs font-semibold", dept === d ? "border-violet-600 bg-violet-600 text-white" : "border-border")}>{d || "All"}</button>)}</div></div>
           <div className="mt-3 grid max-h-[46vh] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
@@ -127,11 +152,13 @@ export function NewOrderDialog({ onClose, onDone, patient: initial }: { onClose:
           <Field label="Referring doctor"><select className={inputCls} value={doctor} onChange={(e) => setDoctor(e.target.value)}><option value="">— walk-in / external —</option>{ctx?.doctors.map((d) => <option key={d.name} value={d.name}>{d.doctor_name}</option>)}</select></Field>
           {!doctor && <Field label="External referrer"><input className={inputCls} value={external} onChange={(e) => setExternal(e.target.value)} /></Field>}
           <div className="flex gap-2">{["Normal", "Priority", "Urgent"].map((p) => <button key={p} onClick={() => setPriority(p)} className={cn("flex-1 rounded-xl border py-2 text-sm font-bold", priority === p ? (p === "Urgent" ? "border-rose-600 bg-rose-600 text-white" : p === "Priority" ? "border-amber-500 bg-amber-500 text-white" : "border-teal-600 bg-teal-600 text-white") : "border-border")}>{p === "Urgent" ? "⚡ Urgent" : p === "Priority" ? "▲ Priority" : "Normal"}</button>)}</div>
+          {atReception ? <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm dark:bg-amber-500/10"><b>Payment at the reception counter.</b> Save the order and send the patient to reception with the order number; the sample is taken after payment.</div> : <>
           <Field label="Payment"><div className="flex flex-wrap gap-1">{["Cash", "Card", "JazzCash", "Easypaisa", "Bank Transfer"].map((m) => <button key={m} onClick={() => setMode(m)} className={cn("rounded-lg border px-2.5 py-1 text-xs font-semibold", mode === m ? "border-emerald-600 bg-emerald-600 text-white" : "border-border")}>{m}</button>)}</div></Field>
           {mode === "Cash" && <Field label="Cash tendered"><input className={inputCls + " text-end tabular-nums"} inputMode="numeric" value={tendered} onChange={(e) => setTendered(e.target.value.replace(/\D/g, ""))} />
             {Number(tendered) > total && <div className="mt-1 text-end text-sm font-bold text-emerald-600">Change {rs(Number(tendered) - total)}</div>}</Field>}
-          <Button variant="submit" size="lg" className="w-full" disabled={!patient || !sel.length} loading={busy} onClick={() => void save(true)}><Banknote className="h-5 w-5" />Collect {rs(total)}</Button>
-          <Button variant="outline" className="w-full" disabled={!patient || !sel.length || busy} onClick={() => void save(false)}><FilePlus2 className="h-4 w-4" />Save without payment</Button>
+          <Button variant="submit" size="lg" className="w-full" disabled={!patient || !sel.length} loading={busy} onClick={() => void save(true)}><Banknote className="h-5 w-5" />Collect {rs(total)}</Button></>}
+          {atReception ? <Button variant="submit" size="lg" className="w-full" disabled={!patient || !sel.length} loading={busy} onClick={() => void save(false)}><FilePlus2 className="h-5 w-5" />Save & send to reception · {rs(total)}</Button>
+            : <Button variant="outline" className="w-full" disabled={!patient || !sel.length || busy} onClick={() => void save(false)}><FilePlus2 className="h-4 w-4" />Save without payment</Button>}
         </div>
       </div>
     </Dialog>
@@ -142,10 +169,11 @@ interface Order { name: string; patient: string; patient_name: string; status: s
   payer_share: number; sales_invoice?: string; expected_at?: string; referring_doctor?: string; items: { name: string; template: string; status: string; price: number; sample?: string; result?: string; outsourced: number }[];
   samples: { name: string; sample_type: string; container: string; status: string; collected_at?: string; rejection_reason?: string }[];
   links: { name: string; expires_at: string; download_count: number; max_downloads: number; revoked: number; version: number; last_accessed_at?: string }[];
-  messages: { name: string; event: string; status: string; channel: string; creation: string }[]; handed_over_to?: string; handed_over_at?: string; report_remarks?: string; whatsapp_number?: string; whatsapp_opt_in?: number }
+  messages: { name: string; event: string; status: string; channel: string; creation: string }[]; receipt?: { name: string; posted_at: string; cashier_name?: string } | null; payment_point?: string; handed_over_to?: string; handed_over_at?: string; report_remarks?: string; whatsapp_number?: string; whatsapp_opt_in?: number }
 
 export function OrderDialog({ name, onClose }: { name: string; onClose: () => void }) {
-  const { data: o, refetch } = useApi<Order>("lab.order", { name });
+  const { hasRole } = useAuth();
+  const { data: o, refetch } = useApi<Order>("lab.order", { name }, { refetchInterval: 10_000 });
   const [mode, setMode] = useState("Cash");
   const pay = useAction("lab.pay", { invalidate: ["lab.orders"], success: "Payment collected", onSuccess: () => void refetch() });
   const release = useAction<{ link?: string }>("lab.release", { invalidate: ["lab.orders"], success: "Report released — link sent", onSuccess: () => void refetch() });
@@ -157,11 +185,16 @@ export function OrderDialog({ name, onClose }: { name: string; onClose: () => vo
   const preview = async () => { try { const html = await call<string>("lab.report_preview", { name }); const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); } catch (e) { toast.error(humanizeError(e)); } };
   if (!o) return <Dialog open onClose={onClose} title={name} size="lg"><div className="h-60 animate-pulse rounded-2xl bg-muted" /></Dialog>;
   const unpaid = ["Draft", "Ordered"].includes(o.status);
+  const atReception = o.payment_point !== "Lab counter" && !hasRole("PW Receptionist", "PW Cash Supervisor");
   const verified = o.items.filter((i) => i.status === "Verified").length;
   return (
     <Dialog open onClose={onClose} title={`${o.patient_name} · ${o.name}`} description={`${o.patient} · ${o.priority}${o.expected_at ? ` · expected ${o.expected_at.slice(0, 16)}` : ""}`} size="lg">
       <div className="mb-3 flex flex-wrap items-center gap-2"><PriorityTag p={o.priority} /><StatusChip s={o.status} /><span className="text-sm">Bill {rs(o.net_total)}{o.payer_share ? ` · panel ${rs(o.payer_share)}` : ""}</span>{o.sales_invoice && <span className="font-mono text-xs text-muted-foreground">{o.sales_invoice}</span>}</div>
-      {unpaid && <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-3 dark:bg-amber-500/10"><span className="flex-1 text-sm font-semibold">Payment due {rs(o.patient_share || o.net_total)}</span>
+      {o.receipt && <div className="mb-3 flex items-center gap-2 rounded-2xl border border-emerald-300 bg-emerald-50 p-3 text-sm dark:bg-emerald-500/10"><Banknote className="h-4 w-4 text-emerald-600" />
+        Paid at reception · <b>{o.receipt.name}</b> · {String(o.receipt.posted_at).slice(0, 16)}{o.receipt.cashier_name ? ` · ${o.receipt.cashier_name}` : ""} — take the sample.</div>}
+      {unpaid && atReception && <div className="mb-3 flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm dark:bg-amber-500/10"><Banknote className="h-4 w-4 text-amber-600" />
+        <span className="flex-1"><b>Waiting for payment at the reception counter</b> · {rs(o.patient_share || o.net_total)} · order <b className="font-mono">{o.name}</b></span></div>}
+      {unpaid && !atReception && <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-3 dark:bg-amber-500/10"><span className="flex-1 text-sm font-semibold">Payment due {rs(o.patient_share || o.net_total)}</span>
         <select className={inputCls.replace("w-full", "") + " w-36"} value={mode} onChange={(e) => setMode(e.target.value)}>{["Cash", "Card", "JazzCash", "Easypaisa", "Bank Transfer"].map((m) => <option key={m}>{m}</option>)}</select>
         <Button variant="submit" loading={pay.isPending} onClick={() => pay.mutate({ name, payment_mode: mode })}><Banknote className="h-4 w-4" />Collect</Button></div>}
       <Section title="Tests">

@@ -34,6 +34,23 @@ def patient(name):
 	return svc.patient_panel(name)
 
 
+@frappe.whitelist()
+def pending_lab(branch=None):
+	"""Lab orders made in the lab and waiting for payment here (D-60)."""
+	branch = scope_branch(branch, required=False)
+	require_roles(*ROLES)
+	return svc.unpaid_lab_orders(branch=branch or default_branch())
+
+
+@frappe.whitelist()
+def discount_limits():
+	"""This cashier's discount limits per billing type (above them the supervisor approves)."""
+	require_roles(*ROLES)
+	from hospital_vvs.services import discounts
+
+	return {bt: dict(zip(("percent", "amount"), discounts.limits_for(frappe.session.user, bt))) for bt in ("OPD Slip", "Lab", "General")}
+
+
 @frappe.whitelist(methods=["POST"])
 def price(data):
 	require_roles(*ROLES)

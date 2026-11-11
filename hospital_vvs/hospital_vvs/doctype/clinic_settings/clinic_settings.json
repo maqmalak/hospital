@@ -130,6 +130,7 @@
   "report_verification_method",
   "lab_auto_verify",
   "lab_allow_partial_release",
+  "lab_payment_point",
   "lb2",
   "critical_notify_message",
   "lab_open_time",
@@ -994,6 +995,14 @@
    "label": "Lab Allow Partial Release"
   },
   {
+   "default": "Reception counter",
+   "description": "Reception counter: the lab registers and orders, the patient pays at reception (receipt), then the lab samples (D-60)",
+   "fieldname": "lab_payment_point",
+   "fieldtype": "Select",
+   "label": "Lab Payment Point",
+   "options": "Reception counter\nLab counter"
+  },
+  {
    "fieldname": "lb2",
    "fieldtype": "Column Break"
   },
@@ -1789,7 +1798,7 @@
  "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-10 18:18:46.063681",
+ "modified": "2026-11-11 23:18:21.699973",
  "modified_by": "Administrator",
  "module": "Hospital VVS",
  "name": "Clinic Settings",

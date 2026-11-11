@@ -305,7 +305,8 @@ PATIENT = doctype("Patient", M, [
 	p(RECEPTIONIST, "rwcR"), p(RECEPTIONIST, "rw", permlevel=1),
 	p(DOCTOR, "rw"), p(DOCTOR, "rw", permlevel=1), p(NURSE, "r", permlevel=1), p(DEO, "rwc"), p(DEO, "rw", permlevel=1),
 	p(REVIEWER, "r", permlevel=1), p(PATHOLOGIST, "r", permlevel=1), p(OV_DOCTOR, "r", permlevel=1),
-] + [x for x in _patient_readers if x["role"] not in (DOCTOR, DEO)],
+	p(LAB_USER, "rwc"),  # D-60: the lab registers walk-in patients (no clinical permlevel-1 fields)
+] + [x for x in _patient_readers if x["role"] not in (DOCTOR, DEO, LAB_USER)],
 	title_field="patient_name", search_fields="patient_name,phone,legacy_mr_no", show_title_field_in_link=1,
 	image_field="photo", track_changes=1, sort_field="creation")
 

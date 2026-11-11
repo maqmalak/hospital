@@ -15,7 +15,7 @@ from hospital_vvs.utils import can_see_clinical, check_branch, default_branch, h
 LIST_FIELDS = ["name", "patient_name", "patient_name_ur", "gender", "dob", "phone", "city", "category", "cnic_masked", "photo",
 	"branch", "disabled", "merged_into", "creation"]
 CLINICAL_FIELDS = {"allergies", "chronic_conditions", "long_term_medicines", "blood_group"}
-REGISTER_ROLES = (R.RECEPTIONIST, R.DEO, R.DOCTOR, R.NURSE)
+REGISTER_ROLES = (R.RECEPTIONIST, R.DEO, R.DOCTOR, R.NURSE, R.LAB_USER)  # lab registers walk-ins (D-60)
 
 
 def age_of(dob):
@@ -60,7 +60,7 @@ def _similar(a, b):
 @frappe.whitelist()
 def find_duplicates(patient_name=None, phone=None, cnic=None, dob=None, age=None, exclude=None):
 	"""Likely duplicates: same CNIC; same phone + similar name; same name + DOB/age within a year."""
-	require_roles(*R.FRONT_DESK, R.DEO)
+	require_roles(*REGISTER_ROLES)  # same people who register (a Phase 7 guard had locked doctors, nurses and the lab out)
 	matches = {}
 	digits = cnic_digits(cnic)
 	if len(digits) == 13:

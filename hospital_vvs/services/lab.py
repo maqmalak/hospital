@@ -146,6 +146,9 @@ def collect(sample_name):
 	s = frappe.get_doc("Lab Sample", sample_name)
 	if s.status not in ("Pending",):
 		frappe.throw(_("Sample {0} is {1}.").format(s.name, s.status))
+	ti = frappe.db.get_value("Test Invoice", s.test_invoice, ["status", "bill_to_admission"], as_dict=True) or {}
+	if ti.get("status") in ("Ordered", "Draft") and not ti.get("bill_to_admission"):  # D-60: no sample before payment
+		frappe.throw(_("Order {0} is not paid yet. Send the patient to the reception counter first.").format(s.test_invoice), title=_("Unpaid"))
 	s.update({"status": "Collected", "collected_by": frappe.session.user, "collected_at": now_datetime()})
 	s.save(ignore_permissions=True)
 	_set_items(s, "Collected")

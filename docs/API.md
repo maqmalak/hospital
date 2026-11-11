@@ -125,6 +125,8 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 |---|---|---|---|---|
 | `context` | branch |  | ROLES |  |
 | `patient` | name |  | ROLES |  |
+| `pending_lab` | branch |  | ROLES | Lab orders made in the lab and waiting for payment here (D-60). |
+| `discount_limits` |  |  | ROLES | This cashier's discount limits per billing type (above them the supervisor approves). |
 | `price` | data | POST | ROLES |  |
 | `request_discounts` | data | POST | ROLES |  |
 | `discount_status` | names |  | ROLES |  |
@@ -261,6 +263,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | `orders` | date, status, q, branch, from_date, to_date, priority |  | ORDERING, PATHOLOGIST, NURSE | Lab orders by day / week / month / custom range (from_date..to_date), status, priority, or search (any date). |
 | `order` | name |  |  |  |
 | `samples` | status, branch |  | LAB_STAFF, NURSE |  |
+| `awaiting_payment` | branch |  | LAB_STAFF, RECEPTIONIST | Orders the lab made that the patient has not paid yet (paid at the reception counter, D-60). |
 | `sample_action` | name, action, reason, note | POST | LAB_STAFF, NURSE |  |
 | `scan` | code |  | LAB_STAFF | Barcode scan anywhere in the lab: sample, order or patient MR. |
 | `labels` | samples |  | LAB_STAFF, NURSE |  |
@@ -359,7 +362,7 @@ Objects and lists are sent as JSON strings. Roles: what the method checks itself
 | Method | Params | Flags | Roles | Summary |
 |---|---|---|---|---|
 | `search` | q, limit, include_disabled |  |  | MR no. / QR scan, phone, CNIC (exact, via hash), legacy MR or name. |
-| `find_duplicates` | patient_name, phone, cnic, dob, age, exclude |  | FRONT_DESK, DEO | Likely duplicates: same CNIC; same phone + similar name; same name + DOB/age within a year. |
+| `find_duplicates` | patient_name, phone, cnic, dob, age, exclude |  | REGISTER_ROLES | Likely duplicates: same CNIC; same phone + similar name; same name + DOB/age within a year. |
 | `register` | data, duplicate_reason | POST | REGISTER_ROLES |  |
 | `get` | name |  |  | Patient record. Clinical fields only for clinical roles and the front desk (field-level, server side). |
 | `update` | name, data | POST | REGISTER_ROLES |  |
