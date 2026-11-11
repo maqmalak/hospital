@@ -13,6 +13,7 @@ export default defineConfig({
   retries: 0,
   reporter: [["list"], ["html", { outputFolder: "e2e-report", open: "never" }]],
   globalSetup: "./e2e/global-setup.ts",
+  globalTeardown: "./e2e/global-teardown.ts",
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://hospital.localhost:8011",
     channel: "chrome",

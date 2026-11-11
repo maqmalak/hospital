@@ -19,6 +19,21 @@ def sessions(users):
 	return out
 
 
+def end_sessions(sids):
+	"""Sign out the sessions the tests minted, so a real person signed in as the same demo user is never pushed out
+	(each user has a simultaneous-session limit; Frappe ends the oldest session when it is passed)."""
+	from frappe.sessions import delete_session
+
+	sids = frappe.parse_json(sids) if isinstance(sids, str) else sids
+	for sid in (sids or {}).values():
+		try:
+			delete_session(sid, reason="E2E finished")
+		except Exception:
+			pass
+	frappe.db.commit()
+	print(json.dumps({"ended": len(sids or {})}))
+
+
 def state(**kw):
 	"""Small helpers the tests call for setup / checks that are not UI."""
 	what = kw.get("what")

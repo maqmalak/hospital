@@ -11,6 +11,7 @@ export default async function globalSetup() {
   const sids = JSON.parse(line) as Record<string, string>;
   const host = new URL(process.env.E2E_BASE_URL ?? "http://hospital.localhost:8011").hostname;
   mkdirSync(".e2e-state", { recursive: true });
+  writeFileSync(".e2e-state/sids.json", JSON.stringify(sids));  // global-teardown signs these out again
   for (const [user, sid] of Object.entries(sids)) {
     writeFileSync(stateFile(user), JSON.stringify({ cookies: [{ name: "sid", value: sid, domain: host, path: "/", expires: -1, httpOnly: true, secure: false, sameSite: "Lax" }], origins: [] }));
   }

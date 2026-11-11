@@ -19,4 +19,5 @@ test("a nurse signs in and lands on the control board", async ({ page }) => {
   await page.getByRole("button", { name: /sign in|log in|continue/i }).first().click();
   await expect(page).toHaveURL(/\/hms\/pw-home/);
   await expect(page.getByText(/OPD vitals/).first()).toBeVisible();
+  await page.request.post("/api/method/logout");  // do not leave a session behind for the real nurse
 });

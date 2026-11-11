@@ -462,8 +462,13 @@ def run():
 	CTX.clear()
 	CTX["rx"], CTX["mr"] = subject()
 	print(f"subject: {CTX['mr']} / {CTX['rx']}")
-	for fn in (h01, h02, h03, h04, h05, h06, h07, h08, h09, h10):
-		fn()
+	try:
+		for fn in (h01, h02, h03, h04, h05, h06, h07, h08, h09, h10):
+			fn()
+	finally:  # sign out the HTTP sessions this audit minted, so staff signed in as these demo users stay signed in
+		from hospital_vvs.devtools.e2e import end_sessions
+
+		end_sessions(CTX.get("sids") or {})
 	as_user("Administrator")
 	fails = [c for c in CHECKS if c["result"] == "FAIL"]
 	warns = [c for c in CHECKS if c["result"] == "WARN"]

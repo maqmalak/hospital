@@ -8,9 +8,12 @@ Lose at most **1 hour** of data (RPO), back online within **4 hours** (RTO).
   **Keep a copy of that key outside this server** (password manager / sealed envelope) — without it no backup can be restored.
 - Schedule (crontab of the bench user):
   ```
-  0 * * * *  cd ~/erpnext-react && ./apps/hospital_vvs/scripts/backup.sh db   >> logs/hv-backup.log 2>&1
+  0 * * * *  cd ~/erpnext-react && ./apps/hospital_vvs/scripts/backup.sh auto >> logs/hv-backup.log 2>&1
   30 2 * * * cd ~/erpnext-react && ./apps/hospital_vvs/scripts/backup.sh full >> logs/hv-backup.log 2>&1
   ```
+- **Installed on this machine 2026-11-11.** `auto` = DB backup every hour, plus a full backup whenever none was taken in the last 24 h —
+  cron skips jobs while a PC sleeps (this one slept 03:00–23:00 on 11 Nov and missed every backup), so the first hourly run after waking catches up.
+  The script sets its own PATH (cron has none for `bench`). Log: `logs/hv-backup.log`.
 - Off-site: set `HV_OFFSITE=user@host:/path` (rsync) or `HV_OFFSITE_S3=s3://bucket/path` in the cron line. Retention: 7 days hourly, 30 days daily
   on the server (`HV_KEEP_DAYS`), 12 monthly on the off-site bucket (lifecycle rule).
 
@@ -44,6 +47,10 @@ Fresh demo / training data: `bench --site <site> execute hospital_vvs.setup.demo
 | Staging | `staging.hospital` (to create) | production copy, anonymized |
 | Training | `training.hospital` (to create) | `bench --site training.hospital set-config hv_training_site 1` → red TRAINING banner; nightly reset = restore a clean backup + `hospital_vvs.setup.demo.seed` |
 | Production | client server | manual tagged release, `bench migrate`, rollback = previous tag + restore |
+
+## Sessions
+Each staff user may have 5 signed-in sessions at once (User → Simultaneous Sessions); past that Frappe signs out the oldest. The audit and
+browser tests sign out the sessions they create (`devtools/e2e.end_sessions`), so running them never logs out staff using the same demo user.
 
 ## Monitoring
 - `GET /api/method/hospital_vvs.api.ops.health` (PW Admin): scheduler on/stale, failed jobs 24 h, queue length, failed/queued messages, disk, DB size, last backup, error-log count.
