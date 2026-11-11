@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/skeleton";
 const LoginPage = lazy(() => import("@/modules/auth/LoginPage"));
 const DesktopPage = lazy(() => import("@/modules/home/DesktopPage"));
 const UsersPage = lazy(() => import("@/modules/admin/UsersPage"));
+const HelpPage = lazy(() => import("@/modules/help/HelpPage"));
 const DashboardPage = lazy(() => import("@/modules/dashboard/DashboardPage"));
 const RegistrationPage = lazy(() => import("@/modules/patients/RegistrationPage"));
 const PatientsPage = lazy(() => import("@/modules/patients/PatientsPage"));
@@ -176,6 +177,7 @@ export default function App() {
         <Route path="/reports/:report" element={g("/reports", <ReportsPage />)} />
         <Route path="/audit" element={g("/audit", <AuditPage />)} />
         <Route path="/users" element={g("/users", <UsersPage />)} />
+        <Route path="/help" element={g("/help", <HelpPage />)} />
         <Route path="/settings" element={g("/settings", <SettingsPage />)} />
         <Route path="/masters" element={g("/masters", <MastersPage />)} />
         <Route path="/masters/:kind" element={g("/masters", <MastersPage />)} />

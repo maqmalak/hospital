@@ -55,3 +55,8 @@ jspm_packages/
 .aider*
 frontend/node_modules
 hospital_vvs/public/frontend
+
+# help videos and guide screenshots (generated; videos are copied to each server)
+tools/videos/out/
+tools/guides/out/
+hospital_vvs/public/downloads/

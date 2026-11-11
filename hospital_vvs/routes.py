@@ -13,6 +13,7 @@ CASH_ROLES = [RECEPTIONIST, LAB_USER, PHARMACY_CASHIER, DISPENSER, CASH_SUPERVIS
 
 DEFAULT_ROUTES = [
 	("/pw-home", "Desktop", ALL, ""),
+	("/help", "Help & guides", ALL, ""),
 	("/pw-dashboard", "Dashboard", [ADMIN, DOCTOR, ACCOUNTANT], ""),
 	("/registration", "Patient registration", [RECEPTIONIST, DEO, LAB_USER], ""),
 	("/patients", "Patients", [RECEPTIONIST, DOCTOR, NURSE, DEO], ""),

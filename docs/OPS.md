@@ -26,6 +26,14 @@ Lose at most **1 hour** of data (RPO), back online within **4 hours** (RTO).
 | Demo site only | OPD demo data | `scripts/opd_demo.sh` (12 new patients, 30 visits) |
 | Demo site only, after OPD | IPD / ER demo data | `scripts/ipd_demo.sh` — cleaned beds back to Available, yesterday's ER visits closed (admit / home / referred), new ER arrivals triaged, longest stays discharged (summary → final bill → settlement or refund → bed to Cleaning), today's OPD patients admitted with an advance, vitals / nursing note / diet / due doses for every inpatient |
 
+## Help centre (manuals, guides, videos)
+- Manuals: edit `hospital_vvs/manuals/<slug>.md` (frontmatter `title`, `roles`, `order`); bold a screen name exactly as in the menu and it links to that screen.
+- PDF guides: `node tools/guides/build.mjs` (screenshots + PDFs; `--no-shots` re-renders; `lab ipd` only those) → `hospital_vvs/public/help/`.
+- Videos: `node tools/videos/record.mjs` (all) or `node tools/videos/record.mjs 00 07` (by prefix) → `tools/videos/out/`; then `python3 tools/videos/publish.py`
+  copies them to `hospital_vvs/public/downloads/videos/` with posters and durations, and a hand-over set to `deliverables/hospital_vvs/`.
+  Recording creates demo patients, admissions and payments — run it on the demo / training site only. Re-record after a screen changes.
+- A guide or video appears on `/help` only when its file is on the server; copy `public/downloads/videos/` to each server.
+
 ## Restore drill (monthly)
 1. Quick check (any time, touches no site): `./apps/hospital_vvs/scripts/verify_backup.sh` — decrypts the newest DB backup and counts tables.
 2. Full drill on staging:
