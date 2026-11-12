@@ -14,6 +14,9 @@ export default {
         15: "3.75rem",
       },
       colors: {
+        /* VVS gold (D-72): the old teal brand scale now resolves to gold, so every teal-* class follows the landing theme. */
+        teal: { 50: "#FBF8EF", 100: "#F5EDD5", 200: "#EBDCAB", 300: "#E0C77E", 400: "#D2B260", 500: "#B8913A", 600: "#9A7A2C", 700: "#7A5C1A", 800: "#5E4614", 900: "#46340F", 950: "#2A1F08" },
+        ink: { DEFAULT: "#14171C", 900: "#0E1013", 800: "#16181C", 700: "#1F2228" },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         "input-bg": "hsl(var(--input-bg))",

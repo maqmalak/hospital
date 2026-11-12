@@ -16,6 +16,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn";
+import { VvsMark } from "@/components/brand";
 
 /** /pw-home — the Desktop (real-estate style home, D-57): glossy app icons per menu group with a hover playbook, what needs
  *  attention, quick links, and a live activity panel. Data: hospital_vvs.api.dashboard.home (only screens the user can open). */
@@ -50,7 +51,7 @@ const ALERT_STYLE: Record<string, { icon: LucideIcon; dot: string; pill: string;
   waiting: { icon: Stethoscope, dot: "from-amber-400 to-orange-500", pill: "bg-amber-500/15 text-amber-700 ring-amber-500/30 dark:text-amber-300", tag: "Waiting" },
   verify: { icon: FlaskConical, dot: "from-violet-500 to-purple-600", pill: "bg-violet-500/15 text-violet-600 ring-violet-500/30 dark:text-violet-300", tag: "Verify" },
   samples: { icon: TestTube, dot: "from-sky-500 to-blue-600", pill: "bg-sky-500/15 text-sky-600 ring-sky-500/30 dark:text-sky-300", tag: "Collect" },
-  discharge: { icon: BedDouble, dot: "from-teal-500 to-cyan-600", pill: "bg-teal-500/15 text-teal-600 ring-teal-500/30 dark:text-teal-300", tag: "Pending" },
+  discharge: { icon: BedDouble, dot: "from-teal-500 to-teal-600", pill: "bg-teal-500/15 text-teal-600 ring-teal-500/30 dark:text-teal-300", tag: "Pending" },
   preauth: { icon: ShieldPlus, dot: "from-indigo-500 to-blue-600", pill: "bg-indigo-500/15 text-indigo-600 ring-indigo-500/30 dark:text-indigo-300", tag: "Decide" },
   expenses: { icon: Receipt, dot: "from-orange-400 to-rose-500", pill: "bg-orange-500/15 text-orange-600 ring-orange-500/30 dark:text-orange-300", tag: "Approval" },
   pharmacy: { icon: Pill, dot: "from-emerald-500 to-green-600", pill: "bg-emerald-500/15 text-emerald-600 ring-emerald-500/30 dark:text-emerald-300", tag: "In progress" },
@@ -95,10 +96,9 @@ export default function DesktopPage() {
       <main className="flex min-w-0 flex-[999_1_640px] flex-col gap-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-300 via-teal-500 to-emerald-600 text-lg font-black text-white shadow-lg shadow-teal-900/30">
-              <span className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/30" />V</span>
+            <VvsMark className="h-11 w-11 shrink-0" />
             <div>
-              <h1 className="text-xl font-semibold tracking-tight">{t(greet)}, {name.split(" ")[0]}</h1>
+              <h1 className="vvs-serif text-2xl font-semibold tracking-tight">{t(greet)}, <span className="vvs-gold-text">{name.split(" ")[0]}</span></h1>
               <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
             </div>
           </div>
@@ -246,10 +246,10 @@ function NeedsAttention({ alerts, loading }: { alerts?: Alert[]; loading: boolea
 
 // ------------------------------------------------------------------ right panel
 const CATEGORY: Record<string, string> = { opd: "OPD", lab: "Lab", ipd: "IPD & ER", finance: "Finance" };
-const CAT_GRADIENT: Record<string, string> = { opd: "from-teal-500 to-cyan-600", lab: "from-violet-500 to-purple-600", ipd: "from-sky-500 to-blue-600", finance: "from-rose-500 to-red-600" };
+const CAT_GRADIENT: Record<string, string> = { opd: "from-teal-500 to-teal-600", lab: "from-violet-500 to-purple-600", ipd: "from-sky-500 to-blue-600", finance: "from-rose-500 to-red-600" };
 const DOC_ICON: Record<string, LucideIcon> = { "OPD Slip": ClipboardList, Prescription: Stethoscope, "Test Invoice": FlaskConical, "Bed Allotment": BedDouble, "ER Visit": Siren, Expense: Receipt };
 const MODULE_STYLE: Record<string, { g: string; icon: LucideIcon }> = {
-  OPD: { g: "from-teal-400 to-cyan-600", icon: Stethoscope }, Lab: { g: "from-violet-400 to-purple-600", icon: FlaskConical }, IPD: { g: "from-sky-400 to-blue-600", icon: BedDouble },
+  OPD: { g: "from-teal-400 to-teal-600", icon: Stethoscope }, Lab: { g: "from-violet-400 to-purple-600", icon: FlaskConical }, IPD: { g: "from-sky-400 to-blue-600", icon: BedDouble },
   ER: { g: "from-red-400 to-orange-600", icon: Siren }, Pharmacy: { g: "from-emerald-400 to-green-600", icon: Pill }, Finance: { g: "from-pink-400 to-rose-600", icon: HandCoins },
   Appointments: { g: "from-indigo-400 to-violet-600", icon: ListTodo },
 };
@@ -282,7 +282,7 @@ function ActivityPanel({ home, loading, tab, setTab, onChanged }: { home?: Home;
         <div aria-hidden className="pointer-events-none absolute -start-20 top-10 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
         <div className="relative space-y-4 p-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-700 text-white shadow-lg shadow-teal-500/30 ring-1 ring-inset ring-white/20"><Activity className="h-5 w-5" /></span>
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 text-white shadow-lg shadow-teal-500/30 ring-1 ring-inset ring-white/20"><Activity className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1"><h2 className="text-lg font-semibold leading-tight">Recent Activity</h2><p className="truncate text-xs text-muted-foreground">Latest updates from the hospital</p></div>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
               <span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" /></span>Live</span>
@@ -309,7 +309,7 @@ function ActivityPanel({ home, loading, tab, setTab, onChanged }: { home?: Home;
               {week.map((d) => (
                 <div key={d.date} className="group/bar relative flex h-full flex-1 flex-col justify-end">
                   <span className="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2 rounded bg-foreground px-1 text-[9px] font-semibold tabular-nums text-background opacity-0 group-hover/bar:opacity-100">{d.count}</span>
-                  <span title={`${dayName(d.date)} ${d.date} · ${d.count}`} className={cn("w-full rounded-md bg-gradient-to-t", d.date === today ? "from-teal-600 to-emerald-400 shadow-md shadow-teal-500/30" : "from-teal-500/40 to-teal-400/20 group-hover/bar:from-teal-500/70")}
+                  <span title={`${dayName(d.date)} ${d.date} · ${d.count}`} className={cn("w-full rounded-md bg-gradient-to-t", d.date === today ? "from-teal-600 to-teal-500 shadow-md shadow-teal-500/30" : "from-teal-500/40 to-teal-400/20 group-hover/bar:from-teal-500/70")}
                     style={{ height: `${peak ? Math.max(8, (d.count / peak) * 100) : 8}%` }} />
                 </div>))}
             </div>
@@ -319,7 +319,7 @@ function ActivityPanel({ home, loading, tab, setTab, onChanged }: { home?: Home;
           <ModuleMix counts={home.module_mix.counts} />
 
           <div className="flex gap-1 overflow-x-auto rounded-xl bg-muted/60 p-1 scrollbar-thin">
-            {tabs.map((x) => <button key={x.key} type="button" onClick={() => setTab(x.key)} className={cn("shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all", tab === x.key ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground")}>{x.label}</button>)}
+            {tabs.map((x) => <button key={x.key} type="button" onClick={() => setTab(x.key)} className={cn("shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all", tab === x.key ? "tab-gold" : "text-muted-foreground hover:text-foreground")}>{x.label}</button>)}
           </div>
 
           <div className="-mx-1 max-h-[560px] space-y-4 overflow-y-auto px-1 scrollbar-thin">
@@ -399,7 +399,7 @@ function ModuleMix({ counts }: { counts: Record<string, Record<string, number>> 
     <div className="rounded-xl border border-border bg-background/40 p-3">
       <div className="mb-2.5 flex items-center justify-between gap-2">
         <div><div className="text-xs font-semibold">Share by module</div><div className="text-[10px] text-muted-foreground">{total ? <><b className="tabular-nums text-foreground">{total.toLocaleString()}</b> records</> : "Nothing yet"}</div></div>
-        <div className="flex rounded-lg bg-muted/70 p-0.5">{PERIODS.map(([k, l]) => <button key={k} type="button" onClick={() => setPeriod(k)} className={cn("rounded-md px-2 py-0.5 text-[10px] font-semibold", active === k ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground")}>{l}</button>)}</div>
+        <div className="flex rounded-lg bg-muted/70 p-0.5">{PERIODS.map(([k, l]) => <button key={k} type="button" onClick={() => setPeriod(k)} className={cn("rounded-md px-2 py-0.5 text-[10px] font-semibold", active === k ? "tab-gold" : "text-muted-foreground hover:text-foreground")}>{l}</button>)}</div>
       </div>
       {!total ? <div className="flex h-10 items-center justify-center rounded-full border border-dashed border-border text-[11px] text-muted-foreground">Nothing in this period yet</div> : (
         <>

@@ -35,7 +35,7 @@ interface NewP { patient_name: string; gender: string; age: string; phone: strin
 
 const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
 const KIND_STYLE: Record<Kind, { icon: typeof Stethoscope; tone: string }> = {
-  Consultation: { icon: Stethoscope, tone: "from-teal-500 to-emerald-600" }, Service: { icon: HandCoins, tone: "from-sky-500 to-blue-600" },
+  Consultation: { icon: Stethoscope, tone: "from-teal-500 to-teal-600" }, Service: { icon: HandCoins, tone: "from-sky-500 to-blue-600" },
   Lab: { icon: FlaskConical, tone: "from-violet-500 to-indigo-600" }, "Lab Order": { icon: FlaskConical, tone: "from-purple-600 to-fuchsia-600" }, "IPD Advance": { icon: BedDouble, tone: "from-amber-500 to-orange-600" },
   "IPD Settlement": { icon: BedDouble, tone: "from-orange-500 to-red-600" }, "Online Fee": { icon: Globe, tone: "from-fuchsia-500 to-purple-600" },
   Dues: { icon: ReceiptText, tone: "from-rose-500 to-pink-600" },
@@ -177,7 +177,7 @@ export default function CounterPage() {
               const billsN = panel ? panel.dues.length + panel.online.length + (panel.admission ? 1 : 0) + (panel.lab_orders?.length ?? 0) : 0;
               const n = k === "bills" ? billsN : k === "fromlab" ? (fromLab.data?.length ?? 0) : 0;
               return (
-              <button key={k} onClick={() => setTab(k)} disabled={(k === "bills" && (!patient || offline)) || (k === "fromlab" && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "bg-card shadow" : "text-muted-foreground")}>
+              <button key={k} onClick={() => setTab(k)} disabled={(k === "bills" && (!patient || offline)) || (k === "fromlab" && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "tab-gold" : "text-muted-foreground")}>
                 <I className="h-4 w-4" />{l}{n ? <span className={cn("rounded-full px-1.5 text-[10px] text-white", k === "fromlab" ? "bg-fuchsia-600" : "bg-rose-600")}>{n}</span> : null}</button>); })}</div>
           </div>
           {tab === "lab" && <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">{["", ...depts].map((d) => <button key={d} onClick={() => setDept(d)} className={cn("rounded-full border px-3 py-1 text-xs font-semibold", dept === d ? "border-violet-600 bg-violet-600 text-white" : "border-border")}>{d || "All"}</button>)}</div>}
@@ -447,7 +447,7 @@ function PayDialog({ total, modes, offline, lines, patient, newP, branch, counte
             {auths && <div className="mt-2 space-y-0.5 text-xs">{Object.entries(auths).map(([k, v]) => <div key={k}>{k.replace("Consultation:", "Consultation ")} · <b>{v.status}</b> ({v.name})</div>)}</div>}</div>}
         </div>
         <div className="space-y-2">
-          <div className="rounded-2xl bg-gradient-to-br from-teal-800 to-emerald-900 p-4 text-white">
+          <div className="rounded-2xl bg-gradient-to-br from-teal-800 to-teal-900 p-4 text-white">
             <div className="flex justify-between text-sm text-white/80"><span>Total</span><span className="tabular-nums">{rs(total)}</span></div>
             <div className="flex justify-between text-sm text-white/80"><span>Paid</span><span className="tabular-nums">{rs(paid)}</span></div>
             <div className="mt-2 text-[10px] uppercase tracking-widest text-white/60">{change ? "Change" : "Due"}</div><div className="text-4xl font-black tabular-nums">{rs(change || due)}</div>

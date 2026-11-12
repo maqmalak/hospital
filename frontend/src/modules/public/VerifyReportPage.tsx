@@ -13,13 +13,13 @@ export default function VerifyReportPage() {
   const [err, setErr] = useState("");
   useEffect(() => { getCall<R>("hospital_vvs.api.lab.verify_report", { name, sig }).then(setR).catch((e) => setErr(humanizeError(e))); }, [name, sig]);
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-teal-50 to-sky-100 p-4 dark:from-slate-950 dark:to-teal-950">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 p-4 dark:from-slate-950 dark:to-teal-950">
       <div className="w-full max-w-md overflow-hidden rounded-3xl bg-card shadow-2xl">
         {!r && !err && <div className="p-10 text-center text-muted-foreground">Checking…</div>}
         {(err || (r && !r.valid && !r.report)) && <div className="p-8 text-center"><ShieldAlert className="mx-auto h-14 w-14 text-rose-500" /><div className="mt-3 text-xl font-bold">Not a valid report</div>
           <p className="mt-1 text-sm text-muted-foreground">This QR code does not match any report issued by the laboratory. Please contact the laboratory.</p></div>}
         {r?.report && <>
-          <div className={r.valid ? "bg-gradient-to-r from-teal-600 to-sky-600 p-6 text-white" : "bg-amber-500 p-6 text-white"}>
+          <div className={r.valid ? "bg-gradient-to-r from-teal-600 to-teal-500 p-6 text-white" : "bg-amber-500 p-6 text-white"}>
             <div className="flex items-center gap-2 text-sm opacity-90"><FlaskConical className="h-4 w-4" />{r.clinic} · Laboratory</div>
             <div className="mt-2 flex items-center gap-2 text-2xl font-black">{r.valid ? <BadgeCheck className="h-7 w-7" /> : <ShieldAlert className="h-7 w-7" />}{r.valid ? "Genuine report" : `Report ${r.status?.toLowerCase()}`}</div>
             <div className="mt-1 font-mono text-sm opacity-90">{r.report} · version {r.version}</div></div>

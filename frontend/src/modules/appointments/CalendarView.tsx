@@ -64,9 +64,9 @@ export function CalendarView({ view, setView, onBook, onOpen, shift = "all", doc
         </div>
         <h2 className="min-w-0 flex-1 truncate px-2 text-lg font-bold">{title}</h2>
         {view === "multi" && <div className="flex rounded-xl bg-muted p-1">{[3, 5, 10, 14].map((n) => (
-          <button key={n} onClick={() => { setSpan(n); try { localStorage.setItem("hv.cal.span", String(n)); } catch { /* ignore */ } }} className={cn("rounded-lg px-2.5 py-1 text-xs font-bold", span === n ? "bg-card shadow-sm" : "text-muted-foreground")}>{n}d</button>))}</div>}
+          <button key={n} onClick={() => { setSpan(n); try { localStorage.setItem("hv.cal.span", String(n)); } catch { /* ignore */ } }} className={cn("rounded-lg px-2.5 py-1 text-xs font-bold", span === n ? "tab-gold" : "text-muted-foreground")}>{n}d</button>))}</div>}
         <div className="flex rounded-xl bg-muted p-1">{([["day", "Day"], ["multi", "Multi-day"], ["week", "Week"], ["month", "Month"]] as [CalView, string][]).map(([v, l]) => (
-          <button key={v} onClick={() => setView(v)} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", view === v ? "bg-gradient-to-r from-teal-600 to-emerald-500 text-white shadow-sm" : "text-muted-foreground")}>{l}</button>))}</div>
+          <button key={v} onClick={() => setView(v)} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", view === v ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-sm" : "text-muted-foreground")}>{l}</button>))}</div>
       </div>
       <Legend />
       {!base.data ? <div className="h-96 animate-pulse bg-muted/40" />
@@ -183,7 +183,7 @@ function MonthGrid({ data, anchor, start, doctors, onDay }: { data: MonthData; a
         return (
           <button key={k} onClick={() => onDay(d)} className={cn("group min-h-[110px] border-b border-e border-border/60 p-2 text-start transition-colors hover:bg-teal-50/60 dark:hover:bg-teal-500/5", !inMonth && "bg-muted/30 text-muted-foreground/60")}>
             <div className="flex items-center justify-between">
-              <span className={cn("flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold", k === today && "bg-gradient-to-br from-teal-600 to-emerald-500 text-white")}>{d.getDate()}</span>
+              <span className={cn("flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold", k === today && "bg-gradient-to-br from-teal-600 to-teal-500 text-white")}>{d.getDate()}</span>
               {pend > 0 && <span className="rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white">{pend} req</span>}
             </div>
             {closed ? <div className="mt-2 rounded-md bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-500/20 dark:text-slate-300">Closed{closed.reason ? ` · ${closed.reason}` : ""}</div>

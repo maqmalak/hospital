@@ -45,7 +45,7 @@ export default function WardPage() {
       <PageHeader title="Wards & beds" icon={BedDouble} color="from-emerald-500 to-teal-600" subtitle={`${branch} · ${beds.length} ${t("Beds").toLowerCase()} · ${data?.occupancy ?? 0}% ${t("Occupancy").toLowerCase()}`}
         actions={<>
           <div className="flex rounded-xl bg-muted p-1">{([["cards", LayoutGrid, "Cards"], ["map", MapIcon, "Map"]] as const).map(([k, I, l]) => (
-            <button key={k} onClick={() => setView(k)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold", view === k ? "bg-card shadow-sm" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>))}</div>
+            <button key={k} onClick={() => setView(k)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold", view === k ? "tab-gold" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>))}</div>
           <Link to="/display/ward" target="_blank"><Button variant="outline"><MonitorPlay className="h-4 w-4" />Kiosk</Button></Link>
         </>} />
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">

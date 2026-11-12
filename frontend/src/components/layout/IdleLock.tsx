@@ -47,7 +47,7 @@ export function IdleLock({ minutes }: { minutes: number }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xl">
       <form onSubmit={(e) => { e.preventDefault(); void unlock(); }} className="w-full max-w-sm rounded-2xl border border-white/10 bg-card p-6 text-center shadow-2xl">
-        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-white"><Lock className="h-6 w-6" /></div>
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-teal-600 text-white"><Lock className="h-6 w-6" /></div>
         <h2 className="text-lg font-bold">{t("Screen locked")}</h2>
         <p className="mb-4 text-sm text-muted-foreground">{boot?.full_name} · {t("Enter your password to continue")}</p>
         <input type="password" autoFocus value={pwd} onChange={(e) => setPwd(e.target.value)} className="mb-3 h-11 w-full rounded-lg border border-input bg-[hsl(var(--input-bg))] px-3" placeholder={t("Password")} />

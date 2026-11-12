@@ -52,7 +52,7 @@ export default function OnlineVisitStatusPage() {
           {v.status === "Pending" && <div className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-500/10 dark:text-amber-200"><Clock className="me-1 inline h-4 w-4" />{t("Waiting for the clinic")}</div>}
         </div>
 
-        {v.status === "Accepted" && <div className="rounded-3xl bg-gradient-to-br from-teal-700 to-emerald-800 p-5 text-white shadow-xl">
+        {v.status === "Accepted" && <div className="rounded-3xl bg-gradient-to-br from-teal-700 to-teal-800 p-5 text-white shadow-xl">
           <div className="flex items-center gap-3"><Stethoscope className="h-6 w-6" /><div><div className="text-xs uppercase tracking-widest text-white/70">{t("Your doctor")}</div><div className="text-lg font-bold">{doc}</div>
             <div className="text-xs text-white/70">{v.doctor?.specialization}</div></div></div>
           <div className="mt-3 flex items-center gap-2 text-sm"><CalendarClock className="h-4 w-4" />{when(v.scheduled_at)}</div>

@@ -31,7 +31,7 @@ export function PatientFile({ mr }: { mr: string }) {
   const tt = data.totals;
   return (
     <section className="mt-5 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-      <div className="relative overflow-hidden bg-gradient-to-r from-teal-800 via-teal-700 to-emerald-600 p-5 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-r from-teal-800 via-teal-700 to-teal-500 p-5 text-white">
         <div className="absolute -end-10 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex flex-wrap items-center gap-3"><FileText className="h-5 w-5" /><h2 className="flex-1 text-lg font-extrabold">Patient file</h2>
           <span className="text-xs text-white/75">Every open of this file is recorded in the audit log</span></div>
@@ -51,7 +51,7 @@ export function PatientFile({ mr }: { mr: string }) {
         {tab === "visits" && (data.visits.length ? (
           <div className="space-y-2">{data.visits.map((v) => (
             <div key={v.name} className="grid gap-3 rounded-2xl border border-border p-3 transition-colors hover:bg-muted/40 md:grid-cols-[90px_1fr_1fr_auto]">
-              <div className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 py-2 dark:from-teal-500/10 dark:to-emerald-500/5">
+              <div className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-teal-50 py-2 dark:from-teal-500/10 dark:to-emerald-500/5">
                 <span className="text-[10px] font-semibold uppercase text-muted-foreground">Token</span><span className="text-2xl font-extrabold text-teal-700 dark:text-teal-300">{v.token_no}</span>
                 <span className="text-[10px] text-muted-foreground">{v.posting_date.slice(5)} · {v.posting_time}</span></div>
               <div className="min-w-0"><div className="flex flex-wrap items-center gap-1.5"><b>{v.doctor_name}</b><span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", CHECK[v.checkup])}>{v.checkup === "Seen" ? <CheckCircle2 className="me-0.5 inline h-3 w-3" /> : <Clock className="me-0.5 inline h-3 w-3" />}{v.checkup}</span>
@@ -98,7 +98,7 @@ export function PatientFile({ mr }: { mr: string }) {
               <div className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">Treatment costs</div>
               {data.costs.map((c) => { const max = Math.max(...data.costs.map((x) => x.amount), 1); return (
                 <div key={c.item_name + c.billing_type} className="mb-2.5"><div className="mb-1 flex justify-between gap-2 text-xs"><span className="truncate">{c.item_name} <span className="text-muted-foreground">× {c.qty}</span></span><span className="font-semibold tabular-nums">{rs(c.amount)}</span></div>
-                  <div className="h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400" style={{ width: `${(c.amount / max) * 100}%` }} /></div></div>); })}
+                  <div className="h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-gradient-to-r from-teal-500 to-teal-400" style={{ width: `${(c.amount / max) * 100}%` }} /></div></div>); })}
               {!data.costs.length && <p className="text-sm text-muted-foreground">Nothing billed yet.</p>}
             </div>
             <div className="rounded-2xl border border-border p-4 text-sm">

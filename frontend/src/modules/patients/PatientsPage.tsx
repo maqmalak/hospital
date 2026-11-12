@@ -53,11 +53,11 @@ export default function PatientsPage() {
   const setV = (v: "cards" | "list") => { setView(v); try { localStorage.setItem("hv.patients.view", v); } catch { /* ignore */ } };
   const name = (p: P) => (i18n.language === "ur" && p.patient_name_ur ? p.patient_name_ur : p.patient_name);
   const go = (path: string) => (e: MouseEvent) => { e.stopPropagation(); nav(path); };
-  const chip = (active: boolean) => cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-colors", active ? "bg-gradient-to-r from-teal-600 to-emerald-500 text-white shadow-sm" : "bg-muted hover:bg-accent");
+  const chip = (active: boolean) => cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-colors", active ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white shadow-sm" : "bg-muted hover:bg-accent");
 
   return (
     <div className="mx-auto max-w-[1500px]">
-      <div className="relative mb-5 overflow-hidden rounded-3xl bg-gradient-to-br from-teal-800 via-teal-700 to-emerald-500 p-5 text-white shadow-lg sm:p-6">
+      <div className="relative mb-5 overflow-hidden rounded-3xl bg-gradient-to-br from-teal-800 via-teal-700 to-teal-500 p-5 text-white shadow-lg sm:p-6">
         <div className="absolute -end-16 -top-20 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute -bottom-24 start-1/4 h-56 w-96 rounded-full bg-emerald-300/20 blur-3xl" />
         <div className="relative flex flex-wrap items-center gap-4">
@@ -91,7 +91,7 @@ export default function PatientsPage() {
           <option value="recent">Newest first</option><option value="visit">Last visit</option><option value="visits">Most visits</option><option value="name">Name A–Z</option></select>
         <div className="flex rounded-xl bg-muted p-1">
           {([["cards", LayoutGrid, "Cards"], ["list", List, "List"]] as const).map(([k, I, l]) => (
-            <button key={k} onClick={() => setV(k)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold", view === k ? "bg-card shadow-sm" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>))}
+            <button key={k} onClick={() => setV(k)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold", view === k ? "tab-gold" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>))}
         </div>
       </div>
 
@@ -129,7 +129,7 @@ export default function PatientsPage() {
                   </div>
                 </div>
                 <div className="mx-4 mt-3 grid grid-cols-3 overflow-hidden rounded-2xl border border-border text-center">
-                  <div className="bg-gradient-to-br from-teal-50 to-emerald-50 py-2 dark:from-teal-500/10 dark:to-emerald-500/5"><div className="text-lg font-extrabold tabular-nums text-teal-700 dark:text-teal-300">{p.visits}</div><div className="text-[10px] text-muted-foreground">{t("Visits")}</div></div>
+                  <div className="bg-gradient-to-br from-teal-50 to-teal-50 py-2 dark:from-teal-500/10 dark:to-emerald-500/5"><div className="text-lg font-extrabold tabular-nums text-teal-700 dark:text-teal-300">{p.visits}</div><div className="text-[10px] text-muted-foreground">{t("Visits")}</div></div>
                   <div className="border-s border-border py-2"><div className="text-xs font-bold">{ago(p.last_visit)}</div><div className="text-[10px] text-muted-foreground">Last visit</div></div>
                   <div className="border-s border-border py-2"><div className="text-xs font-bold">{p.next_appointment ? p.next_appointment.slice(5) : "—"}</div><div className="text-[10px] text-muted-foreground">Next booking</div></div>
                 </div>
@@ -146,7 +146,7 @@ export default function PatientsPage() {
         ) : (
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className="overflow-x-auto"><table className="w-full text-sm">
-              <thead><tr className="bg-gradient-to-r from-teal-700 to-emerald-600 text-xs uppercase tracking-wide text-white">
+              <thead><tr className="bg-gradient-to-r from-teal-700 to-teal-500 text-xs uppercase tracking-wide text-white">
                 <th className="px-4 py-3 text-start">{t("Patient")}</th><th className="text-start">{t("MR No.")}</th><th className="text-start">{t("Phone")}</th>
                 <th className="text-start">{t("Category")}</th><th className="text-end">{t("Visits")}</th><th className="px-3 text-start">Last visit</th><th className="text-start">Flags</th><th className="px-3" /></tr></thead>
               <tbody>{rows.map((p) => (
@@ -180,7 +180,7 @@ export default function PatientsPage() {
           <div className="flex items-center gap-1">
             <Button size="sm" variant="outline" disabled={!page} onClick={() => setPage((x) => x - 1)}><ChevronLeft className="h-4 w-4 rtl:rotate-180" /></Button>
             {Array.from({ length: pages }).slice(Math.max(0, page - 2), Math.max(0, page - 2) + 5).map((_, i) => { const n = Math.max(0, page - 2) + i; return (
-              <button key={n} onClick={() => setPage(n)} className={cn("h-8 min-w-8 rounded-lg px-2 text-sm font-semibold", n === page ? "bg-gradient-to-r from-teal-600 to-emerald-500 text-white" : "hover:bg-muted")}>{n + 1}</button>); })}
+              <button key={n} onClick={() => setPage(n)} className={cn("h-8 min-w-8 rounded-lg px-2 text-sm font-semibold", n === page ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white" : "hover:bg-muted")}>{n + 1}</button>); })}
             <Button size="sm" variant="outline" disabled={page + 1 >= pages} onClick={() => setPage((x) => x + 1)}><ChevronRight className="h-4 w-4 rtl:rotate-180" /></Button>
           </div>
         </div>

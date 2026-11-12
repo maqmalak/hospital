@@ -68,7 +68,7 @@ export default function DoctorsPage() {
 
   return (
     <div className="mx-auto max-w-[1500px]">
-      <PageHeader title="Doctors" icon={Stethoscope} color="from-teal-600 to-cyan-700" subtitle={`${branch} · ${all.filter((d) => d.is_active).length} active`}
+      <PageHeader title="Doctors" icon={Stethoscope} color="from-teal-600 to-teal-700" subtitle={`${branch} · ${all.filter((d) => d.is_active).length} active`}
         actions={canEdit && <Button variant="primary" onClick={() => setEdit("new")}><Plus className="h-4 w-4" />New doctor</Button>} />
 
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
@@ -87,11 +87,11 @@ export default function DoctorsPage() {
         <label className="flex items-center gap-2 px-2 text-sm"><input type="checkbox" checked={activeOnly} onChange={(e) => setActiveOnly(e.target.checked)} className="h-4 w-4 accent-teal-600" />Active only</label>
         <div className="ms-auto flex rounded-xl bg-muted p-1">
           {([["cards", LayoutGrid, "Cards"], ["list", List, "List"]] as const).map(([k, I, l]) => (
-            <button key={k} onClick={() => setV(k)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold", view === k ? "bg-card shadow-sm" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>))}
+            <button key={k} onClick={() => setV(k)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold", view === k ? "tab-gold" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>))}
         </div>
         <div className="flex w-full gap-1.5 overflow-x-auto pb-0.5">
-          <button onClick={() => setSpec("")} className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", !spec ? "bg-gradient-to-r from-teal-600 to-emerald-500 text-white" : "bg-muted hover:bg-accent")}>All specialities</button>
-          {specs.map((s) => <button key={s} onClick={() => setSpec(s === spec ? "" : s)} className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", spec === s ? "bg-gradient-to-r from-teal-600 to-emerald-500 text-white" : "bg-muted hover:bg-accent")}>{s}</button>)}
+          <button onClick={() => setSpec("")} className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", !spec ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white" : "bg-muted hover:bg-accent")}>All specialities</button>
+          {specs.map((s) => <button key={s} onClick={() => setSpec(s === spec ? "" : s)} className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", spec === s ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white" : "bg-muted hover:bg-accent")}>{s}</button>)}
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export default function DoctorsPage() {
         ) : (
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className="overflow-x-auto"><table className="w-full text-sm">
-              <thead><tr className="bg-gradient-to-r from-teal-700 to-emerald-600 text-start text-xs uppercase tracking-wide text-white">
+              <thead><tr className="bg-gradient-to-r from-teal-700 to-teal-500 text-start text-xs uppercase tracking-wide text-white">
                 <th className="px-4 py-3 text-start">{t("Doctor")}</th><th className="text-start">Speciality</th><th className="text-start">{t("Room")}</th>
                 <th className="text-end">{t("Fee")}</th><th className="px-3 text-start">Week</th><th className="text-end">{t("Today")}</th><th className="text-end">30 days</th>
                 <th className="px-3 text-start">Status</th><th className="px-3" /></tr></thead>
@@ -164,7 +164,7 @@ function DoctorCard({ d, name, book, queue, edit, leave }: { d: Doc; name: strin
       </div>
 
       <div className="mx-4 mt-3 grid grid-cols-2 overflow-hidden rounded-2xl border border-border">
-        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 p-2.5 text-center dark:from-teal-500/10 dark:to-emerald-500/5">
+        <div className="bg-gradient-to-br from-teal-50 to-teal-50 p-2.5 text-center dark:from-teal-500/10 dark:to-emerald-500/5">
           <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("Fee")}</div>
           <div className="text-lg font-extrabold tabular-nums text-teal-700 dark:text-teal-300">{rs(d.default_fee)}</div></div>
         <div className="border-s border-border p-2.5 text-center">
@@ -186,7 +186,7 @@ function DoctorCard({ d, name, book, queue, edit, leave }: { d: Doc; name: strin
           <div key={l} className="rounded-xl bg-muted/70 py-1.5"><div className={cn("text-base font-extrabold tabular-nums", c)}>{v}</div><div className="text-[10px] text-muted-foreground">{t(l)}</div></div>))}
       </div>
       <div className="mx-4 mt-2">
-        <div className="h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all" style={{ width: `${load}%` }} /></div>
+        <div className="h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-gradient-to-r from-teal-500 to-teal-400 transition-all" style={{ width: `${load}%` }} /></div>
         <div className="mt-1 flex justify-between text-[10px] text-muted-foreground"><span>{d.month_visits} visits · 30 days</span><span>{d.upcoming} booked · 7 days</span></div>
       </div>
 

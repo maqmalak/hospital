@@ -106,7 +106,7 @@ export function AdmitDialog({ bed: presetBed, patient: presetPatient, onClose, o
           <Field label="Provisional diagnosis"><input className={inputCls} value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} /></Field>
         </div>
         <div className="space-y-3">
-          <div className="rounded-2xl bg-gradient-to-br from-teal-700 to-emerald-800 p-4 text-white">
+          <div className="rounded-2xl bg-gradient-to-br from-teal-700 to-teal-800 p-4 text-white">
             <div className="text-xs uppercase tracking-widest text-white/70">Estimate · {Math.max(Number(days) || 1, 1)} day(s)</div>
             <div className="text-3xl font-black tabular-nums">{rs(estimate)}</div>
             <div className="mt-2 space-y-0.5 text-xs text-white/80">

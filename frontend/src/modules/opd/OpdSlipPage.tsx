@@ -137,7 +137,7 @@ export default function OpdSlipPage() {
         <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white"><FilePlus2 className="h-5 w-5" /></span>
           <h1 className="flex-1 text-xl font-bold">{t("OPD slip")}</h1>
           <div className="flex rounded-xl bg-muted p-1">{["Consultation", "Follow-up", "Procedure"].map((p) => (
-            <button key={p} onClick={() => setPurpose(p)} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", purpose === p ? "bg-card shadow-sm" : "text-muted-foreground")}>{t(p)}</button>))}</div></div>
+            <button key={p} onClick={() => setPurpose(p)} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", purpose === p ? "tab-gold" : "text-muted-foreground")}>{t(p)}</button>))}</div></div>
         <Section><PatientPicker autoFocus value={patient} onPick={setPatient} onClear={() => setPatient(null)} /></Section>
         <Section title={t("Vitals")}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -188,7 +188,7 @@ export default function OpdSlipPage() {
             {!!totals?.discount_amount && <div className="flex justify-between"><span className="text-muted-foreground">{t("Discount")}</span><span className="tabular-nums">−{rs(totals.discount_amount)}</span></div>}
             {!!totals?.payer_share && <div className="flex justify-between"><span className="text-muted-foreground">{t("Payer share")}</span><span className="tabular-nums">−{rs(totals.payer_share)}</span></div>}
           </div>
-          <div className="rounded-2xl bg-gradient-to-br from-teal-800 via-teal-700 to-emerald-500 p-4 text-white shadow-lg">
+          <div className="rounded-2xl bg-gradient-to-br from-teal-800 via-teal-700 to-teal-500 p-4 text-white shadow-lg">
             <div className="text-xs uppercase tracking-wide text-white/75">{t("Payable")}</div><div className="text-3xl font-extrabold tabular-nums">{rs(due)}</div></div>
           <div className="grid grid-cols-3 gap-2">{(ctx?.modes ?? ["Cash"]).map((m) => { const I = MODE_ICON[m] ?? Banknote; return (
             <button key={m} onClick={() => setMode(m)} className={cn("flex flex-col items-center gap-1 rounded-xl border px-2 py-2 text-xs font-semibold", mode === m ? "border-primary bg-primary/10 text-primary" : "border-border")}><I className="h-4 w-4" />{m}</button>); })}</div>

@@ -40,7 +40,7 @@ export default function TestsPage() {
     <div className="mx-auto max-w-7xl">
       <LabHero title="Result entry" sub="Worklist of received samples — enter values, flags and critical alerts are automatic" />
       <div className="mb-4 flex flex-wrap gap-2">
-        <div className="flex gap-1 rounded-xl bg-muted p-1">{["", "Received", "Result Entered", "Report Received", "Dispatched"].map((s) => <button key={s} onClick={() => setStatus(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "bg-card shadow" : "text-muted-foreground")}>{s || "All open"}</button>)}</div>
+        <div className="flex gap-1 rounded-xl bg-muted p-1">{["", "Received", "Result Entered", "Report Received", "Dispatched"].map((s) => <button key={s} onClick={() => setStatus(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "tab-gold" : "text-muted-foreground")}>{s || "All open"}</button>)}</div>
         <select className={inputCls.replace("w-full", "") + " w-48"} value={dept} onChange={(e) => setDept(e.target.value)}><option value="">All departments</option>{depts.map((d) => <option key={d}>{d}</option>)}</select>
       </div>
       {Object.entries(groups).map(([d, list]) => (

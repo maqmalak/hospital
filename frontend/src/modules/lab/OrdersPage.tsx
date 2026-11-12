@@ -56,11 +56,11 @@ export default function LabOrdersPage() {
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="relative min-w-56 flex-1"><Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" /><input className={inputCls + " ps-9"} placeholder="Name, MR or order no." value={q} onChange={(e) => setQ(e.target.value)} /></div>
         <div className="flex rounded-xl bg-muted p-1">{([["day", "Today"], ["week", "Week"], ["month", "Month"], ["custom", "Custom"]] as const).map(([k, l]) => (
-          <button key={k} onClick={() => pick(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", period === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>))}</div>
+          <button key={k} onClick={() => pick(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", period === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>))}</div>
         {period === "custom" && <div className="flex items-center gap-1"><input type="date" className={inputCls.replace("w-full", "") + " w-36"} value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
           <span className="text-muted-foreground">→</span><input type="date" className={inputCls.replace("w-full", "") + " w-36"} value={to} min={from} max={todayISO()} onChange={(e) => setTo(e.target.value)} /></div>}
-        <div className="flex rounded-xl bg-muted p-1">{["", "Urgent", "Priority", "Normal"].map((p) => <button key={p || "all"} onClick={() => setPrio(p)} className={cn("rounded-lg px-2.5 py-1.5 text-xs font-semibold", prio === p ? "bg-card shadow" : "text-muted-foreground")}>{p || "Any priority"}</button>)}</div>
-        <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">{STATUSES.map((s) => <button key={s} onClick={() => setStatus(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "bg-card shadow" : "text-muted-foreground")}>{s === "Ordered" ? "Unpaid" : s || "All"}</button>)}</div>
+        <div className="flex rounded-xl bg-muted p-1">{["", "Urgent", "Priority", "Normal"].map((p) => <button key={p || "all"} onClick={() => setPrio(p)} className={cn("rounded-lg px-2.5 py-1.5 text-xs font-semibold", prio === p ? "tab-gold" : "text-muted-foreground")}>{p || "Any priority"}</button>)}</div>
+        <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">{STATUSES.map((s) => <button key={s} onClick={() => setStatus(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "tab-gold" : "text-muted-foreground")}>{s === "Ordered" ? "Unpaid" : s || "All"}</button>)}</div>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {(rows ?? []).map((r) => {

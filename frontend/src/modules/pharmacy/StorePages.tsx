@@ -17,7 +17,7 @@ interface StockRow { name: string; item_name: string; hv_generic?: string; hv_st
 function useStoreCtx() { const { branch } = useAuth(); return useApi<Ctx>("store.context", { branch }); }
 function WarehousePicker({ ctx, value, onChange, only }: { ctx?: Ctx; value: string; onChange: (v: string) => void; only?: string[] }) {
   return <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">{Object.entries(ctx?.warehouses ?? {}).filter(([k]) => !only || only.includes(k)).map(([k, w]) =>
-    <button key={w} onClick={() => onChange(w)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", value === w ? "bg-card shadow" : "text-muted-foreground")}>{k}</button>)}</div>;
+    <button key={w} onClick={() => onChange(w)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", value === w ? "tab-gold" : "text-muted-foreground")}>{k}</button>)}</div>;
 }
 
 // ------------------------------------------------------------------ medicine stock (/pharmacy/items)
@@ -221,7 +221,7 @@ export function CycleCountPage() {
       <PharmHero title="Cycle count" sub="Blind count — system quantities stay hidden until you submit; variances above the limit need approval" icon={ClipboardList} />
       <Section title="New count" className="mb-4"><div className="flex flex-wrap items-end gap-3">
         <WarehousePicker ctx={ctx} value={wh || ctx?.warehouses["Pharmacy Retail"] || ""} onChange={setWh} />
-        <div className="flex gap-1 rounded-xl bg-muted p-1">{["All", "Rack", "Controlled"].map((s) => <button key={s} onClick={() => setScope(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", scope === s ? "bg-card shadow" : "text-muted-foreground")}>{s}</button>)}</div>
+        <div className="flex gap-1 rounded-xl bg-muted p-1">{["All", "Rack", "Controlled"].map((s) => <button key={s} onClick={() => setScope(s)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", scope === s ? "tab-gold" : "text-muted-foreground")}>{s}</button>)}</div>
         {scope === "Rack" && <input className={inputCls.replace("w-full", "") + " w-32"} placeholder="Rack e.g. A1" value={rack} onChange={(e) => setRack(e.target.value.toUpperCase())} />}
         <Button variant="primary" onClick={() => void create()}><Plus className="h-4 w-4" />Start count</Button></div></Section>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{(rows ?? []).map((c) => (

@@ -107,7 +107,7 @@ export function ConsumptionPage() {
   const dept = (cc: string) => cc.replace(/ - VVSH$/, "");
   return (
     <div className="space-y-5">
-      <PageHeader title="Consumption" icon={PackageMinus} color="from-teal-600 to-emerald-700" subtitle="Consumables issued from the store to OPD, Lab, IPD, OT and Emergency — charged to each department"
+      <PageHeader title="Consumption" icon={PackageMinus} color="from-teal-600 to-teal-700" subtitle="Consumables issued from the store to OPD, Lab, IPD, OT and Emergency — charged to each department"
         actions={<div className="flex flex-wrap items-center gap-2"><input type="date" className={inputCls.replace("w-full", "") + " w-40"} value={range.from ?? data.from_date} onChange={(e) => setRange({ ...range, from: e.target.value })} />
           <span className="text-muted-foreground">→</span><input type="date" className={inputCls.replace("w-full", "") + " w-40"} value={range.to ?? data.to_date} onChange={(e) => setRange({ ...range, to: e.target.value })} />
           <Button variant="save" onClick={() => setIssue(true)}><Plus className="h-4 w-4" />Issue to department</Button></div>} />
@@ -121,7 +121,7 @@ export function ConsumptionPage() {
       {tab === "dept" && <div className="grid gap-4 lg:grid-cols-2">
         <section className="rounded-2xl border border-border bg-card p-4 shadow-sm"><h3 className="mb-3 font-semibold">Cost by department</h3>
           <ul className="space-y-3">{data.by_dept.map((d) => <li key={d.cost_center}><div className="flex justify-between text-sm"><span>{dept(d.cost_center)}</span><b className="tabular-nums">{rs(d.amount)}</b></div>
-            <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-600" style={{ width: `${(d.amount / max) * 100}%` }} /></div></li>)}
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-gradient-to-r from-teal-500 to-teal-600" style={{ width: `${(d.amount / max) * 100}%` }} /></div></li>)}
             {!data.by_dept.length && <Empty title="Nothing issued in this period" icon={PackageMinus} />}</ul></section>
         <section className="rounded-2xl border border-border bg-card p-4 shadow-sm"><h3 className="mb-3 font-semibold">Latest issues</h3>
           <ul className="divide-y divide-border text-sm">{data.issues.slice(0, 12).map((i) => <li key={i.name} className="flex gap-2 py-2"><span className="flex-1"><b>{i.remarks || i.name}</b><span className="block text-xs text-muted-foreground">{i.name} · {i.posting_date}</span></span><b className="tabular-nums">{rs(i.total_outgoing_value)}</b></li>)}</ul></section>

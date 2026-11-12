@@ -126,7 +126,7 @@ export default function RegistrationPage() {
 
       <div className="grid items-start gap-5 xl:grid-cols-[1fr_380px]">
         <div className="space-y-4">
-          <Card icon={User} title="Identity" subtitle="Name as on CNIC / B-form" tone="from-teal-500 to-emerald-600">
+          <Card icon={User} title="Identity" subtitle="Name as on CNIC / B-form" tone="from-teal-500 to-teal-600">
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="flex shrink-0 flex-col items-center gap-2">
                 <div className="relative h-28 w-28 overflow-hidden rounded-3xl shadow-md" style={{ background: GRAD[f.gender] ?? "linear-gradient(135deg,#cbd5e1,#94a3b8)" }}>
@@ -142,7 +142,7 @@ export default function RegistrationPage() {
                 <L label="Full name" req><input className={inp + " text-base font-semibold"} value={f.patient_name} onChange={(e) => setName(e.target.value)} placeholder="Muhammad Ali Khan" /></L>
                 <L label="Name (Urdu)"><UrduField english={f.patient_name} value={f.patient_name_ur} onChange={(v) => set("patient_name_ur", v)} placeholder="محمد علی خان" /></L>
                 <L label="Father / husband"><div className="flex gap-2">
-                  <div className="flex rounded-xl bg-muted p-1">{["S/O", "D/O", "W/O"].map((r) => <button key={r} type="button" onClick={() => set("relation_type", r)} className={cn("rounded-lg px-2 text-xs font-bold", f.relation_type === r ? "bg-card shadow-sm" : "text-muted-foreground")}>{r}</button>)}</div>
+                  <div className="flex rounded-xl bg-muted p-1">{["S/O", "D/O", "W/O"].map((r) => <button key={r} type="button" onClick={() => set("relation_type", r)} className={cn("rounded-lg px-2 text-xs font-bold", f.relation_type === r ? "tab-gold" : "text-muted-foreground")}>{r}</button>)}</div>
                   <input className={inp} value={f.guardian_name} onChange={(e) => set("guardian_name", e.target.value)} /></div></L>
                 <L label="Gender" req><div className="grid grid-cols-3 gap-2">{["Male", "Female", "Other"].map((g) => (
                   <button key={g} type="button" onClick={() => set("gender", g)} className={cn("h-11 rounded-xl border text-sm font-semibold transition-all", f.gender === g ? "border-transparent text-white shadow-md" : "border-input hover:border-primary/50")} style={f.gender === g ? { background: GRAD[g] } : undefined}>{t(g)}</button>))}</div></L>
@@ -216,9 +216,9 @@ export default function RegistrationPage() {
         <aside className="space-y-4 xl:sticky xl:top-4">
           <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             <div className="flex items-center justify-between px-4 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><span>Card preview</span><span>{completeness}% complete</span></div>
-            <div className="mx-4 mt-2 h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all" style={{ width: `${completeness}%` }} /></div>
+            <div className="mx-4 mt-2 h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-gradient-to-r from-teal-500 to-teal-400 transition-all" style={{ width: `${completeness}%` }} /></div>
             <div className="m-4 overflow-hidden rounded-2xl border border-teal-700/30 bg-gradient-to-br from-cyan-50 to-emerald-50 shadow-md dark:from-teal-950 dark:to-emerald-950">
-              <div className="flex items-center justify-between bg-gradient-to-r from-teal-700 to-emerald-500 px-3 py-1.5 text-[11px] font-extrabold text-white"><span>{boot?.clinic.name}</span><span>PATIENT CARD</span></div>
+              <div className="flex items-center justify-between bg-gradient-to-r from-teal-700 to-teal-500 px-3 py-1.5 text-[11px] font-extrabold text-white"><span>{boot?.clinic.name}</span><span>PATIENT CARD</span></div>
               <div className="flex gap-3 p-3">
                 <div className="h-20 w-16 shrink-0 overflow-hidden rounded-lg" style={{ background: GRAD[f.gender] ?? "#cbd5e1" }}>{photoPreview && <img src={photoPreview} alt="" className="h-full w-full object-cover" />}</div>
                 <div className="min-w-0 flex-1">
@@ -252,7 +252,7 @@ export default function RegistrationPage() {
           </div>
 
           <button onClick={() => void save(undefined, false)} disabled={saving}
-            className="group relative flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-500 text-base font-bold text-white shadow-lg shadow-teal-700/30 transition-all hover:shadow-xl disabled:opacity-60">
+            className="group relative flex h-14 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 text-base font-bold text-white shadow-lg shadow-teal-700/30 transition-all hover:shadow-xl disabled:opacity-60">
             <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             {saving && !thenSlip ? <RotateCcw className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}{t("Register patient")}</button>
           <button onClick={() => void save(undefined, true)} disabled={saving}

@@ -71,7 +71,7 @@ function BillView({ name }: { name: string }) {
             <Link to={`/ipd/${a.name}`}><Button size="sm" variant="neutral">Chart</Button></Link>
           </div>
           <div className="mb-3 flex gap-1 rounded-xl bg-muted p-1">{[["summary", "By type"], ["lines", "Every line"]].map(([k, l]) => <button key={k} onClick={() => setView(k as "summary")}
-            className={cn("flex-1 rounded-lg py-1.5 text-sm font-semibold", view === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
+            className={cn("flex-1 rounded-lg py-1.5 text-sm font-semibold", view === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>)}</div>
           {view === "summary" ? <div className="space-y-2">{order.map(([t, v]) => (
             <div key={t} className="grid grid-cols-[120px_1fr_110px] items-center gap-3 text-sm"><span className="flex items-center gap-2 font-semibold"><ChargeDot t={t} />{t}</span>
               <span className="h-2.5 overflow-hidden rounded-full bg-muted"><span className={cn("block h-full rounded-full", CHARGE_TONE[t] ?? "bg-slate-400")} style={{ width: `${Math.max((v / max) * 100, 2)}%` }} /></span>
@@ -80,7 +80,7 @@ function BillView({ name }: { name: string }) {
             : <ChargesTable lines={b.lines} />}
         </section>
         <aside className="space-y-3">
-          <div className="rounded-2xl bg-gradient-to-br from-teal-800 to-emerald-900 p-4 text-white shadow-lg">
+          <div className="rounded-2xl bg-gradient-to-br from-teal-800 to-teal-900 p-4 text-white shadow-lg">
             <Row k="Gross" v={rs(b.gross)} />{b.package_covered > 0 && <Row k={`Package (${a.service_package})`} v={`−${rs(b.package_covered)}`} />}
             {b.discount > 0 && <Row k="Discount" v={`−${rs(b.discount)}`} />}
             {b.payer_share > 0 && <Row k={`${a.payer_type} · ${a.payer} (${b.coverage_percent}%)`} v={`−${rs(b.payer_share)}`} />}

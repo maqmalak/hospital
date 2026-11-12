@@ -104,7 +104,7 @@ function RegisterDialog({ levels, onClose, onDone }: { levels: Board["levels"]; 
     <Dialog open onClose={onClose} title={<span className="flex items-center gap-2"><Ambulance className="h-5 w-5 text-red-600" />Emergency arrival</span>} description="Minimum data now — complete the record later" size="xl">
       <div className="space-y-3">
         <div className="flex gap-1 rounded-xl bg-muted p-1">{[[true, "Known patient"], [false, "Unknown patient"]].map(([k, l]) => <button key={String(k)} onClick={() => setKnown(k as boolean)}
-          className={cn("flex-1 rounded-lg py-2 text-sm font-bold", known === k ? "bg-card shadow" : "text-muted-foreground")}>{l as string}</button>)}</div>
+          className={cn("flex-1 rounded-lg py-2 text-sm font-bold", known === k ? "tab-gold" : "text-muted-foreground")}>{l as string}</button>)}</div>
         {known ? <PatientPicker value={patient} onPick={setPatient} onClear={() => setPatient(null)} autoFocus /> : (
           <div className="grid gap-3 sm:grid-cols-3"><Field label="Sex"><div className="flex gap-1">{["Male", "Female", "Other"].map((g) => <button key={g} onClick={() => setU({ ...u, gender: g })}
             className={cn("flex-1 rounded-lg border py-2 text-sm font-semibold", u.gender === g ? "border-red-600 bg-red-600 text-white" : "border-border")}>{g}</button>)}</div></Field>

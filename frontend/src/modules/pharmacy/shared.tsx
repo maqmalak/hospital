@@ -31,7 +31,7 @@ export function PharmHero({ title, sub, actions, icon: Icon = PillIcon }: { titl
 export const TICKET_TONE: Record<string, string> = {
   Queued: "from-slate-500 to-slate-700", Picking: "from-sky-500 to-blue-700", Picked: "from-indigo-500 to-violet-700", Reviewing: "from-violet-500 to-fuchsia-700",
   Exception: "from-rose-500 to-red-700", Ready: "from-emerald-500 to-teal-700", Called: "from-amber-500 to-orange-600", "Not Collected": "from-stone-500 to-stone-700",
-  "Handed Over": "from-teal-600 to-emerald-800", "On Hold": "from-slate-400 to-slate-600",
+  "Handed Over": "from-teal-600 to-teal-800", "On Hold": "from-slate-400 to-slate-600",
 };
 export function PriorityBadge({ p }: { p?: string }) {
   if (!p || p === "Normal") return null;

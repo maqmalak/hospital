@@ -53,7 +53,7 @@ export function PreAuthPage() {
       <IpdHero title="Insurance pre-authorization" icon={ShieldCheck} tone="indigo" sub="Approval from the insurer before an admission or procedure. Claims come with Finance (Phase 6)."
         actions={<Button className="bg-white text-indigo-900 hover:bg-white/90" onClick={() => setAdding(true)}>New request</Button>} />
       <div className="mb-3 flex gap-1 rounded-xl bg-muted p-1">{["", "Requested", "Approved", "Partially Approved", "Rejected", "Expired"].map((s) => <button key={s} onClick={() => setStatus(s)}
-        className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "bg-card shadow" : "text-muted-foreground")}>{s || "All"}</button>)}</div>
+        className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === s ? "tab-gold" : "text-muted-foreground")}>{s || "All"}</button>)}</div>
       <div className="overflow-x-auto rounded-2xl border border-border bg-card"><table className="w-full text-sm"><thead className="bg-muted/60 text-[11px] uppercase text-muted-foreground"><tr>
         {["Request", "Patient", "Insurer", "For", "Requested", "Approved", "Approval no.", "Valid till", "Status", ""].map((h) => <th key={h} className="px-3 py-2 text-start">{h}</th>)}</tr></thead>
         <tbody>{(data ?? []).map((r) => <tr key={r.name} className="border-t border-border"><td className="px-3 py-2 font-mono text-xs">{r.name}</td><td className="px-3 py-2">{r.patient_name}<div className="text-[11px] text-muted-foreground">{r.patient}</div></td>

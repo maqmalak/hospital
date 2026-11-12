@@ -333,7 +333,7 @@ export default function PosPage() {
                 <span className="bg-gradient-to-r from-sky-700 to-emerald-600 bg-clip-text text-4xl font-black tabular-nums text-transparent dark:from-sky-300 dark:to-emerald-300">{rs(net)}</span></div>
             </div>
             {chooser && !credit && !offline && <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">{([["now", "Pay now", Banknote], ["handover", "Pay at handover", ClipboardList]] as const).map(([k, l, I]) => (
-              <button key={k} onClick={() => setPayAt(k)} className={cn("flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold transition-all", payAt === k ? "bg-card text-sky-800 shadow ring-1 ring-sky-500/30 dark:text-sky-200" : "text-muted-foreground")}><I className="h-3.5 w-3.5" />{l}</button>))}</div>}
+              <button key={k} onClick={() => setPayAt(k)} className={cn("flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-bold transition-all", payAt === k ? "tab-gold" : "text-muted-foreground")}><I className="h-3.5 w-3.5" />{l}</button>))}</div>}
             {ctx.pipeline ? <div className="flex gap-1">{["Normal", "Elderly", "Disabled", "Urgent"].map((p) => <button key={p} onClick={() => setPriority(p)} className={cn("flex-1 rounded-lg border py-1 text-[11px] font-semibold transition-all",
               priority === p ? `${PRIO[p]} text-white shadow` : "border-border text-muted-foreground hover:border-foreground/30")}>{p}</button>)}</div> : null}
             <div className="flex gap-2"><Button variant="neutral" className="h-14 w-14" onClick={() => void hold()} disabled={!lines.length} title="Hold (F8)"><PauseCircle className="h-5 w-5" /></Button>
@@ -701,7 +701,7 @@ function InvoicesDialog({ initialScope, returnMode, sync, offline, agent, onClos
         {offline ? <p className="flex items-center gap-2 py-10 text-sm text-muted-foreground"><CloudOff className="h-4 w-4" />The invoice list needs the server.</p> : <>
           <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted/60 p-1 sm:grid-cols-5">{SCOPES.map(([k, l, I, badge]) => (
             <button key={k} onClick={() => setScope(k)} className={cn("flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-bold uppercase tracking-wide transition-all",
-              scope === k ? "bg-card text-foreground shadow ring-1 ring-sky-500/40" : "text-foreground/65 hover:bg-card/60 hover:text-foreground")}><I className="h-3.5 w-3.5" />{l}
+              scope === k ? "tab-gold" : "text-foreground/65 hover:bg-card/60 hover:text-foreground")}><I className="h-3.5 w-3.5" />{l}
               {scope === k && rows && <span className={cn("min-w-5 rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums text-white", badge)}>{rows.length}</span>}</button>))}</div>
           <div className="relative"><Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input className={inputCls + " h-10 ps-9"} placeholder="Search invoice, token, customer or MR (any day)" value={q} onChange={(e) => setQ(e.target.value)} autoFocus /></div>

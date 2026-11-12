@@ -4,14 +4,15 @@ import { Inbox, ScanLine, Search, X, type LucideIcon } from "lucide-react";
 import { getCall } from "@/services/frappe";
 import { cn } from "@/utils/cn";
 
-export function PageHeader({ title, subtitle, icon: Icon, actions, color = "from-teal-600 to-emerald-500" }: {
+export function PageHeader({ title, subtitle, icon: Icon, actions, color = "from-teal-600 to-teal-500" }: {
   title: string; subtitle?: ReactNode; icon?: LucideIcon; actions?: ReactNode; color?: string }) {
   const { t } = useTranslation();
   return (
     <div className="mb-4 flex flex-wrap items-center gap-3">
-      {Icon && <span className={cn("flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md", color)}><Icon className="h-5 w-5" /></span>}
+      {Icon && <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-[#14171C] text-[#E6CF8F] shadow-md ring-1 ring-inset ring-[#B8913A]/45 dark:bg-white/[0.06]">
+        <Icon className="h-5 w-5" /><span className={cn("absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-gradient-to-r opacity-80", color)} aria-hidden /></span>}
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-xl font-bold tracking-tight">{t(title)}</h1>
+        <h1 className="vvs-serif truncate text-2xl font-semibold leading-tight tracking-tight">{t(title)}</h1>
         {subtitle && <div className="text-sm text-muted-foreground">{subtitle}</div>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -20,7 +21,7 @@ export function PageHeader({ title, subtitle, icon: Icon, actions, color = "from
 }
 
 const TONES: Record<string, string> = {
-  teal: "from-teal-500/15 to-emerald-500/5 text-teal-700 dark:text-teal-300",
+  teal: "from-teal-500/15 to-teal-300/5 text-teal-700 dark:text-teal-300",
   blue: "from-sky-500/15 to-blue-500/5 text-sky-700 dark:text-sky-300",
   violet: "from-violet-500/15 to-indigo-500/5 text-violet-700 dark:text-violet-300",
   amber: "from-amber-500/15 to-orange-500/5 text-amber-700 dark:text-amber-300",
@@ -64,10 +65,10 @@ const PILL: Record<string, string> = {
   Draft: "bg-slate-200 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300",
   Superseded: "bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-300",
   Approved: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
-  "Within Limit": "bg-teal-100 text-teal-800 dark:bg-teal-500/15 dark:text-teal-300",
+  "Within Limit": "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
   Used: "bg-slate-200 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300",
   Sent: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300",
-  Delivered: "bg-teal-100 text-teal-800 dark:bg-teal-500/15 dark:text-teal-300",
+  Delivered: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
   Read: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
   Failed: "bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300",
   Queued: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
@@ -193,7 +194,7 @@ export function Avatarish({ name, src, size = 9 }: { name?: string; src?: string
   const initials = (name || "?").split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   const style = { width: size * 4, height: size * 4 };
   return src ? <img src={src} alt="" style={style} className="shrink-0 rounded-full object-cover" />
-    : <span style={style} className="flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-xs font-bold text-white">{initials}</span>;
+    : <span style={style} className="flex shrink-0 items-center justify-center rounded-full bg-[#14171C] text-xs font-bold text-[#E6CF8F] ring-1 ring-inset ring-[#B8913A]/50">{initials}</span>;
 }
 
 export function Tabs<T extends string>({ tabs, value, onChange }: { tabs: { key: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void }) {
@@ -202,7 +203,7 @@ export function Tabs<T extends string>({ tabs, value, onChange }: { tabs: { key:
     <div className="flex flex-wrap gap-1 rounded-xl bg-muted p-1">
       {tabs.map((tb) => (
         <button key={tb.key} onClick={() => onChange(tb.key)}
-          className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors", value === tb.key ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+          className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors", value === tb.key ? "tab-gold" : "text-muted-foreground hover:text-foreground")}>
           {t(tb.label)}{tb.count != null && <span className="ms-1.5 rounded-full bg-primary/15 px-1.5 text-[11px] text-primary">{tb.count}</span>}
         </button>
       ))}

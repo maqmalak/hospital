@@ -43,7 +43,7 @@ export default function MarPage() {
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <button onClick={() => setWard("")} className={cn("rounded-full px-3 py-1.5 text-sm font-semibold", !ward ? "bg-primary text-primary-foreground" : "hover:bg-muted")}>All wards</button>
         {data?.wards.map((w) => <button key={w.name} onClick={() => setWard(w.name)} className={cn("rounded-full border px-3 py-1.5 text-sm font-semibold", ward === w.name ? "border-primary bg-primary text-primary-foreground" : "border-border")}>{w.ward_name}</button>)}
-        <div className="ms-auto flex gap-1 rounded-xl bg-muted p-1">{[1, 2, 4, 8].map((h) => <button key={h} onClick={() => setHours(h)} className={cn("rounded-lg px-3 py-1 text-xs font-semibold", hours === h ? "bg-card shadow" : "text-muted-foreground")}>next {h}h</button>)}</div>
+        <div className="ms-auto flex gap-1 rounded-xl bg-muted p-1">{[1, 2, 4, 8].map((h) => <button key={h} onClick={() => setHours(h)} className={cn("rounded-lg px-3 py-1 text-xs font-semibold", hours === h ? "tab-gold" : "text-muted-foreground")}>next {h}h</button>)}</div>
       </div>
       <div className="space-y-3">{groups.map((g) => {
         const [w, bed, pname, ref] = g.split("|");

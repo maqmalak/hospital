@@ -145,7 +145,7 @@ export default function BookPage() {
               {opts.specializations.map((s) => { const I = SPEC_ICON[s.name] ?? Stethoscope; return (
                 <button key={s.name} onClick={() => { setSpec(s.name); setQ(""); setStep(2); }}
                   className="group rounded-2xl border border-border p-4 text-start transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg">
-                  <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-600/30 transition-transform group-hover:scale-110"><I className="h-5 w-5" /></span>
+                  <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-md shadow-teal-600/30 transition-transform group-hover:scale-110"><I className="h-5 w-5" /></span>
                   <div className="font-semibold">{ur && s.name_ur ? s.name_ur : s.name}</div>
                   <div className="text-xs text-muted-foreground">{specCount(s.name)} doctor{specCount(s.name) !== 1 ? "s" : ""}</div>
                 </button>); })}
@@ -159,8 +159,8 @@ export default function BookPage() {
                 <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search" className="h-10 flex-1 bg-transparent text-sm outline-none" /></label>
             </div>
             <div className="mb-4 flex gap-1.5 overflow-x-auto pb-1">
-              <button onClick={() => setSpec("")} className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", !spec ? "bg-gradient-to-r from-teal-600 to-emerald-500 text-white" : "bg-muted")}>All</button>
-              {opts.specializations.map((s) => <button key={s.name} onClick={() => setSpec(s.name)} className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", spec === s.name ? "bg-gradient-to-r from-teal-600 to-emerald-500 text-white" : "bg-muted")}>{ur && s.name_ur ? s.name_ur : s.name}</button>)}
+              <button onClick={() => setSpec("")} className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", !spec ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white" : "bg-muted")}>All</button>
+              {opts.specializations.map((s) => <button key={s.name} onClick={() => setSpec(s.name)} className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", spec === s.name ? "bg-gradient-to-r from-teal-600 to-teal-500 text-white" : "bg-muted")}>{ur && s.name_ur ? s.name_ur : s.name}</button>)}
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {doctors.map((d) => (
@@ -186,7 +186,7 @@ export default function BookPage() {
             <p className="mb-4 text-sm text-muted-foreground">{docName(doctor)} · {doctor.days.map((s) => `${s.day} ${to12(s.from)}–${to12(s.to)}`).slice(0, 2).join(" · ")}{doctor.days.length > 2 ? " …" : ""}</p>
             <div className="-mx-1 mb-5 flex gap-2 overflow-x-auto px-1 pb-2">
               {dates.map((d) => (
-                <button key={d.date} onClick={() => void loadSlots(doctor, d.date)} className={cn("min-w-[78px] rounded-2xl border p-2.5 text-center transition-all", date === d.date ? "border-transparent bg-gradient-to-br from-teal-600 to-emerald-500 text-white shadow-lg shadow-teal-600/30" : "border-border hover:border-primary/50")}>
+                <button key={d.date} onClick={() => void loadSlots(doctor, d.date)} className={cn("min-w-[78px] rounded-2xl border p-2.5 text-center transition-all", date === d.date ? "border-transparent bg-gradient-to-br from-teal-600 to-teal-500 text-white shadow-lg shadow-teal-600/30" : "border-border hover:border-primary/50")}>
                   <div className={cn("text-[11px] font-semibold uppercase", date === d.date ? "text-white/80" : "text-muted-foreground")}>{rel(d.date) === "Today" || rel(d.date) === "Tomorrow" ? rel(d.date) : fmtDay(d.date, { weekday: "short" })}</div>
                   <div className="text-2xl font-extrabold leading-tight">{new Date(d.date + "T00:00").getDate()}</div>
                   <div className={cn("text-[10px]", date === d.date ? "text-white/80" : "text-muted-foreground")}>{fmtDay(d.date, { month: "short" })} · {d.free} free</div>
@@ -214,30 +214,30 @@ export default function BookPage() {
                 <span className="flex items-center gap-1 border-e border-border px-3 text-sm font-semibold text-muted-foreground"><Phone className="h-4 w-4" />+92</span>
                 <input inputMode="tel" placeholder="300 1234567" value={phone} onChange={(e) => { setPhone(e.target.value); setMembers(null); setOtp({ sent: false, code: "", token: "", test: "" }); }} className="h-12 flex-1 bg-transparent px-3 text-lg tracking-wide outline-none" />
               </div>
-              <button disabled={normPhone.length < 11 || busy || !!members} onClick={() => void sendOtp()} className="rounded-xl bg-gradient-to-r from-teal-700 to-emerald-500 px-5 font-semibold text-white shadow-md disabled:opacity-40">{busy && !members ? <Loader2 className="h-4 w-4 animate-spin" /> : t("Next")}</button>
+              <button disabled={normPhone.length < 11 || busy || !!members} onClick={() => void sendOtp()} className="rounded-xl bg-gradient-to-r from-teal-700 to-teal-500 px-5 font-semibold text-white shadow-md disabled:opacity-40">{busy && !members ? <Loader2 className="h-4 w-4 animate-spin" /> : t("Next")}</button>
             </div>
             {otp.sent && !otp.token && <div className="mt-4 rounded-2xl border border-teal-200 bg-teal-50/70 p-4 dark:border-teal-500/30 dark:bg-teal-500/10">
               <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-teal-600" />This number is registered with us</div>
               <p className="mb-3 text-sm text-muted-foreground">Enter the 6-digit code we sent on WhatsApp / SMS.{otp.test && <b className="ms-1 text-foreground">(test code {otp.test})</b>}</p>
               <div className="flex gap-2"><input inputMode="numeric" maxLength={6} value={otp.code} onChange={(e) => setOtp((o) => ({ ...o, code: e.target.value.replace(/\D/g, "") }))} className="h-12 flex-1 rounded-xl border border-input bg-[hsl(var(--input-bg))] text-center text-xl font-bold tracking-[0.5em] outline-none focus:border-primary" />
-                <button disabled={otp.code.length < 6 || busy} onClick={() => void verifyOtp()} className="rounded-xl bg-gradient-to-r from-teal-700 to-emerald-500 px-5 font-semibold text-white disabled:opacity-40">{t("Verify")}</button></div>
+                <button disabled={otp.code.length < 6 || busy} onClick={() => void verifyOtp()} className="rounded-xl bg-gradient-to-r from-teal-700 to-teal-500 px-5 font-semibold text-white disabled:opacity-40">{t("Verify")}</button></div>
             </div>}
             {members && members.length > 0 && <div className="mt-5"><div className="mb-2 text-xs font-semibold text-muted-foreground">Who is the appointment for?</div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {members.map((m) => <button key={m.name} onClick={() => setPatient(m.name)} className={cn("flex items-center gap-3 rounded-2xl border p-3 text-start", patient === m.name ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border")}>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-xs font-bold text-white">{initials(m.patient_name)}</span><span className="font-semibold">{m.patient_name}</span>{patient === m.name && <Check className="ms-auto h-4 w-4 text-primary" />}</button>)}
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-teal-600 text-xs font-bold text-white">{initials(m.patient_name)}</span><span className="font-semibold">{m.patient_name}</span>{patient === m.name && <Check className="ms-auto h-4 w-4 text-primary" />}</button>)}
                 <button onClick={() => setPatient("")} className={cn("flex items-center gap-3 rounded-2xl border border-dashed p-3 text-start", patient === "" ? "border-primary bg-primary/5" : "border-border")}><UserPlus className="h-5 w-5 text-primary" /><span className="font-semibold">Someone else</span></button>
               </div></div>}
             {members && patient === "" && <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_110px]">
               <div><label className="mb-1 block text-xs font-semibold text-muted-foreground">Patient name</label><div className="flex items-center gap-2 rounded-xl border border-input bg-[hsl(var(--input-bg))] px-3 focus-within:border-primary"><User className="h-4 w-4 text-muted-foreground" /><input value={nm.name} onChange={(e) => setNm({ ...nm, name: e.target.value })} className="h-11 flex-1 bg-transparent outline-none" /></div></div>
               <div><label className="mb-1 block text-xs font-semibold text-muted-foreground">{t("Age")}</label><input inputMode="numeric" value={nm.age} onChange={(e) => setNm({ ...nm, age: e.target.value.replace(/\D/g, "").slice(0, 3) })} className="h-11 w-full rounded-xl border border-input bg-[hsl(var(--input-bg))] px-3 outline-none focus:border-primary" /></div>
-              <div className="grid grid-cols-3 gap-2 sm:col-span-2">{["Male", "Female", "Other"].map((g) => <button key={g} onClick={() => setNm({ ...nm, gender: g })} className={cn("h-11 rounded-xl border text-sm font-semibold", nm.gender === g ? "border-transparent bg-gradient-to-r from-teal-600 to-emerald-500 text-white" : "border-border")}>{t(g)}</button>)}</div>
+              <div className="grid grid-cols-3 gap-2 sm:col-span-2">{["Male", "Female", "Other"].map((g) => <button key={g} onClick={() => setNm({ ...nm, gender: g })} className={cn("h-11 rounded-xl border text-sm font-semibold", nm.gender === g ? "border-transparent bg-gradient-to-r from-teal-600 to-teal-500 text-white" : "border-border")}>{t(g)}</button>)}</div>
             </div>}
             {members && <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-green-200 bg-green-50/70 p-3 text-sm dark:border-green-500/30 dark:bg-green-500/10">
               <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 accent-green-600" />
               <span><span className="flex items-center gap-1.5 font-semibold"><MessageCircle className="h-4 w-4 text-green-600" />Send me booking updates on WhatsApp / SMS</span>
                 <span className="text-xs text-muted-foreground">Request received, confirmation and reminders only — never medical details.</span></span></label>}
-            <button disabled={!detailsOk} onClick={() => setStep(5)} className="mt-6 h-12 w-full rounded-xl bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-500 font-semibold text-white shadow-lg shadow-teal-700/25 disabled:opacity-40">{t("Next")}</button>
+            <button disabled={!detailsOk} onClick={() => setStep(5)} className="mt-6 h-12 w-full rounded-xl bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 font-semibold text-white shadow-lg shadow-teal-700/25 disabled:opacity-40">{t("Next")}</button>
           </>}
 
           {opts && step === 5 && doctor && slot && <>
@@ -246,7 +246,7 @@ export default function BookPage() {
             <div className="mb-5 grid gap-2">
               {(opts.payment_channels).map((c) => { const meta = c === "At Clinic" ? { I: Wallet, l: t("Pay at clinic"), d: "Pay at reception when you arrive" } : c === "Payment Proof" ? { I: Upload, l: t("Payment proof"), d: "Send to the clinic account, upload the screenshot" } : { I: Wallet, l: c, d: "Pay online now" };
                 return <button key={c} onClick={() => setPay(c)} className={cn("flex items-center gap-3 rounded-2xl border p-4 text-start", pay === c ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border")}>
-                  <span className={cn("flex h-10 w-10 items-center justify-center rounded-xl", pay === c ? "bg-gradient-to-br from-teal-600 to-emerald-500 text-white" : "bg-muted")}><meta.I className="h-5 w-5" /></span>
+                  <span className={cn("flex h-10 w-10 items-center justify-center rounded-xl", pay === c ? "bg-gradient-to-br from-teal-600 to-teal-500 text-white" : "bg-muted")}><meta.I className="h-5 w-5" /></span>
                   <span className="flex-1"><span className="block font-semibold">{meta.l}</span><span className="block text-xs text-muted-foreground">{meta.d}</span></span>{pay === c && <Check className="h-5 w-5 text-primary" />}</button>; })}
             </div>
             {pay === "Payment Proof" && <label className="mb-5 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-5 text-center text-sm hover:border-primary">
@@ -273,7 +273,7 @@ export default function BookPage() {
             <Row icon={User} label="Patient" value={memberName || "—"} />
             <Row icon={Phone} label="WhatsApp" value={normPhone.length >= 11 ? normPhone : "—"} />
           </dl>
-          <div className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50 p-4 dark:from-teal-500/10 dark:to-emerald-500/5">
+          <div className="mt-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-teal-50 to-teal-50 p-4 dark:from-teal-500/10 dark:to-emerald-500/5">
             <span className="text-sm font-semibold text-muted-foreground">{t("Fee")}</span><span className="text-2xl font-extrabold tabular-nums text-teal-700 dark:text-teal-300">Rs {(doctor?.default_fee ?? 0).toLocaleString()}</span></div>
           <div className="mt-4 space-y-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-green-600" />Request and confirmation on WhatsApp</div>
@@ -328,7 +328,7 @@ function DoneCard({ done, doctor, clinic, onAgain }: { done: Done; doctor: Docto
           <button onClick={ics} className="flex items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-semibold hover:bg-muted"><CalendarPlus className="h-4 w-4" />Add to calendar</button>
           <a href={link} className="flex items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-semibold hover:bg-muted"><CalendarDays className="h-4 w-4" />Manage booking</a>
         </div>
-        <button onClick={onAgain} className="mt-2 w-full rounded-xl bg-gradient-to-r from-teal-700 to-emerald-500 py-3 text-sm font-semibold text-white">Book another appointment</button>
+        <button onClick={onAgain} className="mt-2 w-full rounded-xl bg-gradient-to-r from-teal-700 to-teal-500 py-3 text-sm font-semibold text-white">Book another appointment</button>
         {doctor && clinic?.phone && <p className="mt-4 text-center text-xs text-muted-foreground">Questions? Call {clinic.phone}</p>}
       </div>
     </div>

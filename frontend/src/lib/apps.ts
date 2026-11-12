@@ -22,7 +22,7 @@ const group = (label: string) => NAV.find((g) => g.label === label)?.items.map((
 
 export const APPS: App[] = [
   { slug: "dashboard", label: "Dashboard", desc: "The day at a glance", icon: LayoutDashboard, hue: "blue", color: "from-blue-500 to-indigo-600", routes: ["/pw-dashboard"] },
-  { slug: "opd", label: "OPD", desc: "Registration, slips, appointments, counter", icon: UserPlus, hue: "teal", color: "from-teal-500 to-emerald-600", routes: group("OPD"),
+  { slug: "opd", label: "OPD", desc: "Registration, slips, appointments, counter", icon: UserPlus, hue: "teal", color: "from-teal-500 to-teal-600", routes: group("OPD"),
     flow: ["/appointments", "/registration", "/opd_slip", "/counter"], flowTitle: "Booking to token", manual: "reception" },
   { slug: "clinic", label: "Clinic", desc: "Vitals, queue, prescriptions, history", icon: Stethoscope, hue: "rose", color: "from-rose-500 to-pink-600", routes: group("Clinical"),
     flow: ["/opd/vitals", "/physician-queue", "/pw-prescription", "/pw-history"], flowTitle: "Token to prescription", manual: "doctor" },

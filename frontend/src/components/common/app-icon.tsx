@@ -16,7 +16,7 @@ export const ICON_GRADIENT: Record<string, string> = {
   yellow: "from-yellow-300 to-yellow-500 shadow-yellow-500/40", gray: "from-gray-400 to-gray-600 shadow-gray-500/40",
   zinc: "from-zinc-400 to-zinc-600 shadow-zinc-500/40",
 };
-/** Hue from a nav item's gradient ("from-teal-500 to-emerald-500" → teal). */
+/** Hue from a nav item's gradient ("from-teal-500 to-teal-400" → teal). */
 export const hueOf = (color: string) => /from-(\w+)-\d/.exec(color)?.[1] ?? "slate";
 
 /** App-store style icon: rounded square, vivid gradient, soft top gloss, white line icon, coloured glow; lifts on hover of the nearest `.group`. */

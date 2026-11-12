@@ -48,7 +48,7 @@ export function CompanyPicker({ className }: { className?: string }) {
       <Building2 className="mx-1.5 h-4 w-4 text-muted-foreground" />
       {list.map((c) => (
         <button key={c} type="button" role="radio" aria-checked={company === c} title={c} onClick={() => set(c)}
-          className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", company === c ? "bg-card shadow" : "text-muted-foreground")}>{short(c)}</button>
+          className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", company === c ? "tab-gold" : "text-muted-foreground")}>{short(c)}</button>
       ))}
     </div>
   );

@@ -150,7 +150,7 @@ export default function OnlineVisitPage() {
         </div>}
 
         {step === 3 && <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-2xl bg-gradient-to-br from-teal-700 to-emerald-800 p-4 text-white"><span className="font-semibold">{t("Consultation fee")}</span><span className="text-3xl font-black tabular-nums">{rs(ctx?.fee)}</span></div>
+          <div className="flex items-center justify-between rounded-2xl bg-gradient-to-br from-teal-700 to-teal-800 p-4 text-white"><span className="font-semibold">{t("Consultation fee")}</span><span className="text-3xl font-black tabular-nums">{rs(ctx?.fee)}</span></div>
           {ctx?.instructions && <div className="whitespace-pre-wrap rounded-xl bg-muted p-3 text-sm" dir="ltr">{ctx.instructions}</div>}
           <div><div className="mb-1 text-sm font-bold">{t("How will you pay?")}</div><div className="grid grid-cols-2 gap-2">{ctx?.methods.map((m) => (
             <button key={m} onClick={() => setPay({ ...pay, method: m, later: false })} className={cn("flex h-12 items-center justify-center gap-2 rounded-xl border-2 text-sm font-semibold", pay.method === m && !pay.later ? "border-teal-600 bg-teal-50 dark:bg-teal-500/10" : "border-border")}><Wallet className="h-4 w-4" />{m}</button>))}</div></div>

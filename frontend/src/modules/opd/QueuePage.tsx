@@ -55,7 +55,7 @@ export default function QueuePage() {
               {c.list.map((r) => (
                 <div key={r.name} className="rounded-xl border border-border p-3">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-emerald-500 text-lg font-extrabold text-white">{r.token_no}</span>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-teal-500 text-lg font-extrabold text-white">{r.token_no}</span>
                     <Avatarish name={r.patient_name} src={r.photo} />
                     <div className="min-w-0 flex-1"><div className="truncate font-semibold">{r.patient_name}</div>
                       <div className="truncate text-xs text-muted-foreground">{r.patient} · {r.doctor_name}{r.room ? ` · ${r.room}` : ""}</div></div>

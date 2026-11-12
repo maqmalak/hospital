@@ -47,7 +47,7 @@ export default function SamplesPage() {
         actions={<div className="relative"><ScanLine className="absolute start-3 top-2.5 h-4 w-4 text-white/70" /><input value={scan} onChange={(e) => setScan(e.target.value)} onKeyDown={(e) => e.key === "Enter" && void onScan()} placeholder="Scan sample barcode"
           className="h-10 w-64 rounded-xl border border-white/20 bg-white/10 ps-9 pe-3 text-sm text-white placeholder:text-white/60 outline-none focus:bg-white/20" /></div>} />
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <div className="flex gap-1 rounded-2xl bg-muted p-1">{TABS.map((t) => <button key={t.k} onClick={() => { setTab(t.k); setSel([]); }} className={cn("flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold", tab === t.k ? "bg-card shadow" : "text-muted-foreground")}><t.icon className="h-4 w-4" />{t.label}</button>)}</div>
+        <div className="flex gap-1 rounded-2xl bg-muted p-1">{TABS.map((t) => <button key={t.k} onClick={() => { setTab(t.k); setSel([]); }} className={cn("flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold", tab === t.k ? "tab-gold" : "text-muted-foreground")}><t.icon className="h-4 w-4" />{t.label}</button>)}</div>
         <div className="flex-1" />
         {sel.length > 0 && <>
           <span className="text-sm text-muted-foreground">{sel.length} selected</span>

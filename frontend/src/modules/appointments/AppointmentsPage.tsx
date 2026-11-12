@@ -95,10 +95,10 @@ export default function AppointmentsPage() {
         <div className="relative mt-4 flex flex-wrap items-center gap-2 [&_.bg-muted]:bg-white/10 [&_.bg-card]:bg-white [&_.bg-card]:text-indigo-900 [&_.text-muted-foreground]:text-white/75">
           <div className="flex rounded-xl bg-muted p-1">{([["list", "List", List], ["cards", "Cards", LayoutGrid], ["calendar", "Calendar", CalendarDays]] as const).map(([v, l, I]) => {
             const active = v === "calendar" ? isCal : view === v;
-            return <button key={v} onClick={() => changeView(v === "calendar" ? (isCal ? view : "week") : v)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold", active ? "bg-card shadow-sm" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>; })}</div>
+            return <button key={v} onClick={() => changeView(v === "calendar" ? (isCal ? view : "week") : v)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold", active ? "tab-gold" : "text-muted-foreground")}><I className="h-4 w-4" />{l}</button>; })}</div>
           <div className="flex rounded-xl bg-muted p-1">{([["all", "All", null], ["day", "Day", Sun], ["night", "Night", Moon]] as const).map(([v, l, I]) => (
             <button key={v} onClick={() => setShift(v)} title={v === "day" ? `${hhmm(dayStart)}–${hhmm(nightStart)}` : v === "night" ? `${hhmm(nightStart)}–${hhmm(dayStart)}` : "All hours"}
-              className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold", shift === v ? "bg-card shadow-sm" : "text-muted-foreground")}>{I && <I className="h-4 w-4" />}{l}</button>))}</div>
+              className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold", shift === v ? "tab-gold" : "text-muted-foreground")}>{I && <I className="h-4 w-4" />}{l}</button>))}</div>
           <label className="flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 text-sm">
             <span className="h-2.5 w-2.5 rounded-full ring-2 ring-white/40" style={{ background: filterDoctors.find((d) => d.name === docFilter)?.color || "conic-gradient(#14b8a6,#8b5cf6,#f59e0b,#ec4899,#14b8a6)" }} />
             <select value={docFilter} onChange={(e) => setDocFilter(e.target.value)} className="max-w-[220px] bg-transparent text-white outline-none [&>option]:text-black">
@@ -208,7 +208,7 @@ function BookDialog({ open, onClose, onBooked, initialPatient, preset }: { open:
       <div className="space-y-4">
         <PatientPicker value={patient} onPick={setPatient} onClear={() => setPatient(null)} />
         <div className="grid grid-cols-2 rounded-xl bg-muted p-1">{([["doctor", "Specific doctor"], ["any", "Any available doctor"]] as const).map(([k, l]) => (
-          <button key={k} onClick={() => setMode(k)} className={cn("rounded-lg py-2 text-sm font-semibold", mode === k ? "bg-card shadow-sm" : "text-muted-foreground")}>{l}</button>))}</div>
+          <button key={k} onClick={() => setMode(k)} className={cn("rounded-lg py-2 text-sm font-semibold", mode === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>))}</div>
         {mode === "doctor" ? <>
           <Field label="Doctor"><select className={inputCls} value={doctor} onChange={(e) => { setDoctor(e.target.value); setDate(""); setSlot(""); }}><option value="">—</option>
             {doctorList.map((d) => <option key={d.name} value={d.name}>{d.doctor_name} · {d.specialization} · Rs {d.default_fee}</option>)}</select></Field>

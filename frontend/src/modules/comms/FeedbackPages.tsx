@@ -40,7 +40,7 @@ export default function FeedbackAdminPage() {
           <div key={l} className="rounded-2xl bg-white/10 p-3 ring-1 ring-inset ring-white/15"><div className="text-[11px] uppercase tracking-wider text-white/60">{l}</div><div className="text-2xl font-black">{v}</div><div className="text-[11px] text-white/60">{h}</div></div>))}</div>
       </div>
       <div className="flex rounded-xl bg-muted p-1 sm:w-fit">{([["follow", `Follow-ups${rep?.open_follow_ups ? ` (${rep.open_follow_ups})` : ""}`], ["all", "All answers"], ["report", "Report"]] as const).map(([k, l]) => (
-        <button key={k} onClick={() => setTab(k)} className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", tab === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>))}</div>
+        <button key={k} onClick={() => setTab(k)} className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", tab === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>))}</div>
       {tab !== "report" ? (rows ? (rows.length ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{rows.map((r) => (
         <button key={r.name} onClick={() => setOpen(r)} className={cn("rounded-2xl border bg-card p-4 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg", r.follow_up === "Open" ? "border-rose-300" : "border-border")}>
           <div className="flex items-start justify-between gap-2"><div className="min-w-0"><b className="block truncate">{r.patient_name}</b><span className="text-xs text-muted-foreground">{r.source} · {r.doctor_name ?? r.department ?? "—"}</span></div><Stars v={r.rating_value} /></div>

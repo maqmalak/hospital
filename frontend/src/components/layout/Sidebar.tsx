@@ -20,10 +20,11 @@ import { NAV, type NavGroup, type NavItem } from "@/lib/nav";
 import { setShell, useShell } from "@/lib/shell";
 import { appOfRoute } from "@/lib/apps";
 import { cn } from "@/utils/cn";
+import { VvsMark, Wordmark } from "@/components/brand";
 
 const PINS = "hv.nav.pins";
 const OPEN = "hv.nav.open";
-const HOME: NavItem = { route: "/pw-home", label: "Desktop", icon: MonitorIcon, color: "from-teal-400 to-emerald-600", desc: "" };
+const HOME: NavItem = { route: "/pw-home", label: "Desktop", icon: MonitorIcon, color: "from-teal-400 to-teal-600", desc: "" };
 const EXACT = new Set(["/appointments", "/patients", "/ipd", "/lab/templates", "/finance"]);
 
 const readSet = (k: string): Set<string> => { try { return new Set(JSON.parse(localStorage.getItem(k) || "[]") as string[]); } catch { return new Set(); } };
@@ -66,10 +67,10 @@ function ItemLink({ item, active, pinned, onPin, tabIndex, highlighted, onNaviga
     <NavLink to={item.route} tabIndex={tabIndex} onClick={onNavigate} title={t(item.desc || item.label)} aria-current={active ? "page" : undefined}
       className={cn("group relative flex items-center gap-3 rounded-xl py-1.5 pe-2 ps-2.5 text-[13.5px] outline-none transition-all duration-200",
         "focus-visible:ring-2 focus-visible:ring-teal-300/70",
-        active ? "bg-gradient-to-r from-white/[0.14] to-white/[0.04] font-semibold text-white shadow-inner"
+        active ? "bg-gradient-to-r from-[#B8913A]/30 via-[#B8913A]/12 to-transparent font-semibold text-[#F1DE9C] shadow-inner ring-1 ring-inset ring-[#B8913A]/25"
           : "text-sidebar-muted hover:bg-white/[0.06] hover:text-sidebar-foreground motion-safe:hover:translate-x-0.5 rtl:motion-safe:hover:-translate-x-0.5",
         highlighted && !active && "bg-white/[0.08] text-sidebar-foreground")}>
-      <span className={cn("absolute inset-y-1.5 start-0 w-1 rounded-e-full bg-gradient-to-b from-teal-300 to-emerald-500 transition-all duration-300",
+      <span className={cn("absolute inset-y-1.5 start-0 w-1 rounded-e-full bg-gradient-to-b from-teal-300 to-teal-500 transition-all duration-300",
         active ? "opacity-100" : "scale-y-0 opacity-0")} aria-hidden />
       <Tile item={item} active={active} size="sm" />
       <span className="min-w-0 flex-1 truncate">{t(item.label)}</span>
@@ -204,7 +205,7 @@ export function Sidebar({ variant }: { variant: "desktop" | "drawer" }) {
     const cls = cn("group relative mx-auto grid h-11 w-11 place-items-center rounded-xl outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-teal-300/70",
       active ? "bg-white/[0.12]" : "hover:bg-white/[0.07]");
     const inner = <>
-      <span className={cn("absolute inset-y-2 -start-[14px] w-1 rounded-e-full bg-gradient-to-b from-teal-300 to-emerald-500 transition-all duration-300", active ? "opacity-100" : "scale-y-0 opacity-0")} aria-hidden />
+      <span className={cn("absolute inset-y-2 -start-[14px] w-1 rounded-e-full bg-gradient-to-b from-teal-300 to-teal-500 transition-all duration-300", active ? "opacity-100" : "scale-y-0 opacity-0")} aria-hidden />
       <span className={cn("grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br text-white shadow-sm transition-transform duration-200 motion-safe:group-hover:scale-110", color, active && "ring-2 ring-white/40")}><I className="h-4 w-4" /></span>
     </>;
     const ev = { onMouseEnter: (e: React.MouseEvent<HTMLElement>) => showFly(k, e.currentTarget), onMouseLeave: hideFly,
@@ -214,12 +215,12 @@ export function Sidebar({ variant }: { variant: "desktop" | "drawer" }) {
 
   return (
     <nav aria-label={t("Main menu")} className={cn("relative flex h-full flex-col overflow-hidden bg-sidebar text-sidebar-foreground",
-      "bg-[radial-gradient(120%_60%_at_0%_0%,rgba(45,212,191,0.10),transparent_60%)]", variant === "drawer" && "shadow-2xl")}>
+      "bg-[radial-gradient(120%_60%_at_0%_0%,rgba(184,145,58,0.16),transparent_60%)]", variant === "drawer" && "shadow-2xl")}>
       {/* brand */}
       <div className={cn("flex items-center gap-3 px-4 pb-3 pt-4", rail && "justify-center px-0")}>
         <Link to="/pw-home" onClick={closeDrawer} className="group flex min-w-0 items-center gap-3" aria-label={clinicName}>
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-teal-400 to-emerald-600 text-lg font-black text-white shadow-lg shadow-teal-900/40 transition-transform duration-300 motion-safe:group-hover:rotate-[-6deg] motion-safe:group-hover:scale-105">V</span>
-          {!rail && <span className="min-w-0"><span className="block truncate text-sm font-bold">{clinicName}</span><span className="block text-[11px] text-sidebar-muted">VVSDesk</span></span>}
+          <VvsMark className="h-10 w-10 shrink-0 transition-transform duration-500 motion-safe:group-hover:rotate-[8deg]" />
+          {!rail && <span className="min-w-0"><span className="block truncate text-sm font-bold">{clinicName}</span><Wordmark className="block text-[10px]" /></span>}
         </Link>
         {variant === "drawer" && <button type="button" onClick={closeDrawer} className="ms-auto grid h-9 w-9 place-items-center rounded-lg text-sidebar-muted hover:bg-white/10 hover:text-white" aria-label={t("Close menu")}><X className="h-5 w-5" /></button>}
       </div>

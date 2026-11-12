@@ -31,7 +31,7 @@ export default function StationListPage() {
         <Link to="/pc-report"><Button variant="neutral" size="sm"><BarChart3 className="h-4 w-4" />Response times</Button></Link></div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{data.map((s) => (
         <Link key={s.name} to={`/ns/${encodeURIComponent(s.name)}`} className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-sky-600 text-white"><Radio className="h-7 w-7" /></span>
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-600 text-white"><Radio className="h-7 w-7" /></span>
           <span className="min-w-0 flex-1"><b className="block text-lg">{s.station_name}</b><span className="text-xs text-muted-foreground">{s.wards.join(", ") || s.branch}</span>
             <span className="mt-1 block text-xs"><Users className="me-1 inline h-3.5 w-3.5" />{s.patients} patients</span></span>
           {s.unread > 0 && <span className="rounded-full bg-rose-600 px-3 py-1 text-sm font-black text-white">{s.unread}</span>}

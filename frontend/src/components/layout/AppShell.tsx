@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Building2, ChevronDown, ExternalLink, Globe, Languages, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Avatarish } from "@/components/common";
+import { useBrandFonts } from "@/components/brand";
 import { useAuth } from "@/lib/auth";
 import { setShell, useShell } from "@/lib/shell";
 import { loadLearned } from "@/lib/urdu";
@@ -21,6 +22,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const shell = useShell();
   const trail = useTrail();
+  useBrandFonts();
   useEffect(() => { if (boot) void loadLearned(() => getCall<Record<string, string>>("hospital_vvs.api.patients.urdu_words")); }, [boot]); // English → Urdu corrections (D-51)
   useEffect(() => { if (shell.full) setShell({ full: false }); }, [loc.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const toggleTheme = () => {

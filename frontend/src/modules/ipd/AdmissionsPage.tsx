@@ -43,13 +43,13 @@ export default function AdmissionsPage() {
         <div className="relative min-w-56 flex-1"><Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" /><input className={inputCls + " ps-9"} placeholder="Name, MR or admission no." value={q} onChange={(e) => setQ(e.target.value)} /></div>
         <select className={inputCls.replace("w-full", "") + " w-48"} value={ward} onChange={(e) => setWard(e.target.value)}><option value="">All wards</option>{wards.map((w) => <option key={w}>{w}</option>)}</select>
         <div className="flex gap-1 rounded-xl bg-muted p-1">{[["open", "In hospital"], ["Discharged", "Discharged"], ["", "All"]].map(([k, l]) => <button key={k} onClick={() => setStatus(k)}
-          className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
+          className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>)}</div>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {list.map((r) => (
           <Link key={r.name} to={`/ipd/${r.name}`} className={cn("group rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg", r.overdue ? "border-rose-300" : "border-border")}>
             <div className="flex items-start gap-3">
-              <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 text-white"><BedDouble className="h-4 w-4" /><span className="text-xs font-black">{r.bed_no}</span></span>
+              <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-teal-500 text-white"><BedDouble className="h-4 w-4" /><span className="text-xs font-black">{r.bed_no}</span></span>
               <div className="min-w-0 flex-1"><div className="truncate font-bold">{r.patient_name}</div><div className="truncate text-xs text-muted-foreground">{r.patient} · {r.name}</div>
                 <div className="truncate text-xs text-muted-foreground">{r.ward} · {r.doctor_name}</div></div>
               <Chip s={r.status} />

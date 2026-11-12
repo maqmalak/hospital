@@ -4,63 +4,63 @@
 
 @layer base {
   :root {
-    /* VVSDesk clinical theme: soft mint-white page, white cards, deep teal primary, navy-teal sidebar */
-    --background: 180 22% 97%;
-    --foreground: 200 28% 12%;
+    /* VVS gold theme (D-72), from the VVSDesk landing page: warm ivory page, white cards, bronze-gold primary, ink sidebar */
+    --background: 45 33% 97%;
+    --foreground: 220 17% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 200 28% 12%;
+    --card-foreground: 220 17% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 200 28% 12%;
-    --primary: 174 78% 30%;
+    --popover-foreground: 220 17% 10%;
+    --primary: 41 64% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 176 32% 93%;
-    --secondary-foreground: 196 30% 14%;
-    --muted: 182 18% 94%;
-    --muted-foreground: 200 12% 36%;
-    --accent: 172 46% 91%;
-    --accent-foreground: 190 40% 14%;
-    --destructive: 0 74% 52%;
+    --secondary: 42 36% 93%;
+    --secondary-foreground: 40 40% 16%;
+    --muted: 42 22% 94%;
+    --muted-foreground: 30 8% 36%;
+    --accent: 43 52% 91%;
+    --accent-foreground: 38 50% 18%;
+    --destructive: 0 74% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 186 18% 85%;
-    --input: 192 12% 68%;
+    --border: 40 22% 86%;
+    --input: 38 14% 68%;
     --input-bg: 0 0% 100%;
-    --success: 152 64% 32%;
-    --warning: 34 94% 44%;
-    --ring: 174 78% 30%;
-    --sidebar: 194 52% 11%;
-    --sidebar-foreground: 178 30% 95%;
-    --sidebar-muted: 184 16% 70%;
+    --success: 152 64% 30%;
+    --warning: 34 94% 40%;
+    --ring: 41 64% 40%;
+    --sidebar: 225 16% 7%;
+    --sidebar-foreground: 42 30% 94%;
+    --sidebar-muted: 40 10% 66%;
     --radius: 0.65rem;
 
     color-scheme: light;
   }
 
   .dark {
-    --background: 200 34% 6%;
-    --foreground: 180 25% 94%;
-    --card: 198 28% 12%;
-    --card-foreground: 180 25% 94%;
-    --popover: 198 28% 15%;
-    --popover-foreground: 180 25% 94%;
-    --primary: 172 66% 42%;
-    --primary-foreground: 196 60% 6%;
-    --secondary: 196 24% 15%;
-    --secondary-foreground: 180 20% 90%;
-    --muted: 196 22% 18%;
-    --muted-foreground: 184 16% 72%;
-    --accent: 186 26% 17%;
-    --accent-foreground: 180 22% 92%;
+    --background: 225 14% 6%;
+    --foreground: 42 25% 93%;
+    --card: 225 10% 10.5%;
+    --card-foreground: 42 25% 93%;
+    --popover: 225 10% 13%;
+    --popover-foreground: 42 25% 93%;
+    --primary: 42 58% 60%;
+    --primary-foreground: 225 16% 7%;
+    --secondary: 225 8% 15%;
+    --secondary-foreground: 42 20% 90%;
+    --muted: 225 8% 17%;
+    --muted-foreground: 40 10% 70%;
+    --accent: 40 18% 17%;
+    --accent-foreground: 42 22% 92%;
     --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 100%;
-    --border: 194 20% 27%;
-    --input: 192 18% 44%;
-    --input-bg: 198 30% 16%;
+    --border: 225 8% 24%;
+    --input: 40 8% 42%;
+    --input-bg: 225 10% 14%;
     --success: 152 58% 46%;
     --warning: 36 92% 56%;
-    --ring: 172 66% 42%;
-    --sidebar: 200 40% 4.5%;
-    --sidebar-foreground: 180 25% 92%;
-    --sidebar-muted: 184 16% 68%;
+    --ring: 42 58% 60%;
+    --sidebar: 225 18% 4.5%;
+    --sidebar-foreground: 42 25% 92%;
+    --sidebar-muted: 40 10% 64%;
 
     color-scheme: dark;
   }
@@ -85,9 +85,9 @@
      floating above it rather than flat rectangles. */
   .dark body {
     background-image:
-      radial-gradient(1000px 520px at 18% 0%, rgb(20 184 166 / 0.16), transparent 55%),
-      radial-gradient(920px 520px at 86% 12%, rgb(99 102 241 / 0.1), transparent 50%),
-      radial-gradient(920px 520px at 50% 100%, rgb(245 158 11 / 0.06), transparent 55%);
+      radial-gradient(1000px 520px at 18% 0%, rgb(184 145 58 / 0.14), transparent 55%),
+      radial-gradient(920px 520px at 86% 12%, rgb(230 207 143 / 0.05), transparent 50%),
+      radial-gradient(920px 520px at 50% 100%, rgb(184 145 58 / 0.06), transparent 55%);
     background-attachment: fixed;
   }
 }
@@ -100,20 +100,20 @@
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
   .dark select,
   .dark textarea {
-    background-color: hsl(198 30% 16%);   /* a clear step lighter than the card (12%) */
-    border-color: hsl(194 22% 38%);
+    background-color: hsl(225 10% 14.5%);   /* a clear step lighter than the card */
+    border-color: hsl(40 8% 34%);
     color: hsl(220 20% 94%);
     transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
   }
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(:disabled):hover,
   .dark select:not(:disabled):hover,
   .dark textarea:not(:disabled):hover {
-    border-color: hsl(190 35% 52%);
+    border-color: hsl(42 40% 50%);
   }
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visible,
   .dark select:focus-visible,
   .dark textarea:focus-visible {
-    background-color: hsl(198 30% 18%);
+    background-color: hsl(225 10% 16%);
     border-color: hsl(var(--primary));
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.22);
   }
@@ -121,7 +121,7 @@
   .dark select:disabled,
   .dark textarea:disabled {
     opacity: 1;
-    background-color: hsl(198 28% 13%);
+    background-color: hsl(225 10% 12%);
     border-style: dashed;
     color: hsl(220 18% 78%);
   }
@@ -130,7 +130,7 @@
     color: hsl(200 14% 62%);
   }
   .dark select option {
-    background-color: hsl(198 30% 16%);
+    background-color: hsl(225 10% 14.5%);
   }
   /* Native date/time pickers: light calendar icon on the dark field. */
   .dark input::-webkit-calendar-picker-indicator {
@@ -329,11 +329,12 @@
   .frappe-form label { @apply text-[12px] font-medium text-foreground/80; }
 }
 
-/* MicroMax action colour: the azure → teal gradient on buttons and active controls (brand gold stays for logo / headings). */
+/* Action colour (D-72): the landing page's gold bar — dark-gold → champagne → gold, ink text. */
 @layer components {
-  button.bg-primary, a.bg-primary, [role="tab"].bg-primary, .btn-azure {
-    background-image: linear-gradient(135deg, #0f766e 0%, #10b981 100%);
-    box-shadow: 0 8px 22px -10px rgb(33 150 207 / 0.75);
+  button.bg-primary, a.bg-primary, [role="tab"].bg-primary, .btn-azure, .btn-gold {
+    background-image: linear-gradient(135deg, #A88536 0%, #E6CF8F 50%, #B8913A 100%);
+    color: #14171C !important;
+    box-shadow: 0 10px 24px -12px rgb(184 145 58 / 0.9), inset 0 0 0 1px rgb(255 255 255 / 0.3);
   }
   button.bg-primary:hover, a.bg-primary:hover, .btn-azure:hover { filter: brightness(1.06); }
 }
@@ -378,3 +379,21 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
 
 /* app analytics tab switch (D-68) */
 @keyframes hvFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Gold gradient theme (D-72): active tabs / segmented buttons, gold headline text, gold hairlines. */
+@layer components {
+  .tab-gold {
+    background-image: linear-gradient(135deg, #A88536 0%, #E6CF8F 50%, #B8913A 100%);
+    color: #14171C !important;
+    box-shadow: 0 6px 16px -8px rgb(184 145 58 / 0.85), inset 0 0 0 1px rgb(255 255 255 / 0.35);
+  }
+  .tab-gold * { color: inherit; }
+  .vvs-gold-text {
+    background-image: linear-gradient(110deg, #9A7A2C, #D2B260 45%, #B8913A 70%, #8A6A22);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .dark .vvs-gold-text { background-image: linear-gradient(110deg, #B8913A, #F1DE9C 45%, #C9A24A 70%, #E6CF8F); }
+  .gold-rule { height: 1px; background-image: linear-gradient(90deg, #B8913A, rgb(184 145 58 / 0)); }
+  /* page canvas: a faint gold wash from the top-left, like the landing hero */
+  body { background-image: radial-gradient(1100px 480px at 0% 0%, rgb(184 145 58 / 0.07), transparent 60%); background-attachment: fixed; }
+}

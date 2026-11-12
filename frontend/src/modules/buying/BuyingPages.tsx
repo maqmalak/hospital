@@ -156,7 +156,7 @@ export function PurchaseOrdersPage() {
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
           <div className="flex rounded-xl bg-muted p-1">{([["draft", "Draft"], ["receive", "To receive"], ["bill", "To bill"], ["done", "Completed"], ["", "All"]] as const).map(([k, l]) =>
-            <button key={k} onClick={() => setStatus(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
+            <button key={k} onClick={() => setStatus(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", status === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>)}</div>
           <div className="relative ms-auto min-w-56"><Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" /><input className={inputCls + " h-9 ps-9"} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search order or supplier" /></div>
         </div>
         <table className="w-full text-sm"><thead className="bg-muted/50 text-xs text-muted-foreground"><tr>{["Order", "Supplier", "Company", "Date", "Amount", "Received", "Billed", "Status"].map((h) => <th key={h} className="px-3 py-2 text-start font-semibold">{h}</th>)}</tr></thead>
@@ -319,7 +319,7 @@ export function PurchaseInvoicesPage() {
         <StatCard label="Draft invoices" value={data?.totals.drafts ?? 0} icon={FileText} tone="slate" /></div>
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
-          <div className="flex rounded-xl bg-muted p-1">{([["unpaid", "Unpaid"], ["overdue", "Overdue"], ["paid", "Paid"], ["", "All"]] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", tab === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
+          <div className="flex rounded-xl bg-muted p-1">{([["unpaid", "Unpaid"], ["overdue", "Overdue"], ["paid", "Paid"], ["", "All"]] as const).map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", tab === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>)}</div>
           <div className="relative ms-auto min-w-56"><Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" /><input className={inputCls + " h-9 ps-9"} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search invoice, bill no. or supplier" /></div>
         </div>
         <table className="w-full text-sm"><thead className="bg-muted/50 text-xs text-muted-foreground"><tr>{["Invoice", "Supplier", "Company", "Bill no.", "Date", "Due", "Amount", "Owed", "Status", ""].map((h) => <th key={h} className="px-3 py-2 text-start font-semibold">{h}</th>)}</tr></thead>
@@ -361,7 +361,7 @@ export function MaterialRequestsPage() {
     <div className="space-y-4">
       <PageHeader title="Material requests" icon={ClipboardList} color="from-amber-600 to-orange-700" subtitle="Wards, lab and pharmacy ask the store to buy; the store turns requests into purchase orders"
         actions={<div className="flex flex-wrap gap-2"><CompanyPicker /><Button variant="save" onClick={() => setAdd(true)}><Plus className="h-4 w-4" />New request</Button></div>} />
-      <div className="flex rounded-xl bg-muted p-1 sm:w-fit">{([["pending", "Waiting for an order"], ["", "All"]] as const).map(([k, l]) => <button key={k} onClick={() => setStatus(k)} className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", status === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
+      <div className="flex rounded-xl bg-muted p-1 sm:w-fit">{([["pending", "Waiting for an order"], ["", "All"]] as const).map(([k, l]) => <button key={k} onClick={() => setStatus(k)} className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", status === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>)}</div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{(data ?? []).map((m) => (
         <div key={m.name} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-start justify-between gap-2"><div><b>{m.name}</b><div className="text-xs text-muted-foreground">{short(m.company)} · {m.transaction_date} · into {m.set_warehouse}</div></div><Status s={m.docstatus === 0 ? "Draft" : m.status} /></div>

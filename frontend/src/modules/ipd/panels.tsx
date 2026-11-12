@@ -339,7 +339,7 @@ export function ChargeDialog({ target, ctx, onClose, onDone }: { target: Target;
     <Dialog open onClose={onClose} title="Add a charge" description="Posts to the running bill at once" size="md">
       <div className="space-y-3">
         <div className="flex gap-1 rounded-xl bg-muted p-1">{(["Ad-hoc", "Consumable", "Oxygen"] as const).map((k) => <button key={k} onClick={() => { setKind(k); setItem(""); }}
-          className={cn("flex-1 rounded-lg py-1.5 text-sm font-semibold", kind === k ? "bg-card shadow" : "text-muted-foreground")}>{k === "Ad-hoc" ? "Service" : k}</button>)}</div>
+          className={cn("flex-1 rounded-lg py-1.5 text-sm font-semibold", kind === k ? "tab-gold" : "text-muted-foreground")}>{k === "Ad-hoc" ? "Service" : k}</button>)}</div>
         {kind === "Ad-hoc" && <Field label="Service"><select className={inputCls} value={item} onChange={(e) => setItem(e.target.value)}><option value="">— other hospital service —</option>
           {ctx?.charge_items.map((i) => <option key={i.name} value={i.name}>{i.item_name}{i.standard_rate ? ` · ${rs(i.standard_rate)}` : ""}</option>)}</select></Field>}
         {kind === "Consumable" && <Field label="Item from the IPD store">{item ? <div className="flex items-center gap-2 rounded-lg border border-border p-2 text-sm"><b className="flex-1">{item}</b><button onClick={() => setItem("")}><X className="h-4 w-4" /></button></div>

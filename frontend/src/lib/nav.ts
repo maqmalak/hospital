@@ -11,7 +11,7 @@ export interface NavGroup { label: string; items: NavItem[] }
 
 export const NAV: NavGroup[] = [
   { label: "OPD", items: [
-    { route: "/registration", label: "Patient registration", icon: UserPlus, color: "from-teal-500 to-emerald-500", desc: "Register, search, duplicate check, card" },
+    { route: "/registration", label: "Patient registration", icon: UserPlus, color: "from-teal-500 to-teal-400", desc: "Register, search, duplicate check, card" },
     { route: "/counter", label: "Reception counter", icon: ReceiptText, color: "from-emerald-600 to-teal-700", desc: "One cart: OPD, services, lab, IPD, online fees, dues" },
     { route: "/opd_slip", label: "OPD slip", icon: FilePlus2, color: "from-sky-500 to-cyan-500", desc: "Fee, vitals, token and receipt" },
     { route: "/appointments", label: "Appointments", icon: CalendarClock, color: "from-violet-500 to-indigo-500", desc: "Reception, web and WhatsApp bookings" },
@@ -38,7 +38,7 @@ export const NAV: NavGroup[] = [
     { route: "/pharmacy/pick", label: "Pharmacy pick", icon: ScanLine, color: "from-amber-500 to-orange-500", desc: "Pick by rack, scan batches" },
     { route: "/pharmacy/review", label: "Pharmacy review", icon: ClipboardCheck, color: "from-rose-500 to-pink-600", desc: "Pharmacist check and count" },
     { route: "/pharmacy/dispense", label: "Pharmacy handover", icon: PackageCheck, color: "from-green-500 to-emerald-600", desc: "Call, collect, hand over" },
-    { route: "/pharmacy/tickets", label: "Pharmacy pipeline", icon: ListChecks, color: "from-teal-600 to-cyan-700", desc: "All tickets and stage times" },
+    { route: "/pharmacy/tickets", label: "Pharmacy pipeline", icon: ListChecks, color: "from-teal-600 to-teal-700", desc: "All tickets and stage times" },
     { route: "/pharmacy/items", label: "Medicine master", icon: PackageSearch, color: "from-lime-500 to-green-600", desc: "Stock by batch and expiry" },
   ] },
   { label: "Store", items: [
@@ -56,9 +56,9 @@ export const NAV: NavGroup[] = [
   { label: "Inpatient", items: [
     { route: "/er", label: "Emergency", icon: HeartPulse, color: "from-red-500 to-rose-600", desc: "Triage board, unknown patients, disposition" },
     { route: "/ward", label: "Wards & beds", icon: BedDouble, color: "from-emerald-500 to-teal-600", desc: "Live bed map, admit, transfer" },
-    { route: "/ipd", label: "Admissions", icon: ClipboardPlus, color: "from-teal-600 to-cyan-700", desc: "Inpatients, charts, discharge" },
+    { route: "/ipd", label: "Admissions", icon: ClipboardPlus, color: "from-teal-600 to-teal-700", desc: "Inpatients, charts, discharge" },
     { route: "/ipd/mar", label: "Drug round", icon: Pill, color: "from-green-500 to-emerald-600", desc: "Doses due, chart in one tap" },
-    { route: "/ns", label: "Nursing stations", icon: Radio, color: "from-teal-500 to-sky-600", desc: "Bedside calls, replies, broadcast" },
+    { route: "/ns", label: "Nursing stations", icon: Radio, color: "from-teal-500 to-teal-600", desc: "Bedside calls, replies, broadcast" },
     { route: "/ipd_slip", label: "IPD bill", icon: Receipt, color: "from-sky-600 to-indigo-600", desc: "Running bill, advances, final invoice" },
     { route: "/ipd/kitchen", label: "Diet list", icon: Soup, color: "from-lime-500 to-green-600", desc: "Meals per bed for the kitchen" },
     { route: "/ipd/pre-auth", label: "Insurance pre-auth", icon: ShieldPlus, color: "from-indigo-500 to-violet-600", desc: "Approvals before admission" },
@@ -84,7 +84,7 @@ export const NAV: NavGroup[] = [
     { route: "/accounting/reports/profit-and-loss", label: "Profit and loss", icon: BarChart3, color: "from-rose-500 to-red-600", desc: "Income and expense statement" },
     { route: "/accounting/reports/balance-sheet", label: "Balance sheet", icon: Landmark, color: "from-amber-500 to-orange-600", desc: "Assets, liabilities, equity" },
     { route: "/accounting/reports/cash-flow", label: "Cash flow", icon: Coins, color: "from-lime-500 to-green-600", desc: "Operating, investing, financing" },
-    { route: "/accounting/bank-clearance", label: "Bank clearance", icon: Landmark, color: "from-teal-600 to-emerald-700", desc: "Clear cheques against the bank statement" },
+    { route: "/accounting/bank-clearance", label: "Bank clearance", icon: Landmark, color: "from-teal-600 to-teal-700", desc: "Clear cheques against the bank statement" },
     { route: "/accounting/cheque-tracking", label: "Cheque tracking", icon: FileText, color: "from-violet-500 to-purple-600", desc: "Issued and received cheques" },
     { route: "/accounting/cost-centers", label: "Cost centres", icon: Building2, color: "from-slate-500 to-slate-700", desc: "Departments for profit and cost" },
     { route: "/accounting/getting-started", label: "Accounting setup", icon: Settings, color: "from-gray-500 to-gray-700", desc: "Fiscal years, modes of payment, taxes, settings" },
@@ -100,11 +100,11 @@ export const NAV: NavGroup[] = [
     { route: "/import/supplier-quotations", label: "Supplier quotations", icon: FileText, color: "from-violet-500 to-fuchsia-600", desc: "Compare prices, make the order" },
     { route: "/purchase/landed-costs", label: "Landed costs", icon: Ship, color: "from-orange-500 to-amber-600", desc: "Freight and duty into stock cost" },
     { route: "/assets", label: "Fixed assets", icon: Factory, color: "from-emerald-500 to-teal-600", desc: "Machinery, plant, building, IT" },
-    { route: "/consumption", label: "Consumption", icon: PackageMinus, color: "from-teal-500 to-emerald-600", desc: "Consumables issued to departments" },
+    { route: "/consumption", label: "Consumption", icon: PackageMinus, color: "from-teal-500 to-teal-600", desc: "Consumables issued to departments" },
   ] },
   { label: "Billing", items: [
     { route: "/doctor-share", label: "Doctor share", icon: HandCoins, color: "from-sky-600 to-emerald-600", desc: "Commission, owed / paid, payouts" },
-    { route: "/my-share", label: "My commission", icon: HandCoins, color: "from-teal-600 to-sky-600", desc: "Your commission statement" },
+    { route: "/my-share", label: "My commission", icon: HandCoins, color: "from-teal-600 to-teal-500", desc: "Your commission statement" },
     { route: "/billing/discount-approvals", label: "Discount approvals", icon: Percent, color: "from-orange-500 to-amber-500", desc: "Requests above the limit" },
     { route: "/messages", label: "Message log", icon: MessagesSquare, color: "from-green-600 to-teal-600", desc: "WhatsApp / SMS delivery" },
   ] },
@@ -116,7 +116,7 @@ export const NAV: NavGroup[] = [
     { route: "/ov-staff/report", label: "Online visit report", icon: BarChart3, color: "from-violet-600 to-fuchsia-700", desc: "Requests, fees, refunds" },
   ] },
   { label: "Admin", items: [
-    { route: "/doctors", label: "Doctors", icon: Activity, color: "from-teal-600 to-cyan-700", desc: "Doctors, schedules, leave" },
+    { route: "/doctors", label: "Doctors", icon: Activity, color: "from-teal-600 to-teal-700", desc: "Doctors, schedules, leave" },
     { route: "/patients/merge", label: "Merge patients", icon: Merge, color: "from-stone-500 to-stone-700", desc: "Merge duplicate records" },
     { route: "/audit", label: "Audit log", icon: ShieldCheck, color: "from-zinc-600 to-zinc-800", desc: "Who saw what, and changes" },
     { route: "/users", label: "Users & roles", icon: UserCog, color: "from-slate-600 to-zinc-800", desc: "Staff accounts, roles, page access" },

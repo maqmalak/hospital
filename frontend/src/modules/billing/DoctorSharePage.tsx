@@ -101,9 +101,9 @@ function StatementBody({ s, readOnly, onPay, onChanged }: { s: Stmt; readOnly?: 
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex rounded-xl bg-muted p-1">{([["ledger", "Ledger", ReceiptText], ["payouts", "Payouts", Banknote], ["rules", "Rules", Settings2]] as const).filter(([k]) => !readOnly || k !== "rules" || s.rules.length).map(([k, l, I]) => (
-          <button key={k} onClick={() => setTab(k)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold", tab === k ? "bg-card shadow" : "text-muted-foreground")}><I className="h-3.5 w-3.5" />{l}</button>))}</div>
+          <button key={k} onClick={() => setTab(k)} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold", tab === k ? "tab-gold" : "text-muted-foreground")}><I className="h-3.5 w-3.5" />{l}</button>))}</div>
         {tab === "ledger" && <div className="flex rounded-xl bg-muted p-1">{([["", "All"], ["Unpaid", "Unpaid"], ["Paid", "Paid"]] as const).map(([k, l]) => (
-          <button key={l} onClick={() => setFilter(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", filter === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>))}</div>}
+          <button key={l} onClick={() => setFilter(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", filter === k ? "tab-gold" : "text-muted-foreground")}>{l}</button>))}</div>}
         <div className="flex-1" />
         {!readOnly && s.totals.unpaid > 0 && onPay && <Button size="sm" variant="save" onClick={onPay}><Banknote className="h-4 w-4" />Pay {rs(s.totals.unpaid)}</Button>}
         {!readOnly && tab === "rules" && <Button size="sm" variant="neutral" onClick={() => setEdit({ doctor: s.doctor, billing_type: "OPD Slip", share_type: "Percent", value: 0, basis: "Net of discount", is_active: 1 })}><Plus className="h-4 w-4" />Rule</Button>}
@@ -153,7 +153,7 @@ function RuleDialog({ rule, onClose, onSaved }: { rule?: Rule; onClose: () => vo
         </div>
         <div className="grid grid-cols-[1fr_1fr] gap-2">
           <Field label="Commission"><div className="flex rounded-xl bg-muted p-1">{([["Percent", "%"], ["Fixed per unit", "Rs / unit"]] as const).map(([v, l]) => (
-            <button key={v} onClick={() => set({ share_type: v })} className={cn("flex-1 rounded-lg py-1.5 text-xs font-bold", r.share_type === v ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>))}</div></Field>
+            <button key={v} onClick={() => set({ share_type: v })} className={cn("flex-1 rounded-lg py-1.5 text-xs font-bold", r.share_type === v ? "tab-gold" : "text-muted-foreground")}>{l}</button>))}</div></Field>
           <Field label={r.share_type === "Percent" ? "Percent" : "Rs per unit"} required><input className={inputCls + " text-end font-bold"} inputMode="decimal" value={r.value || ""} onChange={(e) => set({ value: Number(e.target.value.replace(/[^\d.]/g, "")) || 0 })} /></Field>
         </div>
         {r.share_type === "Percent" && <Field label="Percent of"><select className={inputCls} value={r.basis} onChange={(e) => set({ basis: e.target.value })}><option>Net of discount</option><option>Gross</option></select></Field>}

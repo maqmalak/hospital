@@ -79,7 +79,7 @@ export default function DevicePage() {
   if (d.type === "Waiting Display") return shell(
     <div className="grid h-full auto-rows-fr grid-cols-2 gap-5 xl:grid-cols-3">{d.opd.doctors.map((x, i) => (
       <div key={i} className="flex flex-col rounded-3xl bg-white/5 p-5"><div className="text-2xl font-bold">{x.doctor}</div><div className="text-white/60">Room {x.room ?? "—"} · {x.waiting} waiting</div>
-        <div className="mt-3 flex flex-1 items-center gap-6 rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-700 px-6"><span className="text-xl uppercase text-white/70">Now</span><span className="text-8xl font-black">{x.now?.token ?? "—"}</span>{x.now?.name && <span className="text-2xl">{x.now.name}</span>}</div>
+        <div className="mt-3 flex flex-1 items-center gap-6 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 px-6"><span className="text-xl uppercase text-white/70">Now</span><span className="text-8xl font-black">{x.now?.token ?? "—"}</span>{x.now?.name && <span className="text-2xl">{x.now.name}</span>}</div>
         <div className="mt-3 flex gap-2">{x.next.map((n) => <span key={n.token} className="rounded-xl bg-white/10 px-4 py-2 text-2xl font-bold">{n.token}</span>)}</div></div>))}
       {!d.opd.doctors.length && <div className="col-span-full pt-24 text-center text-3xl text-white/50">No clinics running</div>}</div>, "bg-gradient-to-br from-slate-950 to-[#04281f]");
 
