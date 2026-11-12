@@ -48,6 +48,8 @@ DEFAULT_ROUTES = [
 	("/purchase_order", "Purchase orders", [STORE_KEEPER, ACCOUNTANT], ""),
 	("/purchase_invoice", "Purchase invoices", [STORE_KEEPER, ACCOUNTANT], ""),
 	("/finance", "Finance overview", [ACCOUNTANT, CASH_SUPERVISOR], ""),
+	("/accounting", "Accounting (chart of accounts, vouchers, ledgers, statements)", [ACCOUNTANT], ""),
+	("/purchase", "Buying documents (orders, receipts, invoices, RFQs, suppliers)", [STORE_KEEPER, ACCOUNTANT], ""),
 	("/online-payments", "Online card payments", [ACCOUNTANT, CASH_SUPERVISOR, RECEPTIONIST], ""),
 	("/fbr", "FBR reporting", [ACCOUNTANT, CASH_SUPERVISOR], ""),
 	("/my-share", "My commission", [DOCTOR], "enable_doctor_share"),

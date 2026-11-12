@@ -50,3 +50,16 @@ DESCRIPTIONS = {
 	OV_STAFF: "Online Visit queue and fees",
 	OV_DOCTOR: "Online Visit consultations",
 }
+
+
+# Standard ERPNext roles that go with a hospital role (D-65): the accounting and buying screens ported from sugarcane read and
+# write ERPNext documents and reports directly, so ERPNext's own permissions apply there.
+ERP_ROLES = {
+	ACCOUNTANT: ["Accounts Manager", "Accounts User", "Purchase Manager", "Purchase User"],
+	STORE_KEEPER: ["Purchase User", "Stock User"],
+}
+ERP_ROLE_SET = {r for v in ERP_ROLES.values() for r in v}
+
+
+def erp_roles_for(pw_roles):
+	return sorted({r for p in pw_roles for r in ERP_ROLES.get(p, [])})

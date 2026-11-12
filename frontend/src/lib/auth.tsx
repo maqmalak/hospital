@@ -22,6 +22,14 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
+/** The screens ported from sugarcane (D-65) share one page-access rule each: /accounting, or /purchase for the buying documents. */
+export function guardRoute(route: string) {
+  const path = route.split("?")[0];
+  if (path.startsWith("/accounting")) return "/accounting";
+  if (/^\/(purchase\/|import\/|masters\/supplier)/.test(path)) return "/purchase";
+  return path;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [boot, setBoot] = useState<Boot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthCtx>(() => ({
     boot, loading, branch, setBranch, login, logout, reload,
-    can: (route: string) => !!boot && (boot.is_admin || boot.routes.some((r) => r.route === route)),
+    can: (route: string) => { const k = guardRoute(route); return !!boot && (boot.is_admin || boot.routes.some((r) => r.route === k)); },
     hasRole: (...r: string[]) => !!boot && (boot.is_admin || r.some((x) => boot.roles.includes(x))),
   }), [boot, loading, branch]); // eslint-disable-line react-hooks/exhaustive-deps
 

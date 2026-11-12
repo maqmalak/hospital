@@ -8,6 +8,15 @@ order: 60
 ## Finance overview
 **Finance overview**: today's and this month's revenue by department, collections by mode, receivables (patients, panels, insurers), payables and cash position.
 
+## Accounting (in the app)
+The **Accounting** menu has the full set of accounting screens (sugarcane style), so the desk is not needed:
+- **Chart of accounts** — the accounts tree with balances; add accounts and groups. **Cost centres** — departments.
+- **Journal entries** — JV, bank and cash vouchers with debits and credits by account; each voucher shows its ledger, activity and connections.
+- **Payment entries** — receipts and payments against invoices (**Get Outstanding Invoices** allocates oldest first).
+- **General ledger**, **Trial balance**, **Profit and loss**, **Balance sheet**, **Cash flow** — set the filters, **Generate**; export to Excel or PDF.
+- **Bank clearance** (clear cheques against the statement) and **Cheque tracking** (every leaf of every cheque book).
+- **Accounting setup** — fiscal years, modes of payment, payment terms, tax templates, terms and conditions, accounts settings.
+
 ## Expenses
 **Expenses**: record an expense with a bill photo; approval runs by amount. **Recurring** tab: rent, salaries of contractors, internet — drafted on their date into the same approval flow.
 

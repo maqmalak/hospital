@@ -101,8 +101,8 @@ def save_user(data):
 	u.first_name, u.last_name = first, last or None
 	u.mobile_no = d.get("mobile_no") or None
 	u.enabled = cint(d.get("enabled", 1))
-	keep = [r.role for r in u.get("roles", []) if r.role not in R.ALL]  # ERPNext / System roles stay as they are
-	u.set("roles", [{"role": r} for r in keep + want])
+	keep = [r.role for r in u.get("roles", []) if r.role not in R.ALL and r.role not in R.ERP_ROLE_SET]  # other ERPNext / System roles stay
+	u.set("roles", [{"role": r} for r in keep + want + R.erp_roles_for(want)])  # + the ERPNext roles that go with them (D-65)
 	if d.get("new_password"):
 		u.new_password = d["new_password"]  # Frappe applies the password policy
 	u.flags.ignore_permissions = True

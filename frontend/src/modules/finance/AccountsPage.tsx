@@ -41,8 +41,8 @@ const CODE_TONE: Record<string, string> = {
   CRV: "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-200",
 };
 const Code = ({ c }: { c: string }) => <span className={cn("rounded-md px-1.5 py-0.5 text-[11px] font-bold", CODE_TONE[c] ?? CODE_TONE.JV)}>{c || "JV"}</span>;
-const desk = (dt: string, name?: string) => `/app/${dt.toLowerCase().replace(/ /g, "-")}${name ? `/${encodeURIComponent(name)}` : ""}`;
-const Desk = ({ dt, name }: { dt: string; name: string }) => <a href={desk(dt, name)} target="_blank" rel="noreferrer" className="font-mono text-xs text-teal-700 hover:underline dark:text-teal-300">{name}</a>;
+const desk = (dt: string, name?: string) => (dt === "Journal Entry" ? "/hms/accounting/journal-entries" : "/hms/accounting/payment-entries") + (name ? `/${encodeURIComponent(name)}` : "");
+const Desk = ({ dt, name }: { dt: string; name: string }) => <a href={desk(dt, name)} className="font-mono text-xs text-teal-700 hover:underline dark:text-teal-300">{name}</a>;
 
 function Kpi({ icon: I, label, value, sub, color, to, title }: { icon: LucideIcon; label: string; value: string; sub?: ReactNode; color: string; to?: string; title?: string }) {
   const body = (
@@ -70,23 +70,23 @@ function Card({ title, sub, actions, children, className }: { title: string; sub
 type Item = { label: string; to: string; icon: LucideIcon; desk?: boolean };
 const MANAGE: { title: string; tile: string; wash: string; items: Item[] }[] = [
   { title: "Transactions", tile: "from-blue-500 to-indigo-600", wash: "from-blue-500/15", items: [
-    { label: "Journal voucher", to: "/app/journal-entry/new", icon: BookOpen, desk: true }, { label: "Payment / receipt", to: "/app/payment-entry/new", icon: HandCoins, desk: true },
+    { label: "Journal entries", to: "/accounting/journal-entries", icon: BookOpen }, { label: "Payment entries", to: "/accounting/payment-entries", icon: HandCoins },
     { label: "Expenses", to: "/expenses", icon: Receipt }, { label: "Discount approvals", to: "/billing/discount-approvals", icon: ShieldCheck }] },
   { title: "Receivables & payables", tile: "from-amber-400 to-orange-500", wash: "from-amber-500/15", items: [
     { label: "Panels & insurers", to: "/panels", icon: Building2 }, { label: "Insurance claims", to: "/claims", icon: FileText },
-    { label: "Supplier invoices", to: "/purchase_invoice", icon: ShoppingCart }, { label: "Doctor share", to: "/doctor-share", icon: HeartHandshake }] },
+    { label: "Supplier invoices", to: "/purchase/invoices", icon: ShoppingCart }, { label: "Doctor share", to: "/doctor-share", icon: HeartHandshake }] },
   { title: "Banking & cash", tile: "from-emerald-400 to-teal-600", wash: "from-emerald-500/15", items: [
     { label: "Cash reports", to: "/cash/reports", icon: Wallet }, { label: "Online card payments", to: "/online-payments", icon: Banknote },
-    { label: "Bank reconciliation", to: "/app/bank-reconciliation-tool", icon: Scale, desk: true }, { label: "Welfare & zakat", to: "/welfare", icon: HeartHandshake }] },
+    { label: "Bank clearance", to: "/accounting/bank-clearance", icon: Scale }, { label: "Welfare & zakat", to: "/welfare", icon: HeartHandshake }] },
   { title: "Reports", tile: "from-sky-400 to-cyan-600", wash: "from-sky-500/15", items: [
-    { label: "General ledger", to: "/app/query-report/General Ledger", icon: BookOpen, desk: true }, { label: "Trial balance", to: "/app/query-report/Trial Balance", icon: Scale, desk: true },
-    { label: "Profit and loss", to: "/app/query-report/Profit and Loss Statement", icon: BarChart3, desk: true }, { label: "Balance sheet", to: "/app/query-report/Balance Sheet", icon: Landmark, desk: true }] },
+    { label: "General ledger", to: "/accounting/reports/general-ledger", icon: BookOpen }, { label: "Trial balance", to: "/accounting/reports/trial-balance", icon: Scale },
+    { label: "Profit and loss", to: "/accounting/reports/profit-and-loss", icon: BarChart3 }, { label: "Balance sheet", to: "/accounting/reports/balance-sheet", icon: Landmark }] },
   { title: "Assets & buying", tile: "from-violet-400 to-purple-600", wash: "from-violet-500/15", items: [
-    { label: "Fixed assets", to: "/assets", icon: Building2 }, { label: "Purchase orders", to: "/purchase_order", icon: Truck },
+    { label: "Fixed assets", to: "/assets", icon: Building2 }, { label: "Purchase orders", to: "/import/purchase-orders", icon: Truck },
     { label: "Buying", to: "/buying", icon: ShoppingCart }, { label: "Consumption", to: "/consumption", icon: Receipt }] },
   { title: "Tax & setup", tile: "from-slate-400 to-slate-600", wash: "from-slate-500/15", items: [
-    { label: "FBR reporting", to: "/fbr", icon: FileText }, { label: "Chart of accounts", to: "/app/account/view/tree", icon: BookOpen, desk: true },
-    { label: "Cost centres", to: "/app/cost-center/view/tree", icon: Landmark, desk: true }, { label: "Clinic settings", to: "/settings", icon: Settings }] },
+    { label: "FBR reporting", to: "/fbr", icon: FileText }, { label: "Chart of accounts", to: "/accounting/chart-of-accounts", icon: BookOpen },
+    { label: "Cost centres", to: "/accounting/cost-centers", icon: Landmark }, { label: "Clinic settings", to: "/settings", icon: Settings }] },
 ];
 
 function ManageFinance() {
@@ -94,10 +94,10 @@ function ManageFinance() {
     <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div><h3 className="text-lg font-semibold">Manage finance</h3>
-          <p className="text-xs text-muted-foreground">Every accounting function: vouchers and payments, receivables and payables, banking, statements, assets and setup. ↗ opens ERPNext.</p></div>
+          <p className="text-xs text-muted-foreground">Every accounting function: vouchers and payments, receivables and payables, banking, statements, assets and setup.</p></div>
         <div className="flex gap-2">
-          <a href="/app/journal-entry/new" target="_blank" rel="noreferrer" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 px-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"><Plus className="h-4 w-4" />Journal voucher</a>
-          <a href="/app/payment-entry/new" target="_blank" rel="noreferrer" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 px-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"><Plus className="h-4 w-4" />Payment / receipt</a>
+          <Link to="/accounting/journal-entries/new" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 px-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"><Plus className="h-4 w-4" />Journal voucher</Link>
+          <Link to="/accounting/payment-entries/new" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 px-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"><Plus className="h-4 w-4" />Payment / receipt</Link>
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">

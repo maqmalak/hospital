@@ -162,6 +162,10 @@ READ_FOR_MONEY = ["Account", "Cost Center", "Customer", "Customer Group", "Terri
 	"Serial and Batch Bundle", "Bin", "Supplier"]
 # doctype: {role: rights}; created through Custom DocPerm (core DocPerms untouched)
 EXTRA_PERMS = {
+	# accounting / buying screens ported from sugarcane (D-65)
+	"Bank": {roles.ACCOUNTANT: ["read", "write", "create"]},
+	"Bank Account": {roles.ACCOUNTANT: ["read", "write", "create"]},
+	"Landed Cost Voucher": {r: ["read", "write", "create", "submit", "cancel"] for r in (roles.STORE_KEEPER, roles.ACCOUNTANT)},
 	"POS Opening Entry": {r: ["read", "create", "write", "submit"] for r in roles.MONEY + [roles.ADMIN, roles.CASH_SUPERVISOR]},
 	"POS Closing Entry": {r: ["read", "create", "write", "submit"] for r in roles.MONEY + [roles.ADMIN, roles.CASH_SUPERVISOR]},
 	"Journal Entry": {roles.CASH_SUPERVISOR: ["read"], roles.ACCOUNTANT: ["read"]},
@@ -244,6 +248,18 @@ def ensure_mm_core_compat():
 		make_property_setter("CRM Notification", "type", "options", options + "\nEmail", "Text", validate_fields_for_doctype=False)
 
 
+def ensure_erp_roles():
+	"""Every user with a hospital role also has the ERPNext roles that go with it (roles.ERP_ROLES, D-65)."""
+	for pw, extra in roles.ERP_ROLES.items():
+		for user in frappe.get_all("Has Role", filters={"role": pw, "parenttype": "User"}, pluck="parent"):
+			if user in ("Administrator", "Guest"):
+				continue
+			have = set(frappe.get_roles(user))
+			missing = [r for r in extra if r not in have and frappe.db.exists("Role", r)]
+			if missing:
+				frappe.get_doc("User", user).add_roles(*missing)
+
+
 def after_migrate():
 	ensure_roles()
 	ensure_mm_core_compat()
@@ -252,6 +268,7 @@ def after_migrate():
 	fields = {k: v for k, v in CUSTOM_FIELDS.items() if frappe.db.exists("DocType", k)}
 	create_custom_fields(fields, update=True)
 	ensure_page_access()
+	ensure_erp_roles()
 	from hospital_vvs.messaging.templates import ensure_templates
 
 	ensure_templates()

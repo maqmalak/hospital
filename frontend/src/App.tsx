@@ -4,12 +4,14 @@ import { useTranslation } from "react-i18next";
 import { ShieldAlert } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/layout/AppShell";
+import { accRoutes } from "@/acc/routes";
 import { Spinner } from "@/components/ui/skeleton";
 
 const LoginPage = lazy(() => import("@/modules/auth/LoginPage"));
 const DesktopPage = lazy(() => import("@/modules/home/DesktopPage"));
 const UsersPage = lazy(() => import("@/modules/admin/UsersPage"));
 const HelpPage = lazy(() => import("@/modules/help/HelpPage"));
+const AccLayout = lazy(() => import("@/acc/AccLayout"));
 const DfdPage = lazy(() => import("@/modules/help/DfdPage"));
 const DashboardPage = lazy(() => import("@/modules/dashboard/DashboardPage"));
 const RegistrationPage = lazy(() => import("@/modules/patients/RegistrationPage"));
@@ -179,6 +181,7 @@ export default function App() {
         <Route path="/audit" element={g("/audit", <AuditPage />)} />
         <Route path="/users" element={g("/users", <UsersPage />)} />
         <Route path="/help" element={g("/help", <HelpPage />)} />
+        <Route element={<AccLayout />}>{accRoutes(g)}</Route>
         <Route path="/dfd" element={g("/dfd", <DfdPage />)} />
         <Route path="/settings" element={g("/settings", <SettingsPage />)} />
         <Route path="/masters" element={g("/masters", <MastersPage />)} />
