@@ -11,8 +11,10 @@ export const CONFIG = {
   email: "[hello@vvsdesk.pk]",
   address: "[Office address, City, Pakistan]",
   // null = show the [X] placeholder; a number = animated counter
-  stats: { hospitals: null as number | null, patients: null as number | null, reports: null as number | null, cities: null as number | null },
-  prices: { clinic: "[__]", hospital: "[__]", enterprise: "[__]" },
+  // SAMPLE figures (owner asked for numbers instead of [X]) — replace with real, verifiable numbers before the page goes public
+  stats: { hospitals: 35, patients: 4200, reports: 18500, cities: 9 } as Record<string, number | null>,
+  // monthly price in PKR; yearly shows 12 × monthly (no yearly discount set). Enterprise is a starting price ("from").
+  prices: { clinic: 10000, hospital: 20000, enterprise: 50000 } as Record<string, number>,
   social: { facebook: "#", linkedin: "#", youtube: "#", instagram: "#" },
 };
 
@@ -23,7 +25,7 @@ const en = {
     title: "VVSDesk – Hospital Management System Software in Pakistan | WhatsApp Booking & Lab Reports",
     description: "VVSDesk is hospital management software for Pakistan: OPD, IPD, lab, pharmacy and billing in one system, with WhatsApp booking and lab reports.",
   },
-  nav: { features: "Features", whatsapp: "WhatsApp", pricing: "Pricing", why: "Why VVSDesk", faq: "FAQ", demo: "Book a Demo", menu: "Menu", close: "Close menu", chat: "Chat on WhatsApp", lang: "اردو" },
+  nav: { features: "Features", whatsapp: "WhatsApp", pricing: "Pricing", why: "Why VVSDesk", faq: "FAQ", demo: "Book a Demo", login: "Login to ERP", menu: "Menu", close: "Close menu", chat: "Chat on WhatsApp", lang: "اردو" },
   hero: {
     eyebrow: "Hospital management system for Pakistan",
     h1a: "Run your entire hospital from one desk",
@@ -80,8 +82,8 @@ const en = {
   },
   stats: { title: "VVSDesk in numbers", hospitals: "hospitals", patients: "daily patients managed", reports: "reports delivered on WhatsApp", cities: "cities", note: "[Placeholder figures — replace with real numbers]" },
   pricing: {
-    eyebrow: "Pricing", title: "Simple plans, priced in rupees", monthly: "Monthly", yearly: "Yearly", perMonth: "/month", perYear: "/year", popular: "Most popular",
-    custom: "Running more than one branch? We price multi-branch groups individually.", cta: "Book a demo", note: "[Prices are placeholders — replace before publishing]",
+    eyebrow: "Pricing", title: "Simple plans, priced in rupees", monthly: "Monthly", yearly: "Yearly", perMonth: "/month", perYear: "/year", popular: "Most popular", from: "from",
+    custom: "Running more than one branch? We price multi-branch groups individually.", cta: "Book a demo", note: "Prices in Pakistani rupees, per hospital. Enterprise is customised to your departments and branches.",
     tiers: [
       { k: "clinic", n: "Clinic", d: "For single-doctor and small clinics", f: ["Registration & appointments", "OPD & prescriptions", "WhatsApp booking & reminders", "Billing & cash shifts", "Up to [X] users"] },
       { k: "hospital", n: "Hospital", d: "For hospitals with wards and a lab", f: ["Everything in Clinic", "IPD, beds & nursing", "Laboratory with WhatsApp reports", "Pharmacy POS & stock", "Panels & insurance claims", "Accounting & doctor share"] },
@@ -104,7 +106,7 @@ const en = {
   faq: {
     eyebrow: "FAQ", title: "Questions hospitals ask us",
     items: [
-      ["How much does VVSDesk cost?", "Plans start from the Clinic tier and are priced per month in rupees. Multi-branch groups get a custom quote. Book a demo and we'll match a plan to your beds and departments."],
+      ["How much does VVSDesk cost?", "Clinic is PKR 10,000 a month, Hospital PKR 20,000 a month, and Enterprise starts from PKR 50,000 a month, customised to your departments. Multi-branch groups get a custom quote."],
       ["Cloud or on-premise?", "Both. Use a Pakistan-based cloud server, or install VVSDesk on a server inside your hospital so your data never leaves the building."],
       ["Can we migrate data from our old system?", "Yes. We import patients, doctors, fee schedules, rates, suppliers and opening stock from your previous software or Excel sheets during setup."],
       ["Does WhatsApp booking need a separate number?", "We recommend a dedicated WhatsApp Business number for the hospital so bookings and reports come from one trusted name. We help you set it up."],
@@ -131,7 +133,7 @@ const en = {
 
 const ur: typeof en = {
   meta: en.meta,
-  nav: { features: "خصوصیات", whatsapp: "واٹس ایپ", pricing: "قیمتیں", why: "VVSDesk کیوں", faq: "سوالات", demo: "ڈیمو بک کریں", menu: "مینو", close: "مینو بند کریں", chat: "واٹس ایپ پر بات کریں", lang: "English" },
+  nav: { features: "خصوصیات", whatsapp: "واٹس ایپ", pricing: "قیمتیں", why: "VVSDesk کیوں", faq: "سوالات", demo: "ڈیمو بک کریں", login: "ای آر پی میں لاگ ان", menu: "مینو", close: "مینو بند کریں", chat: "واٹس ایپ پر بات کریں", lang: "English" },
   hero: {
     eyebrow: "پاکستان کے لیے ہسپتال مینجمنٹ سسٹم",
     h1a: "پورا ہسپتال ایک ڈیسک سے چلائیں",
@@ -187,8 +189,8 @@ const ur: typeof en = {
   },
   stats: { title: "VVSDesk اعداد میں", hospitals: "ہسپتال", patients: "روزانہ مریض", reports: "واٹس ایپ پر بھیجی گئی رپورٹیں", cities: "شہر", note: "[عارضی اعداد — اصل اعداد سے بدلیں]" },
   pricing: {
-    eyebrow: "قیمتیں", title: "سادہ پلان، روپوں میں", monthly: "ماہانہ", yearly: "سالانہ", perMonth: "/ماہ", perYear: "/سال", popular: "سب سے مقبول",
-    custom: "ایک سے زیادہ برانچ؟ ملٹی برانچ گروپس کی قیمت الگ طے ہوتی ہے۔", cta: "ڈیمو بک کریں", note: "[قیمتیں عارضی ہیں — شائع کرنے سے پہلے بدلیں]",
+    eyebrow: "قیمتیں", title: "سادہ پلان، روپوں میں", monthly: "ماہانہ", yearly: "سالانہ", perMonth: "/ماہ", perYear: "/سال", popular: "سب سے مقبول", from: "سے شروع",
+    custom: "ایک سے زیادہ برانچ؟ ملٹی برانچ گروپس کی قیمت الگ طے ہوتی ہے۔", cta: "ڈیمو بک کریں", note: "قیمتیں پاکستانی روپے میں، فی ہسپتال۔ انٹرپرائز آپ کے شعبوں اور برانچوں کے مطابق طے ہوتا ہے۔",
     tiers: [
       { k: "clinic", n: "کلینک", d: "ایک ڈاکٹر اور چھوٹے کلینکس کے لیے", f: ["رجسٹریشن اور اپائنٹمنٹس", "او پی ڈی اور نسخے", "واٹس ایپ بکنگ اور یاد دہانی", "بلنگ اور کیش شفٹ", "[X] صارفین تک"] },
       { k: "hospital", n: "ہسپتال", d: "وارڈ اور لیب والے ہسپتالوں کے لیے", f: ["کلینک کی ہر چیز", "آئی پی ڈی، بستر اور نرسنگ", "لیب اور واٹس ایپ رپورٹیں", "فارمیسی POS اور اسٹاک", "پینل اور انشورنس دعوے", "اکاؤنٹنگ اور ڈاکٹر کا حصہ"] },
@@ -207,7 +209,7 @@ const ur: typeof en = {
   faq: {
     eyebrow: "سوالات", title: "ہسپتال ہم سے کیا پوچھتے ہیں",
     items: [
-      ["VVSDesk کی قیمت کیا ہے؟", "پلان کلینک سے شروع ہوتے ہیں اور ماہانہ روپوں میں ہیں۔ ملٹی برانچ گروپس کی قیمت الگ طے ہوتی ہے۔ ڈیمو بک کریں، ہم آپ کے بستروں اور شعبوں کے مطابق پلان بتائیں گے۔"],
+      ["VVSDesk کی قیمت کیا ہے؟", "کلینک 10,000 روپے ماہانہ، ہسپتال 20,000 روپے ماہانہ، اور انٹرپرائز 50,000 روپے ماہانہ سے شروع، آپ کے شعبوں کے مطابق۔ ملٹی برانچ گروپس کی قیمت الگ طے ہوتی ہے۔"],
       ["کلاؤڈ یا اپنا سرور؟", "دونوں۔ پاکستان میں کلاؤڈ سرور استعمال کریں، یا VVSDesk ہسپتال کے اندر سرور پر لگائیں تاکہ ڈیٹا عمارت سے باہر نہ جائے۔"],
       ["کیا پرانے نظام سے ڈیٹا منتقل ہو سکتا ہے؟", "جی ہاں۔ سیٹ اپ کے دوران مریض، ڈاکٹر، فیس، نرخ، سپلائرز اور ابتدائی اسٹاک پرانے سافٹ ویئر یا ایکسل سے درآمد کرتے ہیں۔"],
       ["کیا واٹس ایپ بکنگ کے لیے الگ نمبر چاہیے؟", "ہم ہسپتال کے لیے الگ واٹس ایپ بزنس نمبر تجویز کرتے ہیں تاکہ بکنگ اور رپورٹیں ایک قابل اعتماد نام سے آئیں۔ سیٹ اپ میں ہم مدد کرتے ہیں۔"],

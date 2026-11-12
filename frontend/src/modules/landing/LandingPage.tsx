@@ -11,7 +11,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } 
 import {
   Activity, ArrowRight, BadgeCheck, BarChart3, BedDouble, Boxes, Building2, CalendarClock, Check, ChevronDown, ClipboardList, Cloud, Database,
   FileCheck2, FileText, FlaskConical, Globe2, HardDrive, HeartPulse, KeyRound, Languages, LayoutGrid, Lock, Mail, MapPin, Menu, MonitorSmartphone, Phone, Pill,
-  Receipt, ScanLine, ShieldCheck, Siren, Star, Stethoscope, Timer, UserCog, UserPlus, Users, Wallet, X, type LucideIcon,
+  LogIn, Receipt, ScanLine, ShieldCheck, Siren, Star, Stethoscope, Timer, UserCog, UserPlus, Users, Wallet, X, type LucideIcon,
 } from "lucide-react";
 import { COPY, CONFIG, type Copy, type Lang } from "./content";
 
@@ -165,6 +165,7 @@ function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) 
         <div className="ms-auto flex items-center gap-2">
           <button type="button" onClick={() => setLang(lang === "en" ? "ur" : "en")} aria-label={lang === "en" ? "اردو میں دیکھیں" : "View in English"}
             className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-[#0F4C5C] hover:bg-[#0F4C5C]/5"><Languages className="h-4 w-4" /><span className={lang === "en" ? "ur" : ""}>{c.nav.lang}</span></button>
+          <a href="/hms/login" className="hidden items-center gap-1.5 rounded-xl border-2 border-[#0F4C5C] px-3.5 py-2 text-sm font-bold text-[#0F4C5C] transition hover:bg-[#0F4C5C] hover:text-white md:inline-flex"><LogIn className="h-4 w-4 rtl:rotate-180" />{c.nav.login}</a>
           <a href={waLink()} target="_blank" rel="noopener noreferrer" aria-label={c.nav.chat} className="grid h-10 w-10 place-items-center rounded-xl border-2 border-[#25D366] text-[#075E35] transition hover:bg-[#25D366]/10"><WaIcon /></a>
           <a href="#demo" className={`${coralBtn} hidden px-4 py-2.5 text-sm sm:inline-flex`}>{c.nav.demo}</a>
           <button type="button" className="grid h-10 w-10 place-items-center rounded-xl text-[#0F4C5C] hover:bg-[#0F4C5C]/5 lg:hidden" aria-expanded={open} aria-controls="mnav" aria-label={open ? c.nav.close : c.nav.menu} onClick={() => setOpen((o) => !o)}>
@@ -174,6 +175,7 @@ function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) 
       <div id="mnav" className={`overflow-hidden border-t border-[#0F4C5C]/10 bg-[#FAF7F2] transition-[max-height] duration-300 lg:hidden ${open ? "max-h-96" : "max-h-0 border-t-0"}`}>
         <nav aria-label="Mobile" className="flex flex-col px-4 py-2">
           {links.map(([h, l]) => <a key={h} href={h} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 font-medium text-[#1E293B] hover:bg-[#0F4C5C]/5">{l}</a>)}
+          <a href="/hms/login" className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#0F4C5C] px-6 py-3 font-bold text-[#0F4C5C]"><LogIn className="h-5 w-5 rtl:rotate-180" />{c.nav.login}</a>
           <a href="#demo" onClick={() => setOpen(false)} className={`${coralBtn} my-2`}>{c.nav.demo}</a>
         </nav>
       </div>
@@ -364,7 +366,7 @@ function How({ c }: { c: Copy }) {
 }
 
 function Stats({ c }: { c: Copy }) {
-  const items: [keyof typeof CONFIG.stats, string, LucideIcon][] = [["hospitals", c.stats.hospitals, Building2], ["patients", c.stats.patients, Users], ["reports", c.stats.reports, FileText], ["cities", c.stats.cities, MapPin]];
+  const items: [string, string, LucideIcon][] = [["hospitals", c.stats.hospitals, Building2], ["patients", c.stats.patients, Users], ["reports", c.stats.reports, FileText], ["cities", c.stats.cities, MapPin]];
   return (
     <section className="bg-[#0A3743] py-16 text-white" aria-labelledby="stats-h">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -374,7 +376,7 @@ function Stats({ c }: { c: Copy }) {
             <Reveal key={k} delay={i * 80}>
               <div className="text-center">
                 <I className="mx-auto h-6 w-6 text-[#9FE3D4]" aria-hidden />
-                <dd className="hd mt-3 text-4xl font-extrabold sm:text-5xl"><Counter value={CONFIG.stats[k]} /></dd>
+                <dd className="hd mt-3 text-4xl font-extrabold sm:text-5xl"><Counter value={CONFIG.stats[k] ?? null} /></dd>
                 <dt className="mt-2 text-sm text-white/75">{l}</dt>
               </div>
             </Reveal>
@@ -408,7 +410,9 @@ function Pricing({ c }: { c: Copy }) {
                   {pop && <span className="absolute -top-3 start-7 rounded-full bg-[#FF6B4A] px-3 py-1 text-xs font-bold text-[#1E293B]">{c.pricing.popular}</span>}
                   <h3 className="hd text-xl font-bold">{t.n}</h3>
                   <p className={`mt-1 text-sm ${pop ? "text-white/75" : "text-[#1E293B]/65"}`}>{t.d}</p>
-                  <p className="mt-6 flex items-baseline gap-1"><span className="hd text-4xl font-extrabold" dir="ltr">PKR {CONFIG.prices[t.k as keyof typeof CONFIG.prices]}</span>
+                  <p className="mt-6 flex flex-wrap items-baseline gap-x-1.5">
+                    {t.k === "enterprise" && <span className={`text-sm font-semibold ${pop ? "text-white/75" : "text-[#1E293B]/60"}`}>{c.pricing.from}</span>}
+                    <span className="hd text-4xl font-extrabold tabular-nums" dir="ltr">PKR {((CONFIG.prices[t.k] ?? 0) * (yearly ? 12 : 1)).toLocaleString("en-PK")}</span>
                     <span className={pop ? "text-white/70" : "text-[#1E293B]/60"}>{yearly ? c.pricing.perYear : c.pricing.perMonth}</span></p>
                   <ul className="mt-6 flex-1 space-y-3">{t.f.map((f) => (
                     <li key={f} className="flex gap-2.5 text-[15px]"><Check className={`mt-0.5 h-5 w-5 shrink-0 ${pop ? "text-[#9FE3D4]" : "text-[#0F4C5C]"}`} aria-hidden />{f}</li>))}</ul>
@@ -419,7 +423,7 @@ function Pricing({ c }: { c: Copy }) {
           })}
         </div>
         <p className="mt-8 text-center text-[15px] text-[#1E293B]/70">{c.pricing.custom}</p>
-        <p className="mt-2 text-center text-xs text-[#1E293B]/45">{c.pricing.note}</p>
+        <p className="mt-2 text-center text-sm text-[#1E293B]/60">{c.pricing.note}</p>
       </div>
     </section>
   );
@@ -571,6 +575,7 @@ function Footer({ c }: { c: Copy }) {
             <li className="flex gap-2"><Phone className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /><span dir="ltr">{CONFIG.phone}</span></li>
             <li className="flex gap-2"><Mail className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /><span dir="ltr">{CONFIG.email}</span></li>
             <li className="flex gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /><span>{CONFIG.address}</span></li>
+            <li className="flex gap-2"><LogIn className="mt-0.5 h-4 w-4 shrink-0 rtl:rotate-180" aria-hidden /><a href="/hms/login" className="font-semibold text-white hover:underline">{c.nav.login}</a></li>
             <li className="flex gap-2"><WaIcon className="mt-0.5 h-4 w-4 shrink-0" /><a href={waLink()} target="_blank" rel="noopener noreferrer" className="hover:text-white">WhatsApp</a></li>
           </ul></div>
       </div>
