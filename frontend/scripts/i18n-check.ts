@@ -19,7 +19,7 @@ const PROP_KEYS = new Set(["label", "title", "desc", "subtitle", "hint", "placeh
 const uiWord = (v: string) => v.length <= 80 && /^[A-Z]/.test(v) && /[a-z]/.test(v) && !/[/_]|\.(tsx?|png|pdf)$|^[A-Z][a-z]+[A-Z]|^hospital/.test(v);
 // values shown from lists / constants (rendered through __tx at run time)
 for (const file of globSync("src/**/*.{ts,tsx}")) {
-  if (file.includes("/i18n/") || file.endsWith("urdu.ts") || file.endsWith(".d.ts")) continue;
+  if (file.includes("/i18n/") || file.endsWith("urdu.ts") || file.endsWith(".d.ts") || file.includes("/modules/landing/")) continue;
   const ast = parse(readFileSync(file, "utf8"), { sourceType: "module", plugins: ["typescript", "jsx"] });
   traverse(ast, {
     StringLiteral(p) {
@@ -36,7 +36,7 @@ for (const py of [...globSync("../hospital_vvs/devtools/schema_*.py"), "../hospi
   if (py.endsWith("routes.py")) for (const m of src.matchAll(/\("\/[^"]*",\s*"([^"]+)"/g)) add(m[1], py);
 }
 for (const file of globSync("src/**/*.tsx")) {
-  if (file.includes("/i18n/")) continue;
+  if (file.includes("/i18n/") || file.includes("/modules/landing/")) continue;  // own English / Urdu copy (D-69)
   const ast = parse(readFileSync(file, "utf8"), { sourceType: "module", plugins: ["typescript", "jsx"] });
   traverse(ast, {
     JSXText(p) { add(p.node.value, file); },

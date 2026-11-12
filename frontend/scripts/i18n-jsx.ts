@@ -11,6 +11,9 @@ export const ATTRS = new Set(["title", "label", "subtitle", "hint", "placeholder
 const SKIP_TAGS = new Set(["code", "pre", "style", "script", "kbd", "datalist"]);
 export const translatable = (s: string) => /[A-Za-z]{2}/.test(s) && !/^(https?:|\/|#|[A-Z0-9_-]+$)/.test(s.trim());
 export const core = (s: string) => s.replace(/\s+/g, " ").trim();
+/** Files with their own language handling (the public VVSDesk landing page, D-69) are left alone. */
+export const OWN_LANG = /[\\/]modules[\\/]landing[\\/]/;
+const skipFile = (state: unknown) => OWN_LANG.test((state as { filename?: string; file?: { opts?: { filename?: string } } }).filename ?? (state as { file?: { opts?: { filename?: string } } }).file?.opts?.filename ?? "");
 
 export default function i18nJsx({ types: t }: { types: typeof T }): PluginObj {
   return {
@@ -23,6 +26,7 @@ export default function i18nJsx({ types: t }: { types: typeof T }): PluginObj {
         },
       },
       JSXText(path, state) {
+        if (skipFile(state)) return;
         const raw = path.node.value;
         if (!translatable(raw)) return;
         const el = path.parentPath.node as T.JSXElement;
@@ -42,6 +46,7 @@ export default function i18nJsx({ types: t }: { types: typeof T }): PluginObj {
         path.skip();
       },
       JSXExpressionContainer(path, state) {
+        if (skipFile(state)) return;
         const e = path.node.expression;
         const value = t.isIdentifier(e) || t.isMemberExpression(e) || t.isLogicalExpression(e) || t.isConditionalExpression(e);
         if (!value && !t.isTemplateLiteral(e)) return;
@@ -65,6 +70,7 @@ export default function i18nJsx({ types: t }: { types: typeof T }): PluginObj {
         // no path.skip(): JSX inside the expression (e.g. {cond && <p>Text</p>}) must still be visited
       },
       JSXAttribute(path, state) {
+        if (skipFile(state)) return;
         const n = path.node;
         if (!t.isJSXIdentifier(n.name) || !ATTRS.has(n.name.name) || !t.isStringLiteral(n.value) || !translatable(n.value.value)) return;
         (state as { used?: boolean }).used = true;
