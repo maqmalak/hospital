@@ -375,3 +375,6 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
 @keyframes hvFly { from { opacity: 0; transform: translateX(-6px) scale(.98); } to { opacity: 1; transform: none; } }
 [dir="rtl"] .animate-\[hvFly_\.16s_ease-out\] { animation-name: hvFlyRtl; }
 @keyframes hvFlyRtl { from { opacity: 0; transform: translateX(6px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* app analytics tab switch (D-68) */
+@keyframes hvFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }

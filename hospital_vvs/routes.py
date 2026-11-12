@@ -16,7 +16,7 @@ DEFAULT_ROUTES = [
 	("/help", "Help & guides", ALL, ""),
 	("/apps", "App home pages", ALL, ""),
 	("/dfd", "Process flow & DFD", ALL, ""),
-	("/pw-dashboard", "Dashboard", [ADMIN, DOCTOR, ACCOUNTANT], ""),
+	("/pw-dashboard", "Dashboard", ALL, ""),
 	("/registration", "Patient registration", [RECEPTIONIST, DEO, LAB_USER], ""),
 	("/patients", "Patients", [RECEPTIONIST, DOCTOR, NURSE, DEO], ""),
 	("/patients/merge", "Merge patients", [ADMIN], ""),

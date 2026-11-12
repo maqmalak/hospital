@@ -11,6 +11,9 @@ import { useApi } from "@/lib/api";
 import { appBySlug, itemByRoute } from "@/lib/apps";
 import type { NavItem } from "@/lib/nav";
 import { cn } from "@/utils/cn";
+import { AppCharts } from "@/components/charts/AppCharts";
+
+const CHART_APPS = new Set(["opd", "clinic", "lab", "ipd", "pharmacy", "store", "cash", "finance", "accounting", "buying", "billing", "insights", "online"]);
 
 interface Alert { key: string; to: string; label: string; meta: string; n: number }
 interface Home { alerts: Alert[]; tiles: Record<string, { value: number; label: string }> }
@@ -72,6 +75,8 @@ export default function AppHomePage() {
           </ol>
         </section>
       )}
+
+      {CHART_APPS.has(app.slug) && <AppCharts app={app.slug} title="Analytics" />}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         {/* screens */}

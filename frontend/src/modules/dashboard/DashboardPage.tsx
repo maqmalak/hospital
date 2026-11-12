@@ -7,6 +7,7 @@ import { useApi } from "@/lib/api";
 import { axisProps, Legend, TipBox, useViz } from "@/lib/viz";
 import { PageHeader, Section, StatCard, inputCls } from "@/components/common";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AppAnalytics } from "./AppAnalytics";
 import { todayISO } from "@/utils/dates";
 
 interface Row { label: string; value: number }
@@ -23,12 +24,13 @@ const short = (v: number) => (v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e3 ?
 const day = (d: string) => new Date(d + "T00:00").toLocaleDateString(undefined, { day: "numeric", month: "short" });
 
 export default function DashboardPage() {
-  const { branch } = useAuth();
+  const { branch, hasRole } = useAuth();
   const { t } = useTranslation();
   const viz = useViz();
   const [date, setDate] = useState(todayISO());
   const [table, setTable] = useState(false);
-  const { data, isLoading } = useApi<Summary>("dashboard.summary", { branch, date }, { refetchInterval: 60_000 });
+  const overview = hasRole("PW Doctor", "PW Accountant", "PW Cash Supervisor");  // hospital-wide money and visits: managers only
+  const { data, isLoading } = useApi<Summary>("dashboard.summary", { branch, date }, { refetchInterval: 60_000, enabled: overview });
   const k = data?.kpi ?? {};
   const blue = viz.series[0];
 
@@ -39,7 +41,8 @@ export default function DashboardPage() {
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls + " w-40"} />
           <button onClick={() => setTable((v) => !v)} className="flex h-10 items-center gap-1 rounded-lg border border-border px-3 text-sm hover:bg-muted"><TableProperties className="h-4 w-4" />{table ? "Charts" : "Table"}</button>
         </>} />
-      {isLoading || !data ? <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}</div> : (
+      <AppAnalytics />
+      {!overview ? null : isLoading || !data ? <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}</div> : (
         <>
           <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatCard label={t("Visits")} value={k.visits ?? 0} hint={`${k.new_visits} new · ${k.follow_up} follow-up`} icon={Activity} tone="teal" />
