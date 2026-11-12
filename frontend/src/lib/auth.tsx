@@ -26,6 +26,7 @@ const Ctx = createContext<AuthCtx | null>(null);
 export function guardRoute(route: string) {
   const path = route.split("?")[0];
   if (path.startsWith("/accounting")) return "/accounting";
+  if (path.startsWith("/apps/")) return "/apps";
   if (/^\/(purchase\/|import\/|masters\/supplier)/.test(path)) return "/purchase";
   return path;
 }

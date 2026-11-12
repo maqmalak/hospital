@@ -4,12 +4,13 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import {
   Activity, AlertCircle, AlertTriangle, ArrowRight, BedDouble, CheckCircle2, ChevronRight, ClipboardList, Eye, FileText, Flag, FlaskConical, HandCoins,
-  HeartPulse, Inbox, LayoutGrid, ListTodo, Percent, Pill, Receipt, RefreshCw, Siren, Stethoscope, Syringe, Truck, UserPlus, Video, Wallet, Zap,
+  HeartPulse, Inbox, ListTodo, Percent, Pill, Receipt, RefreshCw, Siren, Stethoscope, Syringe, Video, Wallet,
   MessageSquareHeart, ShieldPlus, Banknote, TestTube, type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { call, humanizeError, useApi } from "@/lib/api";
 import { NAV, type NavItem } from "@/lib/nav";
+import { APPS, appHref, itemByRoute } from "@/lib/apps";
 import { GlossyIcon, hueOf, ICON_GRADIENT } from "@/components/common/app-icon";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -58,22 +59,6 @@ const ALERT_STYLE: Record<string, { icon: LucideIcon; dot: string; pill: string;
 };
 const alertStyle = (k: string) => ALERT_STYLE[k] ?? { icon: AlertTriangle, dot: "from-slate-500 to-slate-600", pill: "bg-slate-500/15 text-slate-600 ring-slate-500/30", tag: "Info" };
 
-/** Quick links: the main hospital areas as colour cards. */
-const QUICK: { label: string; sub: string; to: string; icon: LucideIcon; bg: string }[] = [
-  { label: "Patient registration", sub: "Register, search, OPD slip", to: "/registration", icon: UserPlus, bg: "from-teal-500 to-emerald-600 shadow-teal-500/30" },
-  { label: "Physician queue", sub: "Tokens, vitals, doctor", to: "/physician-queue", icon: ClipboardList, bg: "from-amber-500 to-orange-500 shadow-amber-500/30" },
-  { label: "Prescription", sub: "Write, sign, print", to: "/pw-prescription", icon: Stethoscope, bg: "from-sky-500 to-blue-600 shadow-sky-500/30" },
-  { label: "Lab orders", sub: "Order, sample, verify, release", to: "/lab/orders", icon: FlaskConical, bg: "from-violet-500 to-purple-600 shadow-violet-500/30" },
-  { label: "Pharmacy POS", sub: "Bill medicines by batch", to: "/medicine_invoice", icon: Pill, bg: "from-emerald-500 to-green-600 shadow-emerald-500/30" },
-  { label: "Admissions", sub: "Beds, charts, discharge", to: "/ipd", icon: BedDouble, bg: "from-cyan-500 to-sky-600 shadow-cyan-500/30" },
-  { label: "Emergency", sub: "Triage, treat, dispose", to: "/er", icon: Siren, bg: "from-red-500 to-orange-500 shadow-red-500/30" },
-  { label: "Reception counter", sub: "One cart, all hospital money", to: "/counter", icon: Wallet, bg: "from-indigo-500 to-violet-600 shadow-indigo-500/30" },
-  { label: "Finance overview", sub: "Revenue, payers, expenses", to: "/finance", icon: HandCoins, bg: "from-pink-500 to-rose-600 shadow-pink-500/30" },
-  { label: "Reports", sub: "MIS and dashboards", to: "/reports", icon: FileText, bg: "from-blue-500 to-indigo-600 shadow-blue-500/30" },
-  { label: "Online visits", sub: "Video consultations", to: "/ov-staff", icon: Video, bg: "from-fuchsia-500 to-pink-600 shadow-fuchsia-500/30" },
-  { label: "Supplier deliveries", sub: "Receive stock by batch", to: "/store/receive", icon: Truck, bg: "from-slate-500 to-slate-600 shadow-slate-500/30" },
-];
-
 /** Each area's usual flow, shown when hovering its icon; other icons show the rest of their menu group. */
 const PLAYBOOKS: Record<string, { title: string; steps: string[] }> = {
   "/registration": { title: "Patient to doctor", steps: ["/registration", "/opd_slip", "/opd/vitals", "/physician-queue", "/pw-prescription"] },
@@ -91,9 +76,6 @@ const PLAYBOOKS: Record<string, { title: string; steps: string[] }> = {
 const ALL_ITEMS: NavItem[] = NAV.flatMap((g) => g.items);
 const itemOf = (route: string) => ALL_ITEMS.find((i) => i.route === route);
 
-/** Insights & Online first (like the real-estate Overview), then the menu order. */
-const FIRST = "Insights & Online";
-const ORDER = [FIRST, ...NAV.map((g) => g.label).filter((l) => l !== FIRST)];
 
 export default function DesktopPage() {
   const { boot, can, branch } = useAuth();
@@ -103,8 +85,7 @@ export default function DesktopPage() {
   const name = boot?.full_name || "there";
   const hour = new Date().getHours();
   const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const sections = ORDER.map((label) => ({ label, items: (NAV.find((g) => g.label === label)?.items ?? []).filter((i) => can(i.route)) })).filter((s) => s.items.length);
-  const quick = QUICK.filter((q) => can(q.to));
+  const apps = APPS.map((app) => ({ app, items: app.routes.map(itemByRoute).filter((i): i is NavItem => !!i && can(i.route)) })).filter((a) => a.items.length);
   const pending = home?.approvals.length ?? 0;
   const subtitle = !home ? "Loading your day…" : pending ? `${pending} request${pending === 1 ? " is" : "s are"} waiting for your approval.`
     : home.alerts.length ? `${home.alerts.length} thing${home.alerts.length === 1 ? " needs" : "s need"} attention today.` : "Everything is up to date.";
@@ -128,12 +109,19 @@ export default function DesktopPage() {
         </div>
 
         <span id="all-modules" className="-mb-6 block scroll-mt-20" />
-        {sections.map((s) => <AppSection key={s.label} label={s.label} items={s.items} tiles={home?.tiles} />)}
-
-        <div className="grid items-start gap-4 lg:grid-cols-2">
-          <NeedsAttention alerts={home?.alerts} loading={isLoading} />
-          {quick.length > 0 && <QuickLinks links={quick} />}
+        <div>
+          <SectionTitle count={apps.length}>{t("Apps")}</SectionTitle>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(112px,1fr))] gap-x-2 gap-y-5 sm:grid-cols-[repeat(auto-fill,128px)]">
+            {apps.map(({ app, items }) => {
+              const total = items.reduce((n, i) => n + (home?.tiles?.[i.route]?.value ?? 0), 0);
+              const tile: NavItem = { route: appHref(app, items.map((i) => i.route)), label: app.label, icon: app.icon, color: app.color, desc: app.desc };
+              return <AppTile key={app.slug} item={tile} stat={total ? { value: total, label: items.length === 1 ? (home?.tiles?.[items[0].route]?.label ?? "") : "open items" } : undefined}
+                siblings={items} screens={items.length} />;
+            })}
+          </div>
         </div>
+
+        <NeedsAttention alerts={home?.alerts} loading={isLoading} />
       </main>
       <ActivityPanel home={home} loading={isLoading} tab={tab} setTab={setTab} onChanged={() => void refetch()} />
     </div>
@@ -150,22 +138,13 @@ function SectionTitle({ children, count }: { children: React.ReactNode; count?: 
   );
 }
 
-function AppSection({ label, items, tiles }: { label: string; items: NavItem[]; tiles?: Home["tiles"] }) {
-  return (
-    <div>
-      <SectionTitle count={items.length}>{label}</SectionTitle>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-x-2 gap-y-4 sm:grid-cols-[repeat(auto-fill,120px)]">
-        {items.map((i) => <AppTile key={i.route} item={i} stat={tiles?.[i.route]} siblings={items} />)}
-      </div>
-    </div>
-  );
-}
 
-function AppTile({ item, stat, siblings }: { item: NavItem; stat?: { value: number; label: string }; siblings: NavItem[] }) {
+function AppTile({ item, stat, siblings, screens }: { item: NavItem; stat?: { value: number; label: string }; siblings: NavItem[]; screens?: number }) {
   const { can } = useAuth();
+  const { t } = useTranslation();
   const hue = hueOf(item.color);
-  const curated = PLAYBOOKS[item.route];
-  const steps = (curated ? curated.steps.map(itemOf).filter((x): x is NavItem => !!x) : siblings.filter((s) => s.route !== item.route).slice(0, 5)).filter((s) => can(s.route));
+  const curated = screens ? undefined : PLAYBOOKS[item.route];
+  const steps = (curated ? curated.steps.map(itemOf).filter((x): x is NavItem => !!x) : siblings.filter((s) => s.route !== item.route).slice(0, screens ? 9 : 5)).filter((s) => can(s.route));
   const title = curated?.title ?? item.desc;
   const [align, setAlign] = useState<"center" | "start" | "end">("center");
   const place = (el: HTMLElement) => {
@@ -176,7 +155,7 @@ function AppTile({ item, stat, siblings }: { item: NavItem; stat?: { value: numb
     <div className="group/tile relative" onMouseEnter={(e) => place(e.currentTarget)} onFocus={(e) => place(e.currentTarget)}>
       <Link to={item.route} className="group flex w-full flex-col items-center gap-1.5 rounded-2xl p-2 text-center outline-none transition focus-visible:ring-2 focus-visible:ring-primary">
         <GlossyIcon icon={item.icon} hue={hue} badge={stat && stat.value > 0 ? <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow ring-2 ring-background">{stat.value > 99 ? "99+" : stat.value}</span> : undefined} />
-        <span className="w-full truncate text-[13px] font-semibold leading-tight">{item.label}</span>
+        <span className="w-full truncate text-[13px] font-semibold leading-tight">{t(item.label)}</span>
         {stat ? <span className="-mt-1 w-full truncate text-[10px] text-muted-foreground"><span className="font-semibold tabular-nums text-foreground">{stat.value.toLocaleString()}</span> {stat.label}</span>
           : <span className="-mt-1 w-full truncate text-[10px] text-muted-foreground">{item.desc}</span>}
       </Link>
@@ -189,7 +168,7 @@ function AppTile({ item, stat, siblings }: { item: NavItem; stat?: { value: numb
               <div className="relative flex items-center gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 shadow-inner ring-1 ring-inset ring-white/30"><item.icon className="h-5 w-5" /></span>
                 <div className="min-w-0 flex-1"><div className="truncate text-sm font-bold leading-tight">{item.label}</div><div className="truncate text-[11px] text-white/80">{title}</div></div>
-                <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset ring-white/30">{steps.length} steps</span>
+                <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset ring-white/30">{screens ? `${screens} ${t(screens === 1 ? "screen" : "screens")}` : `${steps.length} steps`}</span>
               </div>
             </div>
             <ol className="relative p-2">
@@ -200,7 +179,7 @@ function AppTile({ item, stat, siblings }: { item: NavItem; stat?: { value: numb
                     {!last && <span aria-hidden className="absolute start-[23px] top-9 h-[calc(100%-22px)] w-px bg-gradient-to-b from-border to-border/30" />}
                     <Link to={st.route} className="group/step flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-muted/70">
                       <span className={cn("relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[11px] font-bold text-white shadow-md ring-2 ring-popover transition-transform group-hover/step:scale-110", ICON_GRADIENT[hue] ?? ICON_GRADIENT.slate)}>
-                        {last ? <Flag className="h-3.5 w-3.5" /> : i + 1}
+                        {screens ? <st.icon className="h-3.5 w-3.5" /> : last ? <Flag className="h-3.5 w-3.5" /> : i + 1}
                       </span>
                       <span className="min-w-0 flex-1"><span className="block truncate text-[13px] font-semibold leading-tight group-hover/step:text-primary">{st.label}</span>
                         <span className="block truncate text-[10px] text-muted-foreground">{st.desc}</span></span>
@@ -212,7 +191,7 @@ function AppTile({ item, stat, siblings }: { item: NavItem; stat?: { value: numb
               })}
             </ol>
             <Link to={item.route} className="flex items-center justify-between border-t border-border bg-muted/30 px-4 py-2 text-xs font-semibold text-muted-foreground hover:text-primary">
-              Open {item.label} <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
+              {t("Open")} {t(item.label)} <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
             </Link>
           </div>
         </div>
@@ -264,29 +243,6 @@ function NeedsAttention({ alerts, loading }: { alerts?: Alert[]; loading: boolea
   );
 }
 
-function QuickLinks({ links }: { links: typeof QUICK }) {
-  return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-      <div className="mb-4 flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30 ring-1 ring-inset ring-white/20"><Zap className="h-5 w-5" /></span>
-        <div className="min-w-0"><h2 className="text-lg font-semibold leading-tight">Quick Links</h2><p className="truncate text-xs text-muted-foreground">Your main hospital areas</p></div>
-        <a href="#all-modules" className="ms-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs font-medium hover:border-primary/40 hover:text-primary">
-          <LayoutGrid className="h-3.5 w-3.5" /> All apps <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" /></a>
-      </div>
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 2xl:grid-cols-4">
-        {links.map((q) => (
-          <Link key={q.to} to={q.to} className={cn("group relative flex min-h-[112px] flex-col overflow-hidden rounded-xl bg-gradient-to-br p-3 text-white shadow-md ring-1 ring-inset ring-white/15 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg", q.bg)}>
-            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-white/0" />
-            <q.icon className="relative h-6 w-6 drop-shadow-sm" strokeWidth={2} />
-            <span className="relative mt-2 text-sm font-bold leading-tight">{q.label}</span>
-            <span className="relative mt-0.5 line-clamp-2 pe-4 text-[11px] leading-snug text-white/85">{q.sub}</span>
-            <ArrowRight className="absolute bottom-2.5 end-2.5 h-3.5 w-3.5 text-white/90 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 // ------------------------------------------------------------------ right panel
 const CATEGORY: Record<string, string> = { opd: "OPD", lab: "Lab", ipd: "IPD & ER", finance: "Finance" };

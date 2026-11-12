@@ -13,6 +13,7 @@ const UsersPage = lazy(() => import("@/modules/admin/UsersPage"));
 const HelpPage = lazy(() => import("@/modules/help/HelpPage"));
 const AccLayout = lazy(() => import("@/acc/AccLayout"));
 const DfdPage = lazy(() => import("@/modules/help/DfdPage"));
+const AppHomePage = lazy(() => import("@/modules/home/AppHomePage"));
 const DashboardPage = lazy(() => import("@/modules/dashboard/DashboardPage"));
 const RegistrationPage = lazy(() => import("@/modules/patients/RegistrationPage"));
 const PatientsPage = lazy(() => import("@/modules/patients/PatientsPage"));
@@ -183,6 +184,7 @@ export default function App() {
         <Route path="/help" element={g("/help", <HelpPage />)} />
         <Route element={<AccLayout />}>{accRoutes(g)}</Route>
         <Route path="/dfd" element={g("/dfd", <DfdPage />)} />
+        <Route path="/apps/:slug" element={g("/apps", <AppHomePage />)} />
         <Route path="/settings" element={g("/settings", <SettingsPage />)} />
         <Route path="/masters" element={g("/masters", <MastersPage />)} />
         <Route path="/masters/:kind" element={g("/masters", <MastersPage />)} />
