@@ -1,0 +1,66 @@
+[
+ {
+  "n": 1,
+  "title": "DFD level 0 \u2014 VVS Hospital ERP (context)",
+  "sub": "Everyone outside the system and what passes between them",
+  "caption": "DFD level 0 \u2014 the whole hospital in context: patients and families, online booking, doctors, nurses, front desk, lab, pharmacy, payers, suppliers, banks and FBR, management.",
+  "level": 0,
+  "file": "01.svg"
+ },
+ {
+  "n": 2,
+  "title": "DFD level 1 \u2014 VVS Hospital ERP",
+  "sub": "1\u20135 the patient's path \u00b7 6\u201310 pharmacy, money, buying and reports",
+  "caption": "DFD level 1 \u2014 the whole hospital: appointments \u2192 OPD \u2192 lab \u2192 emergency and admission \u2192 ward care and discharge, then pharmacy, cash counters, finance, buying and reports.",
+  "level": 1,
+  "file": "02.svg"
+ },
+ {
+  "n": 3,
+  "title": "Process flow \u2014 the patient journey",
+  "sub": "From an online booking to the report, the pharmacy and discharge",
+  "caption": "Process flow \u2014 the patient journey: appointment, registration, OPD slip, nurse vitals, doctor, lab paid at reception, sample to report, pharmacy, admission, ward care, discharge and the money.",
+  "level": 1,
+  "file": "03.svg"
+ },
+ {
+  "n": 4,
+  "title": "DFD level 1 \u2014 OPD",
+  "sub": "Booking \u2192 registration \u2192 slip & token \u2192 nurse \u2192 doctor",
+  "caption": "DFD level 1 \u2014 OPD: appointments (counter, web, WhatsApp), registration with duplicate check, the OPD slip and token, nurse vitals, the doctor's prescription.",
+  "level": 1,
+  "file": "04.svg"
+ },
+ {
+  "n": 5,
+  "title": "DFD level 1 \u2014 laboratory",
+  "sub": "Order \u2192 paid at reception \u2192 sample \u2192 result \u2192 verification \u2192 report",
+  "caption": "DFD level 1 \u2014 laboratory: orders from the doctor or a walk-in, payment at the reception counter, samples, results with ranges and flags, the pathologist's verification and the report.",
+  "level": 1,
+  "file": "05.svg"
+ },
+ {
+  "n": 6,
+  "title": "DFD level 1 \u2014 wards & emergency",
+  "sub": "Arrival \u2192 triage \u2192 admission \u2192 ward care \u2192 final bill \u2192 discharge",
+  "caption": "DFD level 1 \u2014 wards & emergency: ER arrival and triage, admission with an advance, ward care (vitals, MAR, diet, labs, procedures), the discharge summary, the final bill and discharge.",
+  "level": 1,
+  "file": "06.svg"
+ },
+ {
+  "n": 7,
+  "title": "DFD level 1 \u2014 pharmacy & store",
+  "sub": "Prescription \u2192 POS \u2192 pick \u2192 review \u2192 handover; stock in and out",
+  "caption": "DFD level 1 \u2014 pharmacy and store: the POS (prescription, walk-in, credit), the pick \u2192 review \u2192 handover pipeline, receiving, transfers, cycle counts and returns.",
+  "level": 1,
+  "file": "07.svg"
+ },
+ {
+  "n": 8,
+  "title": "DFD level 1 \u2014 cash & finance",
+  "sub": "Shift \u2192 collections \u2192 close \u2192 approval \u2192 ledger \u2192 reports",
+  "caption": "DFD level 1 \u2014 cash and finance: shifts per counter, collections by mode, the close (notes counted, card and wallets from the system), supervisor approval, vouchers posted in batches, finance reports.",
+  "level": 1,
+  "file": "08.svg"
+ }
+]

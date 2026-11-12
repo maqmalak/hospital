@@ -292,3 +292,132 @@ def overview(from_date=None, to_date=None):
 	return {"from_date": frm, "to_date": to, "revenue_by_type": rev_type, "revenue_by_doctor": rev_doctor, "revenue_by_service": rev_service, "refunds": refunds,
 		"discounts": discounts, "expenses": expenses_cat, "doctor_share": {k: flt(v) for k, v in share.items()}, "payer_ageing": payers.ageing(), "funds": payers.fund_report(),
 		"claims": frappe.db.sql("select status k, count(*) n, sum(claimed_amount) v from `tabInsurance Claim` group by status", as_dict=True)}
+
+
+# ------------------------------------------------------------------ accounts dashboard (sugarcane finance page style, D-64)
+def _voucher_code(doctype, row):
+	"""BPV / BRV / CPV / CRV for payments, JV for journals (Bank / Cash entries take the bank / cash code)."""
+	if doctype == "Payment Entry":
+		cash = (row.get("account_type") or "") == "Cash"
+		return ("C" if cash else "B") + ("PV" if row.get("payment_type") == "Pay" else "RV")
+	vt = row.get("voucher_type") or ""
+	return {"Bank Entry": "BPV", "Cash Entry": "CPV"}.get(vt, "JV")
+
+
+def _fy_start(d):
+	d = frappe.utils.getdate(d)
+	return frappe.utils.getdate(f"{d.year if d.month >= 7 else d.year - 1}-07-01")  # Pakistan: July to June
+
+
+@frappe.whitelist()
+def accounts():
+	require_roles(R.ACCOUNTANT, R.ADMIN, R.CASH_SUPERVISOR)
+	from hospital_vvs.utils import branch_company
+
+	company = branch_company("Lahore Main")
+	t = today()
+	fy = _fy_start(t)
+	month = get_first_day(t)
+
+	def balances(kind):
+		return frappe.db.sql("""select a.name account, a.account_name, coalesce(sum(g.debit - g.credit), 0) balance from tabAccount a
+			left join `tabGL Entry` g on g.account = a.name and g.is_cancelled = 0
+			where a.company = %s and a.account_type = %s and a.is_group = 0 group by a.name order by balance desc""", (company, kind), as_dict=True)
+
+	pl = {r.root_type: flt(r.v) for r in frappe.db.sql("""select a.root_type, sum(g.credit - g.debit) v from `tabGL Entry` g join tabAccount a on a.name = g.account
+		where g.company = %s and g.is_cancelled = 0 and g.posting_date between %s and %s and a.root_type in ('Income', 'Expense') group by a.root_type""",
+		(company, fy, t), as_dict=True)}
+	income, expense = pl.get("Income", 0.0), -pl.get("Expense", 0.0)
+	trend = frappe.db.sql("""select left(g.posting_date, 7) m, sum(case when a.root_type = 'Income' then g.credit - g.debit else 0 end) income,
+		sum(case when a.root_type = 'Expense' then g.debit - g.credit else 0 end) expense from `tabGL Entry` g join tabAccount a on a.name = g.account
+		where g.company = %s and g.is_cancelled = 0 and g.posting_date >= %s group by m order by m""", (company, frappe.utils.add_months(month, -5)), as_dict=True)
+	drafts = []
+	for r in frappe.db.sql("""select name, voucher_type, posting_date, total_debit amount, user_remark remark, owner from `tabJournal Entry`
+		where docstatus = 0 and company = %s order by posting_date, name limit 100""", company, as_dict=True):
+		drafts.append({"doctype": "Journal Entry", "code": _voucher_code("Journal Entry", r), **r})
+	for r in frappe.db.sql("""select pe.name, pe.payment_type, pe.posting_date, pe.paid_amount amount, coalesce(pe.remarks, pe.party_name) remark, pe.owner,
+		(select account_type from tabAccount where name = if(pe.payment_type = 'Pay', pe.paid_from, pe.paid_to)) account_type from `tabPayment Entry` pe
+		where pe.docstatus = 0 and pe.company = %s order by pe.posting_date, pe.name limit 100""", company, as_dict=True):
+		drafts.append({"doctype": "Payment Entry", "code": _voucher_code("Payment Entry", r), **r})
+	recent = []
+	for r in frappe.db.sql("""select 'Journal Entry' doctype, name, voucher_type, null payment_type, null account_type, posting_date, total_debit amount, user_remark remark
+		from `tabJournal Entry` where docstatus = 1 and company = %s
+		union all select 'Payment Entry', pe.name, null, pe.payment_type, (select account_type from tabAccount where name = if(pe.payment_type = 'Pay', pe.paid_from, pe.paid_to)),
+		pe.posting_date, pe.paid_amount, coalesce(pe.remarks, pe.party_name) from `tabPayment Entry` pe where pe.docstatus = 1 and pe.company = %s
+		order by posting_date desc, name desc limit 15""", (company, company), as_dict=True):
+		recent.append({**r, "code": _voucher_code(r.doctype, r)})
+	codes = {}
+	for r in frappe.db.sql("""select 'Journal Entry' doctype, voucher_type, null payment_type, null account_type, total_debit amount from `tabJournal Entry`
+		where docstatus = 1 and company = %s and posting_date >= %s
+		union all select 'Payment Entry', null, pe.payment_type, (select account_type from tabAccount where name = if(pe.payment_type = 'Pay', pe.paid_from, pe.paid_to)), pe.paid_amount
+		from `tabPayment Entry` pe where pe.docstatus = 1 and pe.company = %s and pe.posting_date >= %s""", (company, month, company, month), as_dict=True):
+		c = codes.setdefault(_voucher_code(r.doctype, r), {"code": _voucher_code(r.doctype, r), "n": 0, "amount": 0.0})
+		c["n"] += 1
+		c["amount"] += flt(r.amount)
+	pdc = frappe.db.sql("""select count(*) n, coalesce(sum(case when payment_type = 'Pay' then paid_amount end), 0) issued,
+		coalesce(sum(case when payment_type = 'Receive' then paid_amount end), 0) received from `tabPayment Entry`
+		where docstatus < 2 and company = %s and reference_date > posting_date and clearance_date is null""", company, as_dict=True)[0]
+	one = lambda q, *a: flt(frappe.db.sql(q, a)[0][0])  # noqa: E731
+	return {"company": company, "fy_start": str(fy), "month": str(month)[:7],
+		"banks": [b for b in balances("Bank") if b.balance], "cash": [b for b in balances("Cash") if b.balance],
+		"payable": one("select coalesce(sum(outstanding_amount), 0) from `tabPurchase Invoice` where docstatus = 1 and company = %s", company),
+		"receivable": one("select coalesce(sum(outstanding_amount), 0) from `tabSales Invoice` where docstatus = 1 and company = %s and outstanding_amount > 0", company),
+		"profit": {"income": income, "expense": expense, "profit": income - expense, "margin": round(100 * (income - expense) / income, 1) if income else 0},
+		"trend": [{"month": r.m, "income": flt(r.income), "expense": flt(r.expense)} for r in trend],
+		"drafts": drafts, "recent": recent, "codes": sorted(codes.values(), key=lambda c: c["code"]), "pdc": pdc,
+		"assets": frappe.db.sql("""select count(*) n, coalesce(sum(net_purchase_amount), 0) cost, coalesce(sum(value_after_depreciation), 0) book
+			from tabAsset where docstatus = 1 and company = %s""", company, as_dict=True)[0]}
+
+
+def _refs(refs):
+	refs = frappe.parse_json(refs) if isinstance(refs, str) else refs
+	out = []
+	for r in refs or []:
+		dt, _sep, name = str(r).partition("::")
+		if dt not in ("Journal Entry", "Payment Entry") or not name:
+			frappe.throw(_("Not a voucher: {0}").format(r))
+		out.append((dt, name))
+	if not out:
+		frappe.throw(_("Choose the vouchers"))
+	return out
+
+
+@frappe.whitelist(methods=["POST"])
+def post_vouchers(refs):
+	"""Submit draft vouchers together; each is checked on its own (one failure does not stop the rest)."""
+	require_roles(R.ACCOUNTANT)
+	posted, failed = [], []
+	for dt, name in _refs(refs):
+		try:
+			doc = frappe.get_doc(dt, name)
+			if doc.docstatus != 0:
+				raise frappe.ValidationError(_("already posted"))
+			doc.flags.ignore_permissions = True
+			doc.submit()
+			frappe.db.commit()
+			posted.append(name)
+		except Exception as e:
+			frappe.db.rollback()
+			frappe.clear_last_message()
+			failed.append({"name": name, "error": str(e)[:200]})
+	return {"posted": posted, "failed": failed}
+
+
+@frappe.whitelist(methods=["POST"])
+def print_vouchers(refs):
+	"""One PDF, a voucher per page (the ERPNext print format), as a download."""
+	require_roles(R.ACCOUNTANT, R.ADMIN, R.CASH_SUPERVISOR)
+	import io
+
+	from pypdf import PdfReader, PdfWriter
+
+	w = PdfWriter()
+	for dt, name in _refs(refs):
+		pdf = frappe.get_print(dt, name, as_pdf=True, no_letterhead=0)
+		for p in PdfReader(io.BytesIO(pdf)).pages:
+			w.add_page(p)
+	buf = io.BytesIO()
+	w.write(buf)
+	frappe.local.response.filename = "vouchers.pdf"
+	frappe.local.response.filecontent = buf.getvalue()
+	frappe.local.response.type = "pdf"

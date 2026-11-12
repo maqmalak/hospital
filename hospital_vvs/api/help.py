@@ -25,6 +25,9 @@ MONEY = [R.RECEPTIONIST, R.LAB_USER, R.PHARMACY_CASHIER, R.DISPENSER, R.CASH_SUP
 
 # in the order the work flows: the big picture, front desk, clinic, lab, wards, pharmacy, money, buying, administration
 GUIDES = [
+	{"slug": "process-flow-dfd", "stage": "Start here", "title": "Process flow & DFD", "kind": "Guide",
+	 "summary": "The whole hospital in DFD level 0 and 1, the patient-journey process flow, and level 1 diagrams for OPD, lab, wards & emergency, pharmacy and cash & finance.",
+	 "pdf": "help/process-flow-dfd.pdf", "video": None, "roles": ["all"], "manuals": ["getting-started", "admin", "accounts"]},
 	{"slug": "patient-journey", "stage": "Start here", "title": "Full patient journey — start to finish", "kind": "Guide",
 	 "summary": "One patient through the whole hospital: online appointment, check-in, OPD slip, nurse vitals, doctor, lab test paid at the counter, "
 				"sample, result, verification, pharmacy, then admission, ward care, discharge summary, final bill and discharge.",

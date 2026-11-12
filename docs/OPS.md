@@ -28,6 +28,7 @@ Lose at most **1 hour** of data (RPO), back online within **4 hours** (RTO).
 
 ## Help centre (manuals, guides, videos)
 - Manuals: edit `hospital_vvs/manuals/<slug>.md` (frontmatter `title`, `roles`, `order`); bold a screen name exactly as in the menu and it links to that screen.
+- Process flow & DFD: `python3 tools/guides/dfd_book.py` → `hospital_vvs/public/help/process-flow-dfd.pdf` + `public/help/dfd/*.svg` (page `/dfd`).
 - PDF guides: `node tools/guides/build.mjs` (screenshots + PDFs; `--no-shots` re-renders; `lab ipd` only those) → `hospital_vvs/public/help/`.
 - Videos: `node tools/videos/record.mjs` (all) or `node tools/videos/record.mjs 00 07` (by prefix) → `tools/videos/out/`; then `python3 tools/videos/publish.py`
   copies them to `hospital_vvs/public/downloads/videos/` with posters and durations, and a hand-over set to `deliverables/hospital_vvs/`.

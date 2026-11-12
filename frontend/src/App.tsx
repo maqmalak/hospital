@@ -10,6 +10,7 @@ const LoginPage = lazy(() => import("@/modules/auth/LoginPage"));
 const DesktopPage = lazy(() => import("@/modules/home/DesktopPage"));
 const UsersPage = lazy(() => import("@/modules/admin/UsersPage"));
 const HelpPage = lazy(() => import("@/modules/help/HelpPage"));
+const DfdPage = lazy(() => import("@/modules/help/DfdPage"));
 const DashboardPage = lazy(() => import("@/modules/dashboard/DashboardPage"));
 const RegistrationPage = lazy(() => import("@/modules/patients/RegistrationPage"));
 const PatientsPage = lazy(() => import("@/modules/patients/PatientsPage"));
@@ -82,7 +83,7 @@ const WelfarePage = fin("WelfarePage");
 const PanelsPage = fin("PanelsPage");
 const ClaimsPage = fin("ClaimsPage");
 const ExpensesPage = fin("ExpensesPage");
-const FinanceOverviewPage = fin("FinanceOverviewPage");
+const FinanceAccountsPage = lazy(() => import("@/modules/finance/AccountsPage"));
 const VerifyReportPage = lazy(() => import("@/modules/public/VerifyReportPage"));
 const CheckoutPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.CheckoutPage })));
 const OnlinePaymentsPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.OnlinePaymentsPage })));
@@ -178,6 +179,7 @@ export default function App() {
         <Route path="/audit" element={g("/audit", <AuditPage />)} />
         <Route path="/users" element={g("/users", <UsersPage />)} />
         <Route path="/help" element={g("/help", <HelpPage />)} />
+        <Route path="/dfd" element={g("/dfd", <DfdPage />)} />
         <Route path="/settings" element={g("/settings", <SettingsPage />)} />
         <Route path="/masters" element={g("/masters", <MastersPage />)} />
         <Route path="/masters/:kind" element={g("/masters", <MastersPage />)} />
@@ -199,7 +201,7 @@ export default function App() {
         <Route path="/panels" element={g("/panels", <PanelsPage />)} />
         <Route path="/claims" element={g("/claims", <ClaimsPage />)} />
         <Route path="/expenses" element={g("/expenses", <ExpensesPage />)} />
-        <Route path="/finance" element={g("/finance", <FinanceOverviewPage />)} />
+        <Route path="/finance" element={g("/finance", <FinanceAccountsPage />)} />
         <Route path="/online-payments" element={g("/online-payments", <OnlinePaymentsPage />)} />
         <Route path="/fbr" element={g("/fbr", <FbrPage />)} />
         <Route path="/buying" element={g("/buying", <BuyingDashboardPage />)} />

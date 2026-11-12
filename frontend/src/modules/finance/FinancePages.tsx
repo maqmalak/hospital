@@ -391,14 +391,14 @@ export function PurchasingPage({ doctype }: { doctype: "Purchase Order" | "Purch
 interface KV { k: string; v: number; n?: number }
 interface Ov { revenue_by_type: KV[]; revenue_by_doctor: KV[]; revenue_by_service: KV[]; refunds: KV[]; discounts: KV[]; expenses: KV[]; doctor_share: { earned: number; paid: number; unpaid: number };
   payer_ageing: { customer: string; group: string; d0_30: number; d31_60: number; d61_90: number; d90: number; total: number }[]; funds: Fund[]; claims: KV[] }
-export function FinanceOverviewPage() {
+export function FinanceOverviewPage({ embedded = false }: { embedded?: boolean } = {}) {
   const [from, setFrom] = useState(todayISO().slice(0, 8) + "01");
   const [to, setTo] = useState(todayISO());
   const { data } = useApi<Ov>("finance.overview", { from_date: from, to_date: to });
   const sum = (a?: KV[]) => (a ?? []).reduce((s, x) => s + (x.v || 0), 0);
   return (
     <div className="space-y-5">
-      <PageHeader title="Finance overview" icon={TrendingUp} color="from-indigo-600 to-violet-700" subtitle="Revenue, refunds, discounts, expenses, payers, funds and doctor share"
+      <PageHeader title={embedded ? "Revenue, cost and payers" : "Finance overview"} icon={TrendingUp} color="from-indigo-600 to-violet-700" subtitle="Revenue, refunds, discounts, expenses, payers, funds and doctor share"
         actions={<div className="flex gap-2"><input type="date" className={inputCls + " h-9"} value={from} onChange={(e) => setFrom(e.target.value)} /><input type="date" className={inputCls + " h-9"} value={to} onChange={(e) => setTo(e.target.value)} /></div>} />
       {!data ? <Loading /> : <>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4"><StatCard label="Net revenue" value={rs(sum(data.revenue_by_type))} icon={TrendingUp} tone="teal" /><StatCard label="Refunds" value={rs(sum(data.refunds))} icon={XCircle} tone="rose" />

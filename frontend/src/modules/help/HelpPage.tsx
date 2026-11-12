@@ -6,7 +6,7 @@
  */
 import {
   Ambulance, ArrowUpRight, BedDouble, BookOpen, CalendarClock, ChevronLeft, ChevronRight, Clock, Coins, Crown, Download, FileText, Filter, FlaskConical,
-  HeartPulse, LayoutGrid, LifeBuoy, Link2, ListTree, type LucideIcon, Microscope, Package, Pill, PlayCircle, Printer, ReceiptText, Rocket, Route,
+  HeartPulse, LayoutGrid, LifeBuoy, Network, Link2, ListTree, type LucideIcon, Microscope, Package, Pill, PlayCircle, Printer, ReceiptText, Rocket, Route,
   Search, Sparkles, Stethoscope, Truck, UserPlus, Video, Wallet, X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -48,7 +48,7 @@ const STAGE_HUE: Record<string, Hue> = {
   "Pharmacy & store": "teal", "Cash & finance": "amber", "Buying & assets": "indigo", Administration: "slate",
 };
 const GUIDE_ICON: Record<string, [LucideIcon, Hue]> = {
-  "patient-journey": [Route, "sky"], "getting-started": [Rocket, "blue"], "online-appointment": [CalendarClock, "violet"], "opd-visit": [UserPlus, "emerald"],
+  "process-flow-dfd": [Network, "slate"], "patient-journey": [Route, "sky"], "getting-started": [Rocket, "blue"], "online-appointment": [CalendarClock, "violet"], "opd-visit": [UserPlus, "emerald"],
   "reception-counter": [ReceiptText, "teal"], "tour-opd": [LayoutGrid, "emerald"], "tour-clinical": [Stethoscope, "rose"], "lab-test": [FlaskConical, "violet"],
   "tour-lab": [Microscope, "fuchsia"], emergency: [Ambulance, "rose"], "admission-discharge": [BedDouble, "orange"], "tour-ipd": [HeartPulse, "orange"],
   "pharmacy-sale": [Pill, "teal"], "tour-pharmacy": [Package, "lime"], "cash-shift": [Wallet, "amber"], "tour-finance": [Coins, "amber"],

@@ -47,7 +47,7 @@ export function linkScreens(html: string) {
 
 /** "Open in the app" buttons at the top of each manual. */
 export const MANUAL_PAGES: Record<string, string[]> = {
-  "getting-started": ["/pw-home", "/help?tab=guides"],
+  "getting-started": ["/pw-home", "/help?tab=guides", "/dfd"],
   reception: ["/registration", "/opd_slip", "/counter", "/appointments", "/cash/shift"],
   doctor: ["/pw-prescription", "/physician-queue", "/pw-history", "/ipd", "/er"],
   nurse: ["/opd/vitals", "/ward", "/ipd/mar", "/ipd/kitchen", "/ns"],
@@ -56,7 +56,7 @@ export const MANUAL_PAGES: Record<string, string[]> = {
   pharmacy: ["/medicine_invoice", "/pharmacy/pick", "/pharmacy/review", "/pharmacy/dispense"],
   store: ["/pharmacy/items", "/store/receive", "/buying", "/purchase_order", "/assets"],
   cash: ["/cash/shift", "/cash/close", "/cash/approvals", "/cash/reports"],
-  accounts: ["/finance", "/expenses", "/doctor-share", "/claims", "/reports"],
+  accounts: ["/finance", "/dfd", "/expenses", "/doctor-share", "/claims", "/reports"],
   "online-visits": ["/ov-staff", "/ov-staff/report"],
   admin: ["/users", "/settings", "/audit", "/pw-dashboard"],
 };

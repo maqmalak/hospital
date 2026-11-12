@@ -3,7 +3,7 @@ import { Building2, CreditCard, FileCheck2, FileText, HandHeart, MessageSquareHe
   ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
   Activity, BarChart3, BedDouble, Receipt, ReceiptText, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
   MessageCircle, MessagesSquare, UserCog, Factory, PackageMinus, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
-  LifeBuoy, type LucideIcon,
+  LifeBuoy, Network, type LucideIcon,
 } from "lucide-react";
 
 export interface NavItem { route: string; label: string; icon: LucideIcon; color: string; desc: string }
@@ -107,6 +107,7 @@ export const NAV: NavGroup[] = [
     { route: "/display/devices", label: "Display devices", icon: MonitorSmartphone, color: "from-cyan-600 to-teal-700", desc: "Counter and queue screens" },
   ] },  { label: "Help", items: [
     { route: "/help", label: "Help & guides", icon: LifeBuoy, color: "from-lime-500 to-sky-600", desc: "Manuals, PDF guides and videos of every process" },
+    { route: "/dfd", label: "Process flow & DFD", icon: Network, color: "from-slate-700 to-teal-700", desc: "DFD level 0 and 1 of the whole hospital and each area" },
   ] },
 ];
 
