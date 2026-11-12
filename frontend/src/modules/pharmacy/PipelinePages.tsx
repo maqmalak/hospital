@@ -117,10 +117,10 @@ function ReviewPanel({ name, onChange }: { name: string; onChange: () => void })
   const [back, setBack] = useState("");
   const [swap, setSwap] = useState<TItem | null>(null);
   const [drop, setDrop] = useState<TItem | null>(null);
+  const qc = useQueryClient();  // every hook before the loading return (hooks must run in the same order on every render)
+  const [busy, setBusy] = useState(false);
   if (!data) return <div className="h-80 animate-pulse rounded-3xl bg-muted" />;
   const t = data.ticket;
-  const qc = useQueryClient();
-  const [busy, setBusy] = useState(false);
   const run = async (fn: () => Promise<unknown>, ok: string, close = true) => {
     if (busy) return;  // no double submit
     setBusy(true);
