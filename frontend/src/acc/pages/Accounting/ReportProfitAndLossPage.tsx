@@ -308,7 +308,7 @@ export function ReportProfitAndLossPage() {
       />
 
       {!company ? (
-        <EmptyState title="No company selected" description="Choose a company from the header to run this report." />
+        <EmptyState title="No company selected" description="Choose a company at the top of the page to run this report." />
       ) : (
         <>
           <Card className="p-4">

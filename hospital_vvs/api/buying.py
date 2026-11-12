@@ -23,10 +23,8 @@ def _companies():
 
 
 def _co(company):
-	cos, _ph = _companies()
-	if company and company not in cos:
-		frappe.throw(_("Unknown company."))
-	return company
+	from hospital_vvs.utils import require_company
+	return require_company(company)
 
 
 # ------------------------------------------------------------------ dashboard
@@ -34,7 +32,7 @@ def _co(company):
 def dashboard(company=None):
 	require_roles(*SEE)
 	_co(company)
-	f = {"company": company} if company else {}
+	f = {"company": company}
 	month = get_first_day(today())
 	po = {r.status: r for r in frappe.db.sql("""select status, count(*) n, sum(grand_total) amount from `tabPurchase Order` where docstatus=1 {0}
 		group by status""".format("and company=%(c)s" if company else ""), {"c": company}, as_dict=True)}
@@ -160,8 +158,7 @@ STATUS_FILTER = {"draft": {"docstatus": 0}, "receive": {"docstatus": 1, "status"
 def orders(company=None, status=None, q=None):
 	require_roles(*SEE)
 	f = {"docstatus": ["<", 2]}
-	if company:
-		f["company"] = _co(company)
+	f["company"] = _co(company)
 	f.update(STATUS_FILTER.get(status) or {})
 	of = {"name": ["like", f"%{q}%"], "supplier": ["like", f"%{q}%"]} if q else None
 	rows = frappe.get_all("Purchase Order", filters=f, or_filters=of, fields=["name", "supplier", "company", "transaction_date", "schedule_date", "grand_total", "status",
@@ -250,8 +247,7 @@ def close_order(name, reason=None):
 def receipts(company=None, q=None):
 	require_roles(*SEE)
 	f = {"docstatus": 1}
-	if company:
-		f["company"] = _co(company)
+	f["company"] = _co(company)
 	of = {"name": ["like", f"%{q}%"], "supplier": ["like", f"%{q}%"]} if q else None
 	rows = frappe.get_all("Purchase Receipt", filters=f, or_filters=of, fields=["name", "supplier", "company", "posting_date", "grand_total", "status", "per_billed",
 		"supplier_delivery_note", "set_warehouse"], order_by="posting_date desc, creation desc", limit=200)
@@ -264,8 +260,7 @@ def receipts(company=None, q=None):
 def invoices(company=None, status=None, q=None):
 	require_roles(*SEE)
 	f = {"docstatus": 1}
-	if company:
-		f["company"] = _co(company)
+	f["company"] = _co(company)
 	if status == "unpaid":
 		f["outstanding_amount"] = [">", 0]
 	elif status == "overdue":
@@ -295,8 +290,7 @@ def pay_invoice(name, amount=None, mode_of_payment="Bank Transfer", reference_no
 def material_requests(company=None, status=None):
 	require_roles(*SEE, R.NURSE, R.LAB_USER, R.REVIEWER)
 	f = {"docstatus": ["<", 2], "material_request_type": "Purchase"}
-	if company:
-		f["company"] = _co(company)
+	f["company"] = _co(company)
 	if status == "pending":
 		f.update(docstatus=1, status=["in", ["Pending", "Partially Ordered"]])
 	rows = frappe.get_all("Material Request", filters=f, fields=["name", "company", "transaction_date", "schedule_date", "status", "per_ordered", "set_warehouse", "owner", "docstatus"],

@@ -14,6 +14,7 @@ import {
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import toast from "react-hot-toast";
 import { call, humanizeError, useApi } from "@/lib/api";
+import { CompanyPicker, useCompany } from "@/lib/company";
 import { http } from "@/services/frappe";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/skeleton";
@@ -132,7 +133,8 @@ async function printRefs(list: string[]) {
 }
 
 export default function AccountsPage() {
-  const { data: d, refetch } = useApi<Fin>("finance.accounts");
+  const [company] = useCompany();
+  const { data: d, refetch } = useApi<Fin>("finance.accounts", { company }, { enabled: !!company });
   const qc = useQueryClient();
   const v = useViz();
   const [sel, setSel] = useState<Set<string>>(new Set());
@@ -160,8 +162,9 @@ export default function AccountsPage() {
           <div className="min-w-0 flex-1">
             <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/70">Finance</div>
             <h1 className="text-2xl font-bold tracking-tight">Finance and accounts</h1>
-            <p className="text-sm text-white/85">{d.company} · financial year from {day(d.fy_start)} · bank and cash, payables and receivables, vouchers (JV / BPV / BRV / CPV / CRV), batch posting and printing, fixed assets.</p>
+            <p className="text-sm text-white/85"><b>{d.company}</b> · financial year from {day(d.fy_start)} · bank and cash, payables and receivables, vouchers (JV / BPV / BRV / CPV / CRV), batch posting and printing, fixed assets.</p>
           </div>
+          <CompanyPicker className="bg-white/90 text-slate-800" />
         </div>
       </section>
 

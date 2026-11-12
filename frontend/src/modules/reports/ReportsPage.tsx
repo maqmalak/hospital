@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BarChart3, Download, ExternalLink } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { CompanyPicker, useCompany } from "@/lib/company";
 import { getCall } from "@/services/frappe";
 import { axisProps, Legend, TipBox, useViz } from "@/lib/viz";
 import { Field, inputCls, PageHeader, Section } from "@/components/common";
@@ -46,7 +47,9 @@ function ReportView({ name }: { name: string }) {
   const viz = useViz();
   const [from, setFrom] = useState(addDaysISO(todayISO(), -29));
   const [to, setTo] = useState(todayISO());
-  const { data, isFetching } = useQuery({ queryKey: ["report", name, from, to, branch], queryFn: () => getCall<Result>("frappe.desk.query_report.run", { report_name: name, filters: JSON.stringify({ from_date: from, to_date: to, branch }) }) });
+  const [company] = useCompany();
+  const { data, isFetching } = useQuery({ queryKey: ["report", name, from, to, branch, company], enabled: !!company,
+    queryFn: () => getCall<Result>("frappe.desk.query_report.run", { report_name: name, filters: JSON.stringify({ company, from_date: from, to_date: to, branch }) }) });
   const rows = (data?.result ?? []).filter((r) => !Array.isArray(r));
   const cols = (data?.columns ?? []).map((c) => (typeof c === "string" ? { fieldname: c, label: c } : c));
   const chart = data?.chart;
@@ -56,6 +59,7 @@ function ReportView({ name }: { name: string }) {
     <div className="mx-auto max-w-7xl">
       <PageHeader title={name} icon={BarChart3} color="from-blue-500 to-sky-600" subtitle={<Link to="/reports" className="text-primary">← All reports</Link>}
         actions={<>
+          <Field label="Company"><CompanyPicker /></Field>
           <Field label="From"><input type="date" className={inputCls} value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
           <Field label="To"><input type="date" className={inputCls} value={to} onChange={(e) => setTo(e.target.value)} /></Field>
           <Button variant="outline" className="mt-5" onClick={() => exportToCsv(cols.map((c) => ({ key: c.fieldname, label: c.label })), rows as Record<string, unknown>[], name)}><Download className="h-4 w-4" />CSV</Button>

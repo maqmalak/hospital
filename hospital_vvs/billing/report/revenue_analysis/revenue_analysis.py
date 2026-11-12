@@ -7,7 +7,7 @@ from hospital_vvs.report_utils import bar, branch_sql, dates
 def execute(filters=None):
 	"""Net revenue by billing type, department, doctor and service (07, 10)."""
 	f, frm, to = dates(filters)
-	bsql, args = branch_sql(f, "si.")
+	bsql, args = branch_sql(f, "si.", by_company=True)
 	rows = frappe.db.sql(f"""select si.hv_billing_type billing_type, ifnull(dep.name, '') department, ifnull(d.doctor_name, '') doctor, sii.item_name service,
 		sum(sii.qty) qty, sum(sii.base_amount) gross, sum(sii.base_net_amount) net
 		from `tabSales Invoice Item` sii join `tabSales Invoice` si on si.name=sii.parent left join tabDoctor d on d.name=sii.hv_doctor

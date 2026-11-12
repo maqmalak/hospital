@@ -137,13 +137,15 @@ def party_balance(customer):
 	return flt(frappe.db.sql("select sum(debit-credit) from `tabGL Entry` where party_type='Customer' and party=%s and is_cancelled=0", customer)[0][0])
 
 
-def fund_report():
+def fund_report(company=None):
 	out = []
 	for s in frappe.get_all("Welfare Scheme", fields=["name", "fund_type", "coverage_percent", "is_active", "fund_customer", "cap_per_visit", "cap_per_month"], order_by="name"):
 		fund = s.fund_customer
 		donations = flt(frappe.db.sql("select sum(paid_amount) from `tabPayment Entry` where party=%s and payment_type='Receive' and docstatus=1", fund)[0][0]) if fund else 0
-		used = flt(frappe.db.sql("select sum(grand_total) from `tabSales Invoice` where customer=%s and docstatus=1", fund)[0][0]) if fund else 0
-		patients = frappe.db.sql("select count(distinct hv_patient) from `tabSales Invoice` where customer=%s and docstatus=1", fund)[0][0] if fund else 0
+		co = " and company=%s" if company else ""
+		args = (fund, company) if company else (fund,)
+		used = flt(frappe.db.sql("select sum(grand_total) from `tabSales Invoice` where customer=%s and docstatus=1" + co, args)[0][0]) if fund else 0
+		patients = frappe.db.sql("select count(distinct hv_patient) from `tabSales Invoice` where customer=%s and docstatus=1" + co, args)[0][0] if fund else 0
 		out.append({**s, "donations": donations, "used": used, "balance": -party_balance(fund) if fund else 0, "patients": patients,
 			"approved": frappe.db.count("Welfare Approval", {"scheme": s.name, "status": "Approved"}), "pending": frappe.db.count("Welfare Approval", {"scheme": s.name, "status": "Pending"})})
 	return out
@@ -172,11 +174,13 @@ def statement(payer, from_date, to_date):
 		"outstanding": sum(flt(r.outstanding_amount) for r in rows), "balance": party_balance(payer), "ageing": ageing(payer)}
 
 
-def ageing(payer=None, groups=(PANEL_GROUP, INSURANCE_GROUP, WELFARE_GROUP)):
+def ageing(payer=None, groups=(PANEL_GROUP, INSURANCE_GROUP, WELFARE_GROUP), company=None):
 	f = "si.customer=%(payer)s" if payer else "c.customer_group in %(groups)s"
+	if company:
+		f += " and si.company=%(company)s"
 	rows = frappe.db.sql(f"""select si.customer, c.customer_group, datediff(curdate(), si.posting_date) age, si.outstanding_amount amt
 		from `tabSales Invoice` si join tabCustomer c on c.name=si.customer where si.docstatus=1 and si.outstanding_amount>0 and {f}""",
-		{"payer": payer, "groups": list(groups)}, as_dict=True)
+		{"payer": payer, "groups": list(groups), "company": company}, as_dict=True)
 	out = {}
 	for r in rows:
 		b = out.setdefault(r.customer, {"customer": r.customer, "group": r.customer_group, "d0_30": 0.0, "d31_60": 0.0, "d61_90": 0.0, "d90": 0.0, "total": 0.0})

@@ -30,7 +30,7 @@ class TestFinancePage(IntegrationTestCase):
 	def test_dashboard_post_and_print(self):
 		jv = self._draft_jv()
 		as_user("accounts@vvs.demo")
-		d = finance.accounts()
+		d = finance.accounts("VVS Hospital")
 		for k in ("banks", "cash", "payable", "receivable", "profit", "drafts", "recent", "codes", "pdc", "assets", "trend"):
 			self.assertIn(k, d)
 		draft = next(r for r in d["drafts"] if r["name"] == jv)
@@ -48,8 +48,8 @@ class TestFinancePage(IntegrationTestCase):
 	def test_only_accounts_post(self):
 		as_user("reception@vvs.demo")
 		with self.assertRaises(frappe.PermissionError):
-			finance.accounts()
+			finance.accounts("VVS Hospital")
 		as_user("supervisor@vvs.demo")
-		finance.accounts()  # the supervisor may look
+		finance.accounts("VVS Hospital")  # the supervisor may look
 		with self.assertRaises(frappe.PermissionError):
 			finance.post_vouchers(json.dumps(["Journal Entry::X"]))

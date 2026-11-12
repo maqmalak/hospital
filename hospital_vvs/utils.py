@@ -168,3 +168,19 @@ def check_vitals(v):
 	for k, (lo, hi) in VITAL_RANGES.items():
 		if (v or {}).get(k) not in (None, "") and not lo <= frappe.utils.flt(v[k]) <= hi:
 			frappe.throw(_("{0} {1} looks wrong — check the reading.").format(k.replace("_", " ").title(), v[k]))
+
+
+def companies():
+	"""Every company in the books, the default (the main branch's company) first."""
+	cos = frappe.get_all("Company", pluck="name", order_by="name")
+	d = branch_company((user_branches() or [None])[0]) if frappe.session.user != "Guest" else None
+	return sorted(cos, key=lambda c: c != d)
+
+
+def require_company(company):
+	"""Accounts, sales and buying reports always run for one named company (no "all companies")."""
+	if not company:
+		frappe.throw(_("Choose a company."), title=_("Company required"))
+	if not frappe.db.exists("Company", company):
+		frappe.throw(_("Unknown company: {0}").format(company))
+	return company

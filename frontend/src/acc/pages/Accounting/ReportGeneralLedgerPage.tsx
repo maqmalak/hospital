@@ -337,7 +337,7 @@ export function ReportGeneralLedgerPage() {
       <PageHeader title="General Ledger" subtitle="Every posted GL entry, account by account — computed live by ERPNext" />
 
       {!company ? (
-        <EmptyState title="No company selected" description="Choose a company from the header to run this report." />
+        <EmptyState title="No company selected" description="Choose a company at the top of the page to run this report." />
       ) : (
         <>
           <Card className="overflow-hidden p-0">

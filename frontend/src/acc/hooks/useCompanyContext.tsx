@@ -2,6 +2,7 @@ import * as React from "react";
 import { useCompanies } from "./useCompanies";
 import { useAuth } from "./useAuth";
 import { setActiveCurrency } from "@/acc/utils/currency";
+import { useCompany as useSharedCompany } from "@/lib/company";
 
 /**
  * Active-company context. The selected company is applied as a filter to all
@@ -18,20 +19,17 @@ interface CompanyContextValue {
 }
 
 const CompanyContext = React.createContext<CompanyContextValue | null>(null);
-const STORAGE_KEY = "micromax-active-company";
-
+/** The company is the hospital app's single shared choice (lib/company, D-70): picking it here or on any hospital screen is the same. */
 export function CompanyProvider({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, defaultCompany } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { data, isLoading } = useCompanies(isAuthenticated);
-  const [company, setCompanyState] = React.useState<string | undefined>(
-    () => localStorage.getItem(STORAGE_KEY) ?? undefined,
-  );
+  const [shared, setCompany] = useSharedCompany();
 
   const companies = React.useMemo(
     () => (data ?? []).map((c) => ({ name: c.name, label: c.company_name ?? c.name, currency: c.default_currency })),
     [data],
   );
-
+  const company = shared || undefined;
   const companyCurrency = companies.find((c) => c.name === company)?.currency;
 
   // Keep money formatting's app-wide fallback currency in sync with whatever
@@ -41,22 +39,8 @@ export function CompanyProvider({ children }: { children: React.ReactNode }) {
     setActiveCurrency(companyCurrency);
   }, [companyCurrency]);
 
-  // Pick a sensible default once the list resolves.
-  React.useEffect(() => {
-    if (company && companies.some((c) => c.name === company)) return;
-    const fallback =
-      (defaultCompany && companies.find((c) => c.name === defaultCompany)?.name) ??
-      companies[0]?.name;
-    if (fallback) setCompanyState(fallback);
-  }, [companies, company, defaultCompany]);
-
-  const setCompany = React.useCallback((next: string) => {
-    setCompanyState(next);
-    localStorage.setItem(STORAGE_KEY, next);
-  }, []);
-
   return (
-    <CompanyContext.Provider value={{ company, setCompany, companies, companyCurrency, isLoading }}>
+    <CompanyContext.Provider value={{ company, setCompany, companies, companyCurrency, isLoading: isLoading || !company }}>
       {children}
     </CompanyContext.Provider>
   );

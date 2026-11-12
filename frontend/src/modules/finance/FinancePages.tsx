@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn";
+import { CompanyPicker, useCompany } from "@/lib/company";
 import { todayISO } from "@/utils/dates";
 
 const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
@@ -363,14 +364,15 @@ function RejectDialog({ onClose, onReject }: { onClose: () => void; onReject: (n
 interface PRow { name: string; supplier_name: string; transaction_date?: string; posting_date?: string; grand_total: number; status: string; docstatus: number; outstanding_amount?: number; bill_no?: string; due_date?: string; per_received?: number; per_billed?: number; items: { item_name: string; qty: number; uom: string; rate: number; amount: number }[] }
 export function PurchasingPage({ doctype }: { doctype: "Purchase Order" | "Purchase Invoice" }) {
   const [filter, setFilter] = useState("");
-  const { data, refetch } = useApi<{ rows: PRow[]; can_approve: boolean }>("finance.purchasing", { doctype, status: filter || undefined });
+  const [company] = useCompany();
+  const { data, refetch } = useApi<{ rows: PRow[]; can_approve: boolean }>("finance.purchasing", { doctype, company, status: filter || undefined }, { enabled: !!company });
   const [open, setOpen] = useState<PRow | null>(null);
   if (!data) return <Loading />;
   const po = doctype === "Purchase Order";
   return (
     <div className="space-y-5">
       <PageHeader title={po ? "Purchase orders" : "Purchase invoices"} icon={po ? ShoppingCart : Receipt} color="from-amber-600 to-orange-700" subtitle={po ? "Orders to suppliers — approve drafts, track receiving and billing" : "Supplier bills — approve drafts, see what is unpaid"}
-        actions={<a href={`/desk/${po ? "purchase-order" : "purchase-invoice"}/new`} target="_blank" rel="noreferrer"><Button variant="save"><Plus className="h-4 w-4" />New in desk</Button></a>} />
+        actions={<div className="flex flex-wrap gap-2"><CompanyPicker /><a href={`/desk/${po ? "purchase-order" : "purchase-invoice"}/new`} target="_blank" rel="noreferrer"><Button variant="save"><Plus className="h-4 w-4" />New in desk</Button></a></div>} />
       <div className="flex rounded-xl bg-muted p-1 sm:w-fit">{([["", "All"], ["draft", "Waiting approval"], ...(po ? [] : [["unpaid", "Unpaid"]])] as [string, string][]).map(([k, l]) => <button key={k} onClick={() => setFilter(k)} className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", filter === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
       <div className="overflow-hidden rounded-2xl border border-border bg-card"><table className="w-full text-sm"><thead className="bg-muted/60 text-[11px] uppercase text-muted-foreground"><tr><th className="px-3 py-2 text-start">Document</th><th className="text-start">Supplier</th><th className="text-start">Date</th><th className="text-end">Total</th>
         <th className="text-end">{po ? "Received / billed" : "Unpaid"}</th><th className="px-3 text-start">Status</th><th /></tr></thead>
@@ -394,12 +396,13 @@ interface Ov { revenue_by_type: KV[]; revenue_by_doctor: KV[]; revenue_by_servic
 export function FinanceOverviewPage({ embedded = false }: { embedded?: boolean } = {}) {
   const [from, setFrom] = useState(todayISO().slice(0, 8) + "01");
   const [to, setTo] = useState(todayISO());
-  const { data } = useApi<Ov>("finance.overview", { from_date: from, to_date: to });
+  const [company] = useCompany();
+  const { data } = useApi<Ov>("finance.overview", { company, from_date: from, to_date: to }, { enabled: !!company });
   const sum = (a?: KV[]) => (a ?? []).reduce((s, x) => s + (x.v || 0), 0);
   return (
     <div className="space-y-5">
       <PageHeader title={embedded ? "Revenue, cost and payers" : "Finance overview"} icon={TrendingUp} color="from-indigo-600 to-violet-700" subtitle="Revenue, refunds, discounts, expenses, payers, funds and doctor share"
-        actions={<div className="flex gap-2"><input type="date" className={inputCls + " h-9"} value={from} onChange={(e) => setFrom(e.target.value)} /><input type="date" className={inputCls + " h-9"} value={to} onChange={(e) => setTo(e.target.value)} /></div>} />
+        actions={<div className="flex flex-wrap gap-2">{!embedded && <CompanyPicker />}<input type="date" className={inputCls + " h-9"} value={from} onChange={(e) => setFrom(e.target.value)} /><input type="date" className={inputCls + " h-9"} value={to} onChange={(e) => setTo(e.target.value)} /></div>} />
       {!data ? <Loading /> : <>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4"><StatCard label="Net revenue" value={rs(sum(data.revenue_by_type))} icon={TrendingUp} tone="teal" /><StatCard label="Refunds" value={rs(sum(data.refunds))} icon={XCircle} tone="rose" />
           <StatCard label="Expenses" value={rs(sum(data.expenses))} icon={Receipt} tone="amber" /><StatCard label="Payers owe" value={rs(data.payer_ageing.reduce((a, p) => a + p.total, 0))} icon={Building2} tone="blue" /></div>

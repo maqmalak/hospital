@@ -5,7 +5,9 @@ from hospital_vvs.services.payers import fund_report
 
 def execute(filters=None):
 	"""Donations, use and balance per welfare / zakat fund (07, 10)."""
-	rows = fund_report()
+	from hospital_vvs.utils import require_company
+
+	rows = fund_report(company=require_company((filters or {}).get("company")))
 	cols = [{"fieldname": "name", "label": _("Scheme"), "fieldtype": "Link", "options": "Welfare Scheme", "width": 200}, {"fieldname": "fund_type", "label": _("Fund"), "width": 100},
 		{"fieldname": "coverage_percent", "label": _("Covers %"), "fieldtype": "Percent", "width": 80}, {"fieldname": "donations", "label": _("Donations"), "fieldtype": "Currency", "width": 120},
 		{"fieldname": "used", "label": _("Used"), "fieldtype": "Currency", "width": 120}, {"fieldname": "balance", "label": _("Balance"), "fieldtype": "Currency", "width": 120},

@@ -10,7 +10,7 @@ def execute(filters=None):
 	f, frm, to = dates(filters)
 	if not (filters or {}).get("from_date"):
 		frm = to
-	bsql, args = branch_sql(f, "si.")
+	bsql, args = branch_sql(f, "si.", by_company=True)
 	rows = frappe.db.sql(f"""select si.pos_profile counter, si.owner cashier, p.mode_of_payment mode, count(distinct si.name) invoices,
 		sum(case when si.is_return=0 then p.amount else 0 end) collected, sum(case when si.is_return=1 then -p.amount else 0 end) refunded,
 		sum(p.amount) net from `tabSales Invoice Payment` p join `tabSales Invoice` si on si.name=p.parent

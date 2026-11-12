@@ -9,21 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn";
+import { CompanyPicker, useCompany } from "@/lib/company";
 
 /** Buying (D-59), rebuilt in the hospital style after the real-estate Buying module: dashboard, suppliers, material requests,
- *  purchase orders (approve → receive by batch / location → bill), receipts and invoices (pay). Both companies. */
+ *  purchase orders (approve → receive by batch / location → bill), receipts and invoices (pay). One company at a time (D-70). */
 export const rs = (v?: number | null) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
 const short = (c?: string) => (c ?? "").replace("VVS Pharmacy (Contract)", "Pharmacy").replace("VVS Hospital", "Hospital");
 const sel = inputCls.replace("w-full", "");
 
-function useCompany(): [string, (c: string) => void] {
-  const [c, setC] = useState(() => { try { return localStorage.getItem("hv.buy.company") ?? ""; } catch { return ""; } });
-  return [c, (v: string) => { setC(v); try { localStorage.setItem("hv.buy.company", v); } catch { /* ignore */ } }];
-}
-function CompanySwitch({ value, onChange }: { value: string; onChange: (c: string) => void }) {
-  const opts = [["", "Both companies"], ["VVS Hospital", "Hospital"], ["VVS Pharmacy (Contract)", "Pharmacy"]] as const;
-  return <div className="flex rounded-xl bg-muted p-1">{opts.map(([k, l]) => <button key={k} onClick={() => onChange(k)} className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold", value === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>;
-}
 const Progress = ({ v, tone = "bg-teal-500" }: { v: number; tone?: string }) => <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted"><div className={cn("h-full rounded-full", tone)} style={{ width: `${Math.min(100, v)}%` }} /></div>;
 const Status = ({ s }: { s: string }) => <Badge variant={statusVariant(s)}>{s}</Badge>;
 async function act<T>(fn: () => Promise<T>, ok: string, done?: (r: T) => void) { try { const r = await fn(); toast.success(ok); done?.(r); } catch (e) { toast.error(humanizeError(e)); } }
@@ -33,9 +26,9 @@ const useCtx = () => useApi<Ctx>("buying.form_context", undefined, { staleTime: 
 
 // ------------------------------------------------------------------ dashboard
 export function BuyingDashboardPage() {
-  const [company, setCompany] = useCompany();
+  const [company] = useCompany();
   const { data } = useApi<{ po: Record<string, { n: number; amount: number }>; unpaid: { n: number; amount: number; overdue: number }; month: { company: string; amount: number }[];
-    by_supplier: { supplier: string; company: string; owed: number; bills: number }[]; by_group: { grp: string; amount: number }[]; recent: PO[]; mr_pending: number }>("buying.dashboard", company ? { company } : undefined);
+    by_supplier: { supplier: string; company: string; owed: number; bills: number }[]; by_group: { grp: string; amount: number }[]; recent: PO[]; mr_pending: number }>("buying.dashboard", { company }, { enabled: !!company });
   const [newPo, setNewPo] = useState(false);
   if (!data) return <Skeleton className="h-96 rounded-2xl" />;
   const n = (s: string) => data.po[s]?.n ?? 0;
@@ -43,7 +36,7 @@ export function BuyingDashboardPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Buying" icon={ShoppingCart} color="from-amber-600 to-orange-700" subtitle="Suppliers, orders, receiving by batch, supplier bills and payments — hospital and contract pharmacy"
-        actions={<div className="flex flex-wrap gap-2"><CompanySwitch value={company} onChange={setCompany} /><Button variant="save" onClick={() => setNewPo(true)}><Plus className="h-4 w-4" />New purchase order</Button></div>} />
+        actions={<div className="flex flex-wrap gap-2"><CompanyPicker /><Button variant="save" onClick={() => setNewPo(true)}><Plus className="h-4 w-4" />New purchase order</Button></div>} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <StatCard label="To receive" value={n("To Receive and Bill") + n("To Receive")} icon={Truck} tone="sky" hint="orders waiting for delivery" />
         <StatCard label="To bill" value={n("To Bill")} icon={FileText} tone="violet" hint="received, invoice not booked" />
@@ -144,16 +137,16 @@ function NewSupplierDialog({ groups, onClose, onDone }: { groups: string[]; onCl
 // ------------------------------------------------------------------ purchase orders
 interface PO { name: string; supplier: string; company: string; transaction_date: string; schedule_date?: string; grand_total: number; status: string; per_received: number; per_billed: number; docstatus: number }
 export function PurchaseOrdersPage() {
-  const [company, setCompany] = useCompany();
+  const [company] = useCompany();
   const [status, setStatus] = useState<"" | "draft" | "receive" | "bill" | "done">("receive");
   const [q, setQ] = useState("");
-  const { data, refetch } = useApi<{ rows: PO[]; counts: Record<string, number> }>("buying.orders", { company: company || undefined, status: status || undefined, q: q || undefined });
+  const { data, refetch } = useApi<{ rows: PO[]; counts: Record<string, number> }>("buying.orders", { company, status: status || undefined, q: q || undefined }, { enabled: !!company });
   const [open, setOpen] = useState<string | null>(null); const [add, setAdd] = useState(false);
   const c = data?.counts ?? {};
   return (
     <div className="space-y-4">
       <PageHeader title="Purchase orders" icon={ShoppingCart} color="from-amber-600 to-orange-700" subtitle="Order → approve → receive (batch / expiry or asset location) → bill"
-        actions={<div className="flex flex-wrap gap-2"><CompanySwitch value={company} onChange={setCompany} /><Button variant="save" onClick={() => setAdd(true)}><Plus className="h-4 w-4" />New order</Button></div>} />
+        actions={<div className="flex flex-wrap gap-2"><CompanyPicker /><Button variant="save" onClick={() => setAdd(true)}><Plus className="h-4 w-4" />New order</Button></div>} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Drafts to approve" value={c.draft ?? 0} icon={ClipboardList} tone="amber" onClick={() => setStatus("draft")} />
         <StatCard label="To receive" value={c.receive ?? 0} icon={Truck} tone="sky" onClick={() => setStatus("receive")} />
@@ -291,12 +284,12 @@ function NewOrderDialog({ company: initial, onClose, onDone }: { company: string
 // ------------------------------------------------------------------ receipts
 interface PR { name: string; supplier: string; company: string; posting_date: string; grand_total: number; status: string; per_billed: number; supplier_delivery_note?: string; set_warehouse?: string; lines: { item_name: string; qty: number; uom: string; batch_no?: string; asset_location?: string; amount: number }[] }
 export function PurchaseReceiptsPage() {
-  const [company, setCompany] = useCompany(); const [q, setQ] = useState("");
-  const { data, refetch } = useApi<PR[]>("buying.receipts", { company: company || undefined, q: q || undefined });
+  const [company] = useCompany(); const [q, setQ] = useState("");
+  const { data, refetch } = useApi<PR[]>("buying.receipts", { company, q: q || undefined }, { enabled: !!company });
   return (
     <div className="space-y-4">
       <PageHeader title="Purchase receipts" icon={PackageCheck} color="from-amber-600 to-orange-700" subtitle="Deliveries received into stock by batch and expiry, and assets received by location"
-        actions={<CompanySwitch value={company} onChange={setCompany} />} />
+        actions={<CompanyPicker />} />
       <div className="relative max-w-md"><Search className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" /><input className={inputCls + " ps-9"} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search receipt or supplier" /></div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{(data ?? []).map((r) => (
         <div key={r.name} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
@@ -315,13 +308,13 @@ export function PurchaseReceiptsPage() {
 // ------------------------------------------------------------------ invoices
 interface PI { name: string; supplier: string; company: string; posting_date: string; due_date?: string; bill_no?: string; grand_total: number; outstanding_amount: number; status: string }
 export function PurchaseInvoicesPage() {
-  const [company, setCompany] = useCompany(); const [tab, setTab] = useState<"unpaid" | "overdue" | "paid" | "">("unpaid"); const [q, setQ] = useState("");
-  const { data, refetch } = useApi<{ rows: PI[]; totals: { unpaid: number; overdue: number; drafts: number } }>("buying.invoices", { company: company || undefined, status: tab || undefined, q: q || undefined });
+  const [company] = useCompany(); const [tab, setTab] = useState<"unpaid" | "overdue" | "paid" | "">("unpaid"); const [q, setQ] = useState("");
+  const { data, refetch } = useApi<{ rows: PI[]; totals: { unpaid: number; overdue: number; drafts: number } }>("buying.invoices", { company, status: tab || undefined, q: q || undefined }, { enabled: !!company });
   const [pay, setPay] = useState<PI | null>(null);
   const { hasRole } = useAuth();
   return (
     <div className="space-y-4">
-      <PageHeader title="Supplier invoices" icon={Receipt} color="from-amber-700 to-red-700" subtitle="Bills from suppliers, what is owed and paying them" actions={<CompanySwitch value={company} onChange={setCompany} />} />
+      <PageHeader title="Supplier invoices" icon={Receipt} color="from-amber-700 to-red-700" subtitle="Bills from suppliers, what is owed and paying them" actions={<CompanyPicker />} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3"><StatCard label="Payable" value={rs(data?.totals.unpaid)} icon={Wallet} tone="amber" /><StatCard label="Overdue" value={rs(data?.totals.overdue)} icon={Banknote} tone="rose" />
         <StatCard label="Draft invoices" value={data?.totals.drafts ?? 0} icon={FileText} tone="slate" /></div>
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
@@ -360,14 +353,14 @@ function PayDialog({ inv, onClose, onDone }: { inv: PI; onClose: () => void; onD
 // ------------------------------------------------------------------ material requests
 interface MR { name: string; company: string; transaction_date: string; schedule_date: string; status: string; per_ordered: number; set_warehouse?: string; owner: string; docstatus: number; lines: { item_code: string; item_name: string; qty: number; uom: string; ordered_qty: number }[] }
 export function MaterialRequestsPage() {
-  const [company, setCompany] = useCompany(); const [status, setStatus] = useState<"pending" | "">("pending");
-  const { data, refetch } = useApi<MR[]>("buying.material_requests", { company: company || undefined, status: status || undefined });
+  const [company] = useCompany(); const [status, setStatus] = useState<"pending" | "">("pending");
+  const { data, refetch } = useApi<MR[]>("buying.material_requests", { company, status: status || undefined }, { enabled: !!company });
   const { data: ctx } = useCtx(); const { hasRole } = useAuth();
   const [add, setAdd] = useState(false); const [order, setOrder] = useState<MR | null>(null); const [supplier, setSupplier] = useState("");
   return (
     <div className="space-y-4">
       <PageHeader title="Material requests" icon={ClipboardList} color="from-amber-600 to-orange-700" subtitle="Wards, lab and pharmacy ask the store to buy; the store turns requests into purchase orders"
-        actions={<div className="flex flex-wrap gap-2"><CompanySwitch value={company} onChange={setCompany} /><Button variant="save" onClick={() => setAdd(true)}><Plus className="h-4 w-4" />New request</Button></div>} />
+        actions={<div className="flex flex-wrap gap-2"><CompanyPicker /><Button variant="save" onClick={() => setAdd(true)}><Plus className="h-4 w-4" />New request</Button></div>} />
       <div className="flex rounded-xl bg-muted p-1 sm:w-fit">{([["pending", "Waiting for an order"], ["", "All"]] as const).map(([k, l]) => <button key={k} onClick={() => setStatus(k)} className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", status === k ? "bg-card shadow" : "text-muted-foreground")}>{l}</button>)}</div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{(data ?? []).map((m) => (
         <div key={m.name} className="rounded-2xl border border-border bg-card p-4 shadow-sm">

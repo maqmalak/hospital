@@ -7,7 +7,7 @@ from hospital_vvs.report_utils import bar, branch_sql, dates
 def execute(filters=None):
 	"""Approved expenses by category and month (07, 10)."""
 	f, frm, to = dates(filters)
-	bsql, args = branch_sql(f)
+	bsql, args = branch_sql(f, by_company=True)
 	rows = frappe.db.sql(f"""select category, date_format(posting_date, '%%Y-%%m') month, count(*) n, sum(amount) amount
 		from tabExpense where status='Approved' and posting_date between %(frm)s and %(to)s {bsql} group by category, month order by month, amount desc""",
 		dict(args, frm=frm, to=to), as_dict=True)

@@ -4,6 +4,7 @@
  */
 import { lazy, Suspense, type ReactNode } from "react";
 import { Navigate, Route } from "react-router-dom";
+import { CompanyBar, useCompany } from "@/lib/company";
 
 const AccountCategoriesPage = lazy(() => import("@/acc/pages/Accounting/AccountCategoriesPage").then((m) => ({ default: m.AccountCategoriesPage })));
 const AccountingDimensionsPage = lazy(() => import("@/acc/pages/Accounting/AccountingDimensionsPage").then((m) => ({ default: m.AccountingDimensionsPage })));
@@ -55,7 +56,12 @@ const SuppliersPage = lazy(() => import("@/acc/pages/Masters/SuppliersPage").the
 const TaxTemplatesPage = lazy(() => import("@/acc/pages/Accounting/TaxTemplatesPage").then((m) => ({ default: m.TaxTemplatesPage })));
 const TermsAndConditionsPage = lazy(() => import("@/acc/pages/Accounting/TermsAndConditionsPage").then((m) => ({ default: m.TermsAndConditionsPage })));
 
-const S = ({ children }: { children: ReactNode }) => <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-muted" />}>{children}</Suspense>;
+/** Each screen sits inside the hospital shell: the company bar (D-70) on top, and nothing runs until a company is known. */
+function S({ children }: { children: ReactNode }) {
+  const [company] = useCompany();
+  const wait = <div className="h-72 animate-pulse rounded-2xl bg-muted" />;
+  return <div className="acc-root"><CompanyBar />{company ? <Suspense fallback={wait}>{children}</Suspense> : wait}</div>;
+}
 
 export function accRoutes(g: (route: string, el: ReactNode) => ReactNode) {
   return [

@@ -7,7 +7,7 @@ from frappe.utils import add_days, cint, flt, get_first_day, today
 from hospital_vvs import roles as R
 from hospital_vvs.services import expenses as exp
 from hospital_vvs.services import payers
-from hospital_vvs.utils import has_any_role, require_roles, scope_branch, settings, user_branches
+from hospital_vvs.utils import companies as _companies, has_any_role, require_company, require_roles, scope_branch, settings, user_branches
 
 FIN = (R.ACCOUNTANT,)
 
@@ -236,13 +236,19 @@ def run_recurring_now(name=None):
 	return exp.run_recurring(template=name)
 
 
+# ------------------------------------------------------------------ companies (every accounts / sales / buying screen picks one)
+@frappe.whitelist()
+def companies():
+	return _companies()
+
+
 # ------------------------------------------------------------------ purchasing (ERPNext documents)
 @frappe.whitelist()
-def purchasing(doctype="Purchase Order", status=None):
+def purchasing(doctype="Purchase Order", status=None, company=None):
 	require_roles(R.STORE_KEEPER, R.ACCOUNTANT, R.ADMIN)
 	if doctype not in ("Purchase Order", "Purchase Invoice", "Purchase Receipt"):
 		frappe.throw(_("Unknown document."))
-	f = {"docstatus": ["<", 2]}
+	f = {"docstatus": ["<", 2], "company": require_company(company)}
 	if status == "draft":
 		f["docstatus"] = 0
 	elif status == "unpaid" and doctype == "Purchase Invoice":
@@ -274,24 +280,24 @@ def approve_purchase(doctype, name):
 
 # ------------------------------------------------------------------ financial overview (MIS)
 @frappe.whitelist()
-def overview(from_date=None, to_date=None):
+def overview(company=None, from_date=None, to_date=None):
 	require_roles(R.ACCOUNTANT, R.ADMIN, R.CASH_SUPERVISOR)
 	frm, to = from_date or str(get_first_day(today())), to_date or today()
-	a = {"frm": frm, "to": to}
-	rev_type = frappe.db.sql("""select hv_billing_type k, sum(base_net_total) v, count(*) n from `tabSales Invoice` where docstatus=1 and posting_date between %(frm)s and %(to)s
+	a = {"frm": frm, "to": to, "co": require_company(company)}
+	rev_type = frappe.db.sql("""select hv_billing_type k, sum(base_net_total) v, count(*) n from `tabSales Invoice` where company=%(co)s and docstatus=1 and posting_date between %(frm)s and %(to)s
 		and ifnull(hv_billing_type,'')!='' group by hv_billing_type order by v desc""", a, as_dict=True)
 	rev_doctor = frappe.db.sql("""select d.doctor_name k, sum(sii.base_net_amount) v from `tabSales Invoice Item` sii join `tabSales Invoice` si on si.name=sii.parent
-		join tabDoctor d on d.name=sii.hv_doctor where si.docstatus=1 and si.posting_date between %(frm)s and %(to)s group by d.doctor_name order by v desc limit 15""", a, as_dict=True)
+		join tabDoctor d on d.name=sii.hv_doctor where si.company=%(co)s and si.docstatus=1 and si.posting_date between %(frm)s and %(to)s group by d.doctor_name order by v desc limit 15""", a, as_dict=True)
 	rev_service = frappe.db.sql("""select sii.item_name k, sum(sii.base_net_amount) v, sum(sii.qty) n from `tabSales Invoice Item` sii join `tabSales Invoice` si on si.name=sii.parent
-		where si.docstatus=1 and si.posting_date between %(frm)s and %(to)s and si.hv_billing_type!='Medicine' group by sii.item_name order by v desc limit 15""", a, as_dict=True)
-	refunds = frappe.db.sql("""select hv_billing_type k, -sum(grand_total) v, count(*) n from `tabSales Invoice` where docstatus=1 and is_return=1 and posting_date between %(frm)s and %(to)s group by k""", a, as_dict=True)
-	discounts = frappe.db.sql("""select hv_billing_type k, sum(discount_amount) v from `tabSales Invoice` where docstatus=1 and posting_date between %(frm)s and %(to)s and discount_amount>0 group by k""", a, as_dict=True)
-	expenses_cat = frappe.db.sql("""select category k, sum(amount) v, count(*) n from tabExpense where status='Approved' and posting_date between %(frm)s and %(to)s group by category order by v desc""", a, as_dict=True)
+		where si.company=%(co)s and si.docstatus=1 and si.posting_date between %(frm)s and %(to)s and si.hv_billing_type!='Medicine' group by sii.item_name order by v desc limit 15""", a, as_dict=True)
+	refunds = frappe.db.sql("""select hv_billing_type k, -sum(grand_total) v, count(*) n from `tabSales Invoice` where company=%(co)s and docstatus=1 and is_return=1 and posting_date between %(frm)s and %(to)s group by k""", a, as_dict=True)
+	discounts = frappe.db.sql("""select hv_billing_type k, sum(discount_amount) v from `tabSales Invoice` where company=%(co)s and docstatus=1 and posting_date between %(frm)s and %(to)s and discount_amount>0 group by k""", a, as_dict=True)
+	expenses_cat = frappe.db.sql("""select category k, sum(amount) v, count(*) n from tabExpense where company=%(co)s and status='Approved' and posting_date between %(frm)s and %(to)s group by category order by v desc""", a, as_dict=True)
 	share = frappe.db.sql("""select sum(case when amount>0 then amount else 0 end) earned, sum(case when status='Paid' then amount else 0 end) paid, sum(case when status='Unpaid' then amount else 0 end) unpaid
-		from `tabDoctor Share Ledger`""", as_dict=True)[0]
+		from `tabDoctor Share Ledger` where company=%(co)s""", a, as_dict=True)[0]
 	return {"from_date": frm, "to_date": to, "revenue_by_type": rev_type, "revenue_by_doctor": rev_doctor, "revenue_by_service": rev_service, "refunds": refunds,
-		"discounts": discounts, "expenses": expenses_cat, "doctor_share": {k: flt(v) for k, v in share.items()}, "payer_ageing": payers.ageing(), "funds": payers.fund_report(),
-		"claims": frappe.db.sql("select status k, count(*) n, sum(claimed_amount) v from `tabInsurance Claim` group by status", as_dict=True)}
+		"discounts": discounts, "expenses": expenses_cat, "doctor_share": {k: flt(v) for k, v in share.items()}, "company": a["co"], "payer_ageing": payers.ageing(company=a["co"]), "funds": payers.fund_report(company=a["co"]),
+		"claims": frappe.db.sql("select status k, count(*) n, sum(claimed_amount) v from `tabInsurance Claim` where branch in (select name from tabBranch where hv_company=%s) group by status", a["co"], as_dict=True)}
 
 
 # ------------------------------------------------------------------ accounts dashboard (sugarcane finance page style, D-64)
@@ -310,11 +316,9 @@ def _fy_start(d):
 
 
 @frappe.whitelist()
-def accounts():
+def accounts(company=None):
 	require_roles(R.ACCOUNTANT, R.ADMIN, R.CASH_SUPERVISOR)
-	from hospital_vvs.utils import branch_company
-
-	company = branch_company("Lahore Main")
+	company = require_company(company)
 	t = today()
 	fy = _fy_start(t)
 	month = get_first_day(t)
