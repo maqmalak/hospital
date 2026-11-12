@@ -14,6 +14,7 @@ import {
   LogIn, Receipt, ScanLine, ShieldCheck, Siren, Star, Stethoscope, Timer, UserCog, UserPlus, Users, Wallet, X, type LucideIcon,
 } from "lucide-react";
 import { COPY, CONFIG, type Copy, type Lang } from "./content";
+import { goldText, VvsMark } from "@/components/brand";
 
 const C = { teal: "#0F4C5C", tealDeep: "#0E1013", cream: "#FBFAF7", coral: "#B8913A", wa: "#25D366", waInk: "#075E35", slate: "#1B1D21" };
 const IMG = (f: string) => `${import.meta.env.BASE_URL}landing/${f}`;
@@ -146,24 +147,6 @@ function useSeo(c: Copy, lang: Lang) {
 }
 
 // ---------------------------------------------------------------- sections
-/** The VVS diamond mark (roof · cross · double check), gold — same geometry as the brand files in deliverables/vvs-brand. */
-function VvsMark({ className = "h-9 w-9", id = "vm" }: { className?: string; id?: string }) {
-  return (
-    <svg viewBox="0 0 120 120" className={className} aria-hidden>
-      <defs><linearGradient id={id} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="120" y2="120">
-        <stop offset="0" stopColor="#A88536" /><stop offset=".32" stopColor="#C9A24A" /><stop offset=".5" stopColor="#F1DE9C" /><stop offset=".68" stopColor="#C9A24A" /><stop offset="1" stopColor="#A88536" />
-      </linearGradient></defs>
-      <g fill="none" stroke={`url(#${id})`} strokeLinejoin="miter">
-        <path d="M60 3.5 L116.5 60 L60 116.5 L3.5 60 Z" strokeWidth="5" />
-        <path d="M60 15.5 L104.5 60 L60 104.5 L15.5 60 Z" strokeWidth="1.4" opacity=".55" />
-        <path d="M32.5 54 L60 87 L87.5 54" strokeWidth="7" /><path d="M44.5 54 L60 72.6 L75.5 54" strokeWidth="7" />
-        <path d="M60 25 V45 M50 35 H70" strokeWidth="6" />
-      </g>
-    </svg>
-  );
-}
-const goldText = "bg-[linear-gradient(110deg,#B8913A,#F1DE9C_45%,#C9A24A_70%,#E6CF8F)] bg-clip-text text-transparent";
-
 function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -173,7 +156,7 @@ function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) 
     <header className={`sticky top-0 z-40 text-white transition-all duration-300 ${scrolled ? "border-b border-white/10 bg-[#0E1013]/85 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] backdrop-blur-xl" : "bg-[#0E1013]"}`}>
       <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4 sm:px-6">
         <a href="#top" className="group flex items-center gap-3" aria-label="VVSDesk home">
-          <VvsMark className="h-9 w-9 transition-transform duration-500 group-hover:rotate-[8deg]" id="vm-h" />
+          <VvsMark className="h-9 w-9 transition-transform duration-500 group-hover:rotate-[8deg]" />
           <span className="leading-none" dir="ltr"><span className="brand block text-[17px] tracking-[0.28em] text-white">VVS<span className={goldText}>DESK</span></span>
             <span className="mt-1 block text-[9.5px] font-medium uppercase tracking-[0.32em] text-white/45">Hospital management</span></span>
         </a>
@@ -581,7 +564,7 @@ function Footer({ c }: { c: Copy }) {
     <footer className="bg-[#0E1013] text-white/80">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.3fr]">
         <div>
-          <div className="flex items-center gap-3"><VvsMark className="h-10 w-10" id="vm-f" /><span className="brand text-[17px] tracking-[0.28em] text-white" dir="ltr">VVS<span className={goldText}>DESK</span></span></div>
+          <div className="flex items-center gap-3"><VvsMark className="h-10 w-10" /><span className="brand text-[17px] tracking-[0.28em] text-white" dir="ltr">VVS<span className={goldText}>DESK</span></span></div>
           <p className="mt-4 max-w-xs text-[15px] leading-relaxed">{c.footer.tagline}</p>
           <div className="mt-5 flex gap-2">
             {(["facebook", "linkedin", "youtube", "instagram"] as const).map((s) => (

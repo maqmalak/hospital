@@ -12,6 +12,7 @@ const DesktopPage = lazy(() => import("@/modules/home/DesktopPage"));
 const UsersPage = lazy(() => import("@/modules/admin/UsersPage"));
 const HelpPage = lazy(() => import("@/modules/help/HelpPage"));
 const AccLayout = lazy(() => import("@/acc/AccLayout"));
+const AccountPage = lazy(() => import("@/modules/auth/AccountPage"));
 const DfdPage = lazy(() => import("@/modules/help/DfdPage"));
 const AppHomePage = lazy(() => import("@/modules/home/AppHomePage"));
 const LandingPage = lazy(() => import("@/modules/landing/LandingPage"));
@@ -151,6 +152,7 @@ export default function App() {
         <Route path="/display/beds/:key" element={<DevicePage />} />
         <Route path="/" element={loading ? <Loading /> : <Navigate to={boot ? "/pw-home" : "/login"} replace />} />
         <Route path="/pw-home" element={g("/pw-home", <DesktopPage />)} />
+        <Route path="/account" element={g("/account", <AccountPage />)} />
         <Route path="/pw-dashboard" element={g("/pw-dashboard", <DashboardPage />)} />
         <Route path="/registration" element={g("/registration", <RegistrationPage />)} />
         <Route path="/patients" element={g("/patients", <PatientsPage />)} />

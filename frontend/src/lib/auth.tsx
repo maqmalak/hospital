@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthCtx>(() => ({
     boot, loading, branch, setBranch, login, logout, reload,
-    can: (route: string) => { const k = guardRoute(route); return !!boot && (boot.is_admin || boot.routes.some((r) => r.route === k)); },
+    can: (route: string) => { const k = guardRoute(route); return !!boot && (k === "/account" || boot.is_admin || boot.routes.some((r) => r.route === k)); },
     hasRole: (...r: string[]) => !!boot && (boot.is_admin || r.some((x) => boot.roles.includes(x))),
   }), [boot, loading, branch]); // eslint-disable-line react-hooks/exhaustive-deps
 
