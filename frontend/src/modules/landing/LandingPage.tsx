@@ -8,11 +8,7 @@
  * automatic translation (translate="no") because this page has its own language toggle.
  */
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import {
-  Activity, ArrowRight, BadgeCheck, BarChart3, BedDouble, Boxes, Building2, CalendarClock, Check, ChevronDown, ClipboardList, Cloud, Database,
-  FileCheck2, FileText, FlaskConical, Globe2, HardDrive, HeartPulse, KeyRound, Languages, LayoutGrid, Lock, Mail, MapPin, Menu, MonitorSmartphone, Phone, Pill,
-  LogIn, Receipt, ScanLine, ShieldCheck, Siren, Star, Stethoscope, Timer, UserCog, UserPlus, Users, Wallet, X, type LucideIcon,
-} from "lucide-react";
+import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BarChart3, BedDouble, Bone, Boxes, Brain, Building2, CalendarClock, Check, ChevronDown, ClipboardList, Cloud, Database, FileCheck2, FileText, FlaskConical, Globe2, HardDrive, HeartPulse, KeyRound, Languages, LayoutGrid, Lock, LogIn, Mail, MapPin, Menu, Microscope, MonitorSmartphone, Phone, Pill, Receipt, ScanLine, Scissors, ShieldCheck, Siren, Star, Stethoscope, Timer, UserCog, UserPlus, Users, Wallet, X, type LucideIcon } from "lucide-react";
 import { COPY, CONFIG, type Copy, type Lang } from "./content";
 import { goldText, VvsMark } from "@/components/brand";
 
@@ -151,7 +147,7 @@ function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) 
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => { const f = () => setScrolled(window.scrollY > 8); f(); window.addEventListener("scroll", f, { passive: true }); return () => window.removeEventListener("scroll", f); }, []);
-  const links: [string, string][] = [["#modules", c.nav.features], ["#whatsapp", c.nav.whatsapp], ["#pricing", c.nav.pricing], ["#why", c.nav.why], ["#faq", c.nav.faq]];
+  const links: [string, string][] = [["#services", c.nav.services], ["#modules", c.nav.features], ["#whatsapp", c.nav.whatsapp], ["#pricing", c.nav.pricing], ["#why", c.nav.why], ["#faq", c.nav.faq]];
   return (
     <header className={`sticky top-0 z-40 text-white transition-all duration-300 ${scrolled ? "border-b border-white/10 bg-[#0E1013]/85 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] backdrop-blur-xl" : "bg-[#0E1013]"}`}>
       <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4 sm:px-6">
@@ -280,6 +276,32 @@ const MODULE_ICONS: LucideIcon[][] = [
   [UserPlus, CalendarClock, Globe2], [Stethoscope, BedDouble, ClipboardList, HeartPulse, Siren, Activity], [FlaskConical, ScanLine],
   [Pill, Boxes, BadgeCheck], [Receipt, ShieldCheck, Database, FileCheck2], [Users, Wallet, BarChart3, UserCog],
 ];
+const SERVICE_ICONS = [Stethoscope, Ambulance, HeartPulse, Activity, Brain, Bone, Baby, Accessibility, Scissors, ScanLine, Microscope, Pill];
+function Services({ c }: { c: Copy }) {
+  return (
+    <section id="services" className="scroll-mt-20 bg-[#F4F0E6] py-20 sm:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <Reveal><Eyebrow>{c.services.eyebrow}</Eyebrow><H2>{c.services.title}</H2>
+          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-[#1B1D21]/70">{c.services.sub}</p></Reveal>
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {c.services.items.map(([t, d], i) => {
+            const I = SERVICE_ICONS[i] ?? Stethoscope;
+            return (
+              <Reveal key={t} delay={(i % 4) * 60}>
+                <article className="group h-full rounded-2xl border border-[#B8913A]/15 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-[#B8913A]/40 hover:shadow-[0_20px_40px_-24px_rgba(20,23,28,0.5)]">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#B8913A]/15 text-[#7A5C1A] transition group-hover:bg-[#14171C] group-hover:text-[#E6CF8F]"><I className="h-5 w-5" /></span>
+                  <h3 className="mt-4 text-[17px] font-semibold text-[#1B1D21]">{t}</h3>
+                  <p className="mt-1.5 text-[14.5px] leading-relaxed text-[#1B1D21]/70">{d}</p>
+                </article>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Modules({ c }: { c: Copy }) {
   return (
     <section id="modules" className="scroll-mt-20 py-20 sm:py-24">
@@ -612,6 +634,7 @@ export default function LandingPage() {
         <Hero c={c} />
         <Problems c={c} />
         <WhatsAppSpotlight c={c} />
+        <Services c={c} />
         <Modules c={c} />
         <Why c={c} />
         <How c={c} />

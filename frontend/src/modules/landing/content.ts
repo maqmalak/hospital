@@ -25,7 +25,7 @@ const en = {
     title: "VVSDesk – Hospital Management System Software in Pakistan | WhatsApp Booking & Lab Reports",
     description: "VVSDesk is hospital management software for Pakistan: OPD, IPD, lab, pharmacy and billing in one system, with WhatsApp booking and lab reports.",
   },
-  nav: { features: "Features", whatsapp: "WhatsApp", pricing: "Pricing", why: "Why VVSDesk", faq: "FAQ", demo: "Book a Demo", login: "Login to ERP", menu: "Menu", close: "Close menu", chat: "Chat on WhatsApp", lang: "اردو" },
+  nav: { services: "Services", features: "Features", whatsapp: "WhatsApp", pricing: "Pricing", why: "Why VVSDesk", faq: "FAQ", demo: "Book a Demo", login: "Login to ERP", menu: "Menu", close: "Close menu", chat: "Chat on WhatsApp", lang: "اردو" },
   hero: {
     eyebrow: "Hospital management system for Pakistan",
     h1a: "Run your entire hospital from one desk",
@@ -52,6 +52,24 @@ const en = {
       { t: "Confirmations and reminders, automatically", d: "A confirmation goes out the moment reception approves, and a reminder before the visit — so fewer empty slots.", chat: ["Reminder: your appointment with Dr. Imran Qureshi is tomorrow at 11:00 am.", "Reply 1 to confirm or 2 to reschedule.", "1", "Thank you — see you tomorrow."] },
       { t: "Lab reports the moment they're verified", d: "As soon as the pathologist signs, the report is sent as a secure PDF with a QR code anyone can check.", chat: ["Your Lipid Profile report is ready 📄", "LipidProfile.pdf", "Thank you!", "Show this QR to any doctor to verify the report."] },
       { t: "Payment links, discharge summaries, follow-ups", d: "Send a payment link for an advance, the discharge summary when the patient leaves, and a follow-up reminder a week later.", chat: ["Discharge summary for Bushra Mirza is attached.", "DischargeSummary.pdf", "Please book a follow-up in 7 days. Reply BOOK.", "BOOK"] },
+    ],
+  },
+  services: {
+    eyebrow: "Services", title: "Care under one roof — and one record",
+    sub: "Every department below shares the same patient file, so your doctor sees your lab results, imaging and medicines in one place, whichever building you visit.",
+    items: [
+      ["General OPD", "Walk-in and booked consultations with nurse vitals before every visit and a printed or WhatsApp prescription."],
+      ["Emergency", "Triage on arrival, monitored bays and a quick decision to treat, admit or refer."],
+      ["Internal Medicine", "Diabetes, blood pressure, chest and infection care, with ward admission when needed."],
+      ["Cardiology", "ECG, echo and heart clinics, with follow-up visits booked before you leave."],
+      ["Neurology", "Headache, epilepsy and stroke care, with EEG and inpatient observation beds."],
+      ["Orthopaedics", "Joint replacement, sports injury and fracture care, plus on-site physiotherapy."],
+      ["Obstetrics & Gynaecology", "Antenatal clinics, a labour suite and postnatal follow-up for mother and baby."],
+      ["Paediatrics", "Child health clinics, vaccinations and a children's ward with parents close by."],
+      ["General Surgery", "Planned and emergency operations, day-case procedures and wound care."],
+      ["Radiology & Imaging", "X-ray, ultrasound and CT, with reports added to your file the same day."],
+      ["Pathology & Lab", "Blood and urine tests with barcoded samples and results sent on WhatsApp."],
+      ["Pharmacy", "Medicines dispensed by batch and expiry, checked by a pharmacist against your prescription."],
     ],
   },
   modules: {
@@ -133,7 +151,7 @@ const en = {
 
 const ur: typeof en = {
   meta: en.meta,
-  nav: { features: "خصوصیات", whatsapp: "واٹس ایپ", pricing: "قیمتیں", why: "VVSDesk کیوں", faq: "سوالات", demo: "ڈیمو بک کریں", login: "ای آر پی میں لاگ ان", menu: "مینو", close: "مینو بند کریں", chat: "واٹس ایپ پر بات کریں", lang: "English" },
+  nav: { services: "خدمات", features: "خصوصیات", whatsapp: "واٹس ایپ", pricing: "قیمتیں", why: "VVSDesk کیوں", faq: "سوالات", demo: "ڈیمو بک کریں", login: "ای آر پی میں لاگ ان", menu: "مینو", close: "مینو بند کریں", chat: "واٹس ایپ پر بات کریں", lang: "English" },
   hero: {
     eyebrow: "پاکستان کے لیے ہسپتال مینجمنٹ سسٹم",
     h1a: "پورا ہسپتال ایک ڈیسک سے چلائیں",
@@ -160,6 +178,24 @@ const ur: typeof en = {
       { t: "تصدیق اور یاد دہانی، خود بخود", d: "ریسیپشن کی منظوری پر فوراً تصدیق اور ملاقات سے پہلے یاد دہانی جاتی ہے — اس لیے خالی وقت کم۔", chat: ["یاد دہانی: کل صبح 11 بجے ڈاکٹر عمران قریشی سے آپ کی ملاقات ہے۔", "تصدیق کے لیے 1، وقت بدلنے کے لیے 2 لکھیں۔", "1", "شکریہ — کل ملاقات ہوگی۔"] },
       { t: "تصدیق ہوتے ہی لیب رپورٹ", d: "پیتھالوجسٹ کے دستخط کرتے ہی رپورٹ QR کوڈ کے ساتھ محفوظ PDF میں بھیج دی جاتی ہے جسے کوئی بھی جانچ سکتا ہے۔", chat: ["آپ کی لپڈ پروفائل رپورٹ تیار ہے 📄", "LipidProfile.pdf", "شکریہ!", "رپورٹ کی تصدیق کے لیے یہ QR کسی بھی ڈاکٹر کو دکھائیں۔"] },
       { t: "ادائیگی لنک، ڈسچارج سمری، فالو اپ", d: "پیشگی کے لیے ادائیگی لنک، رخصتی پر ڈسچارج سمری اور ایک ہفتے بعد فالو اپ کی یاد دہانی بھیجیں۔", chat: ["بشریٰ مرزا کی ڈسچارج سمری منسلک ہے۔", "DischargeSummary.pdf", "براہ کرم 7 دن میں فالو اپ بک کریں۔ BOOK لکھیں۔", "BOOK"] },
+    ],
+  },
+  services: {
+    eyebrow: "خدمات", title: "ایک چھت تلے علاج — اور ایک ریکارڈ",
+    sub: "نیچے دیے گئے تمام شعبے مریض کی ایک ہی فائل استعمال کرتے ہیں، اس لیے آپ کا ڈاکٹر لیب، امیجنگ اور ادویات ایک ہی جگہ دیکھتا ہے، چاہے آپ کسی بھی عمارت میں جائیں۔",
+    items: [
+      ["جنرل او پی ڈی", "واک اِن اور بک شدہ معائنے، ہر دورے سے پہلے نرس کے وائٹلز اور پرنٹ یا واٹس ایپ نسخہ۔"],
+      ["ایمرجنسی", "آمد پر ٹرائیج، نگرانی والے بیڈ اور علاج، داخلہ یا ریفر کا فوری فیصلہ۔"],
+      ["میڈیسن", "ذیابیطس، بلڈ پریشر، سینے اور انفیکشن کا علاج، ضرورت پر وارڈ میں داخلہ۔"],
+      ["امراضِ قلب", "ای سی جی، ایکو اور دل کے کلینک، جانے سے پہلے اگلی ملاقات بک۔"],
+      ["نیورولوجی", "سر درد، مرگی اور فالج کا علاج، ای ای جی اور داخلی نگرانی کے بستر۔"],
+      ["آرتھوپیڈکس", "جوڑوں کی تبدیلی، کھیل کی چوٹ اور فریکچر کا علاج، ساتھ فزیوتھراپی۔"],
+      ["زچگی و امراضِ نسواں", "حمل کے دوران کلینک، لیبر روم اور ماں و بچے کی بعد از پیدائش دیکھ بھال۔"],
+      ["امراضِ اطفال", "بچوں کے کلینک، حفاظتی ٹیکے اور بچوں کا وارڈ، والدین قریب۔"],
+      ["جنرل سرجری", "طے شدہ اور ہنگامی آپریشن، ڈے کیس اور زخموں کی دیکھ بھال۔"],
+      ["ریڈیالوجی و امیجنگ", "ایکسرے، الٹراساؤنڈ اور سی ٹی، اسی دن رپورٹ فائل میں۔"],
+      ["پیتھالوجی و لیب", "خون اور پیشاب کے ٹیسٹ، بارکوڈ والے نمونے اور واٹس ایپ پر نتائج۔"],
+      ["فارمیسی", "بیچ اور میعاد کے مطابق ادویات، فارماسسٹ نسخے سے جانچتا ہے۔"],
     ],
   },
   modules: {
