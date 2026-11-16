@@ -1,23 +1,28 @@
 /**
- * VVSDesk marketing landing page (/hms/vvsdesk, public, D-69). React + Tailwind, one page, component per section.
- * Brand: deep teal #0F4C5C, warm off-white #FBFAF7, coral #B8913A (CTAs), WhatsApp green #25D366 (WhatsApp only), slate #1B1D21.
- * Fonts: Plus Jakarta Sans (headings), Inter (body), Noto Nastaliq Urdu (اردو). Real VVSDesk screenshots in browser frames.
- * SEO: title / description / Open Graph / canonical set on mount, one H1, FAQPage + SoftwareApplication JSON-LD.
- * Accessibility: AA contrast (coral buttons carry slate text — white on coral is under 4.5:1), keyboard accordion and toggles,
- * alt text, focus rings, reduced-motion respected. Copy lives in content.ts (English / Urdu) and is kept out of the app's
- * automatic translation (translate="no") because this page has its own language toggle.
+ * Lyallpur Hospital public website (/hms/vvsdesk, public, D-75). One page: header, hero, quick actions, about, services,
+ * doctors (live from the Doctor records), patients & visitors, booking call-to-action, contact, footer.
+ * Look: elegant — ivory page, deep navy, the logo's teal-blue (#2B6E85) and red (#E5322F) as accents, Cormorant Garamond
+ * headings, Inter body, Noto Nastaliq for اردو. Name, address and phone come from Clinic Settings; copy is in content.ts.
+ * The app's automatic translator skips this folder (own language toggle).
  */
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BarChart3, BedDouble, Bone, Boxes, Brain, Building2, CalendarClock, Check, ChevronDown, ClipboardList, Cloud, Database, FileCheck2, FileText, FlaskConical, Globe2, HardDrive, HeartPulse, KeyRound, Languages, LayoutGrid, Lock, LogIn, Mail, MapPin, Menu, Microscope, MonitorSmartphone, Phone, Pill, Receipt, ScanLine, Scissors, ShieldCheck, Siren, Star, Stethoscope, Timer, UserCog, UserPlus, Users, Wallet, X, type LucideIcon } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, Bone, Brain, CalendarCheck, CalendarDays, ClipboardList, FileText,
+  FlaskConical, HeartPulse, Languages, LogIn, Mail, MapPin, Menu, Microscope, Phone, Pill, ScanLine, Scissors, ShieldCheck, Siren, Stethoscope,
+  UserRound, Users, X, type LucideIcon } from "lucide-react";
 import { COPY, CONFIG, type Copy, type Lang } from "./content";
-import { goldText, VvsMark } from "@/components/brand";
+import { Wordmark } from "@/components/brand";
+import { getCall } from "@/services/frappe";
 
-const C = { teal: "#0F4C5C", tealDeep: "#0E1013", cream: "#FBFAF7", coral: "#B8913A", wa: "#25D366", waInk: "#075E35", slate: "#1B1D21" };
-const IMG = (f: string) => `${import.meta.env.BASE_URL}landing/${f}`;
-const waLink = (text = CONFIG.whatsappText) => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(text)}`;
+const BRAND = (f: string) => `${import.meta.env.BASE_URL}brand/${f}`;
 const reduced = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+const hasWa = !/x/i.test(CONFIG.whatsapp) && CONFIG.whatsapp.length >= 10;
+const tel = (p?: string) => `tel:${(p ?? "").replace(/[^\d+]/g, "")}`;
 
-// ---------------------------------------------------------------- small building blocks
+interface Doctor { name: string; doctor_name: string; doctor_name_ur?: string; specialization?: string; default_fee?: number; photo?: string; qualification?: string;
+  color?: string; next_date?: string | null; days: { day: string; from: string; to: string }[] }
+interface Opts { clinic: { name: string; name_ur?: string; phone?: string; address?: string }; specializations: { name: string; name_ur?: string }[]; doctors: Doctor[] }
+
+// ---------------------------------------------------------------- building blocks
 function WaIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor">
@@ -42,104 +47,51 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
   );
 }
 
-function Counter({ value }: { value: number | null }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [n, setN] = useState(0);
-  useEffect(() => {
-    if (value == null || !ref.current) return;
-    if (reduced()) { setN(value); return; }
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      const t0 = performance.now(), dur = 1400;
-      const step = (t: number) => { const k = Math.min(1, (t - t0) / dur); setN(Math.round(value * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(step); };
-      requestAnimationFrame(step);
-    }, { threshold: 0.4 });
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, [value]);
-  return <span ref={ref} className="tabular-nums">{value == null ? "[X]" : `${n.toLocaleString("en-PK")}+`}</span>;
-}
-
 function Eyebrow({ children, light }: { children: ReactNode; light?: boolean }) {
-  return <p className={`mb-3 text-sm font-semibold uppercase tracking-[0.16em] ${light ? "text-[#E6CF8F]" : "text-[#7A5C1A]"}`}>{children}</p>;
+  return (
+    <p className={`mb-4 flex items-center gap-3 text-[13px] font-semibold uppercase tracking-[0.22em] ${light ? "text-[#8FCBE0]" : "text-[#2B6E85]"}`}>
+      <span className={`h-px w-8 ${light ? "bg-[#8FCBE0]/60" : "bg-[#E5322F]"}`} />{children}
+    </p>
+  );
 }
 function H2({ children, light, center }: { children: ReactNode; light?: boolean; center?: boolean }) {
-  return <h2 className={`hd text-[2.15rem] font-semibold leading-[1.1] tracking-[-0.01em] sm:text-[2.9rem] ${light ? "text-white" : "text-[#1B1D21]"} ${center ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}`}>{children}</h2>;
+  return <h2 className={`hd text-[2.3rem] font-semibold leading-[1.08] sm:text-[3.1rem] ${light ? "text-white" : "text-[#0C2431]"} ${center ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}`}>{children}</h2>;
 }
-const coralBtn = "inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#A88536,#E6CF8F_50%,#B8913A)] px-6 py-3.5 text-base font-bold text-[#14171C] shadow-[0_12px_28px_-12px_rgba(184,145,58,0.9)] ring-1 ring-inset ring-white/30 transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#B8913A]/40";
+const redBtn = "inline-flex items-center justify-center gap-2 rounded-full bg-[#D92F2C] px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_14px_30px_-14px_rgba(217,47,44,0.9)] transition hover:-translate-y-0.5 hover:bg-[#C42825] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#E5322F]/30";
+const ghostBtn = "inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-[15px] font-semibold transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4";
 
-function BrowserFrame({ src, alt, url = "hospital.vvsdesk.pk", eager = false, className = "" }: { src: string; alt: string; url?: string; eager?: boolean; className?: string }) {
-  return (
-    <figure className={`overflow-hidden rounded-2xl border border-[#B8913A]/10 bg-white shadow-[0_30px_60px_-30px_rgba(20,23,28,0.45)] ${className}`}>
-      <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2.5">
-        <span className="h-3 w-3 rounded-full bg-[#FF5F57]" /><span className="h-3 w-3 rounded-full bg-[#FEBC2E]" /><span className="h-3 w-3 rounded-full bg-[#28C840]" />
-        <span className="ms-3 flex-1 truncate rounded-md bg-white px-3 py-1 text-center text-xs text-slate-500 ring-1 ring-slate-200" dir="ltr"><Lock className="me-1 inline h-3 w-3" />{url}</span>
-      </div>
-      <img src={src} alt={alt} width={1600} height={1000} loading={eager ? "eager" : "lazy"} decoding="async" {...(eager ? { fetchPriority: "high" as const } : {})} className="block h-auto w-full" />
-    </figure>
-  );
+// ---------------------------------------------------------------- data + SEO
+function useHospital() {
+  const [opts, setOpts] = useState<Opts | null>(null);
+  useEffect(() => { void getCall<Opts>("hospital_vvs.api.appointments.public_options").then(setOpts).catch(() => setOpts(null)); }, []);
+  return opts;
 }
 
-/** A WhatsApp chat on a phone (HTML, not an image). `mine[i]` = line i is the patient's (right, green). */
-function PhoneChat({ lines, mine: sides, name, status, className = "", file }: { lines: string[]; mine: boolean[]; name: string; status: string; className?: string; file?: string }) {
-  return (
-    <div className={`w-[260px] rounded-[2.4rem] border-[10px] border-[#111827] bg-[#111827] shadow-[0_30px_60px_-20px_rgba(15,23,42,0.55)] ${className}`} aria-label={`WhatsApp chat: ${lines.join(" — ")}`} role="img">
-      <div className="absolute left-1/2 top-0 z-10 h-5 w-24 -translate-x-1/2 rounded-b-2xl bg-[#111827]" />
-      <div className="overflow-hidden rounded-[1.8rem] bg-[#ECE5DD]" aria-hidden>
-        <div className="flex items-center gap-2 bg-[#075E54] px-3 pb-2.5 pt-6 text-white">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-[#25D366] text-sm font-black text-[#075E35]">V</span>
-          <div className="min-w-0"><div className="truncate text-[13px] font-semibold">{name}</div><div className="text-[10px] text-white/75">{status}</div></div>
-        </div>
-        <div className="space-y-1.5 px-2.5 py-3 text-[12.5px] leading-snug text-[#1B1D21]" style={{ minHeight: 300 }}>
-          {lines.map((l, i) => {
-            const mine = !!sides[i];
-            const isFile = /\.pdf/i.test(l) || (file && l === file);
-            return (
-              <div key={i} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] rounded-xl px-2.5 py-1.5 shadow-sm ${mine ? "rounded-tr-sm bg-[#DCF8C6]" : "rounded-tl-sm bg-white"}`}>
-                  {isFile ? <span className="flex items-center gap-2"><span className="grid h-8 w-7 place-items-center rounded bg-[#B8913A]/15 text-[9px] font-bold text-[#8E5A1E]">PDF</span><span className="font-medium">{l}</span></span> : l}
-                  <span className="ms-2 inline-block align-bottom text-[9px] text-slate-500">10:4{i}{mine ? " ✓✓" : ""}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------- SEO
-function useSeo(c: Copy, lang: Lang) {
+function useSeo(c: Copy, lang: Lang, h: Opts["clinic"] | undefined) {
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = c.meta.title;
-    document.documentElement.lang = lang === "ur" ? "ur" : "en";
     const added: Element[] = [];
-    const meta = (attr: "name" | "property", key: string, content: string) => {
+    document.title = c.meta.title;
+    const meta = (attr: string, key: string, content: string) => {
       let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
       if (!el) { el = document.createElement("meta"); el.setAttribute(attr, key); document.head.appendChild(el); added.push(el); }
       el.content = content;
     };
     const url = `${window.location.origin}/hms/vvsdesk`;
     meta("name", "description", c.meta.description);
-    meta("name", "keywords", "hospital management system Pakistan, HMIS software, hospital software with WhatsApp, lab management software Pakistan, EMR software Pakistan");
     meta("property", "og:title", c.meta.title); meta("property", "og:description", c.meta.description); meta("property", "og:type", "website");
-    meta("property", "og:url", url); meta("property", "og:image", `${window.location.origin}${IMG("og.jpg")}`); meta("name", "twitter:card", "summary_large_image");
+    meta("property", "og:url", url); meta("property", "og:image", `${window.location.origin}${BRAND("lyallpur-logo.webp")}`);
     const link = document.createElement("link"); link.rel = "canonical"; link.href = url; document.head.appendChild(link); added.push(link);
     const fonts = document.createElement("link"); fonts.rel = "stylesheet";
-    fonts.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Cinzel:wght@600&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap";
+    fonts.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap";
     document.head.appendChild(fonts); added.push(fonts);
     const ld = document.createElement("script"); ld.type = "application/ld+json";
-    ld.text = JSON.stringify([
-      { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: COPY.en.faq.items.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
-      { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "VVSDesk", applicationCategory: "BusinessApplication", operatingSystem: "Web, on-premise",
-        description: COPY.en.meta.description, areaServed: "PK", inLanguage: ["en", "ur"] },
-    ]);
+    ld.text = JSON.stringify({ "@context": "https://schema.org", "@type": "Hospital", name: COPY.en.name, alternateName: COPY.ur.name,
+      description: COPY.en.meta.description, url, logo: `${window.location.origin}${BRAND("lyallpur-logo.webp")}`,
+      ...(h?.phone ? { telephone: h.phone } : {}), ...(h?.address ? { address: { "@type": "PostalAddress", streetAddress: h.address, addressCountry: "PK" } } : {}) });
     document.head.appendChild(ld); added.push(ld);
     return () => { document.title = prevTitle; added.forEach((e) => e.remove()); };
-  }, [c, lang]);
+  }, [c, lang, h]);
 }
 
 // ---------------------------------------------------------------- sections
@@ -147,95 +99,135 @@ function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) 
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => { const f = () => setScrolled(window.scrollY > 8); f(); window.addEventListener("scroll", f, { passive: true }); return () => window.removeEventListener("scroll", f); }, []);
-  const links: [string, string][] = [["#services", c.nav.services], ["#modules", c.nav.features], ["#whatsapp", c.nav.whatsapp], ["#pricing", c.nav.pricing], ["#why", c.nav.why], ["#faq", c.nav.faq]];
+  const links: [string, string][] = [["#services", c.nav.services], ["#doctors", c.nav.doctors], ["#patients", c.nav.patients], ["#about", c.nav.about], ["#contact", c.nav.contact]];
   return (
-    <header className={`sticky top-0 z-40 text-white transition-all duration-300 ${scrolled ? "border-b border-white/10 bg-[#0E1013]/85 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] backdrop-blur-xl" : "bg-[#0E1013]"}`}>
-      <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4 sm:px-6">
-        <a href="#top" className="group flex items-center gap-3" aria-label="VVSDesk home">
-          <VvsMark className="h-9 w-9 transition-transform duration-500 group-hover:rotate-[8deg]" />
-          <span className="leading-none" dir="ltr"><span className="brand block text-[17px] tracking-[0.28em] text-white">VVS<span className={goldText}>DESK</span></span>
-            <span className="mt-1 block text-[9.5px] font-medium uppercase tracking-[0.32em] text-white/45">Hospital management</span></span>
+    <header className={`sticky top-0 z-40 transition-all ${scrolled ? "bg-white/90 shadow-[0_8px_30px_-18px_rgba(12,36,49,0.45)] backdrop-blur-xl" : "bg-[#FAF8F4]"}`}>
+      <div className="mx-auto flex h-[76px] max-w-7xl items-center gap-4 px-4 sm:px-6">
+        <a href="#top" className="flex min-w-0 items-center gap-3" aria-label={c.name}>
+          <img src={BRAND("lyallpur-mark.webp")} alt="" className="h-12 w-12 shrink-0" />
+          <span className="min-w-0 leading-tight">
+            <span className="block truncate text-[17px] font-bold tracking-wide text-[#0C2431]">{c.name}</span>
+            <span className="block truncate text-[10.5px] font-semibold uppercase tracking-[0.2em] text-[#2B6E85]">{c.tagline}</span>
+          </span>
         </a>
-        <nav aria-label="Main" className="ms-6 hidden items-center gap-1 lg:flex">
-          {links.map(([h, l]) => <a key={h} href={h} className="relative rounded-lg px-3 py-2 text-[14.5px] font-medium text-white/70 transition hover:text-white after:absolute after:inset-x-3 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-[#C9A24A] after:transition-transform hover:after:scale-x-100">{l}</a>)}
+        <nav aria-label="Main" className="ms-auto hidden items-center gap-1 lg:flex">
+          {links.map(([h, l]) => <a key={h} href={h} className="rounded-full px-3.5 py-2 text-[14.5px] font-medium text-[#0C2431]/75 transition hover:bg-[#2B6E85]/8 hover:text-[#0C2431]">{l}</a>)}
         </nav>
-        <div className="ms-auto flex items-center gap-2">
-          <button type="button" onClick={() => setLang(lang === "en" ? "ur" : "en")} aria-label={lang === "en" ? "اردو میں دیکھیں" : "View in English"}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-white/80 hover:bg-white/5 hover:text-white"><Languages className="h-4 w-4" /><span className={lang === "en" ? "ur" : ""}>{c.nav.lang}</span></button>
-          <a href="/hms/login" className="hidden items-center gap-1.5 rounded-xl border border-[#C9A24A]/60 px-3.5 py-2 text-sm font-semibold text-[#E6CF8F] transition hover:border-[#E6CF8F] hover:bg-[#C9A24A]/10 md:inline-flex"><LogIn className="h-4 w-4 rtl:rotate-180" />{c.nav.login}</a>
-          <a href={waLink()} target="_blank" rel="noopener noreferrer" aria-label={c.nav.chat} className="grid h-10 w-10 place-items-center rounded-xl bg-[#25D366] text-[#073B22] transition hover:brightness-110"><WaIcon /></a>
-          <a href="#demo" className={`${coralBtn} hidden px-4 py-2.5 text-sm sm:inline-flex`}>{c.nav.demo}</a>
-          <button type="button" className="grid h-10 w-10 place-items-center rounded-xl text-white/85 hover:bg-white/5 lg:hidden" aria-expanded={open} aria-controls="mnav" aria-label={open ? c.nav.close : c.nav.menu} onClick={() => setOpen((o) => !o)}>
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button>
+        <div className="ms-auto flex items-center gap-2 lg:ms-2">
+          <button type="button" onClick={() => setLang(lang === "en" ? "ur" : "en")} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-[#0C2431]/80 hover:bg-[#2B6E85]/8" aria-label="Language">
+            <Languages className="h-4 w-4" />{c.nav.lang}</button>
+          <a href="/hms/book-appointment" className={`${redBtn} hidden px-5 py-2.5 text-sm sm:inline-flex`}><CalendarCheck className="h-4 w-4" />{c.nav.book}</a>
+          <button type="button" onClick={() => setOpen(true)} className="rounded-full p-2.5 text-[#0C2431] hover:bg-[#2B6E85]/8 lg:hidden" aria-label={c.nav.menu}><Menu className="h-6 w-6" /></button>
         </div>
       </div>
-      <div id="mnav" className={`overflow-hidden border-t border-white/10 bg-[#0E1013] transition-[max-height] duration-300 lg:hidden ${open ? "max-h-[28rem]" : "max-h-0 border-t-0"}`}>
-        <nav aria-label="Mobile" className="flex flex-col px-4 py-2">
-          {links.map(([h, l]) => <a key={h} href={h} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 font-medium text-white/85 hover:bg-white/5">{l}</a>)}
-          <a href="/hms/login" className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl border border-[#C9A24A]/60 px-6 py-3 font-semibold text-[#E6CF8F]"><LogIn className="h-5 w-5 rtl:rotate-180" />{c.nav.login}</a>
-          <a href="#demo" onClick={() => setOpen(false)} className={`${coralBtn} my-2`}>{c.nav.demo}</a>
-        </nav>
-      </div>
+      {open && (
+        <div className="fixed inset-0 z-50 bg-[#0C2431]/60 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)}>
+          <div className="absolute inset-y-0 end-0 w-[82%] max-w-sm bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-6 flex items-center justify-between"><img src={BRAND("lyallpur-mark.webp")} alt="" className="h-11 w-11" />
+              <button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 hover:bg-[#0C2431]/5" aria-label={c.nav.close}><X className="h-6 w-6" /></button></div>
+            <nav className="flex flex-col">{links.map(([h, l]) => <a key={h} href={h} onClick={() => setOpen(false)} className="border-b border-[#0C2431]/8 py-3.5 text-lg font-medium text-[#0C2431]">{l}</a>)}</nav>
+            <a href="/hms/book-appointment" className={`${redBtn} mt-6 w-full`}><CalendarCheck className="h-4 w-4" />{c.nav.book}</a>
+            <a href="/hms/login" className="mt-3 flex items-center justify-center gap-2 py-2 text-sm font-medium text-[#0C2431]/70"><LogIn className="h-4 w-4" />{c.nav.staff}</a>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
 
-function Hero({ c }: { c: Copy }) {
-  const h = c.hero;
+function Hero({ c, lang, opts, phone }: { c: Copy; lang: Lang; opts: Opts | null; phone?: string }) {
+  const next = useMemo(() => (opts?.doctors ?? []).map((d) => d.next_date).filter(Boolean).sort()[0], [opts]);
+  const fmt = (d?: string | null) => (d ? new Date(d + "T00:00").toLocaleDateString(lang === "ur" ? "ur-PK" : "en-PK", { weekday: "short", day: "numeric", month: "short" }) : "");
   return (
-    <section id="top" className="relative overflow-hidden bg-[#0E1013] pb-20 pt-12 text-white sm:pt-20">
-      {/* soft gold light + a faint diamond lattice */}
-      <div aria-hidden className="pointer-events-none absolute -top-56 end-[-12%] h-[640px] w-[640px] rounded-full bg-[#C9A24A]/20 blur-[120px]" />
-      <div aria-hidden className="pointer-events-none absolute -bottom-64 start-[-10%] h-[520px] w-[520px] rounded-full bg-[#7A5C1A]/25 blur-[120px]" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(45deg,#E6CF8F_1px,transparent_1px),linear-gradient(-45deg,#E6CF8F_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
-      <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
-        <Reveal>
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#C9A24A]/35 bg-white/[0.04] px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-[#E6CF8F] backdrop-blur"><span className="h-1.5 w-1.5 rounded-full bg-[#25D366] shadow-[0_0_10px] shadow-[#25D366]" />{h.eyebrow}</p>
-          <h1 className="hd text-[2.6rem] font-semibold leading-[1.04] tracking-[-0.01em] text-white sm:text-6xl xl:text-[4.4rem] [.vvsl-ur_&]:text-3xl [.vvsl-ur_&]:sm:text-[2.9rem] [.vvsl-ur_&]:xl:text-[2.6rem]">
-            {h.h1a} <span className={`${goldText} italic`}>{h.h1b}</span>
-          </h1>
-          <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/70">{h.sub}</p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <a href="#demo" className={coralBtn}>{h.cta}<ArrowRight className="h-5 w-5 rtl:rotate-180" /></a>
-            <a href={waLink()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#25D366]/70 bg-[#25D366]/10 px-6 py-3 text-base font-semibold text-[#9FF0C0] transition hover:-translate-y-0.5 hover:bg-[#25D366]/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40"><WaIcon />{h.cta2}</a>
+    <section id="top" className="relative overflow-hidden bg-[#0C2431] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_520px_at_8%_0%,rgba(43,110,133,0.55),transparent_60%),radial-gradient(700px_480px_at_100%_100%,rgba(229,50,47,0.22),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:26px_26px]" />
+      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-32 pt-16 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pb-40 lg:pt-24">
+        <div>
+          <Reveal><Eyebrow light>{c.hero.eyebrow}</Eyebrow></Reveal>
+          <Reveal delay={80}>
+            <h1 className="hd text-[2.9rem] font-semibold leading-[1.02] sm:text-[4.2rem]">
+              {c.hero.h1a}<br /><span className="bg-[linear-gradient(100deg,#FF6B66,#F2A28E_40%,#8FCBE0_75%)] bg-clip-text italic text-transparent">{c.hero.h1b}</span>
+            </h1>
+          </Reveal>
+          <Reveal delay={160}><p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">{c.hero.sub}</p></Reveal>
+          <Reveal delay={240} className="mt-9 flex flex-wrap gap-3">
+            <a href="/hms/book-appointment" className={redBtn}><CalendarCheck className="h-5 w-5" />{c.hero.book}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a>
+            {phone && <a href={tel(phone)} className={`${ghostBtn} border-white/25 text-white hover:bg-white/10 focus-visible:ring-white/30`}><Phone className="h-5 w-5" /><span dir="ltr">{phone}</span></a>}
+          </Reveal>
+        </div>
+        <Reveal delay={200} className="relative mx-auto w-full max-w-md">
+          <div className="relative aspect-square">
+            <div className="absolute inset-[6%] rounded-full border border-white/10" />
+            <div className="absolute inset-[16%] rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-sm" />
+            <div className="absolute inset-[24%] grid place-items-center rounded-full bg-white shadow-[0_40px_90px_-30px_rgba(0,0,0,0.7)]">
+              <img src={BRAND("lyallpur-mark.webp")} alt={c.name} className="h-[72%] w-[72%] object-contain" />
+            </div>
+            <div className="absolute -start-2 top-[8%] w-56 rounded-2xl border border-white/15 bg-white/10 p-4 shadow-2xl backdrop-blur-xl sm:-start-8">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8FCBE0]"><CalendarDays className="h-4 w-4" />{next ? c.hero.cards.next : c.hero.cards.nextNone}</div>
+              <div className="hd mt-1 text-2xl font-semibold">{next ? fmt(next) : c.nav.book}</div>
+              <div className="text-xs text-white/60">{c.hero.cards.nextSub}</div>
+            </div>
+            <div className="absolute -end-2 top-[64%] w-52 rounded-2xl border border-white/15 bg-[#123446]/95 p-4 shadow-2xl backdrop-blur-xl sm:-end-6">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8FCBE0]"><FlaskConical className="h-4 w-4" />{c.hero.cards.lab}</div>
+              <div className="mt-1 text-sm text-white/80">{c.hero.cards.labSub}</div>
+            </div>
+            {phone && <a href={tel(phone)} className="absolute bottom-[0%] start-[2%] flex w-60 items-center gap-3 rounded-2xl bg-white p-3.5 text-[#0C2431] shadow-2xl transition hover:-translate-y-0.5">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#E5322F] text-white"><Siren className="h-5 w-5" /></span>
+              <span><span className="block text-sm font-bold">{c.hero.cards.er}</span><span className="block text-xs text-[#0C2431]/60">{c.hero.cards.erSub}</span></span>
+            </a>}
           </div>
         </Reveal>
-        <Reveal delay={150} className="relative">
-          <div aria-hidden className="absolute -inset-6 rounded-[2rem] bg-[linear-gradient(135deg,rgba(201,162,74,0.35),transparent_45%,rgba(201,162,74,0.15))] blur-2xl" />
-          <BrowserFrame src={IMG("desktop.webp")} alt={h.shotAlt} eager className="relative ring-1 ring-[#C9A24A]/30 lg:translate-x-6 rtl:lg:-translate-x-6" />
-          <PhoneChat name={h.chat.name} status={h.chat.status} file={h.chat.file} lines={[h.chat.m1, h.chat.m2, h.chat.file, h.chat.m3, h.chat.m4]} mine={[false, false, false, true, false]}
-            className="absolute -bottom-16 end-[-8px] hidden origin-bottom-right scale-[0.78] sm:block lg:end-[-36px] rtl:origin-bottom-left" />
-        </Reveal>
-      </div>
-      <div className="relative mx-auto mt-24 max-w-7xl px-4 sm:px-6">
-        <ul className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 border-y border-white/10 py-5 text-[13.5px] font-medium tracking-wide text-[#E6CF8F]/90">
-          {h.trust.map((t, i) => {
-            const I = [Cloud, Languages, FileCheck2, HardDrive][i];
-            return <li key={t} className="flex items-center gap-2"><I className="h-4 w-4 text-[#C9A24A]" />{t}</li>;
-          })}
-        </ul>
       </div>
     </section>
   );
 }
 
-function Problems({ c }: { c: Copy }) {
-  const icons: LucideIcon[] = [Timer, Phone, Receipt];
-  const sol: LucideIcon[] = [CalendarClock, FileText, Wallet];
+const QUICK_ICONS = [CalendarCheck, UserRound, Stethoscope, Siren];
+function QuickActions({ c, phone }: { c: Copy; phone?: string }) {
+  const hrefs = ["/hms/book-appointment", "#doctors", "#services", phone ? tel(phone) : "#contact"];
   return (
-    <section className="py-16 sm:py-20" aria-labelledby="problems-h">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal><h2 id="problems-h" className="hd mx-auto max-w-3xl text-center text-[2.15rem] font-semibold leading-[1.1] tracking-[-0.01em] text-[#1B1D21] sm:text-[2.9rem]">{c.problems.title}</h2></Reveal>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {c.problems.items.map((it, i) => {
-            const P = icons[i], S = sol[i];
+    <div className="relative z-10 mx-auto -mt-20 max-w-7xl px-4 sm:px-6">
+      <div className="grid gap-px overflow-hidden rounded-3xl bg-[#0C2431]/8 shadow-[0_30px_70px_-35px_rgba(12,36,49,0.55)] sm:grid-cols-2 lg:grid-cols-4">
+        {c.quick.map(([t, d], i) => {
+          const I = QUICK_ICONS[i];
+          const er = i === 3;
+          return (
+            <a key={t} href={hrefs[i]} className={`group flex items-center gap-4 p-6 transition ${er ? "bg-[#0C2431] text-white hover:bg-[#123446]" : "bg-white hover:bg-[#F3F8FA]"}`}>
+              <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${er ? "bg-[#E5322F] text-white" : "bg-[#2B6E85]/10 text-[#2B6E85]"}`}><I className="h-6 w-6" /></span>
+              <span className="min-w-0 flex-1"><span className="block font-semibold">{t}</span><span className={`block text-sm ${er ? "text-white/65" : "text-[#0C2431]/60"}`}>{d}</span></span>
+              <ArrowRight className={`h-4 w-4 shrink-0 transition group-hover:translate-x-1 rtl:rotate-180 ${er ? "text-white/60" : "text-[#0C2431]/30"}`} />
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const ABOUT_ICONS = [BadgeCheck, FileText, Microscope, ShieldCheck];
+function About({ c, opts }: { c: Copy; opts: Opts | null }) {
+  const stats: [number, string][] = [[opts?.doctors.length ?? 0, c.about.doctors], [opts?.specializations.length ?? 0, c.about.specialties], [c.services.items.length, c.about.departments]];
+  return (
+    <section id="about" className="scroll-mt-24 py-24 sm:py-28">
+      <div className="mx-auto grid max-w-7xl gap-14 px-4 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
+        <Reveal>
+          <Eyebrow>{c.about.eyebrow}</Eyebrow><H2>{c.about.title}</H2>
+          <p className="mt-6 text-lg leading-relaxed text-[#0C2431]/70">{c.about.body}</p>
+          {opts && <div className="mt-10 grid grid-cols-3 divide-x divide-[#0C2431]/10 rtl:divide-x-reverse">
+            {stats.map(([n, l]) => <div key={l} className="px-4 first:ps-0"><div className="hd text-5xl font-semibold text-[#2B6E85]">{n}</div><div className="mt-1 text-sm text-[#0C2431]/60">{l}</div></div>)}
+          </div>}
+        </Reveal>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {c.about.points.map(([t, d], i) => {
+            const I = ABOUT_ICONS[i];
             return (
-              <Reveal key={it.p} delay={i * 100}>
-                <article className="h-full rounded-2xl border border-[#B8913A]/10 bg-white p-6 shadow-sm">
-                  <div className="flex items-center gap-3 text-[#8E5A1E]"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#B8913A]/12"><P className="h-5 w-5" /></span><h3 className="hd text-[1.4rem] font-semibold">{it.p}</h3></div>
-                  <div className="my-4 flex items-center gap-2 text-[#7A5C1A]/40" aria-hidden><span className="h-px flex-1 bg-current" /><ArrowRight className="h-4 w-4 rotate-90" /><span className="h-px flex-1 bg-current" /></div>
-                  <div className="flex gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#14171C] text-white"><S className="h-5 w-5" /></span><p className="leading-relaxed text-[#1B1D21]/80">{it.s}</p></div>
-                </article>
+              <Reveal key={t} delay={i * 80}>
+                <div className="h-full rounded-3xl border border-[#0C2431]/8 bg-white p-7 shadow-[0_20px_50px_-35px_rgba(12,36,49,0.5)]">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#2B6E85] to-[#1D4F61] text-white"><I className="h-6 w-6" /></span>
+                  <h3 className="hd mt-5 text-2xl font-semibold text-[#0C2431]">{t}</h3>
+                  <p className="mt-2 leading-relaxed text-[#0C2431]/65">{d}</p>
+                </div>
               </Reveal>
             );
           })}
@@ -245,53 +237,25 @@ function Problems({ c }: { c: Copy }) {
   );
 }
 
-/** Which chat lines are the patient's, per WhatsApp feature (booking, reminder, report, discharge). */
-const WA_SIDES = [[true, false, true, false], [false, false, true, false], [false, false, true, false], [false, false, false, true]];
-
-function WhatsAppSpotlight({ c }: { c: Copy }) {
-  return (
-    <section id="whatsapp" className="scroll-mt-20 bg-[#14171C] py-20 text-white sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal><Eyebrow light>{c.wa.eyebrow}</Eyebrow><H2 light>{c.wa.title}</H2><p className="mt-4 max-w-2xl text-lg text-white/80">{c.wa.sub}</p></Reveal>
-        <div className="mt-16 space-y-20">
-          {c.wa.items.map((it, i) => (
-            <div key={it.t} className={`grid items-center gap-10 md:grid-cols-2 ${i % 2 ? "md:[&>*:first-child]:order-2" : ""}`}>
-              <Reveal>
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#25D366]/15 px-3 py-1 text-sm font-semibold text-[#9FF0C0]"><WaIcon className="h-4 w-4" />0{i + 1}</div>
-                <h3 className="hd text-[2rem] font-semibold sm:text-[2.4rem]">{it.t}</h3>
-                <p className="mt-4 max-w-lg text-lg leading-relaxed text-white/80">{it.d}</p>
-              </Reveal>
-              <Reveal delay={120} className="flex justify-center">
-                <PhoneChat name={c.hero.chat.name} status={c.hero.chat.status} lines={it.chat} mine={WA_SIDES[i]} className="relative" />
-              </Reveal>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-const MODULE_ICONS: LucideIcon[][] = [
-  [UserPlus, CalendarClock, Globe2], [Stethoscope, BedDouble, ClipboardList, HeartPulse, Siren, Activity], [FlaskConical, ScanLine],
-  [Pill, Boxes, BadgeCheck], [Receipt, ShieldCheck, Database, FileCheck2], [Users, Wallet, BarChart3, UserCog],
-];
-const SERVICE_ICONS = [Stethoscope, Ambulance, HeartPulse, Activity, Brain, Bone, Baby, Accessibility, Scissors, ScanLine, Microscope, Pill];
+const SERVICE_ICONS: LucideIcon[] = [Stethoscope, Ambulance, HeartPulse, Activity, Brain, Bone, Baby, Accessibility, Scissors, ScanLine, Microscope, Pill];
 function Services({ c }: { c: Copy }) {
   return (
-    <section id="services" className="scroll-mt-20 bg-[#F4F0E6] py-20 sm:py-24">
+    <section id="services" className="scroll-mt-24 bg-white py-24 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal><Eyebrow>{c.services.eyebrow}</Eyebrow><H2>{c.services.title}</H2>
-          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-[#1B1D21]/70">{c.services.sub}</p></Reveal>
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <Reveal className="flex flex-wrap items-end justify-between gap-6">
+          <div><Eyebrow>{c.services.eyebrow}</Eyebrow><H2>{c.services.title}</H2></div>
+          <p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{c.services.sub}</p>
+        </Reveal>
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {c.services.items.map(([t, d], i) => {
             const I = SERVICE_ICONS[i] ?? Stethoscope;
             return (
               <Reveal key={t} delay={(i % 4) * 60}>
-                <article className="group h-full rounded-2xl border border-[#B8913A]/15 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-[#B8913A]/40 hover:shadow-[0_20px_40px_-24px_rgba(20,23,28,0.5)]">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#B8913A]/15 text-[#7A5C1A] transition group-hover:bg-[#14171C] group-hover:text-[#E6CF8F]"><I className="h-5 w-5" /></span>
-                  <h3 className="mt-4 text-[17px] font-semibold text-[#1B1D21]">{t}</h3>
-                  <p className="mt-1.5 text-[14.5px] leading-relaxed text-[#1B1D21]/70">{d}</p>
+                <article className="group relative h-full overflow-hidden rounded-3xl border border-[#0C2431]/8 bg-[#FAF8F4] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#2B6E85]/30 hover:bg-white hover:shadow-[0_26px_50px_-30px_rgba(12,36,49,0.55)]">
+                  <span className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#E5322F] to-[#2B6E85] transition-transform duration-500 group-hover:scale-x-100 rtl:origin-right" />
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-[#2B6E85] shadow-sm ring-1 ring-[#0C2431]/5 transition group-hover:bg-[#2B6E85] group-hover:text-white"><I className="h-6 w-6" /></span>
+                  <h3 className="mt-5 text-lg font-semibold text-[#0C2431]">{t}</h3>
+                  <p className="mt-2 text-[14.5px] leading-relaxed text-[#0C2431]/65">{d}</p>
                 </article>
               </Reveal>
             );
@@ -302,61 +266,103 @@ function Services({ c }: { c: Copy }) {
   );
 }
 
-function Modules({ c }: { c: Copy }) {
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+function clinicDays(days: Doctor["days"]) {
+  if (!days.length) return "";
+  const byTime = new Map<string, string[]>();
+  days.forEach((d) => { const k = `${d.from}–${d.to}`; byTime.set(k, [...(byTime.get(k) ?? []), d.day]); });
+  return [...byTime].map(([t, ds]) => {
+    const idx = ds.map((d) => DAYS.indexOf(d)).sort((a, b) => a - b);
+    const run = idx.length > 2 && idx[idx.length - 1] - idx[0] === idx.length - 1;
+    return `${run ? `${DAYS[idx[0]]}–${DAYS[idx[idx.length - 1]]}` : idx.map((i) => DAYS[i]).join(", ")} · ${t}`;
+  }).join("  /  ");
+}
+function Doctors({ c, lang, opts }: { c: Copy; lang: Lang; opts: Opts | null }) {
+  const [spec, setSpec] = useState("");
+  if (!opts || !opts.doctors.length) return null;
+  const list = opts.doctors.filter((d) => !spec || d.specialization === spec);
+  const specName = (s?: string) => (lang === "ur" ? opts.specializations.find((x) => x.name === s)?.name_ur : undefined) || s || "";
+  const chip = (on: boolean) => `rounded-full px-4 py-2 text-sm font-medium transition ${on ? "bg-[#0C2431] text-white shadow" : "bg-white text-[#0C2431]/70 ring-1 ring-[#0C2431]/10 hover:ring-[#2B6E85]/40"}`;
   return (
-    <section id="modules" className="scroll-mt-20 py-20 sm:py-24">
+    <section id="doctors" className="scroll-mt-24 py-24 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal><Eyebrow>{c.modules.eyebrow}</Eyebrow><H2>{c.modules.title}</H2></Reveal>
-        <div className="mt-12 space-y-12">
-          {c.modules.groups.map((g, gi) => (
-            <div key={g.g}>
-              <Reveal><div className="mb-5 flex items-center gap-3"><span className="grid h-7 w-7 place-items-center rounded-full bg-[#14171C] text-xs font-bold text-white">{gi + 1}</span>
-                <h3 className="hd text-2xl font-semibold text-[#7A5C1A]">{g.g}</h3><span className="h-px flex-1 bg-[#14171C]/15" /></div></Reveal>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {g.items.map(([t, d], i) => {
-                  const I = MODULE_ICONS[gi][i] ?? LayoutGrid;
-                  return (
-                    <Reveal key={t} delay={i * 60}>
-                      <article className="group flex h-full flex-col rounded-2xl border border-[#B8913A]/10 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-[0_20px_40px_-24px_rgba(20,23,28,0.5)]">
-                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#14171C]/8 text-[#7A5C1A] transition group-hover:bg-[#14171C] group-hover:text-white"><I className="h-5 w-5" /></span>
-                        <h4 className="hd mt-4 text-[1.4rem] font-semibold text-[#1B1D21]">{t}</h4>
-                        <p className="mt-1.5 flex-1 text-[15px] leading-relaxed text-[#1B1D21]/70">{d}</p>
-                        <a href="#demo" className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#7A5C1A] hover:underline" aria-label={`${c.modules.learn}: ${t}`}>
-                          {c.modules.learn}<ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5 rtl:rotate-180" /></a>
-                      </article>
-                    </Reveal>
-                  );
-                })}
+        <Reveal><Eyebrow>{c.doctors.eyebrow}</Eyebrow><H2>{c.doctors.title}</H2><p className="mt-4 max-w-2xl text-[17px] text-[#0C2431]/65">{c.doctors.sub}</p></Reveal>
+        <Reveal className="mt-8 flex flex-wrap gap-2">
+          <button type="button" className={chip(!spec)} onClick={() => setSpec("")} aria-pressed={!spec}>{c.doctors.all}</button>
+          {opts.specializations.map((s) => <button key={s.name} type="button" className={chip(spec === s.name)} onClick={() => setSpec(s.name)} aria-pressed={spec === s.name}>{specName(s.name)}</button>)}
+        </Reveal>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {list.slice(0, 8).map((d, i) => {
+            const nm = (lang === "ur" && d.doctor_name_ur) || d.doctor_name;
+            const initials = d.doctor_name.replace(/^Dr\.?\s*/i, "").split(" ").slice(0, 2).map((w) => w[0]).join("");
+            const when = clinicDays(d.days);
+            return (
+              <Reveal key={d.name} delay={(i % 4) * 60}>
+                <article className="flex h-full flex-col overflow-hidden rounded-3xl border border-[#0C2431]/8 bg-white shadow-[0_20px_50px_-38px_rgba(12,36,49,0.6)]">
+                  <div className="relative grid h-40 place-items-center bg-gradient-to-br from-[#E8F2F5] to-[#F6EFEA]">
+                    {d.photo ? <img src={d.photo} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      : <span className="hd grid h-24 w-24 place-items-center rounded-full bg-white text-4xl font-semibold text-[#2B6E85] shadow-md ring-4 ring-white/60" dir="ltr">{initials}</span>}
+                    <span className="absolute bottom-3 start-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#2B6E85] backdrop-blur">{specName(d.specialization)}</span>
+                  </div>
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="text-lg font-semibold text-[#0C2431]">{nm}</h3>
+                    {d.qualification && <p className="text-sm text-[#0C2431]/55" dir="ltr">{d.qualification}</p>}
+                    <p className="mt-3 flex-1 text-[13px] leading-relaxed text-[#0C2431]/70" dir="ltr">{when ? <><CalendarDays className="me-1.5 inline h-4 w-4 align-[-3px] text-[#2B6E85]" />{when}</> : c.doctors.none}</p>
+                    <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#0C2431]/8 pt-4">
+                      {d.default_fee ? <span className="text-sm"><span className="block text-[11px] uppercase tracking-wider text-[#0C2431]/45">{c.doctors.fee}</span><b className="text-[#0C2431]" dir="ltr">Rs {Math.round(d.default_fee).toLocaleString("en-PK")}</b></span> : <span />}
+                      <a href={`/hms/book-appointment?doctor=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1.5 rounded-full bg-[#2B6E85] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#225869]">{c.doctors.book}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a>
+                    </div>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
+        </div>
+        <Reveal className="mt-10 text-center"><a href="/hms/book-appointment" className={`${ghostBtn} border-[#0C2431]/15 text-[#0C2431] hover:border-[#2B6E85] focus-visible:ring-[#2B6E85]/20`}>{c.doctors.more}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a></Reveal>
+      </div>
+    </section>
+  );
+}
+
+const PATIENT_ICONS = [CalendarCheck, ClipboardList, FlaskConical, ShieldCheck, Users, BadgeCheck];
+function Patients({ c }: { c: Copy }) {
+  return (
+    <section id="patients" className="scroll-mt-24 bg-[#0C2431] py-24 text-white sm:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <Reveal><Eyebrow light>{c.patients.eyebrow}</Eyebrow><H2 light>{c.patients.title}</H2></Reveal>
+        <div className="mt-14 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+          {c.patients.items.map(([t, d], i) => {
+            const I = PATIENT_ICONS[i];
+            return (
+              <Reveal key={t} delay={(i % 3) * 70} className="bg-[#0C2431]">
+                <div className="h-full p-8 transition hover:bg-white/[0.03]">
+                  <div className="flex items-center gap-3"><span className="hd text-3xl font-semibold text-[#E5322F]/80" dir="ltr">0{i + 1}</span><I className="h-5 w-5 text-[#8FCBE0]" /></div>
+                  <h3 className="hd mt-4 text-2xl font-semibold">{t}</h3>
+                  <p className="mt-2 leading-relaxed text-white/65">{d}</p>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Cta({ c, phone }: { c: Copy; phone?: string }) {
+  return (
+    <section className="py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <Reveal>
+          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#2B6E85] via-[#225869] to-[#0C2431] px-8 py-14 text-white sm:px-14">
+            <img src={BRAND("lyallpur-mark-dark.webp")} alt="" className="pointer-events-none absolute -end-16 -top-16 h-80 w-80 opacity-10" />
+            <div className="relative flex flex-wrap items-center justify-between gap-8">
+              <div><h2 className="hd text-4xl font-semibold sm:text-5xl">{c.cta.title}</h2><p className="mt-3 max-w-xl text-lg text-white/75">{c.cta.sub}</p></div>
+              <div className="flex flex-wrap gap-3">
+                <a href="/hms/book-appointment" className={redBtn}><CalendarCheck className="h-5 w-5" />{c.cta.book}</a>
+                {phone && <a href={tel(phone)} className={`${ghostBtn} border-white/30 text-white hover:bg-white/10 focus-visible:ring-white/30`}><Phone className="h-5 w-5" />{c.cta.call}</a>}
               </div>
             </div>
-          ))}
-        </div>
-        <Reveal className="mt-14 grid gap-5 lg:grid-cols-2">
-          <BrowserFrame src={IMG("lab.webp")} alt="VVSDesk lab orders: each order shows Paid or Unpaid before the sample is collected" />
-          <BrowserFrame src={IMG("analytics.webp")} alt="VVSDesk dashboard with live charts for the OPD app" />
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function Why({ c }: { c: Copy }) {
-  return (
-    <section id="why" className="scroll-mt-20 bg-white py-20 sm:py-24">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6">
-        <Reveal><Eyebrow>{c.why.eyebrow}</Eyebrow><H2>{c.why.title}</H2></Reveal>
-        <Reveal delay={100}>
-          <div className="mt-10 overflow-hidden rounded-2xl border border-[#B8913A]/12">
-            <table className="w-full border-collapse text-start">
-              <caption className="sr-only">{c.why.title}</caption>
-              <thead><tr className="bg-[#FBFAF7]"><th scope="col" className="w-1/2 px-5 py-4 text-start text-sm font-semibold text-[#1B1D21]/60">{c.why.typical}</th>
-                <th scope="col" className="w-1/2 bg-[#14171C] px-5 py-4 text-start text-sm font-bold text-white">{c.why.ours}</th></tr></thead>
-              <tbody>{c.why.rows.map(([a, b]) => (
-                <tr key={a} className="border-t border-[#B8913A]/10">
-                  <td className="px-5 py-4 align-top text-[15px] text-[#1B1D21]/65"><span className="flex gap-2.5"><X className="mt-0.5 h-4 w-4 shrink-0 text-[#8E5A1E]" aria-label="—" />{a}</span></td>
-                  <td className="bg-[#14171C]/[0.04] px-5 py-4 align-top text-[15px] font-medium text-[#1B1D21]"><span className="flex gap-2.5"><Check className="mt-0.5 h-4 w-4 shrink-0 text-[#7A5C1A]" aria-label="✓" />{b}</span></td>
-                </tr>))}</tbody>
-            </table>
           </div>
         </Reveal>
       </div>
@@ -364,293 +370,117 @@ function Why({ c }: { c: Copy }) {
   );
 }
 
-function How({ c }: { c: Copy }) {
-  const icons: LucideIcon[] = [MonitorSmartphone, Database, Users, BadgeCheck];
-  return (
-    <section className="py-20 sm:py-24" aria-labelledby="how-h">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal><Eyebrow>{c.how.eyebrow}</Eyebrow><h2 id="how-h" className="hd text-[2.15rem] font-semibold leading-[1.1] tracking-[-0.01em] text-[#1B1D21] sm:text-[2.9rem]">{c.how.title}</h2></Reveal>
-        <ol className="relative mt-12 grid gap-8 md:grid-cols-4">
-          <span aria-hidden className="absolute start-6 top-6 hidden h-0.5 w-[calc(100%-3rem)] bg-gradient-to-r from-[#B8913A] via-[#B8913A]/40 to-[#B8913A] md:block rtl:bg-gradient-to-l" />
-          {c.how.steps.map(([t, d], i) => {
-            const I = icons[i];
-            return (
-              <Reveal key={t} delay={i * 120}>
-                <li className="relative">
-                  <span className="relative z-10 grid h-12 w-12 place-items-center rounded-2xl bg-[#14171C] text-white shadow-lg ring-4 ring-[#FBFAF7]"><I className="h-5 w-5" /></span>
-                  <p className="mt-4 text-sm font-semibold text-[#8E5A1E]">{String(i + 1).padStart(2, "0")}</p>
-                  <h3 className="hd mt-1 text-[1.4rem] font-semibold text-[#1B1D21]">{t}</h3>
-                  <p className="mt-2 text-[15px] leading-relaxed text-[#1B1D21]/70">{d}</p>
-                </li>
-              </Reveal>
-            );
-          })}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-function Stats({ c }: { c: Copy }) {
-  const items: [string, string, LucideIcon][] = [["hospitals", c.stats.hospitals, Building2], ["patients", c.stats.patients, Users], ["reports", c.stats.reports, FileText], ["cities", c.stats.cities, MapPin]];
-  return (
-    <section className="bg-[#0E1013] py-16 text-white" aria-labelledby="stats-h">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <h2 id="stats-h" className="sr-only">{c.stats.title}</h2>
-        <dl className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-          {items.map(([k, l, I], i) => (
-            <Reveal key={k} delay={i * 80}>
-              <div className="text-center">
-                <I className="mx-auto h-6 w-6 text-[#E6CF8F]" aria-hidden />
-                <dd className="hd mt-3 text-5xl font-semibold sm:text-6xl"><Counter value={CONFIG.stats[k] ?? null} /></dd>
-                <dt className="mt-2 text-sm text-white/75">{l}</dt>
-              </div>
-            </Reveal>
-          ))}
-        </dl>
-        {Object.values(CONFIG.stats).some((v) => v == null) && <p className="mt-8 text-center text-xs text-white/50">{c.stats.note}</p>}
-      </div>
-    </section>
-  );
-}
-
-function Pricing({ c }: { c: Copy }) {
-  const [yearly, setYearly] = useState(false);
-  return (
-    <section id="pricing" className="scroll-mt-20 py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal className="text-center"><Eyebrow>{c.pricing.eyebrow}</Eyebrow><H2 center>{c.pricing.title}</H2>
-          <div role="radiogroup" aria-label={`${c.pricing.monthly} / ${c.pricing.yearly}`} className="mx-auto mt-8 inline-flex rounded-xl border border-[#B8913A]/15 bg-white p-1">
-            {[false, true].map((y) => (
-              <button key={String(y)} type="button" role="radio" aria-checked={yearly === y} onClick={() => setYearly(y)}
-                className={`rounded-lg px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8913A] ${yearly === y ? "bg-[#14171C] text-white shadow" : "text-[#1B1D21]/70 hover:text-[#7A5C1A]"}`}>
-                {y ? c.pricing.yearly : c.pricing.monthly}</button>))}
-          </div>
-        </Reveal>
-        <div className="mt-12 grid items-stretch gap-6 lg:grid-cols-3">
-          {c.pricing.tiers.map((t, i) => {
-            const pop = t.k === "hospital";
-            return (
-              <Reveal key={t.k} delay={i * 100}>
-                <article className={`relative flex h-full flex-col rounded-2xl p-7 ${pop ? "bg-[#14171C] text-white shadow-[0_30px_60px_-28px_rgba(20,23,28,0.8)] lg:-translate-y-3" : "border border-[#B8913A]/12 bg-white"}`}>
-                  {pop && <span className="absolute -top-3 start-7 rounded-full bg-[linear-gradient(135deg,#A88536,#E6CF8F_50%,#B8913A)] px-3 py-1 text-xs font-bold text-[#14171C]">{c.pricing.popular}</span>}
-                  <h3 className="hd text-2xl font-semibold">{t.n}</h3>
-                  <p className={`mt-1 text-sm ${pop ? "text-white/75" : "text-[#1B1D21]/65"}`}>{t.d}</p>
-                  <p className="mt-6 flex flex-wrap items-baseline gap-x-1.5">
-                    {t.k === "enterprise" && <span className={`text-sm font-semibold ${pop ? "text-white/75" : "text-[#1B1D21]/60"}`}>{c.pricing.from}</span>}
-                    <span className="hd text-[2.6rem] font-semibold tabular-nums" dir="ltr">PKR {((CONFIG.prices[t.k] ?? 0) * (yearly ? 12 : 1)).toLocaleString("en-PK")}</span>
-                    <span className={pop ? "text-white/70" : "text-[#1B1D21]/60"}>{yearly ? c.pricing.perYear : c.pricing.perMonth}</span></p>
-                  <ul className="mt-6 flex-1 space-y-3">{t.f.map((f) => (
-                    <li key={f} className="flex gap-2.5 text-[15px]"><Check className={`mt-0.5 h-5 w-5 shrink-0 ${pop ? "text-[#E6CF8F]" : "text-[#7A5C1A]"}`} aria-hidden />{f}</li>))}</ul>
-                  <a href="#demo" className={pop ? `${coralBtn} mt-8 w-full` : "mt-8 inline-flex w-full items-center justify-center rounded-xl border-2 border-[#B8913A] px-6 py-3 font-bold text-[#7A5C1A] transition hover:bg-[#14171C] hover:text-white"}>{c.pricing.cta}</a>
-                </article>
-              </Reveal>
-            );
-          })}
-        </div>
-        <p className="mt-8 text-center text-[15px] text-[#1B1D21]/70">{c.pricing.custom}</p>
-        <p className="mt-2 text-center text-sm text-[#1B1D21]/60">{c.pricing.note}</p>
-      </div>
-    </section>
-  );
-}
-
-function Testimonials({ c }: { c: Copy }) {
-  return (
-    <section className="bg-white py-20 sm:py-24" aria-labelledby="t-h">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal><Eyebrow>{c.testimonials.eyebrow}</Eyebrow><h2 id="t-h" className="hd text-[2.15rem] font-semibold leading-[1.1] tracking-[-0.01em] text-[#1B1D21] sm:text-[2.9rem]">{c.testimonials.title}</h2>
-          <p className="mt-2 text-xs text-[#1B1D21]/45">{c.testimonials.note}</p></Reveal>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {c.testimonials.items.map((t, i) => (
-            <Reveal key={i} delay={i * 100}>
-              <figure className="flex h-full flex-col rounded-2xl border border-[#B8913A]/10 bg-[#FBFAF7] p-6">
-                <div className="flex gap-0.5 text-[#E8A317]" role="img" aria-label="5 out of 5 stars">{Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-current" aria-hidden />)}</div>
-                <blockquote className="mt-4 flex-1 text-[15px] italic leading-relaxed text-[#1B1D21]/80">{t.q}</blockquote>
-                <figcaption className="mt-5 flex items-center gap-3 border-t border-[#B8913A]/10 pt-4">
-                  <span className="grid h-10 w-10 place-items-center rounded-full bg-[#14171C] text-sm font-bold text-white" aria-hidden>{i + 1}</span>
-                  <span><span className="block font-semibold text-[#1B1D21]">{t.n}</span><span className="block text-sm text-[#1B1D21]/60">{t.r} · {t.h}, {t.c}</span></span>
-                </figcaption>
-              </figure>
-            </Reveal>
-          ))}
-        </div>
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-4" aria-label={c.testimonials.logos}>
-          {Array.from({ length: 6 }).map((_, i) => <span key={i} className="grid h-12 w-32 place-items-center rounded-xl border border-dashed border-[#B8913A]/20 text-xs text-[#1B1D21]/40">{c.testimonials.logos}</span>)}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Security({ c }: { c: Copy }) {
-  const icons: LucideIcon[] = [KeyRound, FileText, HardDrive, FileCheck2, Building2];
-  return (
-    <section className="py-20 sm:py-24" aria-labelledby="sec-h">
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_1fr]">
-        <div>
-          <Reveal><Eyebrow>{c.security.eyebrow}</Eyebrow><h2 id="sec-h" className="hd text-[2.15rem] font-semibold leading-[1.1] tracking-[-0.01em] text-[#1B1D21] sm:text-[2.9rem]">{c.security.title}</h2></Reveal>
-          <ul className="mt-8 space-y-5">
-            {c.security.items.map(([t, d], i) => {
-              const I = icons[i];
-              return (
-                <Reveal key={t} delay={i * 70}>
-                  <li className="flex gap-4"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#14171C] text-white"><I className="h-5 w-5" /></span>
-                    <div><h3 className="hd text-xl font-semibold text-[#1B1D21]">{t}</h3><p className="mt-1 text-[15px] leading-relaxed text-[#1B1D21]/70">{d}</p></div></li>
-                </Reveal>
-              );
-            })}
-          </ul>
-          <p className="mt-6 text-sm text-[#1B1D21]/55">{c.security.note}</p>
-        </div>
-        <Reveal delay={150}><BrowserFrame src={IMG("beds.webp")} alt="VVSDesk wards and beds: the live bed map by ward" /></Reveal>
-      </div>
-    </section>
-  );
-}
-
-function Faq({ c }: { c: Copy }) {
-  const [open, setOpen] = useState<number | null>(0);
-  return (
-    <section id="faq" className="scroll-mt-20 bg-white py-20 sm:py-24">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6">
-        <Reveal className="text-center"><Eyebrow>{c.faq.eyebrow}</Eyebrow><H2 center>{c.faq.title}</H2></Reveal>
-        <div className="mt-10 divide-y divide-[#B8913A]/10 rounded-2xl border border-[#B8913A]/12">
-          {c.faq.items.map(([q, a], i) => {
-            const isOpen = open === i;
-            return (
-              <div key={q}>
-                <h3>
-                  <button type="button" id={`faq-b-${i}`} aria-expanded={isOpen} aria-controls={`faq-p-${i}`} onClick={() => setOpen(isOpen ? null : i)}
-                    className="flex w-full items-center gap-4 px-5 py-5 text-start text-base font-semibold text-[#1B1D21] transition hover:bg-[#FBFAF7] focus-visible:bg-[#FBFAF7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#B8913A]">
-                    <span className="flex-1">{q}</span>
-                    <ChevronDown className={`h-5 w-5 shrink-0 text-[#7A5C1A] transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} aria-hidden />
-                  </button>
-                </h3>
-                <div id={`faq-p-${i}`} role="region" aria-labelledby={`faq-b-${i}`}
-                  className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
-                  <div className="overflow-hidden"><p className="px-5 pb-5 text-[15px] leading-relaxed text-[#1B1D21]/75">{a}</p></div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function DemoCta({ c, lang }: { c: Copy; lang: Lang }) {
-  const [state, setState] = useState<"idle" | "sending" | "ok" | "err">("idle");
-  const [msg, setMsg] = useState("");
-  const submit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const f = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
-    if (!f.name?.trim() || !f.hospital?.trim() || !f.city?.trim() || !f.beds || !f.whatsapp?.trim()) { setState("err"); setMsg(c.cta.required); return; }
-    setState("sending");
-    try {
-      const r = await fetch(CONFIG.demoEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ ...f, language: lang }) });
-      if (!r.ok) throw new Error(String(r.status));
-      setState("ok"); setMsg(c.cta.ok); e.currentTarget?.reset?.();
-    } catch { setState("err"); setMsg(c.cta.err); }
-  };
-  const field = "h-12 w-full rounded-xl border border-white/25 bg-white/95 px-4 text-[15px] text-[#1B1D21] placeholder:text-[#1B1D21]/45 focus:border-[#B8913A] focus:outline-none focus:ring-4 focus:ring-[#B8913A]/30";
-  return (
-    <section id="demo" className="scroll-mt-20 bg-[#14171C] py-20 text-white sm:py-24">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <Reveal className="text-center"><h2 className="hd mx-auto max-w-3xl text-[2.15rem] font-semibold leading-[1.1] tracking-[-0.01em] sm:text-[2.9rem]">{c.cta.title}</h2><p className="mx-auto mt-4 max-w-2xl text-lg text-white/80">{c.cta.sub}</p></Reveal>
-        <Reveal delay={120}>
-          <form onSubmit={(e) => void submit(e)} noValidate className="mx-auto mt-10 grid max-w-5xl gap-3 rounded-2xl bg-white/5 p-4 ring-1 ring-white/10 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_0.8fr_0.9fr_1fr_auto] lg:p-5">
-            <label className="sr-only" htmlFor="d-name">{c.cta.name}</label><input id="d-name" name="name" autoComplete="name" placeholder={c.cta.name} className={field} required />
-            <label className="sr-only" htmlFor="d-hosp">{c.cta.hospital}</label><input id="d-hosp" name="hospital" autoComplete="organization" placeholder={c.cta.hospital} className={field} required />
-            <label className="sr-only" htmlFor="d-city">{c.cta.city}</label><input id="d-city" name="city" autoComplete="address-level2" placeholder={c.cta.city} className={field} required />
-            <label className="sr-only" htmlFor="d-beds">{c.cta.beds}</label>
-            <select id="d-beds" name="beds" defaultValue="" className={field} required><option value="" disabled>{c.cta.beds}</option>{c.cta.bedOptions.map((o) => <option key={o}>{o}</option>)}</select>
-            <label className="sr-only" htmlFor="d-wa">{c.cta.wa}</label><input id="d-wa" name="whatsapp" type="tel" inputMode="tel" autoComplete="tel" placeholder={`${c.cta.wa} (${c.cta.phoneHint})`} className={field} dir="ltr" required />
-            <button type="submit" disabled={state === "sending"} className={`${coralBtn} h-12 py-0 disabled:opacity-60 sm:col-span-2 lg:col-span-1`}>{state === "sending" ? c.cta.sending : c.cta.submit}</button>
-          </form>
-          <p role="status" aria-live="polite" className={`mt-4 text-center text-[15px] font-medium ${state === "ok" ? "text-[#9FF0C0]" : "text-[#FFC2B4]"}`}>{state === "ok" || state === "err" ? msg : ""}</p>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function Footer({ c }: { c: Copy }) {
-  const cols: [string, string[], string[]][] = [
-    [c.footer.product, c.footer.links.product, ["#modules", "#whatsapp", "#pricing", "#modules"]],
-    [c.footer.company, c.footer.links.company, ["#why", "#demo", "#demo", "#demo"]],
-    [c.footer.resources, c.footer.links.resources, ["/hms/help", "/hms/help?tab=guides", "#why", "#faq"]],
+function Contact({ c, h }: { c: Copy; h?: Opts["clinic"] }) {
+  const er = CONFIG.emergencyPhone || h?.phone;
+  const rows: [LucideIcon, string, ReactNode, string?][] = [
+    ...(h?.address ? [[MapPin, c.contact.address, h.address] as [LucideIcon, string, ReactNode]] : []),
+    ...(h?.phone ? [[Phone, c.contact.phone, <span dir="ltr">{h.phone}</span>, tel(h.phone)] as [LucideIcon, string, ReactNode, string]] : []),
+    ...(er ? [[Siren, c.contact.emergency, <span dir="ltr">{er}</span>, tel(er)] as [LucideIcon, string, ReactNode, string]] : []),
+    ...(hasWa ? [[WaIcon as unknown as LucideIcon, c.contact.whatsapp, <span dir="ltr">+{CONFIG.whatsapp}</span>, `https://wa.me/${CONFIG.whatsapp}`] as [LucideIcon, string, ReactNode, string]] : []),
+    ...(CONFIG.email ? [[Mail, c.contact.email, CONFIG.email, `mailto:${CONFIG.email}`] as [LucideIcon, string, ReactNode, string]] : []),
   ];
   return (
-    <footer className="bg-[#0E1013] text-white/80">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.3fr]">
-        <div>
-          <div className="flex items-center gap-3"><VvsMark className="h-10 w-10" /><span className="brand text-[17px] tracking-[0.28em] text-white" dir="ltr">VVS<span className={goldText}>DESK</span></span></div>
-          <p className="mt-4 max-w-xs text-[15px] leading-relaxed">{c.footer.tagline}</p>
-          <div className="mt-5 flex gap-2">
-            {(["facebook", "linkedin", "youtube", "instagram"] as const).map((s) => (
-              <a key={s} href={CONFIG.social[s]} aria-label={s} className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 text-xs font-bold uppercase text-white transition hover:bg-white/20">{s[0]}</a>))}
+    <section id="contact" className="scroll-mt-24 pb-24">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-2">
+        <Reveal>
+          <Eyebrow>{c.contact.eyebrow}</Eyebrow><H2>{c.contact.title}</H2>
+          <ul className="mt-10 space-y-5">
+            {rows.map(([I, l, v, href]) => (
+              <li key={l} className="flex items-start gap-4">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#2B6E85]/10 text-[#2B6E85]"><I className="h-5 w-5" /></span>
+                <span><span className="block text-xs font-semibold uppercase tracking-[0.16em] text-[#0C2431]/45">{l}</span>
+                  {href ? <a href={href} className="text-lg font-medium text-[#0C2431] hover:text-[#2B6E85]">{v}</a> : <span className="text-lg font-medium text-[#0C2431]">{v}</span>}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-8 text-sm text-[#0C2431]/55">{c.contact.hours}</p>
+        </Reveal>
+        <Reveal delay={120}>
+          <div className="relative h-full min-h-[340px] overflow-hidden rounded-[2rem] bg-[#0C2431] p-10 text-white">
+            <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:38px_38px]" />
+            <div className="relative flex h-full flex-col">
+              <img src={BRAND("lyallpur-logo-dark.webp")} alt={c.name} className="h-40 w-auto self-start object-contain" />
+              <div className="mt-auto pt-8">
+                {h?.address && <p className="flex items-start gap-2 text-white/80"><MapPin className="mt-1 h-5 w-5 shrink-0 text-[#FF6B66]" />{h.address}</p>}
+                {h?.address && <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${COPY.en.name}, ${h.address}`)}`} target="_blank" rel="noopener noreferrer"
+                  className={`${redBtn} mt-6`}><MapPin className="h-5 w-5" />{c.contact.directions}</a>}
+              </div>
+            </div>
           </div>
-        </div>
-        {cols.map(([h, items, hrefs]) => (
-          <nav key={h} aria-label={h}><h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E6CF8F]">{h}</h2>
-            <ul className="mt-4 space-y-2.5 text-[15px]">{items.map((l, i) => <li key={l}><a href={hrefs[i]} className="hover:text-white">{l}</a></li>)}</ul></nav>))}
-        <div><h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E6CF8F]">{c.footer.contact}</h2>
-          <ul className="mt-4 space-y-2.5 text-[15px]">
-            <li className="flex gap-2"><Phone className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /><span dir="ltr">{CONFIG.phone}</span></li>
-            <li className="flex gap-2"><Mail className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /><span dir="ltr">{CONFIG.email}</span></li>
-            <li className="flex gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /><span>{CONFIG.address}</span></li>
-            <li className="flex gap-2"><LogIn className="mt-0.5 h-4 w-4 shrink-0 rtl:rotate-180" aria-hidden /><a href="/hms/login" className="font-semibold text-white hover:underline">{c.nav.login}</a></li>
-            <li className="flex gap-2"><WaIcon className="mt-0.5 h-4 w-4 shrink-0" /><a href={waLink()} target="_blank" rel="noopener noreferrer" className="hover:text-white">WhatsApp</a></li>
-          </ul></div>
+        </Reveal>
       </div>
-      <div className="border-t border-white/10 py-5 text-center text-sm text-white/60">© {new Date().getFullYear()} <span dir="ltr">VVSDesk</span>. {c.footer.rights}</div>
+    </section>
+  );
+}
+
+function Footer({ c, h }: { c: Copy; h?: Opts["clinic"] }) {
+  const links: [string, string][] = [["#services", c.nav.services], ["#doctors", c.nav.doctors], ["#patients", c.nav.patients], ["#about", c.nav.about], ["#contact", c.nav.contact], ["/hms/book-appointment", c.nav.book]];
+  return (
+    <footer className="bg-[#081A24] text-white/70">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div>
+          <div className="flex items-center gap-3"><img src={BRAND("lyallpur-mark-dark.webp")} alt="" className="h-12 w-12" />
+            <span><span className="block text-lg font-bold text-white">{c.name}</span><span className="block text-[10.5px] font-semibold uppercase tracking-[0.2em] text-[#8FCBE0]">{c.tagline}</span></span></div>
+          {h?.address && <p className="mt-6 flex items-start gap-2 text-sm"><MapPin className="mt-0.5 h-4 w-4 shrink-0" />{h.address}</p>}
+          {h?.phone && <a href={tel(h.phone)} className="mt-2 flex items-center gap-2 text-sm hover:text-white"><Phone className="h-4 w-4" /><span dir="ltr">{h.phone}</span></a>}
+        </div>
+        <div>
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-white">{c.footer.links}</h3>
+          <ul className="space-y-2 text-sm">{links.map(([hr, l]) => <li key={hr}><a href={hr} className="hover:text-white">{l}</a></li>)}</ul>
+        </div>
+        <div>
+          <a href="/hms/login" className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white/85 hover:bg-white/5"><LogIn className="h-4 w-4" />{c.nav.staff}</a>
+          {Object.entries(CONFIG.social).filter(([, u]) => u).length > 0 && <div className="mt-5 flex gap-3 text-sm">{Object.entries(CONFIG.social).filter(([, u]) => u).map(([k, u]) => <a key={k} href={u} target="_blank" rel="noopener noreferrer" className="capitalize hover:text-white">{k}</a>)}</div>}
+        </div>
+      </div>
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs sm:px-6">
+          <span>© {new Date().getFullYear()} {c.name}. {c.footer.rights}</span>
+          <span className="flex items-center gap-2">{c.footer.powered} <Wordmark className="text-[10px]" /></span>
+        </div>
+      </div>
     </footer>
   );
 }
 
 // ---------------------------------------------------------------- page
 export default function LandingPage() {
-  const [lang, setLang] = useState<Lang>(() => { try { return (localStorage.getItem("vvsdesk.lang") as Lang) || "en"; } catch { return "en"; } });
+  const [lang, setLangState] = useState<Lang>(() => { try { return (localStorage.getItem("hv.site.lang") as Lang) || "en"; } catch { return "en"; } });
+  const setLang = (l: Lang) => { setLangState(l); try { localStorage.setItem("hv.site.lang", l); } catch { /* private mode */ } };
   const c = COPY[lang];
-  useEffect(() => { try { localStorage.setItem("vvsdesk.lang", lang); } catch { /* private mode */ } }, [lang]);
-  useSeo(c, lang);
+  const opts = useHospital();
+  const h = opts?.clinic;
+  const phone = CONFIG.emergencyPhone || h?.phone;
+  useSeo(c, lang, h);
+  useEffect(() => { const prev = document.documentElement.classList.contains("dark"); document.documentElement.classList.remove("dark"); return () => { if (prev) document.documentElement.classList.add("dark"); }; }, []);
   const rtl = lang === "ur";
-  const style = useMemo(() => ({ fontFamily: rtl ? "'Noto Nastaliq Urdu', 'Inter', system-ui, sans-serif" : "'Inter', system-ui, sans-serif", background: C.cream, color: C.slate }), [rtl]);
   return (
-    <div translate="no" lang={rtl ? "ur" : "en"} dir={rtl ? "rtl" : "ltr"} style={style} className={`vvsl min-h-screen scroll-smooth antialiased ${rtl ? "vvsl-ur" : ""}`}>
+    <div className="vvsl min-h-screen bg-[#FAF8F4] text-[#0C2431] antialiased" dir={rtl ? "rtl" : "ltr"} lang={lang} translate="no">
       <style>{`
-        .vvsl .hd { font-family: ${rtl ? "'Noto Nastaliq Urdu', serif" : "'Cormorant Garamond', Georgia, serif"}; }
-        .vvsl .brand { font-family: 'Cinzel', Georgia, serif; font-weight: 600; }
-        .vvsl:not(.vvsl-ur) h2.hd, .vvsl:not(.vvsl-ur) h3.hd, .vvsl:not(.vvsl-ur) h4.hd { letter-spacing: -0.005em; }
-        .vvsl-ur { line-height: 2.05; } .vvsl-ur h1, .vvsl-ur h2, .vvsl-ur h3 { line-height: 1.9 !important; letter-spacing: 0 !important; }
-        .vvsl .ur { font-family: 'Noto Nastaliq Urdu', serif; }
-        html:has(.vvsl) { scroll-behavior: smooth; } @media (prefers-reduced-motion: reduce) { html:has(.vvsl) { scroll-behavior: auto; } }
+        .vvsl { font-family: ${rtl ? "'Noto Nastaliq Urdu', serif" : "Inter, system-ui, sans-serif"}; }
+        .vvsl .hd { font-family: ${rtl ? "'Noto Nastaliq Urdu', serif" : "'Cormorant Garamond', Georgia, serif"}; ${rtl ? "line-height:1.6;" : ""} }
+        ${rtl ? ".vvsl p, .vvsl li { line-height: 2.1; }" : ""}
+        html { scroll-behavior: smooth; }
+        @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
       `}</style>
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-[#7A5C1A]">Skip to content</a>
       <Header c={c} lang={lang} setLang={setLang} />
-      <main id="main">
-        <Hero c={c} />
-        <Problems c={c} />
-        <WhatsAppSpotlight c={c} />
+      <main>
+        <Hero c={c} lang={lang} opts={opts} phone={phone} />
+        <QuickActions c={c} phone={phone} />
+        <About c={c} opts={opts} />
         <Services c={c} />
-        <Modules c={c} />
-        <Why c={c} />
-        <How c={c} />
-        <Stats c={c} />
-        <Pricing c={c} />
-        <Testimonials c={c} />
-        <Security c={c} />
-        <Faq c={c} />
-        <DemoCta c={c} lang={lang} />
+        <Doctors c={c} lang={lang} opts={opts} />
+        <Patients c={c} />
+        <Cta c={c} phone={phone} />
+        <Contact c={c} h={h} />
       </main>
-      <Footer c={c} />
-      <a href={waLink()} target="_blank" rel="noopener noreferrer" aria-label={c.float} title={c.float}
-        className="fixed bottom-5 end-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-[#073B22] shadow-[0_12px_28px_-8px_rgba(7,59,34,0.6)] ring-4 ring-white transition hover:scale-105 focus-visible:outline-none focus-visible:ring-[#B8913A] motion-safe:animate-[vvsPulse_2.4s_ease-in-out_infinite]">
-        <WaIcon className="h-7 w-7" />
-      </a>
-      <style>{`@keyframes vvsPulse { 0%,100% { box-shadow: 0 12px 28px -8px rgba(7,59,34,.6), 0 0 0 0 rgba(37,211,102,.45); } 50% { box-shadow: 0 12px 28px -8px rgba(7,59,34,.6), 0 0 0 10px rgba(37,211,102,0); } }`}</style>
+      <Footer c={c} h={h} />
+      {hasWa ? (
+        <a href={`https://wa.me/${CONFIG.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label={c.contact.whatsapp}
+          className="fixed bottom-5 end-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-[#073B22] shadow-xl ring-4 ring-white transition hover:scale-105"><WaIcon className="h-7 w-7" /></a>
+      ) : phone ? (
+        <a href={tel(phone)} aria-label={c.cta.call} className="fixed bottom-5 end-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-[#D92F2C] text-white shadow-[0_14px_30px_-10px_rgba(217,47,44,0.8)] ring-4 ring-white transition hover:scale-105 sm:hidden"><Phone className="h-6 w-6" /></a>
+      ) : null}
     </div>
   );
 }

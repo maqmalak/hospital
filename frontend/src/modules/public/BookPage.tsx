@@ -66,6 +66,12 @@ export default function BookPage() {
     setDates(ds); setStep(3);
     if (ds[0]) await loadSlots(d, ds[0].date);
   });
+  // deep link from the hospital website: /book-appointment?doctor=DR-0001 opens that doctor's dates
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("doctor");
+    const d = id && opts?.doctors.find((x) => x.name === id);
+    if (d && !doctor) void chooseDoctor(d);
+  }, [opts]); // eslint-disable-line react-hooks/exhaustive-deps
   const loadSlots = async (d: Doctor, day: string) => { setDate(day); setSlots(null); setSlots(await getCall<Slot[]>(M("public_slots"), { doctor: d.name, date: day })); };
   const chooseSlot = (s: Slot) => run(async () => {
     if (slot) await postCall(M("public_release"), { slot: slot.name, hold_key: holdKey }).catch(() => undefined);
