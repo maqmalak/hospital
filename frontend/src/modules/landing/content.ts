@@ -68,6 +68,8 @@ const en = {
     items: [
       ["OPD", "Daily consultation clinics with our consultants — book online or walk in, with nurse vitals before every visit."],
       ["Cardiac Care", "ECG, echocardiography, exercise tolerance tests and cardiac monitoring, led by our cardiology team."],
+      ["ICU & Emergency 24/7", "Emergency open day and night, with an intensive care unit for critically ill patients and constant monitoring."],
+      ["Surgery", "Planned and emergency operations in modern theatres, with anaesthesia, recovery and post-operative care."],
       ["MRI", "Detailed scans of the brain, spine, joints and soft tissue, reported by a radiologist."],
       ["CT Scan", "Fast cross-sectional imaging for head, chest and abdomen — including emergency scans."],
       ["X-Ray", "Digital X-rays for chest, bones and joints, with the image and report added to your file."],
@@ -158,6 +160,8 @@ const ur: typeof en = {
     items: [
       ["او پی ڈی", "ہمارے کنسلٹنٹس کے روزانہ کلینک — آن لائن بک کریں یا براہِ راست آئیں، ہر دورے سے پہلے نرس کے وائٹلز۔"],
       ["امراضِ قلب کی نگہداشت", "ای سی جی، ایکو کارڈیوگرافی، ورزشی ٹیسٹ اور دل کی نگرانی، ہماری امراضِ قلب کی ٹیم کی زیرِ نگرانی۔"],
+      ["آئی سی یو و ایمرجنسی 24/7", "ایمرجنسی دن رات کھلی، شدید بیمار مریضوں کے لیے انتہائی نگہداشت یونٹ اور مسلسل نگرانی۔"],
+      ["سرجری", "جدید آپریشن تھیٹرز میں طے شدہ اور ہنگامی آپریشن، بے ہوشی، ریکوری اور بعد از آپریشن نگہداشت۔"],
       ["ایم آر آئی", "دماغ، ریڑھ کی ہڈی، جوڑوں اور نرم بافتوں کے تفصیلی اسکین، ریڈیالوجسٹ کی رپورٹ کے ساتھ۔"],
       ["سی ٹی اسکین", "سر، سینے اور پیٹ کی تیز امیجنگ — ہنگامی اسکین سمیت۔"],
       ["ایکسرے", "سینے، ہڈیوں اور جوڑوں کے ڈیجیٹل ایکسرے، تصویر اور رپورٹ آپ کی فائل میں۔"],

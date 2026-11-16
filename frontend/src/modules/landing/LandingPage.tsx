@@ -81,7 +81,7 @@ function useSeo(c: Copy, lang: Lang, h: Opts["clinic"] | undefined) {
     meta("property", "og:url", url); meta("property", "og:image", `${window.location.origin}${BRAND("lyallpur-logo.webp")}`);
     const link = document.createElement("link"); link.rel = "canonical"; link.href = url; document.head.appendChild(link); added.push(link);
     const fonts = document.createElement("link"); fonts.rel = "stylesheet";
-    fonts.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap";
+    fonts.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap";
     document.head.appendChild(fonts); added.push(fonts);
     const ld = document.createElement("script"); ld.type = "application/ld+json";
     ld.text = JSON.stringify({ "@context": "https://schema.org", "@type": "Hospital", name: COPY.en.name, alternateName: COPY.ur.name,
@@ -235,7 +235,7 @@ function About({ c, opts }: { c: Copy; opts: Opts | null }) {
   );
 }
 
-const SERVICE_ICONS: LucideIcon[] = [Stethoscope, HeartPulse, Magnet, ScanSearch, ScanLine, TestTubes, Droplets, Waves, Pill, BedDouble];
+const SERVICE_ICONS: LucideIcon[] = [Stethoscope, HeartPulse, Siren, Scissors, Magnet, ScanSearch, ScanLine, TestTubes, Droplets, Waves, Pill, BedDouble];
 /** Diagnostics & treatment (MRI, CT, X-ray, lab, dialysis …): feature cards on white. */
 function Services({ c }: { c: Copy }) {
   return (
@@ -245,15 +245,15 @@ function Services({ c }: { c: Copy }) {
           <div><Eyebrow>{c.services.eyebrow}</Eyebrow><H2>{c.services.title}</H2></div>
           <p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{c.services.sub}</p>
         </Reveal>
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {c.services.items.map(([t, d], i) => {
             const I = SERVICE_ICONS[i] ?? Stethoscope;
             return (
-              <Reveal key={t} delay={(i % 5) * 60}>
+              <Reveal key={t} delay={(i % 4) * 60}>
                 <article className="group relative h-full overflow-hidden rounded-3xl bg-gradient-to-b from-[#F3F8FA] to-white p-7 ring-1 ring-[#0C2431]/8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-34px_rgba(12,36,49,0.6)] hover:ring-[#2B6E85]/30">
                   <span className="hd pointer-events-none absolute -end-1 -top-3 text-[5.5rem] font-semibold leading-none text-[#2B6E85]/[0.07]" dir="ltr">{String(i + 1).padStart(2, "0")}</span>
                   <span className="relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#2B6E85] to-[#1D4F61] text-white shadow-[0_14px_28px_-14px_rgba(43,110,133,0.9)]"><I className="h-7 w-7" /></span>
-                  <h3 className="hd relative mt-6 text-[1.7rem] font-semibold leading-tight text-[#0C2431]">{t}</h3>
+                  <h3 className="svc relative mt-6 text-[1.35rem] font-semibold uppercase leading-tight tracking-[0.04em] text-[#0C2431]">{t}</h3>
                   <span className="relative mt-2 block h-0.5 w-10 rounded-full bg-[#E5322F] transition-all duration-500 group-hover:w-16" />
                   <p className="relative mt-3 text-[14.5px] leading-relaxed text-[#0C2431]/65">{d}</p>
                 </article>
@@ -488,6 +488,7 @@ export default function LandingPage() {
     <div className="vvsl min-h-screen bg-[#FAF8F4] text-[#0C2431] antialiased" dir={rtl ? "rtl" : "ltr"} lang={lang} translate="no">
       <style>{`
         .vvsl { font-family: ${rtl ? "'Noto Nastaliq Urdu', serif" : "Inter, system-ui, sans-serif"}; }
+        .vvsl .svc { font-family: ${rtl ? "'Noto Nastaliq Urdu', serif" : "Oswald, 'Arial Narrow', sans-serif"}; ${rtl ? "text-transform:none;letter-spacing:0;line-height:1.7;" : ""} }
         .vvsl .hd { font-family: ${rtl ? "'Noto Nastaliq Urdu', serif" : "'Cormorant Garamond', Georgia, serif"}; ${rtl ? "line-height:1.6;" : ""} }
         ${rtl ? ".vvsl p, .vvsl li { line-height: 2.1; }" : ""}
         html { scroll-behavior: smooth; }
