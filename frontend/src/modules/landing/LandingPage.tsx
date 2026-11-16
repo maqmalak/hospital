@@ -55,6 +55,19 @@ function Eyebrow({ children, light }: { children: ReactNode; light?: boolean }) 
 function H2({ children, light, center }: { children: ReactNode; light?: boolean; center?: boolean }) {
   return <h2 className={`hd text-[2.3rem] font-semibold leading-[1.08] sm:text-[3.1rem] ${light ? "text-white" : "text-[#0C2431]"} ${center ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}`}>{children}</h2>;
 }
+/** Section title in the logo's style: condensed capitals, logo red, the last words in logo teal-blue, red → teal underline. */
+function BrandTitle({ text, className = "" }: { text: string; className?: string }) {
+  const w = text.split(" ");
+  const k = Math.max(1, w.length - 2);
+  return (
+    <>
+      <h2 className={`svc max-w-xl text-[2.4rem] font-semibold uppercase leading-[1.08] tracking-[0.02em] sm:text-[3.2rem] ${className}`}>
+        <span className="text-[#E5322F]">{w.slice(0, k).join(" ")}</span>{w.length > 1 && <> <span className="whitespace-nowrap text-[#2B6E85]">{w.slice(k).join(" ")}</span></>}
+      </h2>
+      <span className="mt-5 block h-1 w-16 rounded-full bg-gradient-to-r from-[#E5322F] to-[#2B6E85]" />
+    </>
+  );
+}
 const redBtn = "inline-flex items-center justify-center gap-2 rounded-full bg-[#D92F2C] px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_14px_30px_-14px_rgba(217,47,44,0.9)] transition hover:-translate-y-0.5 hover:bg-[#C42825] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#E5322F]/30";
 const ghostBtn = "inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-[15px] font-semibold transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4";
 
@@ -210,10 +223,11 @@ function About({ c, opts }: { c: Copy; opts: Opts | null }) {
     <section id="about" className="scroll-mt-24 py-24 sm:py-28">
       <div className="mx-auto grid max-w-7xl gap-14 px-4 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
         <Reveal>
-          <Eyebrow>{c.about.eyebrow}</Eyebrow><H2>{c.about.title}</H2>
-          <p className="mt-6 text-lg leading-relaxed text-[#0C2431]/70">{c.about.body}</p>
+          <Eyebrow>{c.about.eyebrow}</Eyebrow>
+          <BrandTitle text={c.about.title} />
+          <p className="mt-6 border-s-2 border-[#2B6E85]/25 ps-5 text-lg leading-relaxed text-[#0C2431]/70">{c.about.body}</p>
           {opts && <div className="mt-10 grid grid-cols-3 divide-x divide-[#0C2431]/10 rtl:divide-x-reverse">
-            {stats.map(([n, l]) => <div key={l} className="px-4 first:ps-0"><div className="hd text-5xl font-semibold text-[#2B6E85]">{n}</div><div className="mt-1 text-sm text-[#0C2431]/60">{l}</div></div>)}
+            {stats.map(([n, l]) => <div key={l} className="px-4 first:ps-0"><div className="svc text-5xl font-semibold text-[#2B6E85]" dir="ltr">{n}</div><div className="mt-1 text-sm text-[#0C2431]/60">{l}</div></div>)}
           </div>}
         </Reveal>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -222,8 +236,9 @@ function About({ c, opts }: { c: Copy; opts: Opts | null }) {
             return (
               <Reveal key={t} delay={i * 80}>
                 <div className="h-full rounded-3xl border border-[#0C2431]/8 bg-white p-7 shadow-[0_20px_50px_-35px_rgba(12,36,49,0.5)]">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#2B6E85] to-[#1D4F61] text-white"><I className="h-6 w-6" /></span>
-                  <h3 className="hd mt-5 text-2xl font-semibold text-[#0C2431]">{t}</h3>
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#E5322F] text-white shadow-[0_12px_24px_-12px_rgba(229,50,47,0.9)]"><I className="h-6 w-6" /></span>
+                  <h3 className="svc mt-5 text-[1.3rem] font-semibold uppercase leading-tight tracking-[0.04em] text-[#2B6E85]">{t}</h3>
+                  <span className="mt-2 block h-0.5 w-10 rounded-full bg-[#E5322F]" />
                   <p className="mt-2 leading-relaxed text-[#0C2431]/65">{d}</p>
                 </div>
               </Reveal>
@@ -242,7 +257,7 @@ function Services({ c }: { c: Copy }) {
     <section id="services" className="scroll-mt-24 bg-white py-24 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal className="flex flex-wrap items-end justify-between gap-6">
-          <div><Eyebrow>{c.services.eyebrow}</Eyebrow><H2>{c.services.title}</H2></div>
+          <div><Eyebrow>{c.services.eyebrow}</Eyebrow><BrandTitle text={c.services.title} /></div>
           <p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{c.services.sub}</p>
         </Reveal>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -252,8 +267,8 @@ function Services({ c }: { c: Copy }) {
               <Reveal key={t} delay={(i % 4) * 60}>
                 <article className="group relative h-full overflow-hidden rounded-3xl bg-gradient-to-b from-[#F3F8FA] to-white p-7 ring-1 ring-[#0C2431]/8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-34px_rgba(12,36,49,0.6)] hover:ring-[#2B6E85]/30">
                   <span className="hd pointer-events-none absolute -end-1 -top-3 text-[5.5rem] font-semibold leading-none text-[#2B6E85]/[0.07]" dir="ltr">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#2B6E85] to-[#1D4F61] text-white shadow-[0_14px_28px_-14px_rgba(43,110,133,0.9)]"><I className="h-7 w-7" /></span>
-                  <h3 className="svc relative mt-6 text-[1.35rem] font-semibold uppercase leading-tight tracking-[0.04em] text-[#0C2431]">{t}</h3>
+                  <span className="relative grid h-14 w-14 place-items-center rounded-2xl bg-[#E5322F] text-white shadow-[0_14px_28px_-14px_rgba(229,50,47,0.9)] transition group-hover:bg-[#C42825]"><I className="h-7 w-7" /></span>
+                  <h3 className="svc relative mt-6 text-[1.35rem] font-semibold uppercase leading-tight tracking-[0.04em] text-[#2B6E85]">{t}</h3>
                   <span className="relative mt-2 block h-0.5 w-10 rounded-full bg-[#E5322F] transition-all duration-500 group-hover:w-16" />
                   <p className="relative mt-3 text-[14.5px] leading-relaxed text-[#0C2431]/65">{d}</p>
                 </article>
