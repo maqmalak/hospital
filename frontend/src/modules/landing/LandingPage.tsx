@@ -6,7 +6,7 @@
  * The app's automatic translator skips this folder (own language toggle).
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BedDouble, Bone, Brain, CalendarCheck, CalendarDays, ClipboardList, Droplet, Droplets, Ear, FileText, FlaskConical, HeartPulse, Languages, LogIn, Magnet, Mail, MapPin, Menu, Microscope, Phone, Pill, ScanLine, ScanSearch, Scissors, ShieldCheck, Siren, Sparkles, Stethoscope, TestTubes, UserRound, Users, Waves, X, type LucideIcon } from "lucide-react";
+import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BedDouble, Bone, Brain, CalendarCheck, CalendarDays, ClipboardList, Clock3, DoorOpen, Droplet, Droplets, Ear, FileText, FlaskConical, HeartPulse, Languages, LogIn, Magnet, Mail, MapPin, Menu, Microscope, Phone, Pill, ScanLine, ScanSearch, Scissors, ShieldCheck, Siren, Sparkles, Stethoscope, TestTubes, UserRound, Users, Waves, X, type LucideIcon } from "lucide-react";
 import { COPY, CONFIG, type Copy, type Lang } from "./content";
 import { Wordmark } from "@/components/brand";
 import { getCall } from "@/services/frappe";
@@ -17,7 +17,7 @@ const hasWa = !/x/i.test(CONFIG.whatsapp) && CONFIG.whatsapp.length >= 10;
 const tel = (p?: string) => `tel:${(p ?? "").replace(/[^\d+]/g, "")}`;
 
 interface Doctor { name: string; doctor_name: string; doctor_name_ur?: string; specialization?: string; default_fee?: number; photo?: string; qualification?: string;
-  color?: string; next_date?: string | null; days: { day: string; from: string; to: string }[] }
+  color?: string; consultation_room?: string; next_date?: string | null; days: { day: string; from: string; to: string }[] }
 interface Opts { clinic: { name: string; name_ur?: string; phone?: string; address?: string }; specializations: { name: string; name_ur?: string }[]; doctors: Doctor[] }
 
 // ---------------------------------------------------------------- building blocks
@@ -286,21 +286,13 @@ const Services = ({ c }: { c: Copy }) => <FeatureSection id="services" block={c.
 const Departments = ({ c }: { c: Copy }) => <FeatureSection id="departments" block={c.departments} icons={DEPT_ICONS} />;
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-function clinicDays(days: Doctor["days"]) {
-  if (!days.length) return "";
-  const byTime = new Map<string, string[]>();
-  days.forEach((d) => { const k = `${d.from}–${d.to}`; byTime.set(k, [...(byTime.get(k) ?? []), d.day]); });
-  return [...byTime].map(([t, ds]) => {
-    const idx = ds.map((d) => DAYS.indexOf(d)).sort((a, b) => a - b);
-    const run = idx.length > 2 && idx[idx.length - 1] - idx[0] === idx.length - 1;
-    return `${run ? `${DAYS[idx[0]]}–${DAYS[idx[idx.length - 1]]}` : idx.map((i) => DAYS[i]).join(", ")} · ${t}`;
-  }).join("  /  ");
-}
 function Doctors({ c, lang, opts }: { c: Copy; lang: Lang; opts: Opts | null }) {
   const [spec, setSpec] = useState("");
   if (!opts || !opts.doctors.length) return null;
   const list = opts.doctors.filter((d) => !spec || d.specialization === spec);
   const specName = (s?: string) => (lang === "ur" ? opts.specializations.find((x) => x.name === s)?.name_ur : undefined) || s || "";
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  const todayISO = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   const chip = (on: boolean) => `rounded-full px-4 py-2 text-sm font-medium transition ${on ? "bg-[#E5322F] text-white shadow-[0_10px_22px_-10px_rgba(229,50,47,0.9)]" : "bg-white text-[#2B6E85] ring-1 ring-[#2B6E85]/20 hover:ring-[#E5322F]/50"}`;
   return (
     <section id="doctors" className="scroll-mt-24 bg-white py-24 sm:py-28">
@@ -312,26 +304,39 @@ function Doctors({ c, lang, opts }: { c: Copy; lang: Lang; opts: Opts | null }) 
         </Reveal>
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {list.slice(0, 8).map((d, i) => {
-            const nm = (lang === "ur" && d.doctor_name_ur) || d.doctor_name;
             const initials = d.doctor_name.replace(/^Dr\.?\s*/i, "").split(" ").slice(0, 2).map((w) => w[0]).join("");
-            const when = clinicDays(d.days);
+            const isToday = d.next_date === todayISO;
+            const avail = d.next_date ? new Date(d.next_date + "T00:00").toLocaleDateString(lang === "ur" ? "ur-PK" : "en-PK", { weekday: "short", day: "numeric", month: "short" }) : "";
+            const slot = d.days.find((x) => x.day === DAYS[todayIdx]) ?? d.days[0];
+            const hours = slot ? `${slot.day === DAYS[todayIdx] ? (lang === "ur" ? "آج" : "Today") : slot.day} ${slot.from}–${slot.to}` : "";
             return (
               <Reveal key={d.name} delay={(i % 4) * 60}>
-                <article className="group flex h-full flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-[#0C2431]/8 shadow-[0_20px_50px_-38px_rgba(12,36,49,0.6)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-34px_rgba(12,36,49,0.6)] hover:ring-[#2B6E85]/30">
-                  <div className="relative grid h-40 place-items-center bg-gradient-to-b from-[#F3F8FA] to-white">
-                    {d.photo ? <img src={d.photo} alt="" className="h-full w-full object-cover" loading="lazy" />
+                <article className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] bg-white ring-1 ring-[#0C2431]/8 shadow-[0_24px_50px_-36px_rgba(12,36,49,0.65)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_34px_64px_-34px_rgba(12,36,49,0.6)]">
+                  <div className="flex flex-1 flex-col items-center px-5 pb-5 pt-7 text-center">
+                    {d.photo ? <img src={d.photo} alt="" className="h-24 w-24 rounded-full object-cover shadow-lg ring-4 ring-white" loading="lazy" />
                       : <span className="svc grid h-24 w-24 place-items-center rounded-full bg-[#E5322F] text-4xl font-semibold text-white shadow-[0_16px_30px_-14px_rgba(229,50,47,0.9)] ring-4 ring-white" dir="ltr">{initials}</span>}
-                    <span className="absolute bottom-3 start-3 rounded-full bg-[#2B6E85] px-3 py-1 text-xs font-semibold text-white">{specName(d.specialization)}</span>
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 className="svc text-[1.25rem] font-semibold uppercase leading-tight tracking-[0.03em] text-[#2B6E85]">{nm}</h3>
-                    <span className="mt-2 block h-0.5 w-10 rounded-full bg-[#E5322F] transition-all duration-500 group-hover:w-16" />
-                    {d.qualification && <p className="mt-2 text-sm text-[#0C2431]/55" dir="ltr">{d.qualification}</p>}
-                    <p className="mt-3 flex-1 text-[13px] leading-relaxed text-[#0C2431]/70" dir="ltr">{when ? <><CalendarDays className="me-1.5 inline h-4 w-4 align-[-3px] text-[#E5322F]" />{when}</> : c.doctors.none}</p>
-                    <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#0C2431]/8 pt-4">
-                      {d.default_fee ? <span className="text-sm"><span className="block text-[11px] uppercase tracking-wider text-[#0C2431]/45">{c.doctors.fee}</span><b className="svc text-lg text-[#2B6E85]" dir="ltr">Rs {Math.round(d.default_fee).toLocaleString("en-PK")}</b></span> : <span />}
-                      <a href={`/hms/book-appointment?doctor=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1.5 rounded-full bg-[#E5322F] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_-10px_rgba(229,50,47,0.9)] transition hover:bg-[#C42825]">{c.doctors.book}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a>
+                    {avail && <span className={`mt-3 rounded-full px-3 py-1 text-xs font-semibold ${isToday ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-[#2B6E85]/8 text-[#2B6E85] ring-1 ring-[#2B6E85]/15"}`}>{isToday ? c.doctors.today : `${c.doctors.nextOn} · ${avail}`}</span>}
+                    <h3 className="svc mt-3 text-[1.3rem] font-semibold uppercase leading-tight tracking-[0.03em] text-[#2B6E85]">{d.doctor_name}</h3>
+                    {d.doctor_name_ur && <p className="font-urdu mt-1 text-sm leading-loose text-[#0C2431]/60" dir="rtl">{d.doctor_name_ur}</p>}
+                    <p className="mt-2 flex flex-wrap items-center justify-center gap-1.5 text-xs font-semibold">
+                      <span className="rounded-full bg-[#2B6E85]/10 px-2.5 py-1 text-[#2B6E85]">{specName(d.specialization)}</span>
+                      {d.consultation_room && <span className="flex items-center gap-1 rounded-full bg-[#0C2431]/[0.05] px-2.5 py-1 text-[#0C2431]/60" dir="ltr"><DoorOpen className="h-3.5 w-3.5" />{d.consultation_room}</span>}
+                    </p>
+                    {d.qualification && <p className="mt-1 text-sm text-[#0C2431]/55" dir="ltr">{d.qualification}</p>}
+                    {d.default_fee ? <div className="mt-4 w-full rounded-2xl bg-[#F3F8FA] py-3 ring-1 ring-[#2B6E85]/15">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0C2431]/50">{c.doctors.fee}</div>
+                      <div className="svc text-2xl font-semibold text-[#2B6E85]" dir="ltr">Rs {Math.round(d.default_fee).toLocaleString("en-PK")}</div>
+                    </div> : null}
+                    <div className="mt-4 flex w-full justify-between gap-1" dir="ltr" aria-label={c.doctors.days}>
+                      {DAYS.map((dd, di) => {
+                        const on = d.days.some((x) => x.day === dd);
+                        const now = di === todayIdx;
+                        return <span key={dd} title={dd} className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold ${on ? "bg-[#2B6E85] text-white" : "bg-[#0C2431]/[0.05] text-[#0C2431]/35"} ${now ? "ring-2 ring-[#E5322F] ring-offset-2" : ""}`}>{dd[0]}</span>;
+                      })}
                     </div>
+                    <p className="mb-4 mt-3 min-h-[1.25rem] text-[13px] text-[#0C2431]/65" dir="ltr">{hours ? <><Clock3 className="me-1 inline h-3.5 w-3.5 align-[-2px] text-[#E5322F]" />{hours}</> : d.days.length ? null : c.doctors.none}</p>
+                    <a href={`/hms/book-appointment?doctor=${encodeURIComponent(d.name)}`} className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-[#E5322F] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_-12px_rgba(229,50,47,0.9)] transition hover:bg-[#C42825]">
+                      <CalendarCheck className="h-4 w-4" />{c.doctors.book2}</a>
                   </div>
                 </article>
               </Reveal>

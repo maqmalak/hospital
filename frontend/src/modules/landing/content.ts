@@ -84,6 +84,7 @@ const en = {
     eyebrow: "Our doctors", title: "Meet our consultants",
     sub: "Choose a specialty to see who consults, on which days — and book a time that suits you.",
     all: "All", book: "Book", fee: "Consultation", next: "Next available", none: "Clinic days not published yet", more: "See all doctors and book",
+    today: "Available today", nextOn: "Next", clinic: "Clinic", book2: "Book appointment", days: "Clinic days",
   },
   patients: {
     eyebrow: "Patients & visitors", title: "Before you come to hospital",
@@ -176,6 +177,7 @@ const ur: typeof en = {
     eyebrow: "ہمارے ڈاکٹر", title: "ہمارے کنسلٹنٹس سے ملیں",
     sub: "شعبہ منتخب کریں، دیکھیں کون کن دنوں میں معائنہ کرتا ہے — اور اپنی سہولت کا وقت بک کریں۔",
     all: "سب", book: "بک کریں", fee: "فیس", next: "اگلا دستیاب", none: "کلینک کے دن ابھی شائع نہیں ہوئے", more: "تمام ڈاکٹر دیکھیں اور بک کریں",
+    today: "آج دستیاب", nextOn: "اگلا", clinic: "کلینک", book2: "اپائنٹمنٹ بک کریں", days: "کلینک کے دن",
   },
   patients: {
     eyebrow: "مریض اور ملاقاتی", title: "ہسپتال آنے سے پہلے",
