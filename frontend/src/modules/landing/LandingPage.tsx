@@ -250,19 +250,18 @@ function About({ c, opts }: { c: Copy; opts: Opts | null }) {
   );
 }
 
-const SERVICE_ICONS: LucideIcon[] = [Stethoscope, HeartPulse, Siren, Scissors, Magnet, ScanSearch, ScanLine, TestTubes, Droplets, Waves, Pill, BedDouble];
-/** Diagnostics & treatment (MRI, CT, X-ray, lab, dialysis …): feature cards on white. */
-function Services({ c }: { c: Copy }) {
+/** A titled grid of feature cards in the website style: red icon tile, condensed teal title, red underline, number watermark. */
+function FeatureSection({ id, block, icons, className = "" }: { id: string; block: Copy["services"]; icons: LucideIcon[]; className?: string }) {
   return (
-    <section id="services" className="scroll-mt-24 bg-white py-24 sm:py-28">
+    <section id={id} className={`scroll-mt-24 py-24 sm:py-28 ${className}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal className="flex flex-wrap items-end justify-between gap-6">
-          <div><Eyebrow>{c.services.eyebrow}</Eyebrow><BrandTitle text={c.services.title} /></div>
-          <p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{c.services.sub}</p>
+          <div><Eyebrow>{block.eyebrow}</Eyebrow><BrandTitle text={block.title} /></div>
+          <p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{block.sub}</p>
         </Reveal>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {c.services.items.map(([t, d], i) => {
-            const I = SERVICE_ICONS[i] ?? Stethoscope;
+          {block.items.map(([t, d], i) => {
+            const I = icons[i] ?? Stethoscope;
             return (
               <Reveal key={t} delay={(i % 4) * 60}>
                 <article className="group relative h-full overflow-hidden rounded-3xl bg-gradient-to-b from-[#F3F8FA] to-white p-7 ring-1 ring-[#0C2431]/8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-34px_rgba(12,36,49,0.6)] hover:ring-[#2B6E85]/30">
@@ -281,35 +280,10 @@ function Services({ c }: { c: Copy }) {
   );
 }
 
+const SERVICE_ICONS: LucideIcon[] = [Stethoscope, HeartPulse, Siren, Scissors, Magnet, ScanSearch, ScanLine, TestTubes, Droplets, Waves, Pill, BedDouble];
 const DEPT_ICONS: LucideIcon[] = [Stethoscope, HeartPulse, Activity, Brain, Droplet, Bone, Baby, Accessibility, Scissors, Ear, Sparkles, Ambulance];
-/** Clinical departments and specialties: compact cards on ivory. */
-function Departments({ c }: { c: Copy }) {
-  return (
-    <section id="departments" className="scroll-mt-24 py-24 sm:py-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal className="flex flex-wrap items-end justify-between gap-6">
-          <div><Eyebrow>{c.departments.eyebrow}</Eyebrow><H2>{c.departments.title}</H2></div>
-          <p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{c.departments.sub}</p>
-        </Reveal>
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {c.departments.items.map(([t, d], i) => {
-            const I = DEPT_ICONS[i] ?? Stethoscope;
-            return (
-              <Reveal key={t} delay={(i % 4) * 60}>
-                <article className="group relative h-full overflow-hidden rounded-3xl border border-[#0C2431]/8 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-[#2B6E85]/30 hover:shadow-[0_26px_50px_-30px_rgba(12,36,49,0.55)]">
-                  <span className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#E5322F] to-[#2B6E85] transition-transform duration-500 group-hover:scale-x-100 rtl:origin-right" />
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#2B6E85]/10 text-[#2B6E85] transition group-hover:bg-[#2B6E85] group-hover:text-white"><I className="h-6 w-6" /></span>
-                  <h3 className="mt-5 text-lg font-semibold text-[#0C2431]">{t}</h3>
-                  <p className="mt-2 text-[14.5px] leading-relaxed text-[#0C2431]/65">{d}</p>
-                </article>
-              </Reveal>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
+const Services = ({ c }: { c: Copy }) => <FeatureSection id="services" block={c.services} icons={SERVICE_ICONS} className="bg-white" />;
+const Departments = ({ c }: { c: Copy }) => <FeatureSection id="departments" block={c.departments} icons={DEPT_ICONS} />;
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 function clinicDays(days: Doctor["days"]) {
