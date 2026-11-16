@@ -301,11 +301,11 @@ function Doctors({ c, lang, opts }: { c: Copy; lang: Lang; opts: Opts | null }) 
   if (!opts || !opts.doctors.length) return null;
   const list = opts.doctors.filter((d) => !spec || d.specialization === spec);
   const specName = (s?: string) => (lang === "ur" ? opts.specializations.find((x) => x.name === s)?.name_ur : undefined) || s || "";
-  const chip = (on: boolean) => `rounded-full px-4 py-2 text-sm font-medium transition ${on ? "bg-[#0C2431] text-white shadow" : "bg-white text-[#0C2431]/70 ring-1 ring-[#0C2431]/10 hover:ring-[#2B6E85]/40"}`;
+  const chip = (on: boolean) => `rounded-full px-4 py-2 text-sm font-medium transition ${on ? "bg-[#E5322F] text-white shadow-[0_10px_22px_-10px_rgba(229,50,47,0.9)]" : "bg-white text-[#2B6E85] ring-1 ring-[#2B6E85]/20 hover:ring-[#E5322F]/50"}`;
   return (
     <section id="doctors" className="scroll-mt-24 bg-white py-24 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <Reveal><Eyebrow>{c.doctors.eyebrow}</Eyebrow><H2>{c.doctors.title}</H2><p className="mt-4 max-w-2xl text-[17px] text-[#0C2431]/65">{c.doctors.sub}</p></Reveal>
+        <Reveal className="flex flex-wrap items-end justify-between gap-6"><div><Eyebrow>{c.doctors.eyebrow}</Eyebrow><BrandTitle text={c.doctors.title} /></div><p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{c.doctors.sub}</p></Reveal>
         <Reveal className="mt-8 flex flex-wrap gap-2">
           <button type="button" className={chip(!spec)} onClick={() => setSpec("")} aria-pressed={!spec}>{c.doctors.all}</button>
           {opts.specializations.map((s) => <button key={s.name} type="button" className={chip(spec === s.name)} onClick={() => setSpec(s.name)} aria-pressed={spec === s.name}>{specName(s.name)}</button>)}
@@ -317,19 +317,20 @@ function Doctors({ c, lang, opts }: { c: Copy; lang: Lang; opts: Opts | null }) 
             const when = clinicDays(d.days);
             return (
               <Reveal key={d.name} delay={(i % 4) * 60}>
-                <article className="flex h-full flex-col overflow-hidden rounded-3xl border border-[#0C2431]/8 bg-white shadow-[0_20px_50px_-38px_rgba(12,36,49,0.6)]">
-                  <div className="relative grid h-40 place-items-center bg-gradient-to-br from-[#E8F2F5] to-[#F6EFEA]">
+                <article className="group flex h-full flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-[#0C2431]/8 shadow-[0_20px_50px_-38px_rgba(12,36,49,0.6)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-34px_rgba(12,36,49,0.6)] hover:ring-[#2B6E85]/30">
+                  <div className="relative grid h-40 place-items-center bg-gradient-to-b from-[#F3F8FA] to-white">
                     {d.photo ? <img src={d.photo} alt="" className="h-full w-full object-cover" loading="lazy" />
-                      : <span className="hd grid h-24 w-24 place-items-center rounded-full bg-white text-4xl font-semibold text-[#2B6E85] shadow-md ring-4 ring-white/60" dir="ltr">{initials}</span>}
-                    <span className="absolute bottom-3 start-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#2B6E85] backdrop-blur">{specName(d.specialization)}</span>
+                      : <span className="svc grid h-24 w-24 place-items-center rounded-full bg-[#E5322F] text-4xl font-semibold text-white shadow-[0_16px_30px_-14px_rgba(229,50,47,0.9)] ring-4 ring-white" dir="ltr">{initials}</span>}
+                    <span className="absolute bottom-3 start-3 rounded-full bg-[#2B6E85] px-3 py-1 text-xs font-semibold text-white">{specName(d.specialization)}</span>
                   </div>
                   <div className="flex flex-1 flex-col p-5">
-                    <h3 className="text-lg font-semibold text-[#0C2431]">{nm}</h3>
-                    {d.qualification && <p className="text-sm text-[#0C2431]/55" dir="ltr">{d.qualification}</p>}
-                    <p className="mt-3 flex-1 text-[13px] leading-relaxed text-[#0C2431]/70" dir="ltr">{when ? <><CalendarDays className="me-1.5 inline h-4 w-4 align-[-3px] text-[#2B6E85]" />{when}</> : c.doctors.none}</p>
+                    <h3 className="svc text-[1.25rem] font-semibold uppercase leading-tight tracking-[0.03em] text-[#2B6E85]">{nm}</h3>
+                    <span className="mt-2 block h-0.5 w-10 rounded-full bg-[#E5322F] transition-all duration-500 group-hover:w-16" />
+                    {d.qualification && <p className="mt-2 text-sm text-[#0C2431]/55" dir="ltr">{d.qualification}</p>}
+                    <p className="mt-3 flex-1 text-[13px] leading-relaxed text-[#0C2431]/70" dir="ltr">{when ? <><CalendarDays className="me-1.5 inline h-4 w-4 align-[-3px] text-[#E5322F]" />{when}</> : c.doctors.none}</p>
                     <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#0C2431]/8 pt-4">
-                      {d.default_fee ? <span className="text-sm"><span className="block text-[11px] uppercase tracking-wider text-[#0C2431]/45">{c.doctors.fee}</span><b className="text-[#0C2431]" dir="ltr">Rs {Math.round(d.default_fee).toLocaleString("en-PK")}</b></span> : <span />}
-                      <a href={`/hms/book-appointment?doctor=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1.5 rounded-full bg-[#2B6E85] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#225869]">{c.doctors.book}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a>
+                      {d.default_fee ? <span className="text-sm"><span className="block text-[11px] uppercase tracking-wider text-[#0C2431]/45">{c.doctors.fee}</span><b className="svc text-lg text-[#2B6E85]" dir="ltr">Rs {Math.round(d.default_fee).toLocaleString("en-PK")}</b></span> : <span />}
+                      <a href={`/hms/book-appointment?doctor=${encodeURIComponent(d.name)}`} className="inline-flex items-center gap-1.5 rounded-full bg-[#E5322F] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_-10px_rgba(229,50,47,0.9)] transition hover:bg-[#C42825]">{c.doctors.book}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a>
                     </div>
                   </div>
                 </article>
@@ -337,7 +338,7 @@ function Doctors({ c, lang, opts }: { c: Copy; lang: Lang; opts: Opts | null }) 
             );
           })}
         </div>
-        <Reveal className="mt-10 text-center"><a href="/hms/book-appointment" className={`${ghostBtn} border-[#0C2431]/15 text-[#0C2431] hover:border-[#2B6E85] focus-visible:ring-[#2B6E85]/20`}>{c.doctors.more}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a></Reveal>
+        <Reveal className="mt-10 text-center"><a href="/hms/book-appointment" className={`${ghostBtn} border-[#2B6E85]/30 text-[#2B6E85] hover:border-[#E5322F] hover:text-[#E5322F] focus-visible:ring-[#2B6E85]/20`}>{c.doctors.more}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a></Reveal>
       </div>
     </section>
   );
