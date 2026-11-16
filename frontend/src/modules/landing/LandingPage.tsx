@@ -1,14 +1,12 @@
 /**
- * Lyallpur Hospital public website (/hms/vvsdesk, public, D-75). One page: header, hero, quick actions, about, services,
+ * Lyallpur Medical Complex public website (/hms/vvsdesk, public, D-75). One page: header, hero, quick actions, about, services,
  * doctors (live from the Doctor records), patients & visitors, booking call-to-action, contact, footer.
  * Look: elegant — ivory page, deep navy, the logo's teal-blue (#2B6E85) and red (#E5322F) as accents, Cormorant Garamond
  * headings, Inter body, Noto Nastaliq for اردو. Name, address and phone come from Clinic Settings; copy is in content.ts.
  * The app's automatic translator skips this folder (own language toggle).
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, Bone, Brain, CalendarCheck, CalendarDays, ClipboardList, FileText,
-  FlaskConical, HeartPulse, Languages, LogIn, Mail, MapPin, Menu, Microscope, Phone, Pill, ScanLine, Scissors, ShieldCheck, Siren, Stethoscope,
-  UserRound, Users, X, type LucideIcon } from "lucide-react";
+import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BedDouble, Bone, Brain, CalendarCheck, CalendarDays, ClipboardList, Droplet, Droplets, Ear, FileText, FlaskConical, HeartPulse, Languages, LogIn, Magnet, Mail, MapPin, Menu, Microscope, Phone, Pill, ScanLine, ScanSearch, Scissors, ShieldCheck, Siren, Sparkles, Stethoscope, TestTubes, UserRound, Users, Waves, X, type LucideIcon } from "lucide-react";
 import { COPY, CONFIG, type Copy, type Lang } from "./content";
 import { Wordmark } from "@/components/brand";
 import { getCall } from "@/services/frappe";
@@ -99,7 +97,7 @@ function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) 
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => { const f = () => setScrolled(window.scrollY > 8); f(); window.addEventListener("scroll", f, { passive: true }); return () => window.removeEventListener("scroll", f); }, []);
-  const links: [string, string][] = [["#services", c.nav.services], ["#doctors", c.nav.doctors], ["#patients", c.nav.patients], ["#about", c.nav.about], ["#contact", c.nav.contact]];
+  const links: [string, string][] = [["#services", c.nav.services], ["#departments", c.nav.departments], ["#doctors", c.nav.doctors], ["#patients", c.nav.patients], ["#about", c.nav.about], ["#contact", c.nav.contact]];
   return (
     <header className={`sticky top-0 z-40 transition-all ${scrolled ? "bg-white/90 shadow-[0_8px_30px_-18px_rgba(12,36,49,0.45)] backdrop-blur-xl" : "bg-[#FAF8F4]"}`}>
       <div className="mx-auto flex h-[76px] max-w-7xl items-center gap-4 px-4 sm:px-6">
@@ -207,7 +205,7 @@ function QuickActions({ c, phone }: { c: Copy; phone?: string }) {
 
 const ABOUT_ICONS = [BadgeCheck, FileText, Microscope, ShieldCheck];
 function About({ c, opts }: { c: Copy; opts: Opts | null }) {
-  const stats: [number, string][] = [[opts?.doctors.length ?? 0, c.about.doctors], [opts?.specializations.length ?? 0, c.about.specialties], [c.services.items.length, c.about.departments]];
+  const stats: [number, string][] = [[opts?.doctors.length ?? 0, c.about.doctors], [opts?.specializations.length ?? 0, c.about.specialties], [c.departments.items.length, c.about.departments]];
   return (
     <section id="about" className="scroll-mt-24 py-24 sm:py-28">
       <div className="mx-auto grid max-w-7xl gap-14 px-4 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
@@ -237,7 +235,8 @@ function About({ c, opts }: { c: Copy; opts: Opts | null }) {
   );
 }
 
-const SERVICE_ICONS: LucideIcon[] = [Stethoscope, Ambulance, HeartPulse, Activity, Brain, Bone, Baby, Accessibility, Scissors, ScanLine, Microscope, Pill];
+const SERVICE_ICONS: LucideIcon[] = [Magnet, ScanSearch, ScanLine, TestTubes, Droplets, Waves, Pill, BedDouble];
+/** Diagnostics & treatment (MRI, CT, X-ray, lab, dialysis …): feature cards on white. */
 function Services({ c }: { c: Copy }) {
   return (
     <section id="services" className="scroll-mt-24 bg-white py-24 sm:py-28">
@@ -246,14 +245,45 @@ function Services({ c }: { c: Copy }) {
           <div><Eyebrow>{c.services.eyebrow}</Eyebrow><H2>{c.services.title}</H2></div>
           <p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{c.services.sub}</p>
         </Reveal>
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {c.services.items.map(([t, d], i) => {
             const I = SERVICE_ICONS[i] ?? Stethoscope;
             return (
               <Reveal key={t} delay={(i % 4) * 60}>
-                <article className="group relative h-full overflow-hidden rounded-3xl border border-[#0C2431]/8 bg-[#FAF8F4] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#2B6E85]/30 hover:bg-white hover:shadow-[0_26px_50px_-30px_rgba(12,36,49,0.55)]">
+                <article className="group relative h-full overflow-hidden rounded-3xl bg-gradient-to-b from-[#F3F8FA] to-white p-7 ring-1 ring-[#0C2431]/8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-34px_rgba(12,36,49,0.6)] hover:ring-[#2B6E85]/30">
+                  <span className="hd pointer-events-none absolute -end-1 -top-3 text-[5.5rem] font-semibold leading-none text-[#2B6E85]/[0.07]" dir="ltr">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#2B6E85] to-[#1D4F61] text-white shadow-[0_14px_28px_-14px_rgba(43,110,133,0.9)]"><I className="h-7 w-7" /></span>
+                  <h3 className="hd relative mt-6 text-[1.7rem] font-semibold leading-tight text-[#0C2431]">{t}</h3>
+                  <span className="relative mt-2 block h-0.5 w-10 rounded-full bg-[#E5322F] transition-all duration-500 group-hover:w-16" />
+                  <p className="relative mt-3 text-[14.5px] leading-relaxed text-[#0C2431]/65">{d}</p>
+                </article>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const DEPT_ICONS: LucideIcon[] = [Stethoscope, HeartPulse, Activity, Brain, Droplet, Bone, Baby, Accessibility, Scissors, Ear, Sparkles, Ambulance];
+/** Clinical departments and specialties: compact cards on ivory. */
+function Departments({ c }: { c: Copy }) {
+  return (
+    <section id="departments" className="scroll-mt-24 py-24 sm:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <Reveal className="flex flex-wrap items-end justify-between gap-6">
+          <div><Eyebrow>{c.departments.eyebrow}</Eyebrow><H2>{c.departments.title}</H2></div>
+          <p className="max-w-md text-[17px] leading-relaxed text-[#0C2431]/65">{c.departments.sub}</p>
+        </Reveal>
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {c.departments.items.map(([t, d], i) => {
+            const I = DEPT_ICONS[i] ?? Stethoscope;
+            return (
+              <Reveal key={t} delay={(i % 4) * 60}>
+                <article className="group relative h-full overflow-hidden rounded-3xl border border-[#0C2431]/8 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-[#2B6E85]/30 hover:shadow-[0_26px_50px_-30px_rgba(12,36,49,0.55)]">
                   <span className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#E5322F] to-[#2B6E85] transition-transform duration-500 group-hover:scale-x-100 rtl:origin-right" />
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white text-[#2B6E85] shadow-sm ring-1 ring-[#0C2431]/5 transition group-hover:bg-[#2B6E85] group-hover:text-white"><I className="h-6 w-6" /></span>
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#2B6E85]/10 text-[#2B6E85] transition group-hover:bg-[#2B6E85] group-hover:text-white"><I className="h-6 w-6" /></span>
                   <h3 className="mt-5 text-lg font-semibold text-[#0C2431]">{t}</h3>
                   <p className="mt-2 text-[14.5px] leading-relaxed text-[#0C2431]/65">{d}</p>
                 </article>
@@ -284,7 +314,7 @@ function Doctors({ c, lang, opts }: { c: Copy; lang: Lang; opts: Opts | null }) 
   const specName = (s?: string) => (lang === "ur" ? opts.specializations.find((x) => x.name === s)?.name_ur : undefined) || s || "";
   const chip = (on: boolean) => `rounded-full px-4 py-2 text-sm font-medium transition ${on ? "bg-[#0C2431] text-white shadow" : "bg-white text-[#0C2431]/70 ring-1 ring-[#0C2431]/10 hover:ring-[#2B6E85]/40"}`;
   return (
-    <section id="doctors" className="scroll-mt-24 py-24 sm:py-28">
+    <section id="doctors" className="scroll-mt-24 bg-white py-24 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal><Eyebrow>{c.doctors.eyebrow}</Eyebrow><H2>{c.doctors.title}</H2><p className="mt-4 max-w-2xl text-[17px] text-[#0C2431]/65">{c.doctors.sub}</p></Reveal>
         <Reveal className="mt-8 flex flex-wrap gap-2">
@@ -414,7 +444,7 @@ function Contact({ c, h }: { c: Copy; h?: Opts["clinic"] }) {
 }
 
 function Footer({ c, h }: { c: Copy; h?: Opts["clinic"] }) {
-  const links: [string, string][] = [["#services", c.nav.services], ["#doctors", c.nav.doctors], ["#patients", c.nav.patients], ["#about", c.nav.about], ["#contact", c.nav.contact], ["/hms/book-appointment", c.nav.book]];
+  const links: [string, string][] = [["#services", c.nav.services], ["#departments", c.nav.departments], ["#doctors", c.nav.doctors], ["#patients", c.nav.patients], ["#about", c.nav.about], ["#contact", c.nav.contact], ["/hms/book-appointment", c.nav.book]];
   return (
     <footer className="bg-[#081A24] text-white/70">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
@@ -469,6 +499,7 @@ export default function LandingPage() {
         <QuickActions c={c} phone={phone} />
         <About c={c} opts={opts} />
         <Services c={c} />
+        <Departments c={c} />
         <Doctors c={c} lang={lang} opts={opts} />
         <Patients c={c} />
         <Cta c={c} phone={phone} />

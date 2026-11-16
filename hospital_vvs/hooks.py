@@ -3,7 +3,7 @@ app_title = "Hospital VVS"
 
 # Tile on the Frappe Desk app screen (/desk and /apps); opens the VVS Hospital workspace
 add_to_apps_screen = [
-	{"name": "hospital_vvs", "logo": "/assets/hospital_vvs/images/lyallpur-mark.png", "title": "Lyallpur Hospital", "route": "/desk/vvs-hospital"},
+	{"name": "hospital_vvs", "logo": "/assets/hospital_vvs/images/lyallpur-mark.png", "title": "Lyallpur Medical Complex", "route": "/desk/vvs-hospital"},
 ]
 app_publisher = "MicroMax"
 app_description = "VVSDesk hospital management system for Pakistan (OPD, IPD, ER, lab, pharmacy, cash, billing)"

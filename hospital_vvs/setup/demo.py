@@ -15,7 +15,9 @@ from hospital_vvs.setup.company import ABBR
 
 DEPARTMENTS = [("General Medicine", "جنرل میڈیسن", "#0d9488"), ("Paediatrics", "بچوں کا شعبہ", "#f59e0b"),
 	("Gynaecology & Obstetrics", "گائنی", "#db2777"), ("Cardiology", "امراض قلب", "#dc2626"), ("Orthopaedics", "ہڈیوں کا شعبہ", "#2563eb"),
-	("ENT", "ناک کان گلا", "#7c3aed"), ("Dermatology", "جلد", "#ea580c"), ("Emergency", "ایمرجنسی", "#b91c1c")]
+	("ENT", "ناک کان گلا", "#7c3aed"), ("Dermatology", "جلد", "#ea580c"), ("Emergency", "ایمرجنسی", "#b91c1c"),
+	("Radiology", "ریڈیالوجی", "#0891b2"), ("Pathology & Laboratory", "پیتھالوجی و لیبارٹری", "#7c3aed"),
+	("Nephrology & Dialysis", "امراضِ گردہ و ڈائیلاسز", "#2563eb"), ("Neurology", "نیورولوجی", "#4f46e5"), ("General Surgery", "جنرل سرجری", "#be123c")]
 SPECS = [("General Physician", "جنرل فزیشن", "General Medicine"), ("Paediatrician", "ماہر امراض اطفال", "Paediatrics"),
 	("Gynaecologist", "ماہر امراض نسواں", "Gynaecology & Obstetrics"), ("Cardiologist", "ماہر امراض قلب", "Cardiology"),
 	("Orthopaedic Surgeon", "ماہر ہڈی و جوڑ", "Orthopaedics"), ("ENT Specialist", "ماہر ناک کان گلا", "ENT"),

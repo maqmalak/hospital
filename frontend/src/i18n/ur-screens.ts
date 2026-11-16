@@ -3911,4 +3911,5 @@ export const urScreens: Record<string, string> = {
   "Lyallpur Hospital": "لائل پور ہسپتال",
   "Powered by": "تیار کردہ",
   "Medical & Research Center": "میڈیکل اینڈ ریسرچ سینٹر",
+  "Lyallpur Medical Complex": "لائل پور میڈیکل کمپلیکس",
 };

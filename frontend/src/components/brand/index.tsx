@@ -43,7 +43,7 @@ export function useBrandFonts() {
 }
 
 const BRAND = (f: string) => `${import.meta.env.BASE_URL}brand/${f}`;
-/** The hospital's own logo (Lyallpur Hospital, D-73): the symbol ("mark") or the full logo with name; a lighter cut in dark mode. */
+/** The hospital's own logo (Lyallpur Medical Complex, D-73): the symbol ("mark") or the full logo with name; a lighter cut in dark mode. */
 export function HospitalLogo({ variant = "mark", className = "h-10 w-10", alt = "", onDark = false }: { variant?: "mark" | "full"; className?: string; alt?: string; onDark?: boolean }) {
   const f = variant === "mark" ? "lyallpur-mark" : "lyallpur-logo";
   if (onDark) return <img src={BRAND(`${f}-dark.webp`)} alt={alt} className={`shrink-0 object-contain ${className}`} draggable={false} />;

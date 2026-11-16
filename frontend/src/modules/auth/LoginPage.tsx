@@ -64,7 +64,7 @@ export default function LoginPage() {
     if (digits && i < 5) otpRefs.current[i + 1]?.focus();
   };
 
-  const name = clinic ? (i18n.language === "ur" && clinic.name_ur ? clinic.name_ur : clinic.name) : "Lyallpur Hospital";
+  const name = clinic ? (i18n.language === "ur" && clinic.name_ur ? clinic.name_ur : clinic.name) : "Lyallpur Medical Complex";
   const hour = now.getHours();
   const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 

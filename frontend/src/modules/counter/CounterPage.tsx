@@ -417,7 +417,7 @@ function PayDialog({ total, modes, offline, lines, patient, newP, branch, counte
         const local: Receipt = { name: `OFF-${clientRef.slice(0, 8).toUpperCase()}`, posted_at: new Date().toISOString().replace("T", " ").slice(0, 19), patient: patient?.name ?? "NEW", patient_name: patient?.patient_name ?? newP?.patient_name ?? "",
           lines: lines.map((l) => ({ kind: l.kind, label: l.label, qty: l.qty, rate: l.rate, discount: 0, amount: lineTotal(l) })), tenders: data.tenders as Tender[], gross_total: total, discount_total: 0,
           patient_total: total, tendered: sum, change_amount: Math.max(sum - Math.round(total), 0), tokens: lines.filter((l) => l.kind === "Consultation").map((l) => ({ doctor: l.label.replace("Consultation · ", ""), token: "—" })),
-          cashier, counter, offline: true, pending_sync: true, clinic: clinic ?? { name: "Lyallpur Hospital" } };
+          cashier, counter, offline: true, pending_sync: true, clinic: clinic ?? { name: "Lyallpur Medical Complex" } };
         await enqueue({ client_ref: clientRef, created: new Date().toISOString(), total, patient_name: local.patient_name, status: "pending", attempts: 0,
           data: { ...data, offline: 1, offline_created: local.posted_at }, receipt: local });
         void printDoc(receiptHtml(local), "receipt");

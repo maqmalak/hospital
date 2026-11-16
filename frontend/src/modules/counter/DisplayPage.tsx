@@ -13,5 +13,5 @@ export default function CounterDisplayPage() {
     : s.kind === "done" ? { kind: "done", customer: s.patient, total: s.total, change: s.change, at: s.at ?? Date.now(),
       tokens: s.tokens.map((t) => ({ label: t.doctor, token: t.token, sub: t.room ? `Room ${t.room}` : undefined })), note: "Please wait for your token to be called" }
     : { kind: "idle" };
-  return <CustomerFacing state={state} clinic={boot?.clinic.name ?? "Lyallpur Hospital"} clinicUr={boot?.clinic.name_ur} place="Reception" idleIcon="heart" />;
+  return <CustomerFacing state={state} clinic={boot?.clinic.name ?? "Lyallpur Medical Complex"} clinicUr={boot?.clinic.name_ur} place="Reception" idleIcon="heart" />;
 }
