@@ -6,14 +6,17 @@ import { LANGUAGES } from "@/i18n";
 export function PublicShell({ clinic, clinicUr, phone, address, children, wide }: { clinic?: string; clinicUr?: string; phone?: string; address?: string; children: ReactNode; wide?: boolean }) {
   const { i18n } = useTranslation();
   return (
-    <div className="relative min-h-full bg-background pb-12">
-      <div className="absolute inset-x-0 top-0 h-[340px] overflow-hidden bg-[#06232a]">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_400px_at_0%_0%,rgba(20,184,166,0.65),transparent_60%),radial-gradient(800px_400px_at_100%_20%,rgba(16,185,129,0.5),transparent_60%),radial-gradient(600px_300px_at_60%_100%,rgba(56,189,248,0.25),transparent_60%)]" />
-        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.7)_1px,transparent_1px)] [background-size:40px_40px]" />
+    <div className="site-theme relative min-h-full bg-background pb-12">
+      <div className="absolute inset-x-0 top-0 h-[340px] overflow-hidden bg-[#0C2431]">
+        <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_0%_0%,rgba(43,110,133,0.6),transparent_60%),radial-gradient(700px_380px_at_100%_100%,rgba(229,50,47,0.22),transparent_60%)]" />
+        <div className="absolute inset-0 opacity-[0.05] [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:26px_26px]" />
       </div>
       <header className={`relative mx-auto flex items-center gap-3 px-4 py-5 text-white ${wide ? "max-w-6xl" : "max-w-xl"}`}>
-        <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-300 via-teal-500 to-teal-600 text-xl font-black shadow-lg shadow-black/30"><span className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/30" />V</span>
-        <div className="min-w-0 flex-1"><div className="truncate text-lg font-extrabold">{clinic || "Lyallpur Hospital"}</div>{clinicUr && <div className="font-urdu text-sm leading-relaxed text-teal-100/80">{clinicUr}</div>}</div>
+        <a href="/hms/vvsdesk" className="flex min-w-0 flex-1 items-center gap-3" aria-label={clinic || "Lyallpur Hospital"}>
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white shadow-lg shadow-black/30"><img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark.webp`} alt="" className="h-9 w-9 object-contain" /></span>
+          <span className="min-w-0"><span className="block truncate text-lg font-extrabold tracking-wide">{clinic || "Lyallpur Hospital"}</span>
+            <span className="block truncate text-[10.5px] font-semibold uppercase tracking-[0.2em] text-[#8FCBE0]">{clinicUr ? <span className="font-urdu normal-case tracking-normal text-sm">{clinicUr}</span> : "Medical & Research Center"}</span></span>
+        </a>
         {phone && <a href={`tel:${phone}`} className="hidden items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm backdrop-blur hover:bg-white/20 sm:flex"><Phone className="h-4 w-4" />{phone}</a>}
         <label className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-sm backdrop-blur"><Languages className="h-4 w-4" />
           <select value={i18n.language} onChange={(e) => void i18n.changeLanguage(e.target.value)} className="bg-transparent outline-none [&>option]:text-black">{LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}</select></label>

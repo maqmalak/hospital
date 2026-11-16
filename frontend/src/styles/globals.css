@@ -408,3 +408,17 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
   /* page canvas: a faint gold wash from the top-left, like the landing hero */
   body { background-image: radial-gradient(1100px 480px at 0% 0%, rgb(184 145 58 / 0.07), transparent 60%); background-attachment: fixed; }
 }
+
+/* Public patient pages (booking, online visit, lab report — D-76): the hospital website colours, logo teal-blue + red. */
+@layer base {
+  .site-theme {
+    --primary: 195 51% 34%;
+    --ring: 195 51% 40%;
+    --background: 40 33% 97%;
+    --tl-50: 234 245 249; --tl-100: 205 232 241; --tl-200: 159 209 226; --tl-300: 109 183 208; --tl-400: 79 168 196; --tl-500: 47 135 165;
+    --tl-600: 43 110 133; --tl-700: 34 88 105; --tl-800: 26 67 80; --tl-900: 18 48 58; --tl-950: 10 28 35;
+    --ink: 12 36 49; --ink-900: 8 26 36;
+    --grad: linear-gradient(135deg, #1D4F61 0%, #2B6E85 55%, #2F87A5 100%); --grad-text: #FFFFFF; --grad-glow: rgb(43 110 133 / 0.8);
+  }
+  .dark .site-theme { --background: 206 52% 7.5%; --primary: 194 50% 55%; }
+}
