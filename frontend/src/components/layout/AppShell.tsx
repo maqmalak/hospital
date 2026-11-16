@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <button onClick={toggleTheme} className="rounded-lg border border-border p-2 hover:bg-muted" aria-label="Theme">{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}</button>
             <a href="/hms/vvsdesk" target="_blank" rel="noreferrer" title={t("Visit website")} aria-label={t("Visit website")}
-              className="rounded-lg border border-border p-2 text-[#7A5C1A] hover:border-[#B8913A]/60 hover:bg-[#B8913A]/10 dark:text-[#E6CF8F]"><Globe className="h-4 w-4" /></a>
+              className="rounded-lg border border-border p-2 text-teal-700 hover:border-teal-500/60 hover:bg-teal-500/10 dark:text-teal-300"><Globe className="h-4 w-4" /></a>
             <a href="/desk" target="_blank" rel="noreferrer" className="hidden rounded-lg border border-border px-2 py-1.5 text-xs font-semibold hover:bg-muted md:block">Desk</a>
             <UserMenu name={boot.full_name} user={boot.user} image={boot.image} onLogout={() => void logout()} />
           </header>}

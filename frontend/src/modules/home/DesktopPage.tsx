@@ -16,7 +16,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn";
-import { VvsMark } from "@/components/brand";
+import { HospitalLogo } from "@/components/brand";
 
 /** /pw-home — the Desktop (real-estate style home, D-57): glossy app icons per menu group with a hover playbook, what needs
  *  attention, quick links, and a live activity panel. Data: hospital_vvs.api.dashboard.home (only screens the user can open). */
@@ -96,7 +96,7 @@ export default function DesktopPage() {
       <main className="flex min-w-0 flex-[999_1_640px] flex-col gap-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex items-center gap-3">
-            <VvsMark className="h-11 w-11 shrink-0" />
+            <HospitalLogo className="h-12 w-12" />
             <div>
               <h1 className="vvs-serif text-2xl font-semibold tracking-tight">{t(greet)}, <span className="vvs-gold-text">{name.split(" ")[0]}</span></h1>
               <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>

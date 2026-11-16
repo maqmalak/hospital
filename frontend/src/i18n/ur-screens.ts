@@ -3908,4 +3908,7 @@ export const urScreens: Record<string, string> = {
   "Visit website": "ویب سائٹ دیکھیں",
   "logs every sign-in.": "ہر سائن اِن کا ریکارڈ رکھتا ہے۔",
   "· Hospital management": "· ہسپتال مینجمنٹ",
+  "Lyallpur Hospital": "لائل پور ہسپتال",
+  "Powered by": "تیار کردہ",
+  "Medical & Research Center": "میڈیکل اینڈ ریسرچ سینٹر",
 };

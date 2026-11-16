@@ -9,7 +9,7 @@ export function PageHeader({ title, subtitle, icon: Icon, actions, color = "from
   const { t } = useTranslation();
   return (
     <div className="mb-4 flex flex-wrap items-center gap-3">
-      {Icon && <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-[#14171C] text-[#E6CF8F] shadow-md ring-1 ring-inset ring-[#B8913A]/45 dark:bg-white/[0.06]">
+      {Icon && <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-ink text-teal-300 shadow-md ring-1 ring-inset ring-teal-500/45 dark:bg-white/[0.06]">
         <Icon className="h-5 w-5" /><span className={cn("absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-gradient-to-r opacity-80", color)} aria-hidden /></span>}
       <div className="min-w-0 flex-1">
         <h1 className="vvs-serif truncate text-2xl font-semibold leading-tight tracking-tight">{t(title)}</h1>
@@ -194,7 +194,7 @@ export function Avatarish({ name, src, size = 9 }: { name?: string; src?: string
   const initials = (name || "?").split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   const style = { width: size * 4, height: size * 4 };
   return src ? <img src={src} alt="" style={style} className="shrink-0 rounded-full object-cover" />
-    : <span style={style} className="flex shrink-0 items-center justify-center rounded-full bg-[#14171C] text-xs font-bold text-[#E6CF8F] ring-1 ring-inset ring-[#B8913A]/50">{initials}</span>;
+    : <span style={style} className="flex shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-teal-300 ring-1 ring-inset ring-teal-500/50">{initials}</span>;
 }
 
 export function Tabs<T extends string>({ tabs, value, onChange }: { tabs: { key: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void }) {

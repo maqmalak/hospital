@@ -13,7 +13,7 @@ export function PublicShell({ clinic, clinicUr, phone, address, children, wide }
       </div>
       <header className={`relative mx-auto flex items-center gap-3 px-4 py-5 text-white ${wide ? "max-w-6xl" : "max-w-xl"}`}>
         <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-300 via-teal-500 to-teal-600 text-xl font-black shadow-lg shadow-black/30"><span className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/30" />V</span>
-        <div className="min-w-0 flex-1"><div className="truncate text-lg font-extrabold">{clinic || "VVS Hospital"}</div>{clinicUr && <div className="font-urdu text-sm leading-relaxed text-teal-100/80">{clinicUr}</div>}</div>
+        <div className="min-w-0 flex-1"><div className="truncate text-lg font-extrabold">{clinic || "Lyallpur Hospital"}</div>{clinicUr && <div className="font-urdu text-sm leading-relaxed text-teal-100/80">{clinicUr}</div>}</div>
         {phone && <a href={`tel:${phone}`} className="hidden items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm backdrop-blur hover:bg-white/20 sm:flex"><Phone className="h-4 w-4" />{phone}</a>}
         <label className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-sm backdrop-blur"><Languages className="h-4 w-4" />
           <select value={i18n.language} onChange={(e) => void i18n.changeLanguage(e.target.value)} className="bg-transparent outline-none [&>option]:text-black">{LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}</select></label>

@@ -31,36 +31,45 @@
     --sidebar-foreground: 42 30% 94%;
     --sidebar-muted: 40 10% 66%;
     --radius: 0.65rem;
+    --tl-50: 251 248 239; --tl-100: 245 237 213; --tl-200: 235 220 171; --tl-300: 224 199 126; --tl-400: 210 178 96; --tl-500: 184 145 58;
+    --tl-600: 154 122 44; --tl-700: 122 92 26; --tl-800: 94 70 20; --tl-900: 70 52 15; --tl-950: 42 31 8;
+    --ink: 20 23 28; --ink-900: 14 16 19; --brand-red: 255 51 51;
+    --grad: linear-gradient(135deg, #A88536 0%, #E6CF8F 50%, #B8913A 100%); --grad-text: #14171C; --grad-glow: rgb(184 145 58 / 0.9);
 
     color-scheme: light;
   }
 
   .dark {
-    --background: 225 14% 6%;
-    --foreground: 42 25% 93%;
-    --card: 225 10% 10.5%;
-    --card-foreground: 42 25% 93%;
-    --popover: 225 10% 13%;
-    --popover-foreground: 42 25% 93%;
-    --primary: 42 58% 60%;
-    --primary-foreground: 225 16% 7%;
-    --secondary: 225 8% 15%;
-    --secondary-foreground: 42 20% 90%;
-    --muted: 225 8% 17%;
-    --muted-foreground: 40 10% 70%;
-    --accent: 40 18% 17%;
-    --accent-foreground: 42 22% 92%;
-    --destructive: 0 72% 56%;
+    --background: 206 52% 7.5%;
+    --foreground: 200 30% 94%;
+    --card: 204 42% 11%;
+    --card-foreground: 200 30% 94%;
+    --popover: 204 40% 13.5%;
+    --popover-foreground: 200 30% 94%;
+    --primary: 194 50% 55%;
+    --primary-foreground: 207 60% 6%;
+    --secondary: 204 32% 15%;
+    --secondary-foreground: 200 25% 90%;
+    --muted: 204 30% 16%;
+    --muted-foreground: 200 16% 70%;
+    --accent: 200 34% 17%;
+    --accent-foreground: 200 28% 92%;
+    --destructive: 0 85% 63%;
     --destructive-foreground: 0 0% 100%;
-    --border: 225 8% 24%;
-    --input: 40 8% 42%;
-    --input-bg: 225 10% 14%;
+    --border: 202 26% 22%;
+    --input: 200 18% 40%;
+    --input-bg: 204 38% 14%;
     --success: 152 58% 46%;
     --warning: 36 92% 56%;
-    --ring: 42 58% 60%;
-    --sidebar: 225 18% 4.5%;
-    --sidebar-foreground: 42 25% 92%;
-    --sidebar-muted: 40 10% 64%;
+    --ring: 194 50% 55%;
+    --sidebar: 207 62% 5%;
+    --sidebar-foreground: 200 30% 93%;
+    --sidebar-muted: 200 14% 64%;
+    /* Lyallpur Hospital logo (D-73): teal-blue #2B6E85 swoosh, red #FF3333 cross, deep navy surfaces */
+    --tl-50: 234 245 249; --tl-100: 205 232 241; --tl-200: 159 209 226; --tl-300: 109 183 208; --tl-400: 79 168 196; --tl-500: 47 135 165;
+    --tl-600: 43 110 133; --tl-700: 34 88 105; --tl-800: 26 67 80; --tl-900: 18 48 58; --tl-950: 10 28 35;
+    --ink: 12 30 41; --ink-900: 7 18 26; --brand-red: 255 77 77;
+    --grad: linear-gradient(135deg, #1A4F62 0%, #2B6E85 55%, #2F87A5 100%); --grad-text: #FFFFFF; --grad-glow: rgb(47 135 165 / 0.85);
 
     color-scheme: dark;
   }
@@ -85,9 +94,9 @@
      floating above it rather than flat rectangles. */
   .dark body {
     background-image:
-      radial-gradient(1000px 520px at 18% 0%, rgb(184 145 58 / 0.14), transparent 55%),
-      radial-gradient(920px 520px at 86% 12%, rgb(230 207 143 / 0.05), transparent 50%),
-      radial-gradient(920px 520px at 50% 100%, rgb(184 145 58 / 0.06), transparent 55%);
+      radial-gradient(1000px 520px at 15% 0%, rgb(47 135 165 / 0.20), transparent 55%),
+      radial-gradient(900px 520px at 95% 100%, rgb(255 77 77 / 0.08), transparent 55%),
+      radial-gradient(700px 400px at 70% 10%, rgb(79 168 196 / 0.06), transparent 50%);
     background-attachment: fixed;
   }
 }
@@ -100,20 +109,20 @@
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
   .dark select,
   .dark textarea {
-    background-color: hsl(225 10% 14.5%);   /* a clear step lighter than the card */
-    border-color: hsl(40 8% 34%);
+    background-color: hsl(204 38% 14.5%);   /* a clear step lighter than the card */
+    border-color: hsl(202 24% 32%);
     color: hsl(220 20% 94%);
     transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
   }
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(:disabled):hover,
   .dark select:not(:disabled):hover,
   .dark textarea:not(:disabled):hover {
-    border-color: hsl(42 40% 50%);
+    border-color: hsl(194 45% 50%);
   }
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visible,
   .dark select:focus-visible,
   .dark textarea:focus-visible {
-    background-color: hsl(225 10% 16%);
+    background-color: hsl(204 38% 16.5%);
     border-color: hsl(var(--primary));
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.22);
   }
@@ -121,7 +130,7 @@
   .dark select:disabled,
   .dark textarea:disabled {
     opacity: 1;
-    background-color: hsl(225 10% 12%);
+    background-color: hsl(204 40% 12%);
     border-style: dashed;
     color: hsl(220 18% 78%);
   }
@@ -130,7 +139,7 @@
     color: hsl(200 14% 62%);
   }
   .dark select option {
-    background-color: hsl(225 10% 14.5%);
+    background-color: hsl(204 38% 14.5%);
   }
   /* Native date/time pickers: light calendar icon on the dark field. */
   .dark input::-webkit-calendar-picker-indicator {
@@ -332,9 +341,9 @@
 /* Action colour (D-72): the landing page's gold bar — dark-gold → champagne → gold, ink text. */
 @layer components {
   button.bg-primary, a.bg-primary, [role="tab"].bg-primary, .btn-azure, .btn-gold {
-    background-image: linear-gradient(135deg, #A88536 0%, #E6CF8F 50%, #B8913A 100%);
-    color: #14171C !important;
-    box-shadow: 0 10px 24px -12px rgb(184 145 58 / 0.9), inset 0 0 0 1px rgb(255 255 255 / 0.3);
+    background-image: var(--grad);
+    color: var(--grad-text) !important;
+    box-shadow: 0 10px 24px -12px var(--grad-glow), inset 0 0 0 1px rgb(255 255 255 / 0.25);
   }
   button.bg-primary:hover, a.bg-primary:hover, .btn-azure:hover { filter: brightness(1.06); }
 }
@@ -383,17 +392,19 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
 /* Gold gradient theme (D-72): active tabs / segmented buttons, gold headline text, gold hairlines. */
 @layer components {
   .tab-gold {
-    background-image: linear-gradient(135deg, #A88536 0%, #E6CF8F 50%, #B8913A 100%);
-    color: #14171C !important;
-    box-shadow: 0 6px 16px -8px rgb(184 145 58 / 0.85), inset 0 0 0 1px rgb(255 255 255 / 0.35);
+    background-image: var(--grad);
+    color: var(--grad-text) !important;
+    box-shadow: 0 6px 16px -8px var(--grad-glow), inset 0 0 0 1px rgb(255 255 255 / 0.3);
   }
+  /* dark: the logo's red cross as a hairline under the active tab */
+  .dark .tab-gold { box-shadow: 0 6px 16px -8px var(--grad-glow), inset 0 -2px 0 rgb(var(--brand-red)); }
   .tab-gold * { color: inherit; }
   .vvs-gold-text {
     background-image: linear-gradient(110deg, #9A7A2C, #D2B260 45%, #B8913A 70%, #8A6A22);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .dark .vvs-gold-text { background-image: linear-gradient(110deg, #B8913A, #F1DE9C 45%, #C9A24A 70%, #E6CF8F); }
-  .gold-rule { height: 1px; background-image: linear-gradient(90deg, #B8913A, rgb(184 145 58 / 0)); }
+  .dark .vvs-gold-text { background-image: linear-gradient(110deg, #FF4D4D, #FF7A6E 35%, #6DB7D0 65%, #4FA8C4); }
+  .gold-rule { height: 1px; background-image: linear-gradient(90deg, rgb(var(--tl-500)), rgb(var(--tl-500) / 0)); }
   /* page canvas: a faint gold wash from the top-left, like the landing hero */
   body { background-image: radial-gradient(1100px 480px at 0% 0%, rgb(184 145 58 / 0.07), transparent 60%); background-attachment: fixed; }
 }

@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { call, humanizeError } from "@/lib/api";
 import { Avatarish, Field, inputCls, Section } from "@/components/common";
 import { Button } from "@/components/ui/button";
-import { goldText, useBrandFonts, VvsMark } from "@/components/brand";
+import { useBrandFonts, HospitalLogo } from "@/components/brand";
 
 /** My account (D-71): who I am, my roles and branches, change my password. Open to every signed-in user. */
 export default function AccountPage() {
@@ -26,13 +26,13 @@ export default function AccountPage() {
   };
   return (
     <div className="mx-auto max-w-5xl space-y-4">
-      <section className="relative overflow-hidden rounded-3xl bg-[#0E1013] p-6 text-white shadow-lg">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_300px_at_0%_0%,rgba(184,145,58,0.30),transparent_60%)]" />
-        <VvsMark className="pointer-events-none absolute -end-10 -top-10 h-56 w-56 opacity-[0.08]" />
+      <section className="relative overflow-hidden rounded-3xl bg-ink-900 p-6 text-white shadow-lg">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_300px_at_0%_0%,rgb(var(--tl-500)/0.30),transparent_60%)]" />
+        <HospitalLogo onDark className="pointer-events-none absolute -end-10 -top-10 h-56 w-56 opacity-[0.10]" />
         <div className="relative flex flex-wrap items-center gap-4">
           <Avatarish name={boot.full_name} src={boot.image} size={16} />
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#E6CF8F]/80">My account</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-teal-300/80">My account</div>
             <h1 className="vvs-serif text-3xl font-semibold tracking-tight">{boot.full_name}</h1>
             <p className="flex items-center gap-1.5 text-sm text-white/70"><Mail className="h-4 w-4" />{boot.user}</p>
           </div>
@@ -44,7 +44,7 @@ export default function AccountPage() {
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Section title={<span className="flex items-center gap-2"><UserRound className="h-4 w-4 text-[#B8913A]" />Profile</span>}>
+        <Section title={<span className="flex items-center gap-2"><UserRound className="h-4 w-4 text-teal-500" />Profile</span>}>
           <dl className="grid grid-cols-[120px_1fr] gap-y-3 text-sm">
             <dt className="text-muted-foreground">Name</dt><dd className="font-medium">{boot.full_name}</dd>
             <dt className="text-muted-foreground">Sign-in</dt><dd className="font-medium">{boot.user}</dd>
@@ -53,10 +53,10 @@ export default function AccountPage() {
             <dt className="text-muted-foreground">Organisation</dt><dd className="font-medium">{boot.clinic.name}</dd>
           </dl>
           <div className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">Roles</div>
-          <div className="mt-2 flex flex-wrap gap-1.5">{(boot.is_admin ? ["Administrator", ...roles] : roles).map((r) => <span key={r} className="rounded-full border border-[#B8913A]/30 bg-[#B8913A]/10 px-2.5 py-1 text-xs font-medium text-[#5A4413] dark:text-[#E6CF8F]">{r}</span>)}</div>
+          <div className="mt-2 flex flex-wrap gap-1.5">{(boot.is_admin ? ["Administrator", ...roles] : roles).map((r) => <span key={r} className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2.5 py-1 text-xs font-medium text-teal-800 dark:text-teal-300">{r}</span>)}</div>
         </Section>
 
-        <Section title={<span className="flex items-center gap-2"><KeyRound className="h-4 w-4 text-[#B8913A]" />Change password</span>}>
+        <Section title={<span className="flex items-center gap-2"><KeyRound className="h-4 w-4 text-teal-500" />Change password</span>}>
           <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); void change(); }}>
             <input type="text" autoComplete="username" value={boot.user} readOnly hidden />
             <Field label="Current password" required><input type="password" autoComplete="current-password" className={inputCls} value={old} onChange={(e) => setOld(e.target.value)} /></Field>
@@ -64,7 +64,7 @@ export default function AccountPage() {
             <Field label="New password again" required><input type="password" autoComplete="new-password" className={inputCls} value={again} onChange={(e) => setAgain(e.target.value)} /></Field>
             <Button type="submit" variant="save" disabled={busy || !old || !pwd || !again}><ShieldCheck className="h-4 w-4" />Change password</Button>
           </form>
-          <p className="mt-4 text-xs text-muted-foreground">Other signed-in devices stay signed in. <span className={goldText}>VVSDesk</span> logs every sign-in.</p>
+          <p className="mt-4 text-xs text-muted-foreground">Other signed-in devices stay signed in. <span className="vvs-gold-text">VVSDesk</span> logs every sign-in.</p>
         </Section>
       </div>
     </div>

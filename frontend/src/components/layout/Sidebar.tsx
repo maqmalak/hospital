@@ -20,7 +20,7 @@ import { NAV, type NavGroup, type NavItem } from "@/lib/nav";
 import { setShell, useShell } from "@/lib/shell";
 import { appOfRoute } from "@/lib/apps";
 import { cn } from "@/utils/cn";
-import { VvsMark, Wordmark } from "@/components/brand";
+import { HOSPITAL_TAGLINE, HospitalLogo } from "@/components/brand";
 
 const PINS = "hv.nav.pins";
 const OPEN = "hv.nav.open";
@@ -67,7 +67,7 @@ function ItemLink({ item, active, pinned, onPin, tabIndex, highlighted, onNaviga
     <NavLink to={item.route} tabIndex={tabIndex} onClick={onNavigate} title={t(item.desc || item.label)} aria-current={active ? "page" : undefined}
       className={cn("group relative flex items-center gap-3 rounded-xl py-1.5 pe-2 ps-2.5 text-[13.5px] outline-none transition-all duration-200",
         "focus-visible:ring-2 focus-visible:ring-teal-300/70",
-        active ? "bg-gradient-to-r from-[#B8913A]/30 via-[#B8913A]/12 to-transparent font-semibold text-[#F1DE9C] shadow-inner ring-1 ring-inset ring-[#B8913A]/25"
+        active ? "bg-gradient-to-r from-teal-500/30 via-teal-500/12 to-transparent font-semibold text-teal-200 shadow-inner ring-1 ring-inset ring-teal-500/25"
           : "text-sidebar-muted hover:bg-white/[0.06] hover:text-sidebar-foreground motion-safe:hover:translate-x-0.5 rtl:motion-safe:hover:-translate-x-0.5",
         highlighted && !active && "bg-white/[0.08] text-sidebar-foreground")}>
       <span className={cn("absolute inset-y-1.5 start-0 w-1 rounded-e-full bg-gradient-to-b from-teal-300 to-teal-500 transition-all duration-300",
@@ -215,12 +215,12 @@ export function Sidebar({ variant }: { variant: "desktop" | "drawer" }) {
 
   return (
     <nav aria-label={t("Main menu")} className={cn("relative flex h-full flex-col overflow-hidden bg-sidebar text-sidebar-foreground",
-      "bg-[radial-gradient(120%_60%_at_0%_0%,rgba(184,145,58,0.16),transparent_60%)]", variant === "drawer" && "shadow-2xl")}>
+      "bg-[radial-gradient(120%_60%_at_0%_0%,rgb(var(--tl-500)/0.16),transparent_60%)]", variant === "drawer" && "shadow-2xl")}>
       {/* brand */}
       <div className={cn("flex items-center gap-3 px-4 pb-3 pt-4", rail && "justify-center px-0")}>
         <Link to="/pw-home" onClick={closeDrawer} className="group flex min-w-0 items-center gap-3" aria-label={clinicName}>
-          <VvsMark className="h-10 w-10 shrink-0 transition-transform duration-500 motion-safe:group-hover:rotate-[8deg]" />
-          {!rail && <span className="min-w-0"><span className="block truncate text-sm font-bold">{clinicName}</span><Wordmark className="block text-[10px]" /></span>}
+          <HospitalLogo onDark className="h-10 w-10 transition-transform duration-500 motion-safe:group-hover:scale-105" />
+          {!rail && <span className="min-w-0"><span className="block truncate text-sm font-bold">{clinicName}</span><span className="block truncate text-[10.5px] uppercase tracking-[0.12em] text-sidebar-muted">{t(HOSPITAL_TAGLINE)}</span></span>}
         </Link>
         {variant === "drawer" && <button type="button" onClick={closeDrawer} className="ms-auto grid h-9 w-9 place-items-center rounded-lg text-sidebar-muted hover:bg-white/10 hover:text-white" aria-label={t("Close menu")}><X className="h-5 w-5" /></button>}
       </div>

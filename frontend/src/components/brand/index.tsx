@@ -4,7 +4,7 @@ import { useEffect, useId } from "react";
 export const GOLD = "#B8913A";
 export const INK = "#14171C";
 export const goldText = "bg-[linear-gradient(110deg,#B8913A,#F1DE9C_45%,#C9A24A_70%,#E6CF8F)] bg-clip-text text-transparent";
-export const goldBtn = "inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#A88536,#E6CF8F_50%,#B8913A)] font-bold text-[#14171C] shadow-[0_12px_28px_-12px_rgba(184,145,58,0.9)] ring-1 ring-inset ring-white/30 transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#B8913A]/40 disabled:translate-y-0 disabled:opacity-60";
+export const goldBtn = "btn-gold inline-flex items-center justify-center gap-2 rounded-xl font-bold transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/40 disabled:translate-y-0 disabled:opacity-60";
 
 /** The VVS diamond mark (roof · cross · double check), gold. */
 export function VvsMark({ className = "h-9 w-9" }: { className?: string }) {
@@ -26,7 +26,7 @@ export function VvsMark({ className = "h-9 w-9" }: { className?: string }) {
 
 /** "VVSDESK" in Cinzel, DESK in gold. */
 export function Wordmark({ className = "text-[17px]", light = true }: { className?: string; light?: boolean }) {
-  return <span dir="ltr" className={`vvs-brand tracking-[0.28em] ${light ? "text-white" : "text-[#14171C] dark:text-white"} ${className}`}>VVS<span className={goldText}>DESK</span></span>;
+  return <span dir="ltr" className={`vvs-brand tracking-[0.28em] ${light ? "text-white" : "text-ink dark:text-white"} ${className}`}>VVS<span className="vvs-gold-text">DESK</span></span>;
 }
 
 const FONTS = "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Cinzel:wght@600&display=swap";
@@ -41,3 +41,19 @@ export function useBrandFonts() {
     document.head.appendChild(s);
   }, []);
 }
+
+const BRAND = (f: string) => `${import.meta.env.BASE_URL}brand/${f}`;
+/** The hospital's own logo (Lyallpur Hospital, D-73): the symbol ("mark") or the full logo with name; a lighter cut in dark mode. */
+export function HospitalLogo({ variant = "mark", className = "h-10 w-10", alt = "", onDark = false }: { variant?: "mark" | "full"; className?: string; alt?: string; onDark?: boolean }) {
+  const f = variant === "mark" ? "lyallpur-mark" : "lyallpur-logo";
+  if (onDark) return <img src={BRAND(`${f}-dark.webp`)} alt={alt} className={`shrink-0 object-contain ${className}`} draggable={false} />;
+  return (
+    <span className={`relative inline-block shrink-0 ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
+      <img src={BRAND(`${f}.webp`)} alt="" className="h-full w-full object-contain dark:hidden" draggable={false} />
+      <img src={BRAND(`${f}-dark.webp`)} alt="" className="hidden h-full w-full object-contain dark:block" draggable={false} />
+    </span>
+  );
+}
+
+/** Second line under the hospital name. */
+export const HOSPITAL_TAGLINE = "Medical & Research Center";

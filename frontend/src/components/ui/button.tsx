@@ -13,7 +13,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 const variantClasses: Record<Variant, string> = {
   default: "bg-foreground text-background hover:opacity-90",
   primary:
-    "btn-gold bg-[linear-gradient(135deg,#A88536,#E6CF8F_50%,#B8913A)] font-semibold text-[#14171C] shadow-[0_10px_24px_-12px_rgba(184,145,58,0.9)] ring-1 ring-inset ring-white/30 hover:brightness-110 active:brightness-95",
+    "btn-gold btn-gold font-semibold hover:brightness-110 active:brightness-95",
   destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
   outline: "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
   secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/70",
@@ -21,7 +21,7 @@ const variantClasses: Record<Variant, string> = {
   link: "text-primary underline-offset-4 hover:underline",
   // form actions — glossy gradients with a coloured glow; lift on hover
   save:
-    "rounded-lg bg-[linear-gradient(135deg,#A88536,#E6CF8F_50%,#B8913A)] font-semibold text-[#14171C] shadow-[0_10px_24px_-12px_rgba(184,145,58,0.9)] ring-1 ring-inset ring-white/30 hover:-translate-y-px hover:shadow-lg hover:shadow-primary/40 active:translate-y-0 transition-all",
+    "rounded-lg btn-gold font-semibold hover:-translate-y-px hover:shadow-lg hover:shadow-primary/40 active:translate-y-0 transition-all",
   submit:
     "rounded-lg bg-gradient-to-b from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-1 ring-inset ring-white/15 hover:-translate-y-px hover:from-emerald-500 hover:to-emerald-500 hover:shadow-lg hover:shadow-emerald-600/40 active:translate-y-0 transition-all",
   workflow:
