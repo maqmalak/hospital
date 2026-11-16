@@ -66,6 +66,8 @@ const en = {
     eyebrow: "Services", title: "Diagnostics & treatment",
     sub: "Scans, tests and treatment in the same building — reports go straight into your file, where your doctor sees them.",
     items: [
+      ["OPD", "Daily consultation clinics with our consultants — book online or walk in, with nurse vitals before every visit."],
+      ["Cardiac Care", "ECG, echocardiography, exercise tolerance tests and cardiac monitoring, led by our cardiology team."],
       ["MRI", "Detailed scans of the brain, spine, joints and soft tissue, reported by a radiologist."],
       ["CT Scan", "Fast cross-sectional imaging for head, chest and abdomen — including emergency scans."],
       ["X-Ray", "Digital X-rays for chest, bones and joints, with the image and report added to your file."],
@@ -154,6 +156,8 @@ const ur: typeof en = {
     eyebrow: "خدمات", title: "تشخیص اور علاج",
     sub: "اسکین، ٹیسٹ اور علاج ایک ہی عمارت میں — رپورٹیں سیدھی آپ کی فائل میں جاتی ہیں جہاں ڈاکٹر انہیں دیکھتا ہے۔",
     items: [
+      ["او پی ڈی", "ہمارے کنسلٹنٹس کے روزانہ کلینک — آن لائن بک کریں یا براہِ راست آئیں، ہر دورے سے پہلے نرس کے وائٹلز۔"],
+      ["امراضِ قلب کی نگہداشت", "ای سی جی، ایکو کارڈیوگرافی، ورزشی ٹیسٹ اور دل کی نگرانی، ہماری امراضِ قلب کی ٹیم کی زیرِ نگرانی۔"],
       ["ایم آر آئی", "دماغ، ریڑھ کی ہڈی، جوڑوں اور نرم بافتوں کے تفصیلی اسکین، ریڈیالوجسٹ کی رپورٹ کے ساتھ۔"],
       ["سی ٹی اسکین", "سر، سینے اور پیٹ کی تیز امیجنگ — ہنگامی اسکین سمیت۔"],
       ["ایکسرے", "سینے، ہڈیوں اور جوڑوں کے ڈیجیٹل ایکسرے، تصویر اور رپورٹ آپ کی فائل میں۔"],
