@@ -6,7 +6,7 @@
  * The app's automatic translator skips this folder (own language toggle).
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BedDouble, Bone, Brain, CalendarCheck, CalendarDays, ClipboardList, Clock3, DoorOpen, Droplet, Droplets, Ear, FileText, FlaskConical, HeartPulse, Languages, LogIn, Magnet, Mail, MapPin, Menu, Microscope, Phone, Pill, ScanLine, ScanSearch, Scissors, ShieldCheck, Siren, Sparkles, Stethoscope, TestTubes, UserRound, Users, Waves, X, type LucideIcon } from "lucide-react";
+import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BedDouble, Bone, Brain, CalendarCheck, CalendarDays, ClipboardList, Clock3, DoorOpen, Droplet, Droplets, Ear, FileText, FlaskConical, HeartPulse, Languages, LogIn, Magnet, Mail, MapPin, Menu, Navigation, Microscope, Phone, Pill, ScanLine, ScanSearch, Scissors, ShieldCheck, Siren, Sparkles, Stethoscope, TestTubes, UserRound, Users, Waves, X, type LucideIcon } from "lucide-react";
 import { COPY, CONFIG, type Copy, type Lang } from "./content";
 import { Wordmark } from "@/components/brand";
 import { getCall } from "@/services/frappe";
@@ -99,7 +99,7 @@ function useSeo(c: Copy, lang: Lang, h: Opts["clinic"] | undefined) {
     const ld = document.createElement("script"); ld.type = "application/ld+json";
     ld.text = JSON.stringify({ "@context": "https://schema.org", "@type": "Hospital", name: COPY.en.name, alternateName: COPY.ur.name,
       description: COPY.en.meta.description, url, logo: `${window.location.origin}${BRAND("lyallpur-logo.webp")}`,
-      ...(h?.phone ? { telephone: h.phone } : {}), ...(h?.address ? { address: { "@type": "PostalAddress", streetAddress: h.address, addressCountry: "PK" } } : {}) });
+      ...(h?.phone ? { telephone: h.phone } : {}), ...(h?.address ? { address: { "@type": "PostalAddress", streetAddress: h.address, addressLocality: "Faisalabad", addressRegion: "Punjab", addressCountry: "PK" } } : {}) });
     document.head.appendChild(ld); added.push(ld);
     return () => { document.title = prevTitle; added.forEach((e) => e.remove()); };
   }, [c, lang, h]);
@@ -450,6 +450,7 @@ function Cta({ c, phone }: { c: Copy; phone?: string }) {
 
 function Contact({ c, h }: { c: Copy; h?: Opts["clinic"] }) {
   const er = CONFIG.emergencyPhone || h?.phone;
+  const mapQ = CONFIG.mapQuery || (h?.address ? `${h.address}, Pakistan` : "");
   const rows: [LucideIcon, string, ReactNode, string?][] = [
     ...(h?.address ? [[MapPin, c.contact.address, h.address] as [LucideIcon, string, ReactNode]] : []),
     ...(h?.phone ? [[Phone, c.contact.phone, <span dir="ltr">{h.phone}</span>, tel(h.phone)] as [LucideIcon, string, ReactNode, string]] : []),
@@ -461,12 +462,12 @@ function Contact({ c, h }: { c: Copy; h?: Opts["clinic"] }) {
     <section id="contact" className="scroll-mt-24 pb-24">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-2">
         <Reveal>
-          <Eyebrow>{c.contact.eyebrow}</Eyebrow><H2>{c.contact.title}</H2>
+          <Eyebrow>{c.contact.eyebrow}</Eyebrow><BrandTitle text={c.contact.title} />
           <ul className="mt-10 space-y-5">
             {rows.map(([I, l, v, href]) => (
               <li key={l} className="flex items-start gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#2B6E85]/10 text-[#2B6E85]"><I className="h-5 w-5" /></span>
-                <span><span className="block text-xs font-semibold uppercase tracking-[0.16em] text-[#0C2431]/45">{l}</span>
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#E5322F] text-white shadow-[0_12px_24px_-12px_rgba(229,50,47,0.9)]"><I className="h-5 w-5" /></span>
+                <span><span className="svc block text-[13px] font-semibold uppercase tracking-[0.12em] text-[#2B6E85]">{l}</span>
                   {href ? <a href={href} className="text-lg font-medium text-[#0C2431] hover:text-[#2B6E85]">{v}</a> : <span className="text-lg font-medium text-[#0C2431]">{v}</span>}</span>
               </li>
             ))}
@@ -474,15 +475,24 @@ function Contact({ c, h }: { c: Copy; h?: Opts["clinic"] }) {
           <p className="mt-8 text-sm text-[#0C2431]/55">{c.contact.hours}</p>
         </Reveal>
         <Reveal delay={120}>
-          <div className="relative h-full min-h-[340px] overflow-hidden rounded-[2rem] bg-[#0C2431] p-10 text-white">
-            <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:38px_38px]" />
-            <div className="relative flex h-full flex-col">
-              <img src={BRAND("lyallpur-logo-dark.webp")} alt={c.name} className="h-40 w-auto self-start object-contain" />
-              <div className="mt-auto pt-8">
-                {h?.address && <p className="flex items-start gap-2 text-white/80"><MapPin className="mt-1 h-5 w-5 shrink-0 text-[#FF6B66]" />{h.address}</p>}
-                {h?.address && <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${COPY.en.name}, ${h.address}`)}`} target="_blank" rel="noopener noreferrer"
-                  className={`${redBtn} mt-6`}><MapPin className="h-5 w-5" />{c.contact.directions}</a>}
+          <div className="relative h-full min-h-[440px] overflow-hidden rounded-[2rem] bg-[#0C2431] shadow-[0_30px_70px_-35px_rgba(12,36,49,0.6)]">
+            {mapQ ? (
+              <iframe title={c.contact.mapTitle} src={`https://www.google.com/maps?q=${encodeURIComponent(mapQ)}&z=16&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+                className="absolute inset-0 h-full w-full border-0 grayscale-[0.25]" />
+            ) : <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:38px_38px]" />}
+            <div className="absolute inset-x-4 bottom-4 rounded-3xl bg-white/95 p-5 text-[#0C2431] shadow-2xl backdrop-blur sm:inset-x-6 sm:bottom-6 sm:p-6">
+              <div className="flex items-start gap-4">
+                <img src={BRAND("lyallpur-mark.webp")} alt="" className="h-14 w-14 shrink-0" />
+                <div className="min-w-0">
+                  <div className="svc text-lg font-semibold uppercase tracking-[0.04em] text-[#2B6E85]">{c.name}</div>
+                  {h?.address && <p className="mt-1 flex items-start gap-1.5 text-[15px] text-[#0C2431]/75"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#E5322F]" />{h.address}</p>}
+                  {h?.phone && <a href={tel(h.phone)} className="mt-1 flex items-center gap-1.5 text-[15px] font-medium text-[#0C2431] hover:text-[#2B6E85]"><Phone className="h-4 w-4 text-[#E5322F]" /><span dir="ltr">{h.phone}</span></a>}
+                </div>
               </div>
+              {mapQ && <div className="mt-5 flex flex-wrap gap-2">
+                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQ)}`} target="_blank" rel="noopener noreferrer" className={`${redBtn} px-5 py-3 text-sm`}><Navigation className="h-4 w-4" />{c.contact.directions}</a>
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQ)}`} target="_blank" rel="noopener noreferrer" className={`${ghostBtn} border-[#0C2431]/15 px-5 py-3 text-sm text-[#0C2431] hover:bg-[#0C2431]/5 focus-visible:ring-[#2B6E85]/20`}><MapPin className="h-4 w-4" />{c.contact.openMap}</a>
+              </div>}
             </div>
           </div>
         </Reveal>

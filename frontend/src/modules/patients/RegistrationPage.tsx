@@ -20,7 +20,7 @@ interface Form { [k: string]: unknown; patient_name: string; patient_name_ur: st
   preferred_language: string; panel: string; employee_id: string; insurance_provider: string; policy_no: string; photo: string;
   allergies: { allergy: string; severity: string; reaction: string }[]; wa: boolean; sms: boolean; data: boolean; household: boolean }
 const EMPTY: Form = { patient_name: "", patient_name_ur: "", relation_type: "S/O", guardian_name: "", gender: "", dob: "", age: "", phone: "", alt_phone: "",
-  cnic: "", address: "", city: "Lahore", category: "Normal", blood_group: "", preferred_language: "ur", panel: "", employee_id: "", insurance_provider: "",
+  cnic: "", address: "", city: "Faisalabad", category: "Normal", blood_group: "", preferred_language: "ur", panel: "", employee_id: "", insurance_provider: "",
   policy_no: "", photo: "", allergies: [], wa: true, sms: true, data: true, household: true };
 interface Dup { name: string; patient_name: string; phone?: string; age?: number; gender: string; last_visit?: string; reason: string; score: number; category?: string }
 
@@ -163,7 +163,7 @@ export default function RegistrationPage() {
               <L label="Alternate phone"><input className={inp} inputMode="tel" value={f.alt_phone} onChange={(e) => set("alt_phone", e.target.value)} /></L>
               <L label="Address" className="sm:col-span-2"><div className="relative"><Home className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground" /><input className={inp + " ps-9"} value={f.address} onChange={(e) => set("address", e.target.value)} placeholder="House, street, area" /></div></L>
               <L label="City"><div className="relative"><MapPin className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground" /><input className={inp + " ps-9"} list="cities" value={f.city} onChange={(e) => set("city", e.target.value)} /></div>
-                <datalist id="cities">{["Lahore", "Karachi", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala"].map((c) => <option key={c} value={c} />)}</datalist></L>
+                <datalist id="cities">{["Faisalabad", "Lahore", "Karachi", "Islamabad", "Rawalpindi", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala"].map((c) => <option key={c} value={c} />)}</datalist></L>
               <L label="Message language"><div className="grid grid-cols-3 gap-2">{[["ur", "اردو"], ["en", "English"], ["ar", "العربية"]].map(([k, l]) => (
                 <button key={k} type="button" onClick={() => set("preferred_language", k)} className={cn("h-11 rounded-xl border text-sm font-semibold", f.preferred_language === k ? "border-primary bg-primary/10 text-primary" : "border-input", k === "ur" && "font-urdu text-base")}>{l}</button>))}</div></L>
             </div>

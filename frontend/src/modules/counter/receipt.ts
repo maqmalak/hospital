@@ -1,4 +1,5 @@
 import { esc, money, qrSvg } from "@/lib/print";
+import { thermalHeader } from "@/lib/letterhead";
 
 export interface ReceiptLine { idx?: number; kind: string; label: string; qty: number; rate: number; discount?: number; amount: number; token_no?: number; refunded?: number; reference_name?: string }
 export interface Receipt {
@@ -16,8 +17,7 @@ export function receiptHtml(r: Receipt) {
   <style>@page{size:80mm auto;margin:3mm}body{font:12px/1.35 Inter,sans-serif;width:74mm;margin:0;color:#000}.c{text-align:center}.r{display:flex;justify-content:space-between;gap:4px}
   .b{font-weight:800}.hr{border-top:1px dashed #000;margin:2mm 0}.xs{font-size:10px}.tk{border:2px solid #000;border-radius:6px;text-align:center;margin:1.5mm 0;padding:1mm}
   .tk .n{font-size:40px;font-weight:800;line-height:1}.ur{font-family:Gulzar,serif;direction:rtl}.off{border:2px dashed #000;padding:1mm;text-align:center;font-weight:800;margin:1mm 0}</style></head><body>
-  <div class="c b" style="font-size:15px">${esc(r.clinic.name)}</div>${r.clinic.name_ur ? `<div class="c ur">${esc(r.clinic.name_ur)}</div>` : ""}
-  <div class="c xs">${esc(r.clinic.address || "")}${r.clinic.phone ? ` · ${esc(r.clinic.phone)}` : ""}</div><div class="hr"></div>
+  ${thermalHeader(r.clinic)}<div class="hr"></div>
   ${r.pending_sync ? `<div class="off">OFFLINE RECEIPT · token on sync</div>` : ""}${tok}
   ${row("Receipt", esc(r.name))}${row("Date", esc(r.posted_at.slice(0, 16)))}${row("MR No.", `<b>${esc(r.patient)}</b>`)}${row("Patient", esc(r.patient_name))}
   <div class="hr"></div>${r.lines.map((l) => row(`${l.qty !== 1 ? `${l.qty} × ` : ""}${esc(l.label)}${l.refunded ? " (refunded)" : ""}`, money(l.amount))

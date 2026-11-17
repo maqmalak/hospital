@@ -5,6 +5,7 @@ import { CalendarClock, Check, CircleX, Clock, ImagePlus, Loader2, Lock, Pill, P
 import toast from "react-hot-toast";
 import { getCall, humanizeError, postCall } from "@/services/frappe";
 import { esc, printHtml } from "@/lib/print";
+import { lhCss, lhPage } from "@/lib/letterhead";
 import { cn } from "@/utils/cn";
 import { PublicShell } from "./shared";
 
@@ -14,7 +15,7 @@ interface Rx { name: string; date: string; doctor: string; qualification?: strin
 interface View { name: string; status: string; patient_name: string; created: string; fee: number; fee_status: string; payment_method: string; scheduled_at?: string; video_link?: string | null;
   doctor?: { doctor_name: string; doctor_name_ur?: string; specialization?: string; qualification?: string } | null; rejection_reason?: string | null; cancel_reason?: string | null;
   refund_amount?: number; refund_reference?: string; completed_at?: string; follow_up?: string; follow_up_date?: string; has_prescription: boolean; verified: boolean;
-  prescription?: Rx; payment_instructions?: string; clinic: { name: string; name_ur?: string; phone?: string }; can_cancel: boolean; can_pay: boolean; methods: string[] }
+  prescription?: Rx; payment_instructions?: string; clinic: { name: string; name_ur?: string; phone?: string; address?: string }; can_cancel: boolean; can_pay: boolean; methods: string[] }
 const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
 const when = (s?: string) => (s ? new Date(s.replace(" ", "T")).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
 
@@ -109,11 +110,14 @@ function RxView({ rx }: { rx: Rx }) {
 }
 
 function rxHtml(v: View, rx: Rx) {
-  return `<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A5;margin:10mm}body{font:12px/1.5 Arial,sans-serif;color:#0f172a}h1{font-size:16px;margin:0}
-  .m{border-bottom:1px solid #e2e8f0;padding:6px 0}.muted{color:#64748b}</style></head><body><h1>${esc(v.clinic.name)}</h1><div class="muted">Online consultation ${esc(v.name)} · ${esc(rx.date)}</div>
-  <p><b>${esc(v.patient_name)}</b></p><p>${esc(rx.doctor)}${rx.qualification ? ` · ${esc(rx.qualification)}` : ""}${rx.registration_no ? ` · PMDC ${esc(rx.registration_no)}` : ""}</p>
-  ${rx.diagnoses.length ? `<p><b>Diagnosis:</b> ${esc(rx.diagnoses.join(", "))}</p>` : ""}<h3>℞</h3>
-  ${rx.medicines.map((m) => `<div class="m"><b>${esc(m.item_name)}</b><br>${esc([m.dose, m.frequency, m.duration, m.route].filter(Boolean).join(" · "))}${m.instructions ? `<br>${esc(m.instructions)}` : ""}</div>`).join("")}
-  ${rx.lab_tests.length ? `<p><b>Tests:</b> ${esc(rx.lab_tests.join(", "))}</p>` : ""}${rx.advice ? `<p><b>Advice:</b> ${esc(rx.advice)}</p>` : ""}${rx.follow_up_date ? `<p><b>Follow-up:</b> ${esc(rx.follow_up_date)}</p>` : ""}
-  <p class="muted">Prescription ${esc(rx.name)}</p></body></html>`;
+  const body = `<div class="dr"><b>${esc(rx.doctor)}</b><div class="muted">${[rx.qualification, rx.registration_no ? `PMDC ${rx.registration_no}` : ""].filter(Boolean).map(esc).join(" · ")}</div></div>
+  <div class="pt"><b>${esc(v.patient_name)}</b><span class="muted">${esc(rx.date)} · ${esc(rx.name)}</span></div>
+  ${rx.diagnoses.length ? `<p><b class="k">Diagnosis</b> ${esc(rx.diagnoses.join(", "))}</p>` : ""}<div class="rx">℞</div>
+  ${rx.medicines.map((m) => `<div class="m"><b>${esc(m.item_name)}</b><br>${esc([m.dose, m.frequency, m.duration, m.route].filter(Boolean).join(" · "))}${m.instructions ? `<br><span class="muted">${esc(m.instructions)}</span>` : ""}</div>`).join("")}
+  ${rx.lab_tests.length ? `<p><b class="k">Tests</b> ${esc(rx.lab_tests.join(", "))}</p>` : ""}${rx.advice ? `<p><b class="k">Advice</b> ${esc(rx.advice)}</p>` : ""}${rx.follow_up_date ? `<p><b class="k">Follow-up</b> ${esc(rx.follow_up_date)}</p>` : ""}`;
+  return `<!doctype html><html><head><meta charset="utf-8"><style>${lhCss("A5")}body{font:11.5px/1.5 Inter,Arial,sans-serif;color:#0f172a}
+  .dr b{font-size:14px;color:#0C2431}.pt{display:flex;justify-content:space-between;background:#F2F7F9;border-left:1.2mm solid #2B6E85;border-radius:2mm;padding:2mm 3mm;margin:3mm 0}
+  .rx{font:800 26px/1 Georgia,serif;color:#E5322F;margin:2mm 0}.k{color:#2B6E85;text-transform:uppercase;font-size:10px;letter-spacing:.08em;margin-right:4px}
+  .m{border-bottom:1px solid #e2e8f0;padding:5px 0}.muted{color:#64748b}</style></head><body>
+  ${lhPage(body, v.clinic, { title: "Online consultation", note: esc(v.name), footRight: `Rx ${esc(rx.name)}` })}</body></html>`;
 }

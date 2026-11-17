@@ -6,6 +6,7 @@
 export const CONFIG = {
   whatsapp: "92XXXXXXXXXX",            // international format, digits only — [replace]; hidden while it contains X
   emergencyPhone: "",                  // a separate emergency line; empty = the main phone from Clinic Settings
+  mapQuery: "",                        // exact Google Maps search (place name or plus code) — empty = the Clinic Settings address
   email: "",                           // e.g. info@lyallpurhospital.pk — empty = not shown
   social: { facebook: "", instagram: "", youtube: "" } as Record<string, string>,  // empty = not shown
 };
@@ -114,8 +115,8 @@ const en = {
   },
   cta: { title: "Need to see a doctor?", sub: "Book online in a couple of minutes, or call us and our team will help.", book: "Book an appointment", call: "Call" },
   contact: {
-    eyebrow: "Contact", title: "Visit or call us", address: "Address", phone: "Phone", whatsapp: "WhatsApp", email: "Email",
-    directions: "Get directions", emergency: "Emergency", hours: "Clinic days and times are shown with each doctor when you book.",
+    eyebrow: "Contact", title: "Visit or call us", address: "Address", phone: "Landline", whatsapp: "WhatsApp", email: "Email",
+    directions: "Get directions", openMap: "Open in Google Maps", mapTitle: "Map: Lyallpur Medical Complex, Faisalabad", emergency: "Emergency", hours: "Clinic days and times are shown with each doctor when you book.",
   },
   footer: { rights: "All rights reserved.", powered: "Hospital system by", links: "Quick links" },
 };
@@ -222,8 +223,8 @@ const ur: typeof en = {
   },
   cta: { title: "ڈاکٹر سے ملنا ہے؟", sub: "چند منٹ میں آن لائن بک کریں، یا کال کریں — ہماری ٹیم مدد کرے گی۔", book: "اپائنٹمنٹ بک کریں", call: "کال کریں" },
   contact: {
-    eyebrow: "رابطہ", title: "تشریف لائیں یا کال کریں", address: "پتہ", phone: "فون", whatsapp: "واٹس ایپ", email: "ای میل",
-    directions: "راستہ دیکھیں", emergency: "ایمرجنسی", hours: "ہر ڈاکٹر کے کلینک کے دن اور اوقات بکنگ کے وقت دکھائے جاتے ہیں۔",
+    eyebrow: "رابطہ", title: "تشریف لائیں یا کال کریں", address: "پتہ", phone: "لینڈ لائن", whatsapp: "واٹس ایپ", email: "ای میل",
+    directions: "راستہ دیکھیں", openMap: "گوگل میپس میں کھولیں", mapTitle: "نقشہ: لائل پور میڈیکل کمپلیکس، فیصل آباد", emergency: "ایمرجنسی", hours: "ہر ڈاکٹر کے کلینک کے دن اور اوقات بکنگ کے وقت دکھائے جاتے ہیں۔",
   },
   footer: { rights: "جملہ حقوق محفوظ ہیں۔", powered: "ہسپتال سسٹم", links: "فوری روابط" },
 };

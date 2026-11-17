@@ -3,6 +3,7 @@ import { Pill as PillIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRealtime } from "@/lib/realtime";
 import { esc, qrSvg } from "@/lib/print";
+import { thermalHeader } from "@/lib/letterhead";
 import { cn } from "@/utils/cn";
 
 export const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
@@ -47,8 +48,7 @@ export function receiptHtml(r: Receipt) {
   return `<!doctype html><html><head><meta charset="utf-8"><style>@page{size:80mm auto;margin:3mm}body{font-family:Arial,sans-serif;font-size:10pt;width:74mm;margin:0}
   .c{text-align:center}.b{font-weight:700}.tk{font-size:34pt;font-weight:900;letter-spacing:2px;border:2px dashed #000;margin:6px 0;padding:4px}
   table{width:100%;border-collapse:collapse}td{padding:2px 0;vertical-align:top}.r{text-align:right}.m{font-size:8pt;color:#444}hr{border:0;border-top:1px dashed #000}</style></head><body>
-  <div class="c b" style="font-size:13pt">${esc(r.clinic.name)}</div>${r.clinic.name_ur ? `<div class="c" style="font-family:'Noto Nastaliq Urdu',serif">${esc(r.clinic.name_ur)}</div>` : ""}
-  <div class="c m">${esc(r.clinic.address ?? "")} ${esc(r.clinic.phone ?? "")}</div><hr>
+  ${thermalHeader(r.clinic)}<hr>
   ${r.token ? `<div class="c m">Collection token</div><div class="c tk">${esc(r.token)}</div>` : ""}
   <div class="m">${esc(r.name)} · ${esc(r.posting_date)} ${esc(r.posting_time)} · ${esc(r.counter ?? "")}</div>
   <div class="m">${esc(r.customer)}${r.patient ? ` · ${esc(r.patient)}` : ""}${r.prescription ? ` · Rx ${esc(r.prescription)}` : ""}</div>${r.paper_rx ? `<div class="m">Prescribed by ${/^dr\.?\s/i.test(r.paper_rx.doctor) ? "" : "Dr "}${esc(r.paper_rx.doctor)}${r.paper_rx.reg_no ? ` (${esc(r.paper_rx.reg_no)})` : ""}${r.paper_rx.rx_date ? ` · ${esc(r.paper_rx.rx_date)}` : ""}</div>` : ""}<hr>

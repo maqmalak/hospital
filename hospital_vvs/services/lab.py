@@ -629,6 +629,8 @@ def _prev_cell(pv, FLAG):
 
 
 def report_html(d):
+	from hospital_vvs.letterhead import footer_html, header_html
+
 	esc = frappe.utils.escape_html
 	P = d.get("print") or {}
 	FLAG = {"Low": ("#b45309", "#fef3c7", "L"), "High": ("#b45309", "#fef3c7", "H"), "Critical Low": ("#b91c1c", "#fee2e2", "LL"),
@@ -681,49 +683,51 @@ def report_html(d):
 	@page {{ size: A4; margin: 12mm 12mm 16mm 12mm; }}
 	* {{ box-sizing: border-box; }}
 	body {{ font-family: Helvetica, Arial, sans-serif; font-size: 10.5px; color: #0f172a; margin: 0; }}
-	.hdr {{ display: table; width: 100%; border-bottom: 3px solid #0f766e; padding-bottom: 8px; }}
+	.hdr {{ display: table; width: 100%; border-bottom: 3px solid #2B6E85; padding-bottom: 8px; }}
 	.hdr > div {{ display: table-cell; vertical-align: middle; }}
 	.logo {{ width: 62px; }} .logo img {{ width: 56px; height: 56px; border-radius: 12px; }}
-	.cl {{ font-size: 21px; font-weight: 800; color: #0f766e; letter-spacing: .2px; }} .cl .ur {{ font-size: 16px; color: #0369a1; margin-left: 8px; font-weight: 600; }}
-	.sub {{ font-size: 10px; color: #475569; margin-top: 1px; }} .dep {{ font-size: 11px; font-weight: 700; color: #0369a1; margin-top: 3px; text-transform: uppercase; letter-spacing: 1px; }}
+	.cl {{ font-size: 21px; font-weight: 800; color: #2B6E85; letter-spacing: .2px; }} .cl .ur {{ font-size: 16px; color: #0369a1; margin-left: 8px; font-weight: 600; }}
+	.sub {{ font-size: 10px; color: #475569; margin-top: 1px; }} .dep {{ font-size: 10.5px; font-weight: 700; color: #2B6E85; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }}
 	.acc {{ font-size: 9px; color: #64748b; }}
-	.qr {{ width: 108px; text-align: center; }} .qr img {{ width: 84px; height: 84px; }} .qr div {{ font-size: 8px; color: #64748b; }}
-	.title {{ margin: 8px 0 6px; text-align: center; }} .title span {{ display: inline-block; white-space: nowrap; background: #0f766e; color: #fff; font-weight: 800; letter-spacing: 2px; padding: 4px 22px; border-radius: 20px; font-size: 11px; }}
+	.ttl {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; }} .ttl td {{ vertical-align: middle; padding: 0; }}
+	.pill {{ display: inline-block; white-space: nowrap; background: #0C2431; color: #fff; font-weight: 800; letter-spacing: 2.5px; padding: 5px 16px; border-radius: 20px; font-size: 11px; }}
+	.qr {{ width: 100px; text-align: center; }} .qr img {{ width: 72px; height: 72px; }} .qr div {{ font-size: 7.5px; color: #64748b; }}
+	.title {{ margin: 8px 0 6px; text-align: center; }} .title span {{ display: inline-block; white-space: nowrap; background: #2B6E85; color: #fff; font-weight: 800; letter-spacing: 2px; padding: 4px 22px; border-radius: 20px; font-size: 11px; }}
 	.pt {{ border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; padding: 6px 8px; }}
 	.cell {{ display: inline-block; width: 32.5%; padding: 3px 4px; vertical-align: top; }} .cell span {{ display: block; font-size: 8px; text-transform: uppercase; color: #64748b; letter-spacing: .6px; }}
 	.ur {{ font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif; direction: rtl; }}
 	.pr {{ font-size: 8px; font-weight: 800; padding: 1px 6px; border-radius: 10px; color: #fff; }} .pr-urgent {{ background: #dc2626; }} .pr-priority {{ background: #f59e0b; }}
-	.dept {{ margin: 12px 0 4px; font-size: 11px; font-weight: 800; color: #fff; background: #0f766e; border-left: 6px solid #0369a1; padding: 4px 8px; border-radius: 6px; letter-spacing: 1px; text-transform: uppercase; }}
-	.t {{ margin: 6px 0 10px; page-break-inside: avoid; }} .tn {{ font-size: 12.5px; font-weight: 800; color: #0f766e; margin-bottom: 3px; }}
-	.rt {{ width: 100%; border-collapse: collapse; }} .rt th {{ text-align: left; font-size: 8.5px; text-transform: uppercase; color: #475569; border-bottom: 1.5px solid #0f766e; padding: 4px 6px; letter-spacing: .5px; }}
+	.dept {{ margin: 12px 0 4px; font-size: 11px; font-weight: 800; color: #fff; background: #2B6E85; border-left: 6px solid #E5322F; padding: 4px 8px; border-radius: 6px; letter-spacing: 1px; text-transform: uppercase; }}
+	.t {{ margin: 6px 0 10px; page-break-inside: avoid; }} .tn {{ font-size: 12.5px; font-weight: 800; color: #2B6E85; margin-bottom: 3px; }}
+	.rt {{ width: 100%; border-collapse: collapse; }} .rt th {{ text-align: left; font-size: 8.5px; text-transform: uppercase; color: #475569; border-bottom: 1.5px solid #2B6E85; padding: 4px 6px; letter-spacing: .5px; }}
 	.rt td {{ padding: 4px 6px; border-bottom: 1px solid #e2e8f0; }} .rt tr:nth-child(even) td {{ background: #f8fafc; }}
 	.res {{ font-weight: 800; }} .u {{ color: #475569; }} .flag {{ font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 4px; margin-left: 4px; }}
-	.txt {{ padding: 6px 8px; background: #f8fafc; border-left: 3px solid #0f766e; margin-top: 4px; line-height: 1.5; }}
-	.interp {{ margin-top: 5px; padding: 5px 8px; background: #ecfeff; border: 1px solid #a5f3fc; border-radius: 6px; }} .interp b {{ color: #0e7490; margin-right: 6px; }}
+	.txt {{ padding: 6px 8px; background: #f8fafc; border-left: 3px solid #2B6E85; margin-top: 4px; line-height: 1.5; }}
+	.interp {{ margin-top: 5px; padding: 5px 8px; background: #F2F7F9; border: 1px solid #cfe3ea; border-radius: 6px; }} .interp b {{ color: #2B6E85; margin-right: 6px; }}
 	.note, .pend {{ color: #64748b; font-style: italic; margin-top: 3px; }} .vb {{ font-size: 8.5px; color: #64748b; margin-top: 3px; text-align: right; }}
 	.amd {{ font-size: 8px; color: #fff; background: #dc2626; padding: 1px 6px; border-radius: 8px; margin-left: 6px; vertical-align: middle; }}
 	.remarks {{ margin: 10px 0; padding: 7px 9px; border: 1px dashed #0369a1; border-radius: 8px; background: #f0f9ff; line-height: 1.5; }}
 	.sign {{ display: table; width: 100%; margin-top: 18px; page-break-inside: avoid; }} .sign > div {{ display: table-cell; vertical-align: bottom; }}
 	.sigbox {{ text-align: center; width: 260px; position: relative; }} .sig {{ max-height: 48px; max-width: 170px; }} .sigline {{ height: 40px; }}
-	.dsig {{ margin-top: 3px; font-size: 8.5px; font-weight: 700; color: #0f766e; }}
+	.dsig {{ margin-top: 3px; font-size: 8.5px; font-weight: 700; color: #2B6E85; }}
 	.sigbox .nm {{ border-top: 1px solid #0f172a; padding-top: 3px; font-weight: 800; font-size: 11px; }} .sigbox .tt {{ font-size: 9px; color: #475569; }}
 	.legend {{ font-size: 8.5px; color: #64748b; }}
-	.foot {{ margin-top: 14px; border-top: 2px solid #0f766e; padding-top: 5px; font-size: 8.5px; color: #475569; display: table; width: 100%; }} .foot > div {{ display: table-cell; vertical-align: top; }}
+	.foot {{ margin-top: 14px; border-top: 2px solid #2B6E85; padding-top: 5px; font-size: 8.5px; color: #475569; display: table; width: 100%; }} .foot > div {{ display: table-cell; vertical-align: top; }}
+	.fnote {{ margin-top: 12px; font-size: 8.5px; color: #475569; }}
 	.end {{ text-align: center; font-size: 9px; color: #94a3b8; letter-spacing: 3px; margin-top: 8px; }}
 	</style></head><body>
-	<div class="hdr"><div class="logo"><img src="{P.get('logo') or ''}"></div>
-		<div><div class="cl">{esc(c['name'])}</div>
-		<div class="sub">{esc(c.get('address') or '')}{(' · ' + esc(c['phone'])) if c.get('phone') else ''}</div>
-		<div class="dep">{esc(P.get('department') or '')}</div>{('<div class="acc">' + esc(P['accreditation']) + '</div>') if P.get('accreditation') else ''}</div>
-		<div class="qr"><img src="{qr}"><div>Scan to verify<br>{esc(d['name'])} · v{d.get('version') or 1}</div></div></div>
-	<div class="title"><span>LABORATORY REPORT</span></div>
+	{header_html(c)}
+	<table class="ttl"><tr><td><span class="pill">LABORATORY REPORT</span>
+		<div class="dep">{esc(P.get('department') or '')}</div>{('<div class="acc">' + esc(P['accreditation']) + '</div>') if P.get('accreditation') else ''}</td>
+		<td class="qr"><img src="{qr}"><div>Scan to verify<br>{esc(d['name'])} · v{d.get('version') or 1}</div></td></tr></table>
 	<div class="pt">{grid}</div>
 	{''.join(parts)}
 	{remarks}
 	<div class="sign"><div class="legend">Flags: <b style="color:#b45309">H</b> high · <b style="color:#b45309">L</b> low · <b style="color:#b91c1c">HH / LL</b> critical · <b style="color:#b45309">A</b> abnormal</div>
 		<div class="sigbox">{sig}<div class="nm">{esc(P.get('signatory') or '')}</div><div class="tt">{esc(P.get('title') or '')}{(' · PMDC ' + esc(P['reg'])) if P.get('reg') else ''}</div>
 		<div class="dsig">&#10003; Digitally signed{(' · ' + esc(P['signed_at'])) if P.get('signed_at') else ''}</div></div></div>
-	<div class="foot"><div>{esc(P.get('footer') or '')}</div><div style="text-align:right;width:180px">Printed {frappe.utils.now_datetime().strftime('%d-%m-%Y %H:%M')}<br>{esc(c['name'])}</div></div>
+	{('<div class="fnote">' + esc(P['footer']) + '</div>') if P.get('footer') else ''}
+	<div style="margin-top:10px">{footer_html(c, 'Printed ' + frappe.utils.now_datetime().strftime('%d-%m-%Y %H:%M'))}</div>
 	<div class="end">— END OF REPORT —</div>
 	</body></html>"""
 

@@ -5,6 +5,8 @@
  * paper or choose "Save as PDF" as the destination.
  */
 
+import { lhCss, lhPage } from "@/lib/letterhead";
+
 function escapeHtml(value: unknown): string {
   const s = value === null || value === undefined ? "" : String(value);
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -49,12 +51,11 @@ function openPrintDialog(html: string) {
 
 const PAGE_STYLES = `
   * { box-sizing: border-box; }
-  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111; margin: 24px; }
+  body { font-family: Inter, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111; }
   h1 { font-size: 18px; margin: 0 0 2px; }
   .subtitle { font-size: 12px; color: #555; margin: 0 0 16px; }
   table { width: 100%; border-collapse: collapse; font-size: 10px; }
   .meta-row { margin-top: 16px; font-size: 10px; color: #888; }
-  @page { size: auto; margin: 14mm; }
 `;
 
 function printPage(title: string, subtitle: string | undefined, tableHtml: string, rowCount: number) {
@@ -63,13 +64,11 @@ function printPage(title: string, subtitle: string | undefined, tableHtml: strin
 <head>
 <meta charset="utf-8">
 <title>${escapeHtml(title)}</title>
-<style>${PAGE_STYLES}</style>
+<style>${lhCss("auto")}${PAGE_STYLES}</style>
 </head>
 <body>
-  <h1>${escapeHtml(title)}</h1>
-  ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
-  ${tableHtml}
-  <p class="meta-row">Printed ${new Date().toLocaleString()} — ${rowCount} record${rowCount === 1 ? "" : "s"}</p>
+  ${lhPage(`${tableHtml}
+  <p class="meta-row">Printed ${new Date().toLocaleString()} — ${rowCount} record${rowCount === 1 ? "" : "s"}</p>`, null, { title, note: subtitle ? escapeHtml(subtitle) : "", footRight: escapeHtml(title), watermark: false })}
 </body>
 </html>`;
   openPrintDialog(html);
@@ -77,7 +76,7 @@ function printPage(title: string, subtitle: string | undefined, tableHtml: strin
 
 const DOCUMENT_STYLES = `
   * { box-sizing: border-box; }
-  body { font-family: Georgia, "Times New Roman", Times, serif; color: #111; margin: 18px; line-height: 1.35; font-size: 10px; }
+  body { font-family: Inter, Arial, sans-serif; color: #111; line-height: 1.4; font-size: 10px; }
   .doc-header { text-align: center; margin-bottom: 12px; }
   h1 { font-size: 14px; margin: 0 0 2px; letter-spacing: 0.02em; text-transform: uppercase; }
   .subtitle { font-size: 9px; color: #555; margin: 0; font-style: italic; }
@@ -94,7 +93,6 @@ const DOCUMENT_STYLES = `
   .signature-block { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 32px; margin-top: 28px; font-size: 9px; }
   .signature-line { border-top: 1px solid #111; margin-top: 28px; padding-top: 3px; }
   .meta-row { margin-top: 12px; font-size: 8px; color: #888; text-align: center; }
-  @page { size: auto; margin: 10mm; }
 `;
 
 /**
@@ -123,17 +121,13 @@ export function printDocument(
 <head>
 <meta charset="utf-8">
 <title>${escapeHtml(title)}</title>
-<style>${DOCUMENT_STYLES}</style>
+<style>${lhCss("A4")}${DOCUMENT_STYLES}</style>
 </head>
 <body>
-  <div class="doc-header">
-    <h1>${escapeHtml(title)}</h1>
-    ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ""}
-  </div>
-  ${infoHtml}
+  ${lhPage(`${infoHtml}
   <div class="body-content">${bodyHtml}</div>
   <div class="signature-block">${signatureHtml}</div>
-  <p class="meta-row">Printed ${new Date().toLocaleString()}</p>
+  <p class="meta-row">Printed ${new Date().toLocaleString()}</p>`, null, { title, note: subtitle ? escapeHtml(subtitle) : "", footRight: escapeHtml(title) })}
 </body>
 </html>`;
   openPrintDialog(html);

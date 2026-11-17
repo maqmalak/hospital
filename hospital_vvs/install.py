@@ -272,6 +272,9 @@ def after_migrate():
 	from hospital_vvs.messaging.templates import ensure_templates
 
 	ensure_templates()
+	from hospital_vvs.letterhead import ensure_letter_head
+
+	ensure_letter_head()
 	from hospital_vvs.services.doctor_share import ensure_accounts
 
 	ensure_accounts()

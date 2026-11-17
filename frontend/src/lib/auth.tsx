@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import i18n from "i18next";
 import { getCall, http, refreshCSRFToken } from "@/services/frappe";
 import { setActiveCurrency } from "@/utils/currency";
+import { setLetterheadClinic } from "@/lib/letterhead";
 
 export interface Boot {
   user: string; full_name: string; image?: string; language?: string; roles: string[]; is_admin: boolean;
@@ -44,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (window as unknown as { csrf_token?: string }).csrf_token = b.csrf_token;
       setBoot(b);
       setActiveCurrency(b.clinic.currency);
+      setLetterheadClinic(b.clinic);
       setBranchState((cur) => (cur && b.branches.includes(cur) ? cur : b.branch || b.branches[0] || ""));
       const lang = (() => { try { return localStorage.getItem("hv.lang"); } catch { return null; } })() || b.language;
       if (lang && ["en", "ur", "ar"].includes(lang) && lang !== i18n.language) void i18n.changeLanguage(lang);

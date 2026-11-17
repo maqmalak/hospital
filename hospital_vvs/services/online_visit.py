@@ -155,7 +155,7 @@ def public_view(ov):
 		"cancel_reason": ov.cancel_reason if ov.status == "Cancelled" else None, "refund_amount": ov.refund_amount, "refund_reference": ov.refund_reference,
 		"completed_at": str(ov.completed_at or ""), "follow_up": ov.follow_up, "follow_up_date": str(ov.follow_up_date or ""),
 		"has_prescription": bool(ov.prescription), "verified": verified(ov), "payment_instructions": s.ov_payment_instructions,
-		"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "phone": s.phone}, "can_cancel": ov.status == "Pending",
+		"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "phone": s.phone, "address": s.address}, "can_cancel": ov.status == "Pending",
 		"can_pay": ov.status in ("Pending", "Accepted") and ov.fee_status == "Unpaid", "methods": methods()}
 	if ov.prescription and verified(ov):
 		out["prescription"] = prescription_data(ov.prescription)

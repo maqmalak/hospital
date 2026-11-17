@@ -1,21 +1,20 @@
 import { esc, money, qrSvg } from "@/lib/print";
+import { lhCss, lhEnd, lhStart } from "@/lib/letterhead";
 import type { Bill } from "./shared";
 
 const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Gulzar&display=swap" rel="stylesheet">`;
-const A4 = `@page{size:A4;margin:12mm}body{font:11.5px/1.45 Inter,Arial,sans-serif;color:#0f172a;margin:0}
-  h1{font-size:18px;margin:0}h2{font-size:13px;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.06em;color:#0f766e}
+const A4 = `${lhCss("A4")}body{font:11.5px/1.45 Inter,Arial,sans-serif;color:#0f172a;margin:0}
+  h1{font-size:18px;margin:0}h2{font-size:12px;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.12em;color:#2B6E85}h2::after{content:"";display:block;width:24px;height:2px;background:#E5322F;margin-top:3px}
   table{width:100%;border-collapse:collapse}th,td{padding:5px 6px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}
-  th{background:#f1f5f9;font-size:10px;text-transform:uppercase;letter-spacing:.05em}.n{text-align:right;font-variant-numeric:tabular-nums}
+  th{background:#F2F7F9;color:#2B6E85;font-size:10px;text-transform:uppercase;letter-spacing:.05em}.n{text-align:right;font-variant-numeric:tabular-nums}
   .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0f766e;padding-bottom:8px;margin-bottom:10px}
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 14px}.k{font-size:9.5px;color:#64748b;text-transform:uppercase}.v{font-weight:600}
-  .tot td{font-weight:700}.big td{font-size:14px;font-weight:800;border-top:2px solid #0f172a}.muted{color:#64748b}.stamp{display:inline-block;border:2px solid #0f766e;
-  color:#0f766e;padding:2px 10px;border-radius:6px;font-weight:800;letter-spacing:.1em}.sig{margin-top:40px;display:flex;justify-content:space-between}
+  .tot td{font-weight:700}.big td{font-size:14px;font-weight:800;border-top:2px solid #0f172a}.muted{color:#64748b}.stamp{display:inline-block;border:2px solid #2B6E85;
+  color:#2B6E85;padding:2px 10px;border-radius:6px;font-weight:800;letter-spacing:.1em}.sig{margin-top:40px;display:flex;justify-content:space-between}
   .sig div{border-top:1px solid #0f172a;width:45%;padding-top:4px;text-align:center;font-size:10px}`;
 
 function header(clinic: Bill["clinic"], title: string, right: string) {
-  return `<div class="head"><div>${clinic.logo ? `<img src="${esc(clinic.logo)}" style="height:38px;margin-bottom:4px"/>` : ""}<h1>${esc(clinic.name)}</h1>
-  <div class="muted">${esc(clinic.address || "")}${clinic.phone ? ` · ${esc(clinic.phone)}` : ""}</div></div>
-  <div style="text-align:right"><div class="stamp">${esc(title)}</div><div class="muted" style="margin-top:4px">${right}</div></div></div>`;
+  return lhStart(clinic, { title, note: right, footRight: title });
 }
 
 /** Running / interim / final bill on A4, grouped by charge type with package cover and payer split. */
@@ -47,7 +46,7 @@ export function billHtml(b: Bill, kind: "Interim bill" | "Final bill" | "Advance
   ${b.payments.map((p) => `<tr><td>${esc(p.posting_date)}</td><td>${esc(p.name)}</td><td>${esc(p.hv_purpose || p.payment_type)}</td><td>${esc(p.mode_of_payment)}</td>
   <td class="n">${p.payment_type === "Pay" ? "−" : ""}${money(p.paid_amount)}</td></tr>`).join("")}</tbody></table>` : ""}
   ${kind === "Interim bill" ? `<p class="muted" style="margin-top:10px">Interim bill: bed days and nursing are counted to the time printed. The final bill is made at discharge.</p>` : ""}
-  <div class="sig"><div>Billing officer</div><div>Patient / attendant</div></div></body></html>`;
+  <div class="sig"><div>Billing officer</div><div>Patient / attendant</div></div>${lhEnd()}</body></html>`;
 }
 
 export interface SummaryPrint {
@@ -80,7 +79,7 @@ export function summaryHtml(d: SummaryPrint) {
   ${s.referred_to ? block("Referred to", s.referred_to) : ""}
   ${s.discharge_type === "Expired" ? block("Death", `Date and time: ${s.death_datetime || ""}\nCause: ${s.cause_of_death || ""}`) : ""}
   <div class="sig"><div>${esc(d.doctor.doctor_name)}${d.doctor.qualification ? ` · ${esc(d.doctor.qualification)}` : ""}${d.doctor.registration_no ? `<br>PMDC ${esc(d.doctor.registration_no)}` : ""}
-  <br>Signed ${esc(s.signed_at?.slice(0, 16) || "")}</div><div>Received by patient / attendant</div></div></body></html>`;
+  <br>Signed ${esc(s.signed_at?.slice(0, 16) || "")}</div><div>Received by patient / attendant</div></div>${lhEnd()}</body></html>`;
 }
 
 /** Admission wristband (25 × 250 mm strip) — name, MR, admission, ward, allergies, QR of the MR number only. */
