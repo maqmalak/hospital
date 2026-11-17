@@ -4,6 +4,7 @@ import { ArrowRight, Search } from "lucide-react";
 import { DEPARTMENTS, PHOTOS } from "../content";
 import { doctorsOf, useDoctors } from "../data";
 import { Wrap } from "../SiteV2";
+import DeptOrbit from "../DeptOrbit";
 import { card, ICONS, PageHero, Reveal, useTitle } from "../ui";
 
 export default function Departments() {
@@ -13,7 +14,7 @@ export default function Departments() {
   const list = useMemo(() => DEPARTMENTS.filter((d) => `${d.name} ${d.summary} ${d.services.join(" ")}`.toLowerCase().includes(q.toLowerCase())), [q]);
   return (
     <>
-      <PageHero eyebrow="Departments" title="Specialist care, under one roof" sub="Fourteen departments sharing one medical record — so your consultant, the lab, radiology and the pharmacy all see the same information." img={PHOTOS.corridor}>
+      <PageHero eyebrow="Departments" title="Specialist care, under one roof" sub={`${DEPARTMENTS.length} departments sharing one medical record — so your consultant, the lab, radiology and the pharmacy all see the same information.`} img={PHOTOS.corridor} aside={<DeptOrbit />}>
         <label className="flex max-w-md items-center gap-3 rounded-full border border-white/25 bg-white/10 px-5 backdrop-blur-md focus-within:ring-4 focus-within:ring-white/20">
           <Search className="h-5 w-5 text-white/70" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search departments or services" aria-label="Search departments" className="h-[52px] flex-1 bg-transparent text-white outline-none placeholder:text-white/60" />
         </label>

@@ -306,6 +306,7 @@ function CSS(rtl: boolean) {
   .s2-globe{animation:s2globe 26s linear infinite}@keyframes s2globe{to{transform:rotateY(360deg)}}
   .s2-orbit{animation:s2spin 14s linear infinite}
   .s2-float{animation:s2float 5.5s ease-in-out infinite}@keyframes s2float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .s2-pulse-soft{animation:s2ps 3.2s ease-in-out infinite}@keyframes s2ps{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:.25}}
   .s2-page{animation:s2fade .45s ease both}@keyframes s2fade{from{opacity:0}to{opacity:1}}
   .s2-pop{animation:s2pop .22s cubic-bezier(.2,.7,.2,1) both}@keyframes s2pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
   .s2-drawer{animation:s2drawer .3s cubic-bezier(.2,.7,.2,1) both}@keyframes s2drawer{from{transform:translateX(${rtl ? "-" : ""}100%)}to{transform:none}}
@@ -315,6 +316,6 @@ function CSS(rtl: boolean) {
   .s2-pulse{animation:s2pl 2.4s ease-in-out infinite}@keyframes s2pl{0%,100%{box-shadow:0 0 0 0 rgba(229,72,63,.45)}50%{box-shadow:0 0 0 12px rgba(229,72,63,0)}}
   .s2 input,.s2 select,.s2 textarea{transition:border-color .2s,box-shadow .2s}
   html{scroll-behavior:smooth}
-  @media (prefers-reduced-motion: reduce){.s2-reveal{opacity:1;transform:none;transition:none}.s2-word{animation:none;opacity:1;transform:none}.s2-kenburns,.s2-pulse,.s2-spin,.s2-spin-rev,.s2-globe,.s2-orbit,.s2-float,.s2-skel,.s2-page,.s2-pop,.s2-drawer{animation:none}html{scroll-behavior:auto}}
+  @media (prefers-reduced-motion: reduce){.s2-reveal{opacity:1;transform:none;transition:none}.s2-word{animation:none;opacity:1;transform:none}.s2-kenburns,.s2-pulse,.s2-spin,.s2-spin-rev,.s2-globe,.s2-orbit,.s2-pulse-soft,.s2-float,.s2-skel,.s2-page,.s2-pop,.s2-drawer{animation:none}html{scroll-behavior:auto}}
   `;
 }
