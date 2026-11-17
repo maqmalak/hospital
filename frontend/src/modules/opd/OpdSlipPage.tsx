@@ -42,6 +42,9 @@ export default function OpdSlipPage() {
   const [discDlg, setDiscDlg] = useState(false);
   const [totals, setTotals] = useState<Totals | null>(null);
   const [saving, setSaving] = useState(false);
+  // inside the free follow-up window the visit is free unless the cashier chooses to charge the doctor's follow-up fee
+  const [chargeFU, setChargeFU] = useState(false);
+  useEffect(() => { setChargeFU(false); }, [patient?.name, doctor?.name]);
   const clientRef = useRef(crypto.randomUUID());
 
   useEffect(() => {
@@ -60,11 +63,11 @@ export default function OpdSlipPage() {
   useEffect(() => { if (doctor) pickDoctor(doctor); }, [purpose]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const payload = useMemo(() => ({
-    patient: patient?.name, doctor: doctor?.name, branch, purpose, items: lines, chief_complaint: complaint, payment_mode: mode,
+    patient: patient?.name, doctor: doctor?.name, branch, purpose, items: lines, chief_complaint: complaint, payment_mode: mode, charge_follow_up: chargeFU ? 1 : 0,
     cash_tendered: Number(tendered) || 0, discount_amount: discount.status && ["Within Limit", "Approved"].includes(discount.status) ? discount.amount : 0,
     discount_reason: discount.reason, discount_authorization: discount.auth || undefined,
     ...Object.fromEntries(Object.entries(vitals).filter(([, v]) => v !== "").map(([k, v]) => [k, Number(v)])),
-  }), [patient, doctor, branch, purpose, lines, complaint, mode, tendered, discount, vitals]);
+  }), [patient, doctor, branch, purpose, lines, complaint, mode, tendered, discount, vitals, chargeFU]);
 
   // server-computed totals (free follow-up window, payer split)
   useEffect(() => {
@@ -95,7 +98,7 @@ export default function OpdSlipPage() {
     } catch (e) { toast.error(humanizeError(e)); }
   };
 
-  const reset = () => { setPatient(null); setLines([]); setVitals({}); setComplaint(""); setTendered(""); setDiscount({ amount: 0, reason: "", auth: "", status: "" }); setPurpose("Consultation"); clientRef.current = crypto.randomUUID(); };
+  const reset = () => { setChargeFU(false); setPatient(null); setLines([]); setVitals({}); setComplaint(""); setTendered(""); setDiscount({ amount: 0, reason: "", auth: "", status: "" }); setPurpose("Consultation"); clientRef.current = crypto.randomUUID(); };
 
   const save = async () => {
     if (!patient || !doctor) return toast.error("Choose the patient and the doctor");
@@ -179,7 +182,13 @@ export default function OpdSlipPage() {
             </div>))}
           <select value="" onChange={(e) => { const it = ctx?.items.find((x) => x.item_code === e.target.value); if (it) setLines((ls) => [...ls, { item_code: it.item_code, item_name: it.item_name, qty: 1, rate: it.rate }]); }}
             className={inputCls + " text-muted-foreground"}><option value="">+ Add service…</option>{ctx?.items.map((i) => <option key={i.item_code} value={i.item_code}>{i.item_name} · {rs(i.rate)}</option>)}</select>
-          {totals?.is_free_follow_up ? <div className="flex items-center gap-2 rounded-xl bg-teal-50 p-3 text-sm font-semibold text-teal-800 dark:bg-teal-500/10 dark:text-teal-200"><CheckCircle2 className="h-4 w-4" />{t("Free follow-up")} (within {ctx?.follow_up_free_days} days)</div> : null}
+          {totals?.is_free_follow_up ? <div className="space-y-2 rounded-xl bg-teal-50 p-3 text-sm text-teal-800 dark:bg-teal-500/10 dark:text-teal-200">
+            <div className="flex items-center gap-2 font-semibold"><CheckCircle2 className="h-4 w-4" />{t("Free follow-up")} (within {ctx?.follow_up_free_days} days)</div>
+            <button type="button" onClick={() => { setChargeFU(true); setPurpose("Follow-up"); }} className="w-full rounded-lg border border-teal-300 bg-white px-3 py-1.5 font-semibold text-teal-800 hover:bg-teal-100 dark:border-teal-500/40 dark:bg-transparent dark:text-teal-100">
+              {t("Charge follow-up fee")}{doctor?.follow_up_fee ? ` · ${rs(doctor.follow_up_fee)}` : ""}</button></div>
+            : chargeFU ? <div className="flex items-center justify-between gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-500/10 dark:text-amber-100">
+              <span className="font-semibold">{t("Follow-up fee charged")}</span>
+              <button type="button" onClick={() => setChargeFU(false)} className="rounded-lg px-2 py-1 font-semibold underline">{t("Make it free")}</button></div> : null}
           {totals && totals.payer_share > 0 && <div className="rounded-xl bg-amber-50 p-3 text-sm dark:bg-amber-500/10"><b>{totals.payer_type}</b> {totals.payer}: covers {rs(totals.payer_share)}</div>}
           {discount.status && <div className={cn("flex items-center gap-2 rounded-xl p-3 text-sm", discount.status === "Pending" ? "bg-amber-50 dark:bg-amber-500/10" : discount.status === "Rejected" ? "bg-rose-50 dark:bg-rose-500/10" : "bg-emerald-50 dark:bg-emerald-500/10")}>
             <Percent className="h-4 w-4" /><span className="flex-1">Discount {rs(discount.amount)} · <Pill value={discount.status} /></span>

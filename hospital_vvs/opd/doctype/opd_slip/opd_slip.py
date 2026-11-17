@@ -39,6 +39,11 @@ class OPDSlip(Document):
 		last = frappe.db.get_value("OPD Slip", {"patient": self.patient, "doctor": self.doctor, "docstatus": 1,
 			"is_free_follow_up": 0, "net_total": [">", 0], "name": ["!=", self.name or ""],
 			"posting_date": ["between", [add_days(getdate(self.posting_date), -days), getdate(self.posting_date)]]}, "name")
+		if last and self.flags.charge_follow_up:
+			# charged on purpose: bill the doctor's follow-up fee instead of making the visit free
+			self.flags.free_window_waived = True
+			self.purpose = "Follow-up"
+			return
 		if last:
 			self.is_free_follow_up = 1
 			self.purpose = "Follow-up"

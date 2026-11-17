@@ -52,10 +52,12 @@ function Hero() {
   const er = phoneOf("emergency", phone);
   return (
     <section className="relative isolate overflow-hidden bg-[#08303A] text-white">
-      <div ref={img} className="absolute inset-0 -z-10 will-change-transform">
-        <img src={PHOTOS.building} alt={ui.name} className="s2-kenburns h-[115%] w-full object-cover object-[60%_30%]" {...{ fetchpriority: "high" }} />
+      {/* the building: full background on phones; the right ~60% on wide screens so the whole facade shows */}
+      <div ref={img} className="absolute inset-y-0 end-0 -z-10 w-full will-change-transform lg:w-[62%]">
+        <img src={PHOTOS.building} alt={ui.name} className="s2-kenburns h-[112%] w-full object-cover object-[70%_25%] lg:object-[50%_20%]" style={{ transformOrigin: "70% 30%" }} {...{ fetchpriority: "high" }} />
       </div>
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#062229] via-[#08303A]/80 to-[#08303A]/10 rtl:bg-gradient-to-l" />
+      <div className="absolute inset-0 -z-10 bg-[#08303A]/70 lg:hidden" />
+      <div className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-[#062229] from-[38%] via-[#08303A]/60 via-[55%] to-transparent lg:block rtl:bg-gradient-to-l" />
       <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-[var(--bg)] to-transparent" />
       <Wrap className="flex min-h-[calc(100svh-124px)] flex-col justify-center pb-40 pt-16 lg:min-h-[720px]">
         <Reveal><Eyebrow light>{ui.hero.eyebrow}</Eyebrow></Reveal>

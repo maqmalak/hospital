@@ -54,6 +54,8 @@ def _build(d):
 	doc.posting_date = today()
 	for it in d.get("items") or []:
 		doc.append("items", {"item_code": it["item_code"], "qty": flt(it.get("qty") or 1), "rate": flt(it.get("rate"))})
+	# the cashier chose to charge the follow-up fee although the visit is inside the free window
+	doc.flags.charge_follow_up = cint(d.get("charge_follow_up"))
 	return doc
 
 
@@ -88,6 +90,8 @@ def create_slip(data):
 	check_branch(doc.branch)
 	doc.insert()
 	doc.submit()
+	if doc.flags.charge_follow_up and doc.flags.free_window_waived:
+		doc.add_comment("Comment", _("Follow-up fee charged inside the free follow-up window (chosen at the counter)."))
 	return slip_print(doc.name)
 
 

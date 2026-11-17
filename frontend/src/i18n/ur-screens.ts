@@ -3916,4 +3916,7 @@ export const urScreens: Record<string, string> = {
   "You aren't linked to a doctor, so choose who this prescription is for.": "آپ کسی ڈاکٹر سے منسلک نہیں ہیں، اس لیے منتخب کریں کہ یہ نسخہ کس ڈاکٹر کا ہے۔",
   "Close old shift": "پرانی شفٹ بند کریں",
   "View closing": "بندش دیکھیں",
+  "Charge follow-up fee": "فالو اپ فیس وصول کریں",
+  "Follow-up fee charged": "فالو اپ فیس وصول کی جا رہی ہے",
+  "Make it free": "مفت کریں",
 };
