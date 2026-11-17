@@ -4,7 +4,7 @@ import { CalendarCheck, Check, Phone, Video } from "lucide-react";
 import { CONFIG, PHOTOS, SERVICES } from "../content";
 import { rs, tel } from "../data";
 import { useS2, Wrap } from "../SiteV2";
-import { btn, card, ICONS, PageHero, Reveal, SectionHead, Skeleton, useTitle } from "../ui";
+import { btn, card, ICONS, PageHero, Reveal, ServiceGlobe, SectionHead, Skeleton, useTitle } from "../ui";
 
 export default function Services() {
   const { site, phone } = useS2();
@@ -13,7 +13,7 @@ export default function Services() {
   useEffect(() => { if (loc.hash) setTimeout(() => document.getElementById(loc.hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" }), 250); }, [loc.hash]);
   return (
     <>
-      <PageHero eyebrow="Services" title="Everything you need, in one building" sub="From a blood test to major surgery — diagnostics, treatment and recovery without moving between hospitals." img={PHOTOS.icu} />
+      <PageHero eyebrow="Services" title="Everything you need, in one building" sub="From a blood test to major surgery — diagnostics, treatment and recovery without moving between hospitals." img={PHOTOS.icu} aside={<ServiceGlobe />} />
       <section className="py-20">
         <Wrap className="space-y-6">
           {SERVICES.map((s, i) => { const I = ICONS[s.icon]; return (
