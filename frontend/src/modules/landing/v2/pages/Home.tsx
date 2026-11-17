@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarCheck, ChevronLeft, ChevronRight, MapPin, Phone, Pill, Siren, Stethoscope, UserRound, Building2, Quote } from "lucide-react";
+import { ArrowRight, CalendarCheck, ChevronLeft, ChevronRight, MapPin, Phone, Pill, Siren, Stethoscope, UserRound, Building2, Quote, BedDouble, Layers } from "lucide-react";
 import { ARTICLES, CONFIG, DEPARTMENTS, PHOTOS, SERVICES } from "../content";
 import ServiceGlobe from "../ServiceGlobe";
 import DeptOrbit from "../DeptOrbit";
@@ -85,7 +85,7 @@ function Quick() {
         {ui.quick.map(([t, d], i) => { const [I, to] = items[i]; return (
           <Reveal key={t} delay={i * 70} className={i === 4 ? "col-span-2 sm:col-span-1" : ""}>
             <Link to={to} className="group flex h-full flex-col gap-3 rounded-[22px] border border-white/40 s2-glass p-5 shadow-[0_24px_50px_-28px_rgba(8,48,58,0.55)] backdrop-blur-xl transition hover:-translate-y-1 dark:border-white/10">
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--mint)] text-[var(--primary)] transition group-hover:bg-[var(--primary)] group-hover:text-white"><I className="h-5 w-5" /></span>
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--accent)] text-white shadow-[0_10px_22px_-10px_var(--accent)] transition group-hover:bg-[var(--primary)] group-hover:shadow-[0_10px_22px_-10px_var(--primary)]"><I className="h-5 w-5" /></span>
               <span><span className="block font-bold">{t}</span><span className="block text-sm text-[var(--muted)]">{d}</span></span>
             </Link>
           </Reveal>); })}
@@ -94,19 +94,26 @@ function Quick() {
   );
 }
 
+const STAT_ICONS = [BedDouble, Stethoscope, Building2, Layers];
+
 function Stats() {
   const { ui, site } = useS2();
   const stats: [number, string][] = [[CONFIG.beds || site?.beds || 0, ui.stats.beds], [site?.doctors ?? 0, ui.stats.doctors], [DEPARTMENTS.length, ui.stats.departments], [8, ui.stats.floors]];
   return (
     <section className="py-16 sm:py-20">
       <Wrap>
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[28px] bg-[var(--line)] lg:grid-cols-4">
-          {stats.map(([n, l], i) => (
-            <Reveal key={l} delay={i * 80} className="bg-[var(--surface)] px-6 py-8 text-center">
-              <div className="s2-display text-[3rem] leading-none text-[var(--primary)]">{site || i > 1 ? <Counter to={n} /> : <Skeleton className="mx-auto h-12 w-20" />}</div>
-              <div className="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">{l}</div>
-            </Reveal>
-          ))}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
+          {stats.map(([n, l], i) => { const I = STAT_ICONS[i]; return (
+            <Reveal key={l} delay={i * 80}>
+              <div className="group relative h-full overflow-hidden rounded-[24px] border border-[var(--line)] bg-[var(--surface)] px-5 pb-7 pt-6 text-center shadow-[0_22px_48px_-30px_rgba(8,48,58,0.55)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-28px_rgba(8,48,58,0.6)] sm:px-6">
+                <span aria-hidden className="absolute inset-x-0 top-0 z-[1] h-1 bg-gradient-to-r from-[var(--primary)] via-[var(--accent)] to-[var(--primary)]" />
+                <span aria-hidden className="pointer-events-none absolute -end-10 -top-10 h-32 w-32 rounded-full bg-[var(--mint)] opacity-70 transition duration-500 group-hover:scale-125" />
+                <span className="relative mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[var(--accent)] text-white shadow-[0_10px_22px_-10px_var(--accent)]"><I className="h-6 w-6" /></span>
+                <div className="s2-display relative mt-4 text-[2.6rem] leading-none text-[var(--primary)] sm:text-[3.2rem]">{site || i > 1 ? <Counter to={n} /> : <Skeleton className="mx-auto h-12 w-20" />}</div>
+                <div className="relative mx-auto mt-3 h-0.5 w-8 rounded-full bg-[var(--accent)]" />
+                <div className="relative mt-3 text-[13px] font-bold uppercase tracking-[0.16em] text-[var(--ink)] opacity-80">{l}</div>
+              </div>
+            </Reveal>); })}
         </div>
       </Wrap>
     </section>
