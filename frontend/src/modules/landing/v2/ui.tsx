@@ -82,16 +82,35 @@ export const btn = {
 export const card = "rounded-[22px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_18px_44px_-30px_rgba(14,46,56,0.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(14,46,56,0.55)]";
 
 /** Page banner for inner pages. */
-export function PageHero({ eyebrow, title, sub, img, children }: { eyebrow: string; title: string; sub?: string; img: string; children?: ReactNode }) {
+/** Hospital logo on a white disc inside thin concentric rings, for the right side of a page hero (lg and up). */
+export function LogoMedallion() {
+  return (
+    <div aria-hidden className="pointer-events-none relative grid h-[380px] w-[380px] place-items-center">
+      <span className="absolute inset-0 rounded-full border border-white/10" />
+      <span className="s2-spin absolute inset-[22px] rounded-full border border-dashed border-white/25" />
+      <span className="absolute inset-[48px] rounded-full border border-[#9FE3DA]/30 bg-white/[0.04] backdrop-blur-[2px]" />
+      <span className="s2-spin-rev absolute inset-[22px]"><span className="absolute -top-[5px] left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#FF6B66] shadow-[0_0_14px_3px_rgba(255,107,102,0.6)]" /></span>
+      <span className="s2-spin absolute inset-0"><span className="absolute -bottom-[4px] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#9FE3DA] shadow-[0_0_12px_3px_rgba(159,227,218,0.55)]" /></span>
+      <span className="relative grid h-[236px] w-[236px] place-items-center rounded-full bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6),0_0_0_10px_rgba(255,255,255,0.08)]">
+        <img src={`${import.meta.env.BASE_URL}brand/lyallpur-logo.webp`} alt="" width={520} height={403} className="w-[172px]" />
+      </span>
+    </div>
+  );
+}
+
+export function PageHero({ eyebrow, title, sub, img, children, aside }: { eyebrow: string; title: string; sub?: string; img: string; children?: ReactNode; aside?: ReactNode }) {
   return (
     <section className="relative overflow-hidden bg-[#08303A] text-white">
       <img src={img} alt="" className="s2-kenburns absolute inset-0 h-full w-full object-cover opacity-45" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#08303A] via-[#08303A]/85 to-[#08303A]/30 rtl:bg-gradient-to-l" />
-      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20">
+      <div className={`relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20 ${aside ? "lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12" : ""}`}>
+        <div>
         <Reveal><Eyebrow light>{eyebrow}</Eyebrow></Reveal>
         <Reveal delay={80}><h1 className="s2-display max-w-3xl text-[2.6rem] leading-[1.05] sm:text-[3.8rem]">{title}</h1></Reveal>
         {sub && <Reveal delay={160}><p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/75">{sub}</p></Reveal>}
         {children && <Reveal delay={220} className="mt-8">{children}</Reveal>}
+        </div>
+        {aside && <Reveal delay={200} className="hidden lg:block">{aside}</Reveal>}
       </div>
     </section>
   );

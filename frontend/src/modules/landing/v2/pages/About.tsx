@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Eye, HeartHandshake, Lightbulb, ShieldCheck, Target, Users } from "lucide-react";
 import { CONFIG, DEPARTMENTS, PHOTOS } from "../content";
 import { useS2, Wrap } from "../SiteV2";
-import { btn, card, Counter, PageHero, Reveal, SectionHead, useTitle } from "../ui";
+import { btn, card, Counter, LogoMedallion, PageHero, Reveal, SectionHead, useTitle } from "../ui";
 
 const VALUES: [typeof Eye, string, string][] = [
   [HeartHandshake, "Compassion", "We treat every patient the way we would want our own family treated — with patience, dignity and clear explanations."],
@@ -17,7 +17,7 @@ export default function About() {
   const shots: [string, string][] = [[PHOTOS.building, "The hospital, People's Colony"], [PHOTOS.reception, "Reception"], [PHOTOS.lounge, "Waiting lounge"], [PHOTOS.corridor, "Clear wayfinding"], [PHOTOS.room, "Private room"], [PHOTOS.icu, "Intensive care"], [PHOTOS.pharmacy, "Pharmacy"]];
   return (
     <>
-      <PageHero eyebrow="About us" title="A hospital built around the patient" sub="Lyallpur Medical Complex brings consultants, emergency care, diagnostics, surgery and inpatient wards together in People's Colony No 1, Faisalabad — one building, one team, one medical record." img={PHOTOS.building} />
+      <PageHero eyebrow="About us" title="A hospital built around the patient" sub="Lyallpur Medical Complex brings consultants, emergency care, diagnostics, surgery and inpatient wards together in People's Colony No 1, Faisalabad — one building, one team, one medical record." img={PHOTOS.building} aside={<LogoMedallion />} />
       <section className="py-24">
         <Wrap className="grid items-center gap-14 lg:grid-cols-2">
           <Reveal>
