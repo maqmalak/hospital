@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, CalendarCheck, ChevronLeft, ChevronRight, MapPin, Phone, Pill, Siren, Stethoscope, UserRound, Building2, Quote } from "lucide-react";
 import { ARTICLES, CONFIG, DEPARTMENTS, PHOTOS, SERVICES } from "../content";
 import ServiceGlobe from "../ServiceGlobe";
+import DeptOrbit from "../DeptOrbit";
 import { phoneOf, tel, useDoctors } from "../data";
 import { useS2, Wrap } from "../SiteV2";
 import { btn, card, Counter, DoctorCard, Eyebrow, ICONS, reduced, Reveal, SectionHead, Skeleton, useJsonLd, useTitle, WordReveal } from "../ui";
@@ -112,32 +113,37 @@ function Stats() {
   );
 }
 
+/** Departments on a dark panel, laid out like the Departments page hero: copy and every department as a link on the left,
+ *  the logo with departments orbiting on the right (lg). */
 function Departments() {
   const { ui } = useS2();
   const [e, t, s] = ui.sections.depts;
-  const feat = DEPARTMENTS.slice(0, 8);
   return (
     <section className="pb-24">
       <Wrap>
-        <SectionHead eyebrow={e} title={t} sub={s} action={<Link to="/site/departments" className={btn.ghost}>{ui.nav.all}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link>} />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {feat.map((d, i) => { const I = ICONS[d.icon]; return (
-            <Reveal key={d.slug} delay={(i % 4) * 70}>
-              <Link to={`/site/departments/${d.slug}`} className={`${card} group flex h-full flex-col overflow-hidden`}>
-                <div className="relative h-36 overflow-hidden"><img src={d.img} alt="" loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#08303A]/70 to-transparent" />
-                  <span className="absolute bottom-3 start-3 grid h-11 w-11 place-items-center rounded-2xl bg-white/90 text-[var(--primary)] shadow-lg backdrop-blur"><I className="h-5 w-5" /></span></div>
-                <div className="flex flex-1 flex-col p-5"><h3 className="text-[1.05rem] font-bold">{d.name}</h3><p className="mt-1.5 flex-1 text-sm leading-relaxed text-[var(--muted)]">{d.summary}</p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--primary)]">{ui.common.more}<ArrowRight className="h-4 w-4 transition group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" /></span></div>
-              </Link>
-            </Reveal>); })}
+        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-bl from-[#0E5E6F] via-[#08303A] to-[#062229] px-6 py-12 text-white sm:px-12 lg:py-6">
+          <span aria-hidden className="absolute -end-24 -top-24 h-72 w-72 rounded-full bg-[#FF6B66]/10 blur-3xl" />
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+            <div className="lg:py-10">
+              <Reveal><Eyebrow light>{e}</Eyebrow></Reveal>
+              <Reveal delay={80}><h2 className="s2-display max-w-xl text-[2.2rem] leading-[1.08] sm:text-[3rem]">{t}</h2></Reveal>
+              <Reveal delay={140}><p className="mt-4 max-w-lg text-[17px] leading-relaxed text-white/75">{s}</p></Reveal>
+              <Reveal delay={200}><ul className="mt-7 flex max-w-xl flex-wrap gap-2">
+                {DEPARTMENTS.map((d) => { const I = ICONS[d.icon] ?? Stethoscope; return (
+                  <li key={d.slug}><Link to={`/site/departments/${d.slug}`} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-2 text-sm font-medium text-white/90 backdrop-blur transition hover:border-[#FF6B66]/70 hover:bg-white/15">
+                    <I className="h-4 w-4 text-[#FF8A85]" />{d.name.replace(/ \(.*\)$/, "")}</Link></li>); })}
+              </ul></Reveal>
+              <Reveal delay={260}><Link to="/site/departments" className={`${btn.primary} mt-8`}>{ui.nav.all}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link></Reveal>
+            </div>
+            <Reveal delay={150} className="hidden lg:block"><DeptOrbit /></Reveal>
+          </div>
         </div>
       </Wrap>
     </section>
   );
 }
 
-/** Services on a dark panel: copy and service links on the left, the logo globe with services orbiting on the right (lg). */
+/** Services on a dark panel, mirrored from Departments above: the logo globe with services orbiting on the left (lg), copy and links on the right. */
 function ServicesOrbit() {
   const { ui } = useS2();
   const [e, t, s] = ui.sections.services;
@@ -146,7 +152,8 @@ function ServicesOrbit() {
       <Wrap>
         <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0E5E6F] via-[#08303A] to-[#062229] px-6 py-12 text-white sm:px-12 lg:py-6">
           <span aria-hidden className="absolute -start-24 -top-24 h-72 w-72 rounded-full bg-[#9FE3DA]/10 blur-3xl" />
-          <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+          <div className="relative grid items-center gap-8 lg:grid-cols-[auto_1fr]">
+            <Reveal delay={150} className="hidden lg:block"><ServiceGlobe base="/site/services#" /></Reveal>
             <div className="lg:py-10">
               <Reveal><Eyebrow light>{e}</Eyebrow></Reveal>
               <Reveal delay={80}><h2 className="s2-display max-w-xl text-[2.2rem] leading-[1.08] sm:text-[3rem]">{t}</h2></Reveal>
@@ -158,7 +165,6 @@ function ServicesOrbit() {
               </ul></Reveal>
               <Reveal delay={260}><Link to="/site/services" className={`${btn.primary} mt-8`}>{ui.nav.all}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link></Reveal>
             </div>
-            <Reveal delay={150} className="hidden lg:block"><ServiceGlobe base="/site/services#" /></Reveal>
           </div>
         </div>
       </Wrap>
