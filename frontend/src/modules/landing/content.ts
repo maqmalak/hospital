@@ -26,6 +26,21 @@ const en = {
     sub: "Specialist consultants, diagnostics, pharmacy and inpatient care together under one roof — with one medical record that follows you from the first visit to the last.",
     book: "Book an appointment", call: "Call the hospital",
     cards: { next: "Next available", nextNone: "Book online", nextSub: "with our consultants", lab: "Lab reports", labSub: "sent to your phone when ready", er: "Emergency", erSub: "Call before you come" },
+    facts: [["120", "Beds"], ["8", "Floors"], ["24/7", "Emergency"]] as [string, string][],
+    photo: "Lyallpur Medical Complex building", badge: "Healing with excellence",
+  },
+  facilities: {
+    eyebrow: "Inside the hospital", title: "Spaces designed for healing",
+    sub: "Calm, clean and easy to find your way around — from the front desk to the intensive care unit.",
+    items: [
+      ["Reception", "Registration, help desk and patient guidance at the main entrance."],
+      ["Waiting lounge", "Comfortable, well-lit seating with a live queue screen."],
+      ["Clear wayfinding", "Signposted corridors to ICU, theatres, cath lab and private rooms."],
+      ["Private rooms", "Quiet en-suite rooms for a restful stay and family visits."],
+      ["Intensive care", "Monitored ICU beds with round-the-clock specialist nursing."],
+      ["Pharmacy", "In-house pharmacy for prescriptions, open with the hospital."],
+    ] as [string, string][],
+    note: "Architectural visualisation",
   },
   quick: [
     ["Book an appointment", "Choose a doctor and a time online"],
@@ -119,6 +134,21 @@ const ur: typeof en = {
     sub: "ماہر کنسلٹنٹ، تشخیص، فارمیسی اور داخلہ علاج ایک ہی چھت تلے — اور ایک ہی میڈیکل ریکارڈ جو پہلے دورے سے آخری تک آپ کے ساتھ رہتا ہے۔",
     book: "اپائنٹمنٹ بک کریں", call: "ہسپتال کو کال کریں",
     cards: { next: "اگلا دستیاب وقت", nextNone: "آن لائن بک کریں", nextSub: "ہمارے کنسلٹنٹس کے ساتھ", lab: "لیب رپورٹس", labSub: "تیار ہوتے ہی آپ کے فون پر", er: "ایمرجنسی", erSub: "آنے سے پہلے کال کریں" },
+    facts: [["120", "بستر"], ["8", "منزلیں"], ["24/7", "ایمرجنسی"]] as [string, string][],
+    photo: "لائل پور میڈیکل کمپلیکس کی عمارت", badge: "بہترین شفا، بہترین خدمت",
+  },
+  facilities: {
+    eyebrow: "ہسپتال کے اندر", title: "شفا کے لیے بنائی گئی جگہیں",
+    sub: "پُرسکون، صاف ستھری اور راستہ تلاش کرنے میں آسان — استقبالیہ سے انتہائی نگہداشت یونٹ تک۔",
+    items: [
+      ["استقبالیہ", "مرکزی دروازے پر رجسٹریشن، ہیلپ ڈیسک اور مریضوں کی رہنمائی۔"],
+      ["انتظار گاہ", "آرام دہ اور روشن نشستیں، قطار کی لائیو اسکرین کے ساتھ۔"],
+      ["واضح رہنمائی", "آئی سی یو، آپریشن تھیٹر، کیتھ لیب اور پرائیویٹ کمروں تک نشان زدہ راہداریاں۔"],
+      ["پرائیویٹ کمرے", "آرام دہ قیام اور اہلِ خانہ کی ملاقات کے لیے پُرسکون کمرے۔"],
+      ["انتہائی نگہداشت", "مانیٹر شدہ آئی سی یو بستر اور چوبیس گھنٹے ماہر نرسنگ۔"],
+      ["فارمیسی", "نسخوں کے لیے ہسپتال کی اپنی فارمیسی۔"],
+    ] as [string, string][],
+    note: "تعمیراتی خاکہ",
   },
   quick: [
     ["اپائنٹمنٹ بک کریں", "آن لائن ڈاکٹر اور وقت منتخب کریں"],

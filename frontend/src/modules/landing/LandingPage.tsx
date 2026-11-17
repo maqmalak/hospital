@@ -1,6 +1,6 @@
 /**
  * Lyallpur Medical Complex public website (/hms/vvsdesk, public, D-75). One page: header, hero, quick actions, about, services,
- * doctors (live from the Doctor records), patients & visitors, booking call-to-action, contact, footer.
+ * facilities gallery, doctors (live from the Doctor records), patients & visitors, booking call-to-action, contact, footer.
  * Look: elegant — ivory page, deep navy, the logo's teal-blue (#2B6E85) and red (#E5322F) as accents, Cormorant Garamond
  * headings, Inter body, Noto Nastaliq for اردو. Name, address and phone come from Clinic Settings; copy is in content.ts.
  * The app's automatic translator skips this folder (own language toggle).
@@ -56,13 +56,13 @@ function H2({ children, light, center }: { children: ReactNode; light?: boolean;
   return <h2 className={`hd text-[2.3rem] font-semibold leading-[1.08] sm:text-[3.1rem] ${light ? "text-white" : "text-[#0C2431]"} ${center ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}`}>{children}</h2>;
 }
 /** Section title in the logo's style: condensed capitals, logo red, the last words in logo teal-blue, red → teal underline. */
-function BrandTitle({ text, className = "" }: { text: string; className?: string }) {
+function BrandTitle({ text, className = "", light }: { text: string; className?: string; light?: boolean }) {
   const w = text.split(" ");
   const k = Math.max(1, w.length - 2);
   return (
     <>
       <h2 className={`svc max-w-xl text-[2.4rem] font-semibold uppercase leading-[1.08] tracking-[0.02em] sm:text-[3.2rem] ${className}`}>
-        <span className="text-[#E5322F]">{w.slice(0, k).join(" ")}</span>{w.length > 1 && <> <span className="whitespace-nowrap text-[#2B6E85]">{w.slice(k).join(" ")}</span></>}
+        <span className={light ? "text-[#FF5A55]" : "text-[#E5322F]"}>{w.slice(0, k).join(" ")}</span>{w.length > 1 && <> <span className={`whitespace-nowrap ${light ? "text-[#8FCBE0]" : "text-[#2B6E85]"}`}>{w.slice(k).join(" ")}</span></>}
       </h2>
       <span className="mt-5 block h-1 w-16 rounded-full bg-gradient-to-r from-[#E5322F] to-[#2B6E85]" />
     </>
@@ -149,11 +149,30 @@ function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) 
 function Hero({ c, lang, opts, phone }: { c: Copy; lang: Lang; opts: Opts | null; phone?: string }) {
   const next = useMemo(() => (opts?.doctors ?? []).map((d) => d.next_date).filter(Boolean).sort()[0], [opts]);
   const fmt = (d?: string | null) => (d ? new Date(d + "T00:00").toLocaleDateString(lang === "ur" ? "ur-PK" : "en-PK", { weekday: "short", day: "numeric", month: "short" }) : "");
+  const nextCard = (
+    <div className="w-56 rounded-2xl border border-white/20 bg-[#0C2431]/70 p-4 text-white shadow-2xl backdrop-blur-xl">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8FCBE0]"><CalendarDays className="h-4 w-4" />{next ? c.hero.cards.next : c.hero.cards.nextNone}</div>
+      <div className="hd mt-1 text-2xl font-semibold">{next ? fmt(next) : c.nav.book}</div>
+      <div className="text-xs text-white/65">{c.hero.cards.nextSub}</div>
+    </div>
+  );
+  const erCard = phone && (
+    <a href={tel(phone)} className="flex w-64 items-center gap-3 rounded-2xl bg-white p-3.5 text-[#0C2431] shadow-2xl transition hover:-translate-y-0.5">
+      <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#E5322F] text-white shadow-[0_10px_20px_-10px_rgba(229,50,47,0.9)]"><Siren className="h-5 w-5" /></span>
+      <span className="min-w-0"><span className="block text-sm font-bold">{c.hero.cards.er} · 24/7</span><span className="block truncate text-xs text-[#0C2431]/60" dir="ltr">{phone}</span></span>
+    </a>
+  );
   return (
     <section id="top" className="relative overflow-hidden bg-[#0C2431] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_520px_at_8%_0%,rgba(43,110,133,0.55),transparent_60%),radial-gradient(700px_480px_at_100%_100%,rgba(229,50,47,0.22),transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:26px_26px]" />
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-32 pt-16 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pb-40 lg:pt-24">
+      {/* the building, full-bleed on the end side from lg up */}
+      <div className="pointer-events-none absolute inset-y-0 end-0 hidden w-[56%] lg:block">
+        <img src={BRAND("site/building.webp")} alt={c.hero.photo} className="h-full w-full object-cover object-[50%_30%]" fetchPriority="high" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2431] via-[#0C2431]/35 to-transparent rtl:bg-gradient-to-l" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0C2431]/85 to-transparent" />
+      </div>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_520px_at_0%_0%,rgba(43,110,133,0.5),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:26px_26px] lg:w-1/2" />
+      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-32 pt-14 sm:px-6 lg:min-h-[640px] lg:grid-cols-[1fr_1fr] lg:pb-44 lg:pt-20">
         <div>
           <Reveal><Eyebrow light>{c.hero.eyebrow}</Eyebrow></Reveal>
           <Reveal delay={80}>
@@ -166,29 +185,63 @@ function Hero({ c, lang, opts, phone }: { c: Copy; lang: Lang; opts: Opts | null
             <a href="/hms/book-appointment" className={redBtn}><CalendarCheck className="h-5 w-5" />{c.hero.book}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></a>
             {phone && <a href={tel(phone)} className={`${ghostBtn} border-white/25 text-white hover:bg-white/10 focus-visible:ring-white/30`}><Phone className="h-5 w-5" /><span dir="ltr">{phone}</span></a>}
           </Reveal>
+          <Reveal delay={320} className="mt-10 flex max-w-md divide-x divide-white/15 rtl:divide-x-reverse">
+            {c.hero.facts.map(([n, l]) => (
+              <div key={l} className="flex-1 px-5 first:ps-0 last:pe-0">
+                <div className="svc text-[2.1rem] font-semibold leading-none text-white" dir="ltr">{n}</div>
+                <div className="mt-1.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#8FCBE0]">{l}</div>
+              </div>
+            ))}
+          </Reveal>
         </div>
-        <Reveal delay={200} className="relative mx-auto w-full max-w-md">
-          <div className="relative aspect-square">
-            <div className="absolute inset-[6%] rounded-full border border-white/10" />
-            <div className="absolute inset-[16%] rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-sm" />
-            <div className="absolute inset-[24%] grid place-items-center rounded-full bg-white shadow-[0_40px_90px_-30px_rgba(0,0,0,0.7)]">
-              <img src={BRAND("lyallpur-mark.webp")} alt={c.name} className="h-[72%] w-[72%] object-contain" />
-            </div>
-            <div className="absolute -start-2 top-[8%] w-56 rounded-2xl border border-white/15 bg-white/10 p-4 shadow-2xl backdrop-blur-xl sm:-start-8">
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8FCBE0]"><CalendarDays className="h-4 w-4" />{next ? c.hero.cards.next : c.hero.cards.nextNone}</div>
-              <div className="hd mt-1 text-2xl font-semibold">{next ? fmt(next) : c.nav.book}</div>
-              <div className="text-xs text-white/60">{c.hero.cards.nextSub}</div>
-            </div>
-            <div className="absolute -end-2 top-[64%] w-52 rounded-2xl border border-white/15 bg-[#123446]/95 p-4 shadow-2xl backdrop-blur-xl sm:-end-6">
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8FCBE0]"><FlaskConical className="h-4 w-4" />{c.hero.cards.lab}</div>
-              <div className="mt-1 text-sm text-white/80">{c.hero.cards.labSub}</div>
-            </div>
-            {phone && <a href={tel(phone)} className="absolute bottom-[0%] start-[2%] flex w-60 items-center gap-3 rounded-2xl bg-white p-3.5 text-[#0C2431] shadow-2xl transition hover:-translate-y-0.5">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#E5322F] text-white"><Siren className="h-5 w-5" /></span>
-              <span><span className="block text-sm font-bold">{c.hero.cards.er}</span><span className="block text-xs text-[#0C2431]/60">{c.hero.cards.erSub}</span></span>
-            </a>}
+        {/* phone / tablet: the building as a framed photo */}
+        <Reveal delay={200} className="relative lg:hidden">
+          <div className="overflow-hidden rounded-[28px] border border-white/10 shadow-[0_40px_80px_-40px_rgba(0,0,0,0.8)]">
+            <img src={BRAND("site/building.webp")} alt={c.hero.photo} className="aspect-[4/3] w-full object-cover object-[50%_30%]" />
           </div>
+          <div className="absolute -bottom-6 start-4">{erCard}</div>
         </Reveal>
+        {/* lg+: floating cards over the photo */}
+        <div className="relative hidden h-full lg:block">
+          <Reveal delay={260} className="absolute end-2 top-2">
+            <div className="flex items-center gap-3 rounded-full border border-white/25 bg-white/90 py-2 pe-5 ps-2 text-[#0C2431] shadow-2xl backdrop-blur">
+              <img src={BRAND("lyallpur-mark.webp")} alt="" className="h-10 w-10" />
+              <span className="svc text-[13px] font-semibold uppercase tracking-[0.2em] text-[#2B6E85]">{c.hero.badge}</span>
+            </div>
+          </Reveal>
+          <Reveal delay={340} className="absolute start-2 top-[42%]">{nextCard}</Reveal>
+          {erCard && <Reveal delay={420} className="absolute bottom-0 start-24">{erCard}</Reveal>}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Inside the hospital: a bento gallery of the facility renders. */
+const FACILITY_IMGS = ["reception", "lounge", "corridor", "room", "icu", "pharmacy"];
+function Facilities({ c }: { c: Copy }) {
+  const f = c.facilities;
+  const span = ["sm:col-span-2 sm:row-span-2", "", "", "lg:col-span-2", "lg:col-span-2", "sm:col-span-2"];
+  return (
+    <section id="facilities" className="scroll-mt-24 bg-[#0C2431] py-24 text-white sm:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <Reveal className="grid items-end gap-6 lg:grid-cols-[1.2fr_1fr]">
+          <div><Eyebrow light>{f.eyebrow}</Eyebrow><BrandTitle text={f.title} light /></div>
+          <p className="max-w-md text-lg leading-relaxed text-white/70 lg:justify-self-end">{f.sub}</p>
+        </Reveal>
+        <div className="mt-12 grid auto-rows-[220px] gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {f.items.map(([t, d], i) => (
+            <Reveal key={t} delay={(i % 4) * 70} className={`group relative overflow-hidden rounded-3xl ${span[i]}`}>
+              <img src={BRAND(`site/${FACILITY_IMGS[i]}.webp`)} alt={t} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0C2431]/95 via-[#0C2431]/25 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5">
+                <div className="flex items-center gap-2"><span className="h-0.5 w-6 rounded-full bg-[#E5322F]" /><h3 className="svc text-[1.15rem] font-semibold uppercase tracking-[0.06em]">{t}</h3></div>
+                <p className={`mt-1.5 text-sm leading-relaxed text-white/75 ${i === 0 ? "" : "line-clamp-2"}`}>{d}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <p className="mt-5 text-end text-xs text-white/40">{f.note}</p>
       </div>
     </section>
   );
@@ -494,6 +547,7 @@ export default function LandingPage() {
         <Hero c={c} lang={lang} opts={opts} phone={phone} />
         <QuickActions c={c} phone={phone} />
         <About c={c} opts={opts} />
+        <Facilities c={c} />
         <Services c={c} />
         <Departments c={c} />
         <Doctors c={c} lang={lang} opts={opts} />
