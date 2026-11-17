@@ -11,7 +11,7 @@ from hospital_vvs import roles as R
 
 COMPANY = "VVS Hospital"
 ABBR = "VVSH"
-BRANCHES = [("Lahore Main", "LHR", "671A, Peoples Colony No 1, Canal Road, Faisalabad", "+92 41 8530147")]
+BRANCHES = [("Lahore Main", "LHR", "Plot 669, Block A People's Colony No 1, Faisalabad, Pakistan", "+92 41 8530147")]
 BILLING_TYPES = {
 	# billing type: (income account, cost center, warehouse key)
 	"Fee": ("Consultation Fee Income", "OPD", "General Store"),

@@ -28,7 +28,7 @@ export const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleStrin
 export const tel = (p?: string) => `tel:${(p ?? "").replace(/[^\d+]/g, "")}`;
 export const hasWa = !/x/i.test(CONFIG.whatsapp) && CONFIG.whatsapp.length >= 10;
 export const phoneOf = (kind: string, main?: string) => CONFIG.phones[kind] || main || "";
-export const mapQuery = (address?: string) => CONFIG.mapQuery || (address ? `${address}, Pakistan` : "Lyallpur Medical Complex, Canal Road, Faisalabad");
+export const mapQuery = (address?: string) => CONFIG.mapQuery || (address ? (/pakistan/i.test(address) ? address : `${address}, Pakistan`) : "Lyallpur Medical Complex, People's Colony No 1, Faisalabad");
 export const deptOf = (d: Doctor): Dept | undefined => DEPARTMENTS.find((x) => x.match.some((m) => (d.specialization ?? "").toLowerCase().includes(m)));
 export const doctorsOf = (dept: Dept, list: Doctor[]) => list.filter((d) => deptOf(d)?.slug === dept.slug);
 export const slugDoc = (d: Doctor) => d.name.toLowerCase();

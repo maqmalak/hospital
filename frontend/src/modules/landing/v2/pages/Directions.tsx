@@ -6,17 +6,17 @@ import { btn, card, PageHero, Reveal, useTitle } from "../ui";
 
 export default function Directions() {
   const { site, phone } = useS2();
-  useTitle("Get directions", "How to reach Lyallpur Medical Complex, 671A Peoples Colony No 1, Canal Road, Faisalabad — map, parking and ambulance entrance.");
+  useTitle("Get directions", "How to reach Lyallpur Medical Complex, Plot 669, Block A, People's Colony No 1, Faisalabad — map, parking and ambulance entrance.");
   const q = mapQuery(site?.clinic.address);
   const er = phoneOf("ambulance", phone);
   const info: [typeof Car, string, string][] = [
-    [Car, "By car & parking", "Canal Road, Peoples Colony No 1. Visitor parking is at the front of the building and in the basement — follow the blue P signs."],
-    [Bus, "Rickshaw, taxi & ride-hailing", "Ask for “Lyallpur Medical Complex, Canal Road, Peoples Colony”. Drop-off is at the main entrance, in front of reception."],
+    [Car, "By car & parking", "Plot 669, Block A, People's Colony No 1. Visitor parking is at the front of the building and in the basement — follow the blue P signs."],
+    [Bus, "Rickshaw, taxi & ride-hailing", "Ask for “Lyallpur Medical Complex, People's Colony No 1”. Drop-off is at the main entrance, in front of reception."],
     [Ambulance, "Ambulance & emergency entrance", "The emergency entrance is on the ground floor, marked in red. Please keep the ambulance bay clear at all times."],
   ];
   return (
     <>
-      <PageHero eyebrow="Get directions" title="Find us on Canal Road" sub={site?.clinic.address ?? "Canal Road, Faisalabad"} img={PHOTOS.building}>
+      <PageHero eyebrow="Get directions" title="Find us in People's Colony" sub={site?.clinic.address ?? "People's Colony No 1, Faisalabad"} img={PHOTOS.building}>
         <div className="flex flex-wrap gap-3"><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}`} target="_blank" rel="noopener noreferrer" className={btn.primary}><Navigation className="h-5 w-5" />Start navigation</a>
           <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`} target="_blank" rel="noopener noreferrer" className={btn.glass}><MapPin className="h-5 w-5" />Open in Google Maps</a></div>
       </PageHero>

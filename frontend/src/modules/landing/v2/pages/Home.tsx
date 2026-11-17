@@ -8,7 +8,7 @@ import { btn, card, Counter, DoctorCard, Eyebrow, ICONS, reduced, Reveal, Sectio
 
 export default function Home() {
   const { ui, lang, site, phone } = useS2();
-  useTitle(lang === "ur" ? ui.name : "Compassionate care, advanced medicine", "Lyallpur Medical Complex, Canal Road, Faisalabad — consultants, 24/7 emergency, MRI, CT, laboratory, surgery and private rooms. Book an appointment online.");
+  useTitle(lang === "ur" ? ui.name : "Compassionate care, advanced medicine", "Lyallpur Medical Complex, People's Colony No 1, Faisalabad — consultants, 24/7 emergency, MRI, CT, laboratory, surgery and private rooms. Book an appointment online.");
   useJsonLd(site ? { "@context": "https://schema.org", "@type": ["Hospital", "MedicalOrganization"], name: ui.name, alternateName: "لائل پور میڈیکل کمپلیکس",
     url: `${location.origin}/hms/site`, image: `${location.origin}${PHOTOS.building}`, telephone: site.clinic.phone,
     address: { "@type": "PostalAddress", streetAddress: site.clinic.address, addressLocality: "Faisalabad", addressRegion: "Punjab", addressCountry: "PK" },

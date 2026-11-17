@@ -446,7 +446,7 @@ function Cta({ c, phone }: { c: Copy; phone?: string }) {
 
 function Contact({ c, h }: { c: Copy; h?: Opts["clinic"] }) {
   const er = CONFIG.emergencyPhone || h?.phone;
-  const mapQ = CONFIG.mapQuery || (h?.address ? `${h.address}, Pakistan` : "");
+  const mapQ = CONFIG.mapQuery || (h?.address ? (/pakistan/i.test(h.address) ? h.address : `${h.address}, Pakistan`) : "");
   const rows: [LucideIcon, string, ReactNode, string?][] = [
     ...(h?.address ? [[MapPin, c.contact.address, h.address] as [LucideIcon, string, ReactNode]] : []),
     ...(h?.phone ? [[Phone, c.contact.phone, <span dir="ltr">{h.phone}</span>, tel(h.phone)] as [LucideIcon, string, ReactNode, string]] : []),

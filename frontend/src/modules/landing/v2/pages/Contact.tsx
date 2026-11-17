@@ -7,7 +7,7 @@ import { btn, card, PageHero, Reveal, useTitle } from "../ui";
 
 export default function Contact() {
   const { site, phone } = useS2();
-  useTitle("Contact us", "Phone numbers, address, map and contact form for Lyallpur Medical Complex, Canal Road, Faisalabad.");
+  useTitle("Contact us", "Phone numbers, address, map and contact form for Lyallpur Medical Complex, People's Colony No 1, Faisalabad.");
   const q = mapQuery(site?.clinic.address);
   const lines: [typeof Phone, string, string, boolean][] = [[Siren, "Emergency (24/7)", phoneOf("emergency", phone), true], [PhoneCall, "Reception", phoneOf("reception", phone), false],
     [CalendarCheck, "Appointments", phoneOf("appointments", phone), false], [Ambulance, "Ambulance", phoneOf("ambulance", phone), true]];

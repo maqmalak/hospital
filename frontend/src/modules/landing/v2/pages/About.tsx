@@ -13,11 +13,11 @@ const VALUES: [typeof Eye, string, string][] = [
 
 export default function About() {
   const { site } = useS2();
-  useTitle("About us", "Lyallpur Medical Complex is a multi-specialty hospital and research centre on Canal Road, Faisalabad.");
-  const shots: [string, string][] = [[PHOTOS.building, "The hospital, Canal Road"], [PHOTOS.reception, "Reception"], [PHOTOS.lounge, "Waiting lounge"], [PHOTOS.corridor, "Clear wayfinding"], [PHOTOS.room, "Private room"], [PHOTOS.icu, "Intensive care"], [PHOTOS.pharmacy, "Pharmacy"]];
+  useTitle("About us", "Lyallpur Medical Complex is a multi-specialty hospital and research centre in People's Colony No 1, Faisalabad.");
+  const shots: [string, string][] = [[PHOTOS.building, "The hospital, People's Colony"], [PHOTOS.reception, "Reception"], [PHOTOS.lounge, "Waiting lounge"], [PHOTOS.corridor, "Clear wayfinding"], [PHOTOS.room, "Private room"], [PHOTOS.icu, "Intensive care"], [PHOTOS.pharmacy, "Pharmacy"]];
   return (
     <>
-      <PageHero eyebrow="About us" title="A hospital built around the patient" sub="Lyallpur Medical Complex brings consultants, emergency care, diagnostics, surgery and inpatient wards together on Canal Road, Faisalabad — one building, one team, one medical record." img={PHOTOS.building} />
+      <PageHero eyebrow="About us" title="A hospital built around the patient" sub="Lyallpur Medical Complex brings consultants, emergency care, diagnostics, surgery and inpatient wards together in People's Colony No 1, Faisalabad — one building, one team, one medical record." img={PHOTOS.building} />
       <section className="py-24">
         <Wrap className="grid items-center gap-14 lg:grid-cols-2">
           <Reveal>
@@ -33,7 +33,7 @@ export default function About() {
           </Reveal>
           <Reveal delay={120} className="relative">
             <img src={PHOTOS.building} alt="Lyallpur Medical Complex building" className="aspect-[4/5] w-full rounded-[32px] object-cover shadow-[0_40px_80px_-40px_rgba(8,48,58,0.7)]" loading="lazy" />
-            <div className="absolute -bottom-6 start-6 max-w-xs rounded-[22px] border border-white/30 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:bg-[#0D2730]/85"><div className="s2-display text-xl">Healing with excellence</div><div className="mt-1 text-sm text-[var(--muted)]">Canal Road, Faisalabad</div></div>
+            <div className="absolute -bottom-6 start-6 max-w-xs rounded-[22px] border border-white/30 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:bg-[#0D2730]/85"><div className="s2-display text-xl">Healing with excellence</div><div className="mt-1 text-sm text-[var(--muted)]">People's Colony No 1, Faisalabad</div></div>
           </Reveal>
         </Wrap>
       </section>
