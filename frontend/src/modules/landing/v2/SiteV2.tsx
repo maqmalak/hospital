@@ -39,7 +39,13 @@ export default function SiteV2() {
     const had = document.documentElement.classList.contains("dark"); document.documentElement.classList.remove("dark");
     return () => { if (had) document.documentElement.classList.add("dark"); };
   }, []);
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [loc.pathname]);
+  // New page → top, or to the #section a link asked for (e.g. a Home planet → /site/services#imaging) once it has rendered.
+  useEffect(() => {
+    if (!loc.hash) { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); return; }
+    let n = 0; const id = decodeURIComponent(loc.hash.slice(1));
+    const go = () => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); else if (n++ < 20) setTimeout(go, 100); };
+    go();
+  }, [loc.pathname, loc.hash]);
   const rtl = lang === "ur";
   const ctx = useMemo(() => ({ lang, ui, site, phone, dark }), [lang, ui, site, phone, dark]);
   return (

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarCheck, ChevronLeft, ChevronRight, MapPin, Phone, Pill, Siren, Stethoscope, UserRound, Building2, Quote } from "lucide-react";
-import { ARTICLES, CONFIG, DEPARTMENTS, PHOTOS } from "../content";
+import { ARTICLES, CONFIG, DEPARTMENTS, PHOTOS, SERVICES } from "../content";
+import ServiceGlobe from "../ServiceGlobe";
 import { phoneOf, tel, useDoctors } from "../data";
 import { useS2, Wrap } from "../SiteV2";
 import { btn, card, Counter, DoctorCard, Eyebrow, ICONS, reduced, Reveal, SectionHead, Skeleton, useJsonLd, useTitle, WordReveal } from "../ui";
@@ -19,6 +20,7 @@ export default function Home() {
       <Quick />
       <Stats />
       <Departments />
+      <ServicesOrbit />
       <DoctorsRail />
       <Tour />
       {CONFIG.testimonials.length > 0 && <Testimonials />}
@@ -129,6 +131,35 @@ function Departments() {
                   <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--primary)]">{ui.common.more}<ArrowRight className="h-4 w-4 transition group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" /></span></div>
               </Link>
             </Reveal>); })}
+        </div>
+      </Wrap>
+    </section>
+  );
+}
+
+/** Services on a dark panel: copy and service links on the left, the logo globe with services orbiting on the right (lg). */
+function ServicesOrbit() {
+  const { ui } = useS2();
+  const [e, t, s] = ui.sections.services;
+  return (
+    <section className="pb-24">
+      <Wrap>
+        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0E5E6F] via-[#08303A] to-[#062229] px-6 py-12 text-white sm:px-12 lg:py-6">
+          <span aria-hidden className="absolute -start-24 -top-24 h-72 w-72 rounded-full bg-[#9FE3DA]/10 blur-3xl" />
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+            <div className="lg:py-10">
+              <Reveal><Eyebrow light>{e}</Eyebrow></Reveal>
+              <Reveal delay={80}><h2 className="s2-display max-w-xl text-[2.2rem] leading-[1.08] sm:text-[3rem]">{t}</h2></Reveal>
+              <Reveal delay={140}><p className="mt-4 max-w-lg text-[17px] leading-relaxed text-white/75">{s}</p></Reveal>
+              <Reveal delay={200}><ul className="mt-7 flex max-w-xl flex-wrap gap-2">
+                {SERVICES.map((sv) => { const I = ICONS[sv.icon] ?? Stethoscope; return (
+                  <li key={sv.id}><Link to={`/site/services#${sv.id}`} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-2 text-sm font-medium text-white/90 backdrop-blur transition hover:border-[#9FE3DA]/60 hover:bg-white/15">
+                    <I className="h-4 w-4 text-[#9FE3DA]" />{sv.title}</Link></li>); })}
+              </ul></Reveal>
+              <Reveal delay={260}><Link to="/site/services" className={`${btn.primary} mt-8`}>{ui.nav.all}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link></Reveal>
+            </div>
+            <Reveal delay={150} className="hidden lg:block"><ServiceGlobe base="/site/services#" /></Reveal>
+          </div>
         </div>
       </Wrap>
     </section>

@@ -43,6 +43,7 @@ export const UI = {
     stats: { beds: "Beds", doctors: "Consultants", departments: "Departments", floors: "Floors" },
     sections: {
       depts: ["Specialties", "Departments built around you", "Specialist teams who share one record, so your care is joined up from clinic to ward."],
+      services: ["Services", "Everything you need, in one building", "Tests, scans, surgery, dialysis, intensive care and your medicines — all under one roof, on one record."],
       doctors: ["Our consultants", "Meet the doctors", "Clinic days, fees and the next free slot — live from our booking system."],
       tour: ["Inside the hospital", "Spaces designed for healing", "Calm, clean and easy to find your way around."],
       news: ["Health blog", "Advice from our clinicians", "Practical guidance for you and your family."],
@@ -70,6 +71,7 @@ export const UI = {
     stats: { beds: "بستر", doctors: "کنسلٹنٹس", departments: "شعبے", floors: "منزلیں" },
     sections: {
       depts: ["شعبہ جات", "آپ کے لیے بنائے گئے شعبے", "ماہر ٹیمیں جو ایک ہی ریکارڈ سے کام کرتی ہیں، تاکہ کلینک سے وارڈ تک علاج مربوط رہے۔"],
+      services: ["خدمات", "ہر سہولت، ایک ہی عمارت میں", "ٹیسٹ، اسکین، سرجری، ڈائیلاسز، انتہائی نگہداشت اور ادویات — سب ایک چھت تلے، ایک ہی ریکارڈ پر۔"],
       doctors: ["ہمارے کنسلٹنٹس", "ڈاکٹروں سے ملیں", "کلینک کے دن، فیس اور اگلا خالی وقت — براہِ راست ہمارے بکنگ سسٹم سے۔"],
       tour: ["ہسپتال کے اندر", "شفا کے لیے بنائی گئی جگہیں", "پُرسکون، صاف ستھری اور راستہ تلاش کرنے میں آسان۔"],
       news: ["صحت بلاگ", "ہمارے معالجین کے مشورے", "آپ اور آپ کے خاندان کے لیے عملی رہنمائی۔"],
