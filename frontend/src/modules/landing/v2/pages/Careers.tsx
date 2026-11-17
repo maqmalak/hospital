@@ -21,7 +21,8 @@ export default function Careers() {
         <Wrap className="grid items-start gap-10 lg:grid-cols-[1fr_1.2fr]">
           <Reveal><SectionHead eyebrow="Where we hire" title="Areas we recruit in" />
             <div className="-mt-4 space-y-3">{CAREERS.areas.map(([t, d]) => <div key={t} className="flex gap-4 rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-5"><Briefcase className="h-6 w-6 shrink-0 text-[var(--primary)]" /><div><div className="font-bold">{t}</div><div className="text-sm text-[var(--muted)]">{d}</div></div></div>)}</div></Reveal>
-          <Reveal delay={100}><EnquiryForm kind="Careers" extra={{ label: "Area of interest", options: CAREERS.areas.map(([t]) => t) }} messageLabel="Qualifications, experience and the role you want" submit="Send application" note="Our HR team keeps your details on file and contacts you when a suitable post opens." /></Reveal>
+          <Reveal delay={100}><EnquiryForm kind="Careers" extra={{ label: "Area of interest", options: CAREERS.areas.map(([t]) => t) }} messageLabel="Qualifications, experience and the role you want" submit="Send application"
+            upload={{ label: "Attach your CV (optional)", hint: "PDF or Word, up to 5 MB.", accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" }} note="Our HR team keeps your details on file and contacts you when a suitable post opens." /></Reveal>
         </Wrap>
       </section>
     </>

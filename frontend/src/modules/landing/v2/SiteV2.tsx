@@ -5,7 +5,8 @@
  */
 import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { ArrowUp, ChevronDown, Languages, Mail, MapPin, Menu, Moon, Phone, Search, Siren, Sun, X, LogIn, Facebook, Instagram, Youtube, Linkedin } from "lucide-react";
+import { ArrowUp, ChevronDown, Languages, Mail, MapPin, Menu, Moon, Phone, Search, Siren, Sun, X, LogIn, Facebook, Instagram, Youtube, Linkedin, Loader2 } from "lucide-react";
+import { postCall } from "@/services/frappe";
 import { CONFIG, DEPARTMENTS, FLOORS, SERVICES, UI, type Lang, type UICopy } from "./content";
 import { hasWa, phoneOf, tel, useDoctors, useSite, slugDoc, type Site } from "./data";
 import { ICONS, btn } from "./ui";
@@ -215,6 +216,16 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
 function Footer() {
   const { ui, site } = useS2();
   const [done, setDone] = useState(false);
+  const [mail, setMail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [subErr, setSubErr] = useState("");
+  /** Footer newsletter → Email Group "Website Health Tips" (api.public.site_subscribe). */
+  const subscribe = async (e: React.FormEvent) => {
+    e.preventDefault(); setBusy(true); setSubErr("");
+    try { await postCall("hospital_vvs.api.public.site_subscribe", { email: mail }); setDone(true); }
+    catch (x) { const m = (x as { message?: string })?.message || ""; setSubErr(/429|too many/i.test(m) ? ui.footer.subBusy : ui.footer.subFail); }
+    finally { setBusy(false); }
+  };
   const c = site?.clinic;
   const social: [string, typeof Facebook][] = [["facebook", Facebook], ["instagram", Instagram], ["youtube", Youtube], ["linkedin", Linkedin]];
   const quick: [string, string][] = [["/site/about", ui.nav.about], ["/site/doctors", ui.nav.doctors], ["/site/rooms", ui.nav.rooms], ["/site/pharmacy", ui.nav.pharmacy], ["/site/map", ui.nav.map], ["/site/patients", ui.nav.patients], ["/site/news", ui.nav.news], ["/site/careers", ui.nav.careers]];
@@ -237,12 +248,13 @@ function Footer() {
             {c?.phone && <li><a href={tel(c.phone)} className="flex gap-2 hover:text-white"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#FF6B66]" /><span dir="ltr">{c.phone}</span></a></li>}
             {CONFIG.email && <li><a href={`mailto:${CONFIG.email}`} className="flex gap-2 hover:text-white"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#FF6B66]" />{CONFIG.email}</a></li>}
           </ul>
-          <form className="mt-6" onSubmit={(e) => { e.preventDefault(); setDone(true); }}>
+          <form className="mt-6" onSubmit={subscribe}>
             <div className="text-sm font-semibold text-white">{ui.footer.newsletter}</div><div className="text-xs">{ui.footer.newsSub}</div>
             {done ? <div className="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-sm text-white">{ui.footer.thanks}</div> : (
               <div className="mt-3 flex overflow-hidden rounded-full bg-white/10 p-1 focus-within:ring-2 focus-within:ring-[#9FE3DA]/50">
-                <input type="email" required placeholder={ui.footer.emailPh} aria-label={ui.footer.emailPh} className="min-w-0 flex-1 bg-transparent px-4 text-sm text-white outline-none placeholder:text-white/50" />
-                <button className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white">{ui.footer.subscribe}</button></div>)}
+                <input type="email" required value={mail} onChange={(e) => setMail(e.target.value)} placeholder={ui.footer.emailPh} aria-label={ui.footer.emailPh} className="min-w-0 flex-1 bg-transparent px-4 text-sm text-white outline-none placeholder:text-white/50" />
+                <button disabled={busy} className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : ui.footer.subscribe}</button></div>)}
+            {subErr && <p className="mt-2 text-xs text-[#FFB4B1]" role="alert">{subErr}</p>}
           </form>
         </div>
       </div>

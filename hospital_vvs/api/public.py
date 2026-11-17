@@ -59,8 +59,9 @@ def site_info():
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=5, seconds=3600)
-def site_enquiry(kind=None, name=None, phone=None, email=None, message=None, extra=None):
-	"""Website forms (contact, pharmacy enquiry, careers) → a received Communication staff see in the desk. Five per hour per IP."""
+def site_enquiry(kind=None, name=None, phone=None, email=None, message=None, extra=None, file_name=None, file_data=None):
+	"""Website forms (contact, pharmacy enquiry, careers) → a received Communication staff see in the desk. Five per hour per IP.
+	Pharmacy and Careers may carry one file (a prescription photo or a CV) as base64; it is attached privately to the Communication."""
 	kind = _clean(kind, 30) or "Contact"
 	if kind not in ("Contact", "Pharmacy", "Careers"):
 		kind = "Contact"
@@ -77,6 +78,63 @@ def site_enquiry(kind=None, name=None, phone=None, email=None, message=None, ext
 	c = frappe.get_doc({"doctype": "Communication", "communication_type": "Communication", "communication_medium": "Other",
 		"sent_or_received": "Received", "subject": f"[Website · {kind}] {name}", "content": body, "sender_full_name": name,
 		"sender": email or None, "phone_no": phone, "status": "Open"})
+	upload = _upload(kind, file_name, file_data)
 	c.flags.ignore_permissions = True
 	c.insert()
+	if upload:
+		f = frappe.get_doc({"doctype": "File", "file_name": upload[0], "content": upload[1], "is_private": 1,
+			"attached_to_doctype": "Communication", "attached_to_name": c.name})
+		f.flags.ignore_permissions = True
+		f.insert()
+	return {"ok": True}
+
+
+_UPLOAD_EXT = {"Pharmacy": {"jpg", "jpeg", "png", "webp", "pdf"}, "Careers": {"pdf", "doc", "docx"}}
+_UPLOAD_MAX = 5 * 1024 * 1024
+
+
+def _upload(kind, file_name, file_data):
+	"""Validate an optional website upload → (safe file name, bytes) or None."""
+	if not file_data:
+		return None
+	import base64
+
+	allowed = _UPLOAD_EXT.get(kind)
+	name = re.sub(r"[^\w.\- ]", "", str(file_name or "")).strip()[-80:] or "upload"
+	ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+	if not allowed or ext not in allowed:
+		frappe.throw(_("That file type can't be sent here."))
+	data = str(file_data)
+	if data.startswith("data:"):
+		data = data.split(",", 1)[-1]
+	if len(data) > _UPLOAD_MAX * 4 // 3 + 8:
+		frappe.throw(_("The file is larger than 5 MB."))
+	try:
+		raw = base64.b64decode(data, validate=True)
+	except Exception:
+		frappe.throw(_("The file could not be read."))
+	if not raw or len(raw) > _UPLOAD_MAX:
+		frappe.throw(_("The file is larger than 5 MB."))
+	return f"website-{kind.lower()}-{name}", raw
+
+
+NEWSLETTER_GROUP = "Website Health Tips"
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=5, seconds=3600)
+def site_subscribe(email=None):
+	"""Website footer → member of the Email Group "Website Health Tips" (desk: Email Group → newsletters). Five per hour per IP."""
+	email = _clean(email, 120).lower()
+	if not email:
+		frappe.throw(_("Please give your email address."))
+	frappe.utils.validate_email_address(email, throw=True)
+	if not frappe.db.exists("Email Group", NEWSLETTER_GROUP):
+		g = frappe.get_doc({"doctype": "Email Group", "title": NEWSLETTER_GROUP})
+		g.flags.ignore_permissions = True
+		g.insert()
+	if not frappe.db.exists("Email Group Member", {"email_group": NEWSLETTER_GROUP, "email": email}):
+		m = frappe.get_doc({"doctype": "Email Group Member", "email_group": NEWSLETTER_GROUP, "email": email})
+		m.flags.ignore_permissions = True
+		m.insert()
 	return {"ok": True}
