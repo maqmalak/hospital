@@ -2,7 +2,8 @@
 
 Static pages are listed here; department and article slugs are read from the website's own content file
 (frontend/src/modules/landing/v2/content.ts) so the sitemap never lists a page the site does not have;
-doctor profiles come from the Doctor records the site shows."""
+doctor profiles come from the Doctor records the site shows.
+Empty in mock mode — only filled once the site config key `hv_site_indexing` is set (see robots.py)."""
 
 import os
 import re
@@ -27,6 +28,8 @@ def _slugs(block):
 
 
 def get_context(context):
+	if not frappe.conf.get("hv_site_indexing"):
+		return {"links": []}
 	today = nowdate()
 	routes = [f"/hms/site/{p}".rstrip("/") for p in PAGES] + ["/hms/book-appointment"]
 	routes += [f"/hms/site/departments/{s}" for s in _slugs("DEPARTMENTS")]
