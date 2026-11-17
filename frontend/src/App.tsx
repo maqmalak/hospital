@@ -16,6 +16,7 @@ const AccountPage = lazy(() => import("@/modules/auth/AccountPage"));
 const DfdPage = lazy(() => import("@/modules/help/DfdPage"));
 const AppHomePage = lazy(() => import("@/modules/home/AppHomePage"));
 const LandingPage = lazy(() => import("@/modules/landing/LandingPage"));
+const SiteV2 = lazy(() => import("@/modules/landing/v2/SiteV2"));
 const DashboardPage = lazy(() => import("@/modules/dashboard/DashboardPage"));
 const RegistrationPage = lazy(() => import("@/modules/patients/RegistrationPage"));
 const PatientsPage = lazy(() => import("@/modules/patients/PatientsPage"));
@@ -138,6 +139,7 @@ export default function App() {
         <Route path="/pw-login" element={<Navigate to="/login" replace />} />
         <Route path="/book-appointment" element={<BookPage />} />
         <Route path="/vvsdesk" element={<LandingPage />} />
+        <Route path="/site/*" element={<SiteV2 />} />
         <Route path="/my-appointment/:token" element={<ManagePage />} />
         <Route path="/lab-report/:token" element={<LabReportPage />} />
         <Route path="/patient/:token" element={<PatientRoomPage />} />

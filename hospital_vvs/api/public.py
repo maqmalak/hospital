@@ -26,3 +26,57 @@ def book_demo(name=None, hospital=None, city=None, beds=None, whatsapp=None, lan
 	lead.insert()
 	lead.add_comment("Comment", f"VVSDesk demo request · beds: {beds} · page language: {_clean(language, 4) or 'en'}")
 	return {"ok": True}
+
+
+# ------------------------------------------------------------------ hospital website v2 (/hms/site, D-80)
+@frappe.whitelist(allow_guest=True)
+def site_info():
+	"""Live facts for the public website: departments, wards with day rates, active packages, bed and doctor counts.
+	Only public, non-personal data. Cached for ten minutes."""
+	key = "hv:site_info"
+	cached = frappe.cache.get_value(key)
+	if cached:
+		return cached
+	s = frappe.get_cached_doc("Clinic Settings")
+	wards = frappe.get_all("Ward", filters={"is_active": 1}, fields=["name", "ward_name", "ward_name_ur", "ward_type", "gender", "floor",
+		"bed_charge_per_day", "nursing_charge_per_shift", "icu_surcharge_per_day"], order_by="sort_order, ward_name")
+	beds = {}
+	for b in frappe.get_all("Hospital Bed", fields=["ward"]):
+		beds[b.ward] = beds.get(b.ward, 0) + 1
+	for w in wards:
+		w["beds"] = beds.pop(w.pop("name"), 0)
+	packages = []
+	for p in frappe.get_all("Service Package", filters={"is_active": 1}, fields=["name", "package_name", "price", "days", "description", "ward_type"], order_by="price"):
+		inc = frappe.get_all("Package Inclusion", filters={"parent": p.name, "parenttype": "Service Package"}, pluck="charge_type", order_by="idx")
+		packages.append({**{k: v for k, v in p.items() if k != "name"}, "inclusions": [i for i in inc if i]})
+	depts = frappe.get_all("Medical Department", filters={"is_active": 1}, fields=["department_name", "department_name_ur"], order_by="department_name")
+	out = {"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "phone": s.phone, "address": s.address},
+		"departments": depts, "wards": wards, "packages": packages,
+		"beds": frappe.db.count("Hospital Bed"), "doctors": frappe.db.count("Doctor", {"is_active": 1, "doctor_type": ["!=", "External Referring"]})}
+	frappe.cache.set_value(key, out, expires_in_sec=600)
+	return out
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=5, seconds=3600)
+def site_enquiry(kind=None, name=None, phone=None, email=None, message=None, extra=None):
+	"""Website forms (contact, pharmacy enquiry, careers) → a received Communication staff see in the desk. Five per hour per IP."""
+	kind = _clean(kind, 30) or "Contact"
+	if kind not in ("Contact", "Pharmacy", "Careers"):
+		kind = "Contact"
+	name, email, message, extra = _clean(name, 80), _clean(email, 120), _clean(message, 2000), _clean(extra, 300)
+	phone = re.sub(r"[^\d+]", "", str(phone or ""))[:16]
+	if not name or len(re.sub(r"\D", "", phone)) < 10 or not message:
+		frappe.throw(_("Please give your name, a valid phone number and a message."))
+	if email:
+		frappe.utils.validate_email_address(email, throw=True)
+	body = f"<p><b>{frappe.utils.escape_html(name)}</b> · {frappe.utils.escape_html(phone)}{(' · ' + frappe.utils.escape_html(email)) if email else ''}</p>"
+	if extra:
+		body += f"<p>{frappe.utils.escape_html(extra)}</p>"
+	body += f"<p>{frappe.utils.escape_html(message)}</p>"
+	c = frappe.get_doc({"doctype": "Communication", "communication_type": "Communication", "communication_medium": "Other",
+		"sent_or_received": "Received", "subject": f"[Website · {kind}] {name}", "content": body, "sender_full_name": name,
+		"sender": email or None, "phone_no": phone, "status": "Open"})
+	c.flags.ignore_permissions = True
+	c.insert()
+	return {"ok": True}
