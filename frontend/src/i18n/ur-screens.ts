@@ -3912,4 +3912,8 @@ export const urScreens: Record<string, string> = {
   "Powered by": "تیار کردہ",
   "Medical & Research Center": "میڈیکل اینڈ ریسرچ سینٹر",
   "Lyallpur Medical Complex": "لائل پور میڈیکل کمپلیکس",
+  "Prescribing doctor": "نسخہ لکھنے والا ڈاکٹر",
+  "You aren't linked to a doctor, so choose who this prescription is for.": "آپ کسی ڈاکٹر سے منسلک نہیں ہیں، اس لیے منتخب کریں کہ یہ نسخہ کس ڈاکٹر کا ہے۔",
+  "Close old shift": "پرانی شفٹ بند کریں",
+  "View closing": "بندش دیکھیں",
 };

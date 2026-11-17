@@ -145,6 +145,8 @@ def save(data, sign=0):
 				frappe.throw(_("The online visit is not open."))
 			doc.update({"online_visit": d["online_visit"], "source": "Online Visit", "patient": ov.patient, "branch": ov.branch,
 				"doctor": d.get("doctor") or ov.assigned_doctor})
+		if not doc.doctor:
+			frappe.throw(_("Choose the prescribing doctor — this user is not linked to a Doctor record."))
 	for k in ("examination_notes", "advice", "follow_up_days", "follow_up_date", "amendment_reason"):
 		if k in d:
 			doc.set(k, d[k])

@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { call, getCall, humanizeError, useApi } from "@/lib/api";
 import { useRealtime } from "@/lib/realtime";
 import { mappedPrinter, printDoc } from "@/lib/print";
+import { ShiftNotice } from "@/components/common/ShiftNotice";
 import { opdSlipHtml, type SlipPrint } from "@/lib/templates";
 import { Field, inputCls, PatientPicker, Pill, Section, type PatientHit } from "@/components/common";
 import { Button } from "@/components/ui/button";
@@ -103,10 +104,12 @@ export default function OpdSlipPage() {
     try {
       const slip = await call<SlipPrint>("opd.create_slip", { data: { ...payload, client_ref: clientRef.current } });
       toast.success(`Token ${slip.token_no} · ${slip.name}`);
-      if (boot) await printDoc(opdSlipHtml(slip), "receipt", { agent: !!boot.print.agent, printer: mappedPrinter(boot.print.printers, "receipt") });
       reset();
+      // the slip is saved; a printer problem must not look like a failed save
+      if (boot) { try { await printDoc(opdSlipHtml(slip), "receipt", { agent: !!boot.print.agent, printer: mappedPrinter(boot.print.printers, "receipt") }); }
+        catch (pe) { toast.error(`Saved, but printing failed: ${humanizeError(pe)} — use Reprint in Recent slips.`, { duration: 8000 }); } }
       void qc.invalidateQueries({ queryKey: ["opd.counter_context"] }); void qc.invalidateQueries({ queryKey: ["opd.recent_slips"] });
-    } catch (e) { toast.error(humanizeError(e), { duration: 7000 }); } finally { setSaving(false); }
+    } catch (e) { toast.error(humanizeError(e), { duration: 7000 }); void qc.invalidateQueries({ queryKey: ["cash.my_shift"] }); } finally { setSaving(false); }
   };
 
   const due = totals?.patient_share ?? lines.reduce((s, l) => s + l.qty * l.rate, 0);
@@ -134,6 +137,7 @@ export default function OpdSlipPage() {
 
       {/* patient + vitals */}
       <section className="space-y-4 p-3 sm:p-5">
+        <ShiftNotice />
         <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white"><FilePlus2 className="h-5 w-5" /></span>
           <h1 className="flex-1 text-xl font-bold">{t("OPD slip")}</h1>
           <div className="flex rounded-xl bg-muted p-1">{["Consultation", "Follow-up", "Procedure"].map((p) => (

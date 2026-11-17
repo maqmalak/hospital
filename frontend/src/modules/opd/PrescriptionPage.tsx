@@ -67,6 +67,10 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
   const [amendFrom, setAmendFrom] = useState<{ name: string; reason: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [amendDlg, setAmendDlg] = useState(false);
+  // prescribing doctor: from the token / online visit / signed-in doctor; otherwise chosen here (e.g. admin writing for a doctor)
+  const [docPick, setDocPick] = useState("");
+  const needDoctor = !!ws && !ws.doctor && !queue && !ov;
+  const { data: docList } = useApi<{ rows: unknown[]; doctors: { name: string; doctor_name: string; consultation_room?: string }[] }>("opd.queue", {}, { enabled: needDoctor, staleTime: 300_000 });
 
   useEffect(() => {
     if (!ws) return;
@@ -101,10 +105,11 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
     if (!ws) return;
     const blocked = alerts.findIndex((a, i) => a.blocking && !meds[i]?.override_reason?.trim());
     if (sign && blocked >= 0) { toast.error(`Line ${blocked + 1}: enter an override reason for the safety alert`); return; }
+    if (needDoctor && !docPick) { toast.error("Choose the prescribing doctor first."); return; }
     setBusy(true);
     try {
       const doc = await call<{ name: string; docstatus: number }>("prescription.save", { sign: sign ? 1 : 0, data: {
-        name, queue_entry: queue, online_visit: ov, patient: ws.patient.name, medicines: meds, diagnoses: dx, lab_tests: labs, examination_notes: notes, advice,
+        name, queue_entry: queue, online_visit: ov, patient: ws.patient.name, doctor: needDoctor ? docPick : undefined, medicines: meds, diagnoses: dx, lab_tests: labs, examination_notes: notes, advice,
         follow_up_days: Number(fuDays) || undefined, amended_from: amendFrom?.name, amendment_reason: amendFrom?.reason } });
       setName(doc.name);
       if (sign) {
@@ -114,7 +119,7 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
         if (ov) setTimeout(() => nav("/ov-staff"), 600);
       } else toast.success("Draft saved");
     } catch (e) { toast.error(humanizeError(e), { duration: 8000 }); } finally { setBusy(false); }
-  }, [ws, alerts, meds, dx, labs, notes, advice, fuDays, name, queue, ov, amendFrom, nav]);
+  }, [ws, alerts, meds, dx, labs, notes, advice, fuDays, name, queue, ov, amendFrom, nav, needDoctor, docPick]);
 
   const printRx = async (rxName: string) => { try { await printPrescription(rxName, ws!.patient.name, boot); } catch (e) { toast.error(humanizeError(e)); } };
 
@@ -182,6 +187,12 @@ function Workspace({ queue, rx, patient, ov }: { queue?: string; rx?: string; pa
             <Button size="sm" variant="outline" onClick={async () => { const n = prompt("Template name"); if (n) { await call("prescription.save_template", { template_name: n, data: { medicines: meds, diagnoses: dx, advice } }); toast.success("Template saved"); void refetch(); } }}><FileText className="h-4 w-4" />Save as template</Button>
           </>}
         </div>
+
+        {needDoctor && !signed && <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-500/30 dark:bg-amber-500/10">
+          <Stethoscope className="h-4 w-4 text-amber-700" /><span className="font-semibold">Prescribing doctor</span>
+          <select aria-label="Prescribing doctor" className={inputCls + " h-9 max-w-xs flex-1"} value={docPick} onChange={(e) => setDocPick(e.target.value)}>
+            <option value="">Choose…</option>{(docList?.doctors ?? []).map((d) => <option key={d.name} value={d.name}>{d.doctor_name}{d.consultation_room ? ` · ${d.consultation_room}` : ""}</option>)}</select>
+          <span className="text-xs text-muted-foreground">You aren't linked to a doctor, so choose who this prescription is for.</span></div>}
 
         {signed && <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 p-3 text-sm dark:border-emerald-500/30 dark:bg-emerald-500/10">
           <PenLine className="h-4 w-4 text-emerald-700" /><span className="flex-1">Signed — this prescription can no longer be edited. Corrections are made as an amended version.</span>
