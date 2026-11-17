@@ -98,48 +98,6 @@ export function LogoMedallion() {
   );
 }
 
-/**
- * 3D wireframe globe (pure CSS preserve-3d): six meridians and five parallels spin on a tilted axis around a shaded
- * teal sphere, a dashed orbit ring circles it, glowing points ride the surface, and four service chips float alongside.
- * Right side of the Services hero (lg and up); motion stops under prefers-reduced-motion.
- */
-const GLOBE_R = 140;
-export function ServiceGlobe() {
-  const D = GLOBE_R * 2;
-  const chips: [LucideIcon, string, string][] = [[Stethoscope, "OPD clinics", "top-6 -start-6"], [FlaskConical, "Lab & tests", "top-24 -end-2"],
-    [ScanLine, "Imaging", "bottom-24 -start-8"], [Ambulance, "24/7 ambulance", "bottom-6 end-0"]];
-  return (
-    <div aria-hidden className="pointer-events-none relative grid h-[400px] w-[400px] place-items-center">
-      <span className="absolute h-[340px] w-[340px] rounded-full bg-[#14B8A6]/20 blur-3xl" />
-      <span className="absolute rounded-full" style={{ width: D, height: D, background: "radial-gradient(circle at 32% 28%, #2C8C99 0%, #0E5E6F 38%, #062229 78%)", boxShadow: "inset -24px -30px 60px rgba(0,0,0,.55), inset 18px 16px 40px rgba(159,227,218,.18), 0 40px 80px -30px rgba(0,0,0,.7)" }} />
-      <div className="absolute" style={{ width: D, height: D, perspective: 900 }}>
-        <div className="h-full w-full" style={{ transformStyle: "preserve-3d", transform: "rotateX(-16deg) rotateZ(14deg)" }}>
-          <div className="s2-globe relative h-full w-full" style={{ transformStyle: "preserve-3d" }}>
-            {[0, 30, 60, 90, 120, 150].map((a) => <span key={a} className="absolute inset-0 rounded-full border border-[#9FE3DA]/40" style={{ transform: `rotateY(${a}deg)` }} />)}
-            {[-60, -30, 0, 30, 60].map((lat) => {
-              const r = Math.cos((lat * Math.PI) / 180) * GLOBE_R, y = Math.sin((lat * Math.PI) / 180) * GLOBE_R;
-              return <span key={lat} className={`absolute rounded-full border ${lat === 0 ? "border-[#9FE3DA]/60" : "border-[#9FE3DA]/30"}`}
-                style={{ width: r * 2, height: r * 2, left: GLOBE_R - r, top: GLOBE_R - r, transform: `translateY(${-y}px) rotateX(90deg)` }} />;
-            })}
-            {[[20, 25, "#FF6B66"], [110, -15, "#9FE3DA"], [200, 40, "#FF6B66"], [290, 5, "#FFFFFF"], [160, -45, "#9FE3DA"], [60, -35, "#FFFFFF"]].map(([lon, lat, c], i) => (
-              <span key={i} className="absolute left-1/2 top-1/2 -ml-[5px] -mt-[5px] h-2.5 w-2.5 rounded-full" style={{ background: c as string, boxShadow: `0 0 14px 4px ${c}99`, transform: `rotateY(${lon}deg) rotateX(${lat}deg) translateZ(${GLOBE_R}px)` }} />
-            ))}
-          </div>
-          <span className="absolute -inset-[34px] rounded-full" style={{ transform: "rotateX(76deg)", transformStyle: "preserve-3d" }}>
-            <span className="s2-orbit absolute inset-0 rounded-full border border-dashed border-white/35"><span className="absolute -top-[6px] left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-[#FF6B66] shadow-[0_0_16px_4px_rgba(255,107,102,0.65)]" /></span>
-          </span>
-        </div>
-      </div>
-      <span className="absolute rounded-full" style={{ width: D, height: D, background: "radial-gradient(circle at 30% 22%, rgba(255,255,255,.28), transparent 38%)" }} />
-      {chips.map(([I, t, pos], i) => (
-        <span key={t} className={`s2-float absolute ${pos} flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-3.5 py-2 text-sm font-semibold text-white shadow-[0_18px_40px_-18px_rgba(0,0,0,0.6)] backdrop-blur-md`} style={{ animationDelay: `${i * -1.4}s` }}>
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-white text-[#0E5E6F]"><I className="h-4 w-4" /></span>{t}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export function PageHero({ eyebrow, title, sub, img, children, aside }: { eyebrow: string; title: string; sub?: string; img: string; children?: ReactNode; aside?: ReactNode }) {
   return (
     <section className="relative overflow-hidden bg-[#08303A] text-white">

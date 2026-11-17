@@ -4,7 +4,8 @@ import { CalendarCheck, Check, Phone, Video } from "lucide-react";
 import { CONFIG, PHOTOS, SERVICES } from "../content";
 import { rs, tel } from "../data";
 import { useS2, Wrap } from "../SiteV2";
-import { btn, card, ICONS, PageHero, Reveal, ServiceGlobe, SectionHead, Skeleton, useTitle } from "../ui";
+import ServiceGlobe from "../ServiceGlobe";
+import { btn, card, ICONS, PageHero, Reveal, SectionHead, Skeleton, useTitle } from "../ui";
 
 export default function Services() {
   const { site, phone } = useS2();
