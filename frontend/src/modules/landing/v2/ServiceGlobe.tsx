@@ -43,6 +43,6 @@ function Globe() {
 
 /** `base`: where a planet links — "#" on the Services page itself, "/site/services#" elsewhere. */
 export default function ServiceGlobe({ base = "#" }: { base?: string }) {
-  return <Orbit split={4} rings={[150, 222]} periods={[30, 50]} glow={340} center={<Globe />}
+  return <Orbit split={5} rings={[150, 222]} periods={[30, 50]} glow={340} center={<Globe />}
     items={SERVICES.map((s) => ({ key: s.id, label: s.title, icon: s.icon, to: `${base}${s.id}` }))} />;
 }

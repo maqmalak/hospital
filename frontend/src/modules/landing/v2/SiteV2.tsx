@@ -39,7 +39,7 @@ export default function SiteV2() {
     const had = document.documentElement.classList.contains("dark"); document.documentElement.classList.remove("dark");
     return () => { if (had) document.documentElement.classList.add("dark"); };
   }, []);
-  // New page → top, or to the #section a link asked for (e.g. a Home planet → /site/services#imaging) once it has rendered.
+  // New page → top, or to the #section a link asked for (e.g. a Home planet → /site/services#mri) once it has rendered.
   useEffect(() => {
     if (!loc.hash) { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); return; }
     let n = 0; const id = decodeURIComponent(loc.hash.slice(1));

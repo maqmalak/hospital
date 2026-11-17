@@ -2,14 +2,14 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   Activity, Ambulance, ArrowRight, Baby, Bone, Brain, CalendarCheck, Clock3, Droplets, Ear, FlaskConical, HeartPulse, Pill, ScanLine, Scissors, Siren,
-  Sparkles, Stethoscope, Video, type LucideIcon,
+  Sparkles, Stethoscope, Video, Magnet, Microscope, AudioWaveform, type LucideIcon,
 } from "lucide-react";
 import type { Doctor } from "./data";
 import { fmtDate, initials, todayISO, rs, slugDoc } from "./data";
 
 export const ICONS: Record<string, LucideIcon> = {
   stethoscope: Stethoscope, heart: HeartPulse, siren: Siren, brain: Brain, droplets: Droplets, bone: Bone, baby: Baby, scissors: Scissors, ear: Ear,
-  sparkles: Sparkles, scan: ScanLine, flask: FlaskConical, clock: Clock3, activity: Activity, video: Video, pill: Pill, ambulance: Ambulance,
+  sparkles: Sparkles, scan: ScanLine, flask: FlaskConical, clock: Clock3, activity: Activity, video: Video, pill: Pill, ambulance: Ambulance, magnet: Magnet, microscope: Microscope, waves: AudioWaveform,
 };
 
 export const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;

@@ -155,10 +155,13 @@ export const DEPARTMENTS: Dept[] = [
     services: ["Blood tests", "Urine and stool tests", "Cultures", "Hormone and special tests", "Home sample collection on request"], technology: ["Automated analysers", "QR-verified digital reports"], match: ["patholog", "lab"] },
 ];
 
-export interface ServiceGroup { id: string; title: string; icon: string; img: string; text: string; items: string[] }
+export interface ServiceGroup { id: string; title: string; icon: string; /** "" → illustrated panel until a real photo is supplied */ img: string; text: string; items: string[] }
 export const SERVICES: ServiceGroup[] = [
-  { id: "diagnostics", title: "Diagnostics & laboratory", icon: "flask", img: PHOTOS.pharmacy, text: "Routine and special tests, verified by a pathologist and sent to your phone.", items: ["Blood and urine tests", "Cultures and sensitivities", "Hormone tests", "Health check-up profiles"] },
-  { id: "imaging", title: "Imaging", icon: "scan", img: PHOTOS.corridor, text: "Scans reported into your record for every doctor to see.", items: ["MRI", "CT scan", "Digital X-ray", "Ultrasound & Doppler"] },
+  { id: "laboratory", title: "Laboratory", icon: "microscope", img: "", text: "Routine and special tests, verified by a pathologist and sent to your phone.", items: ["Blood and urine tests", "Cultures and sensitivities", "Hormone and thyroid tests", "Health check-up profiles"] },
+  { id: "mri", title: "MRI", icon: "magnet", img: "", text: "Detailed, radiation-free scans of the brain, spine, joints and soft tissue, reported by a radiologist.", items: ["Brain and spine MRI", "Joint and sports-injury MRI", "Abdomen and pelvis MRI", "Contrast studies"] },
+  { id: "ct-scan", title: "CT scan", icon: "scan", img: "", text: "Fast cross-sectional imaging — for emergencies, chest and abdomen, and planning treatment.", items: ["Head CT (stroke and injury)", "Chest and abdomen CT", "CT with contrast", "CT angiography"] },
+  { id: "ultrasound", title: "Ultrasound", icon: "waves", img: "", text: "Safe, painless scans with no radiation — including pregnancy and Doppler studies.", items: ["Abdomen and pelvis", "Pregnancy (obstetric) scans", "Doppler studies", "Thyroid, breast and soft tissue"] },
+  { id: "x-ray", title: "X-ray", icon: "bone", img: "", text: "Digital X-rays in minutes, with images in your record for every doctor to see.", items: ["Chest X-ray", "Bones and joints", "Spine", "Portable X-ray for wards and ICU"] },
   { id: "surgery", title: "Surgery", icon: "scissors", img: PHOTOS.icu, text: "Planned and emergency operations in modern theatres.", items: ["General surgery", "Orthopaedic surgery", "Gynaecological surgery", "ENT surgery"] },
   { id: "daycare", title: "Day care", icon: "clock", img: PHOTOS.room, text: "Minor procedures and infusions without an overnight stay.", items: ["Day-care procedures", "Infusions", "Dressings", "Minor operations"] },
   { id: "emergency", title: "Emergency 24/7", icon: "siren", img: PHOTOS.corridor, text: "Triage, resuscitation and monitored bays, day and night.", items: ["Triage on arrival", "Trauma care", "Chest pain & stroke", "Ambulance handover"] },
