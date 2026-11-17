@@ -6,9 +6,16 @@ export default function DeptOrbit() {
   return (
     <Orbit split={5} items={DEPARTMENTS.map((d) => ({ key: d.slug, label: d.name.replace(/ \(.*\)$/, ""), icon: d.icon, to: `/site/departments/${d.slug}` }))}
       center={
-        <div className="relative grid h-[156px] w-[156px] place-items-center rounded-full bg-white shadow-[0_0_0_10px_rgba(255,255,255,0.08),0_0_60px_10px_rgba(159,227,218,0.35),0_30px_60px_-20px_rgba(0,0,0,0.6)]">
-          <span className="s2-pulse-soft absolute -inset-[22px] rounded-full border border-white/15" />
-          <img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark.webp`} alt="" width={256} height={256} className="h-[108px] w-[108px]" />
+        <div className="relative grid h-[156px] w-[156px] place-items-center">
+          {/* corona: soft turning rays + breathing halo behind the sun */}
+          <span className="s2-corona absolute -inset-[70px] rounded-full" />
+          <span className="s2-halo absolute -inset-[6px] rounded-full" />
+          <span className="s2-pulse-soft absolute -inset-[24px] rounded-full border border-white/20" />
+          {/* the sun: white disc with a light sweep and the glowing mark */}
+          <span className="relative grid h-full w-full place-items-center overflow-hidden rounded-full bg-[radial-gradient(circle_at_35%_30%,#FFFFFF_0%,#F4FBFA_55%,#D9F1EE_100%)] shadow-[0_0_0_5px_rgba(255,255,255,0.55),0_0_0_12px_rgba(255,236,170,0.22),0_0_30px_14px_rgba(255,236,170,0.35)]">
+            <img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark.webp`} alt="" width={256} height={256} className="s2-logo-glow relative h-[108px] w-[108px]" />
+            <span className="s2-shine pointer-events-none absolute inset-y-0 -left-1/2 w-1/2" />
+          </span>
         </div>
       } />
   );

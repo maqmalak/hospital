@@ -314,6 +314,15 @@ function CSS(rtl: boolean) {
   .s2-sign{animation:s2sign 7s ease-in-out infinite}@keyframes s2sign{0%,100%{transform:rotateY(-32deg) rotateX(6deg)}50%{transform:rotateY(32deg) rotateX(-4deg)}}
   .s2-float{animation:s2float 5.5s ease-in-out infinite}@keyframes s2float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
   .s2-pulse-soft{animation:s2ps 3.2s ease-in-out infinite}@keyframes s2ps{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:.25}}
+  .s2-corona{background:repeating-conic-gradient(from 0deg,rgba(255,236,170,.0) 0deg 9deg,rgba(255,236,170,.22) 12deg,rgba(255,236,170,0) 15deg 24deg);
+    -webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%);filter:blur(1.5px);animation:s2spin 18s linear infinite}
+  .s2-halo{box-shadow:0 0 40px 12px rgba(255,236,170,.45),0 0 90px 30px rgba(159,227,218,.35);animation:s2halo 3.6s ease-in-out infinite}
+  @keyframes s2halo{0%,100%{box-shadow:0 0 36px 10px rgba(255,236,170,.40),0 0 80px 26px rgba(159,227,218,.30)}50%{box-shadow:0 0 60px 20px rgba(255,236,170,.65),0 0 130px 46px rgba(159,227,218,.45)}}
+  .s2-logo-glow{animation:s2lg 3.6s ease-in-out infinite}@keyframes s2lg{0%,100%{filter:drop-shadow(0 0 4px rgba(255,107,102,.35))}50%{filter:drop-shadow(0 0 14px rgba(255,107,102,.7)) brightness(1.08)}}
+  .s2-logo-glow-dark{animation:s2lgd 3.6s ease-in-out infinite}@keyframes s2lgd{0%,100%{filter:drop-shadow(0 0 10px rgba(159,227,218,.5))}50%{filter:drop-shadow(0 0 22px rgba(159,227,218,.95)) drop-shadow(0 0 8px rgba(255,107,102,.6)) brightness(1.15)}}
+  .s2-core{background:radial-gradient(circle,rgba(159,227,218,.55),rgba(159,227,218,0) 70%);animation:s2core 3.6s ease-in-out infinite}@keyframes s2core{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
+  .s2-shine{background:linear-gradient(105deg,transparent 20%,rgba(255,255,255,.75) 50%,transparent 80%);transform:skewX(-18deg);animation:s2shine 3.8s ease-in-out infinite}
+  @keyframes s2shine{0%,40%{left:-60%}80%,100%{left:130%}}
   .s2-page{animation:s2fade .45s ease both}@keyframes s2fade{from{opacity:0}to{opacity:1}}
   .s2-pop{animation:s2pop .22s cubic-bezier(.2,.7,.2,1) both}@keyframes s2pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
   .s2-drawer{animation:s2drawer .3s cubic-bezier(.2,.7,.2,1) both}@keyframes s2drawer{from{transform:translateX(${rtl ? "-" : ""}100%)}to{transform:none}}
@@ -323,6 +332,6 @@ function CSS(rtl: boolean) {
   .s2-pulse{animation:s2pl 2.4s ease-in-out infinite}@keyframes s2pl{0%,100%{box-shadow:0 0 0 0 rgba(229,72,63,.45)}50%{box-shadow:0 0 0 12px rgba(229,72,63,0)}}
   .s2 input,.s2 select,.s2 textarea{transition:border-color .2s,box-shadow .2s}
   html{scroll-behavior:smooth}
-  @media (prefers-reduced-motion: reduce){.s2-reveal{opacity:1;transform:none;transition:none}.s2-word{animation:none;opacity:1;transform:none}.s2-kenburns,.s2-pulse,.s2-spin,.s2-spin-rev,.s2-globe,.s2-orbit,.s2-sign,.s2-pulse-soft,.s2-float,.s2-skel,.s2-page,.s2-pop,.s2-drawer{animation:none}html{scroll-behavior:auto}}
+  @media (prefers-reduced-motion: reduce){.s2-reveal{opacity:1;transform:none;transition:none}.s2-word{animation:none;opacity:1;transform:none}.s2-kenburns,.s2-pulse,.s2-spin,.s2-spin-rev,.s2-globe,.s2-orbit,.s2-sign,.s2-corona,.s2-halo,.s2-logo-glow,.s2-logo-glow-dark,.s2-core,.s2-shine,.s2-pulse-soft,.s2-float,.s2-skel,.s2-page,.s2-pop,.s2-drawer{animation:none}html{scroll-behavior:auto}}
   `;
 }

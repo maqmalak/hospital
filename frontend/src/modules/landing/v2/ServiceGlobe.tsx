@@ -14,10 +14,11 @@ function Globe() {
     <div className="relative grid place-items-center" style={{ width: D, height: D }}>
       <span className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle at 32% 28%, #2C8C99 0%, #0E5E6F 38%, #062229 78%)", boxShadow: "inset -22px -28px 56px rgba(0,0,0,.55), inset 16px 14px 36px rgba(159,227,218,.18), 0 40px 80px -30px rgba(0,0,0,.7)" }} />
       {/* 3D logo sign: stacked darker layers behind the coloured face give it thickness; it swings on Y */}
+      <span className="s2-core absolute h-[120px] w-[120px] rounded-full" />
       <div className="absolute inset-0 grid place-items-center" style={{ perspective: 600 }}>
         <div className="s2-sign relative h-[104px] w-[104px]" style={{ transformStyle: "preserve-3d" }}>
           {[7, 6, 5, 4, 3, 2, 1].map((z) => <img key={z} src={MARK} alt="" className="absolute inset-0 h-full w-full" style={{ transform: `translateZ(${-z * 1.6}px)`, filter: `brightness(${0.25 + z * 0.02}) saturate(.6)` }} />)}
-          <img src={MARK} alt="" className="absolute inset-0 h-full w-full" style={{ transform: "translateZ(1px)", filter: "drop-shadow(0 0 14px rgba(159,227,218,.55))" }} />
+          <img src={MARK} alt="" className="s2-logo-glow-dark absolute inset-0 h-full w-full" style={{ transform: "translateZ(1px)" }} />
         </div>
       </div>
       {/* wireframe in front of the sign, so it sits inside the globe */}
@@ -37,6 +38,7 @@ function Globe() {
         </div>
       </div>
       <span className="pointer-events-none absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle at 30% 22%, rgba(255,255,255,.26), transparent 40%)" }} />
+      <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"><span className="s2-shine absolute inset-y-0 -left-1/2 w-1/2" /></span>
     </div>
   );
 }
