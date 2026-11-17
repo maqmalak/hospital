@@ -38,7 +38,7 @@ function Globe() {
         </div>
       </div>
       <span className="pointer-events-none absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle at 30% 22%, rgba(255,255,255,.26), transparent 40%)" }} />
-      <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"><span className="s2-shine absolute inset-y-0 -left-1/2 w-1/2" /></span>
+      <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"><span className="s2-sweep absolute inset-y-0 -left-1/2 w-1/2" /></span>
     </div>
   );
 }
