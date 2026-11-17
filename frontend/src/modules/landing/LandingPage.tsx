@@ -164,11 +164,12 @@ function Hero({ c, lang, opts, phone }: { c: Copy; lang: Lang; opts: Opts | null
   );
   return (
     <section id="top" className="relative overflow-hidden bg-[#0C2431] text-white">
-      {/* the building, full-bleed on the end side from lg up */}
-      <div className="pointer-events-none absolute inset-y-0 end-0 hidden w-[56%] lg:block">
-        <img src={BRAND("site/building.webp")} alt={c.hero.photo} className="h-full w-full object-cover object-[50%_30%]" fetchPriority="high" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0C2431] via-[#0C2431]/35 to-transparent rtl:bg-gradient-to-l" />
-        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0C2431]/85 to-transparent" />
+      {/* the building behind the whole hero, every screen size; navy overlay keeps the text readable */}
+      <div className="pointer-events-none absolute inset-0">
+        <img src={BRAND("site/building.webp")} alt={c.hero.photo} className="h-full w-full object-cover object-[62%_30%] lg:object-[50%_30%]" {...{ fetchpriority: "high" }} />
+        <div className="absolute inset-0 bg-[#0C2431]/75 lg:hidden" />
+        <div className="absolute inset-0 hidden bg-gradient-to-r from-[#0C2431] via-[#0C2431]/80 to-[#0C2431]/10 lg:block rtl:bg-gradient-to-l" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0C2431] to-transparent" />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_520px_at_0%_0%,rgba(43,110,133,0.5),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:26px_26px] lg:w-1/2" />
@@ -194,13 +195,8 @@ function Hero({ c, lang, opts, phone }: { c: Copy; lang: Lang; opts: Opts | null
             ))}
           </Reveal>
         </div>
-        {/* phone / tablet: the building as a framed photo */}
-        <Reveal delay={200} className="relative lg:hidden">
-          <div className="overflow-hidden rounded-[28px] border border-white/10 shadow-[0_40px_80px_-40px_rgba(0,0,0,0.8)]">
-            <img src={BRAND("site/building.webp")} alt={c.hero.photo} className="aspect-[4/3] w-full object-cover object-[50%_30%]" />
-          </div>
-          <div className="absolute -bottom-6 start-4">{erCard}</div>
-        </Reveal>
+        {/* phone / tablet: emergency card under the text (the photo is the hero background) */}
+        {erCard && <Reveal delay={200} className="lg:hidden">{erCard}</Reveal>}
         {/* lg+: floating cards over the photo */}
         <div className="relative hidden h-full lg:block">
           <Reveal delay={260} className="absolute end-2 top-2">
