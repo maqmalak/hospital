@@ -6,6 +6,7 @@ import { useRealtime } from "@/lib/realtime";
 
 interface Disp { doctors: { doctor: string; room?: string; now: { token: number; name?: string; status?: string; called_at: string } | null; next: { token: number; name?: string }[]; waiting: number }[]; clinic: string; clinic_ur?: string }
 
+/* Fixed VVS gold palette (not the theme teal-* variables, which turn blue in dark mode): #2A1F08 / #EBDCAB / #E0C77E / #B8913A. */
 /** Waiting-room TV: token and room (first name when Clinic Settings allows); the patient with the doctor shows token + name.
  *  Chime + Urdu/English voice on a new call. */
 export default function QueueDisplayPage() {
@@ -34,21 +35,21 @@ export default function QueueDisplayPage() {
     say(`ٹوکن نمبر ${token}${room ? `، کمرہ نمبر ${room} میں تشریف لائیں` : ""}`, "ur-PK");
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 p-6 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-[#2A1F08] to-slate-900 p-6 text-white">
       <div className="mb-6 flex items-end justify-between">
         <div className="flex items-center gap-4">
           <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.15),0_12px_30px_-8px_rgba(0,0,0,0.6)]">
             <img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark.webp`} alt="" className="h-14 w-14 object-contain" />
           </span>
-          <div><div className="text-3xl font-extrabold leading-tight">{data?.clinic}</div><div className="mt-1 font-urdu text-xl leading-[2.2] text-teal-200" dir="rtl">{data?.clinic_ur}</div></div>
+          <div><div className="text-3xl font-extrabold leading-tight">{data?.clinic}</div><div className="mt-1 font-urdu text-xl leading-[2.2] text-[#EBDCAB]" dir="rtl">{data?.clinic_ur}</div></div>
         </div>
-        <div className="text-end"><div className="text-4xl font-bold tabular-nums">{clock.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div><div className="text-teal-200">{clock.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</div></div>
+        <div className="text-end"><div className="text-4xl font-bold tabular-nums">{clock.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div><div className="text-[#EBDCAB]">{clock.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</div></div>
       </div>
       {flash && <div className="mb-6 animate-pulse rounded-3xl bg-gradient-to-r from-amber-400 to-orange-500 p-6 text-center text-slate-950"><div className="text-xl font-bold">NOW CALLING · اب باری</div><div className="text-8xl font-black">{flash}</div></div>}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {(data?.doctors ?? []).map((d) => (
           <div key={d.doctor} className={`relative overflow-hidden rounded-3xl border-2 bg-white/[0.12] p-6 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.75)] backdrop-blur ${d.now?.status === "In Consultation" ? "border-emerald-400/70" : "border-white/25"}`}>
-            <span aria-hidden className={`absolute inset-x-0 top-0 h-1.5 ${d.now?.status === "In Consultation" ? "bg-emerald-400" : "bg-gradient-to-r from-teal-300 to-teal-500"}`} />
+            <span aria-hidden className={`absolute inset-x-0 top-0 h-1.5 ${d.now?.status === "In Consultation" ? "bg-emerald-400" : "bg-gradient-to-r from-[#E0C77E] to-[#B8913A]"}`} />
             <div className="flex items-center justify-between gap-3"><div className="text-2xl font-extrabold">{d.doctor}</div><div className="shrink-0 rounded-full bg-white px-3.5 py-1 text-sm font-bold text-slate-900">Room {d.room || "–"}</div></div>
             {d.now?.status === "In Consultation" ? (
               <>
@@ -60,7 +61,7 @@ export default function QueueDisplayPage() {
               </>
             ) : (
               <>
-                <div className="mt-4 text-sm font-semibold uppercase tracking-widest text-teal-200">Now serving · اب باری</div>
+                <div className="mt-4 text-sm font-semibold uppercase tracking-widest text-[#EBDCAB]">Now serving · اب باری</div>
                 <div className="text-7xl font-black tabular-nums">{d.now?.token ?? "—"}</div>{d.now?.name && <div className="text-lg text-white/80">{d.now.name}</div>}
               </>
             )}
