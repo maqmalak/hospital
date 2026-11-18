@@ -9,7 +9,7 @@
 set -euo pipefail
 
 BENCH="${BENCH:-$HOME/frappe-bench}"
-SITE="${SITE:-lms.micromaxonline.uk}"
+SITE="${SITE:-lyallpurhospital.pk}"
 KEEP_DAYS="${KEEP_DAYS:-14}"
 REMOTE="${REMOTE:-}"            # e.g. offsite:lmc-backups
 DIR="$BENCH/sites/$SITE/private/backups"

@@ -1,18 +1,18 @@
 # Deploy: Lyallpur Medical Complex (hospital ERP + LMC website)
 
 Server `169.58.20.21`, user `maqmalak`, bench `/home/maqmalak/frappe-bench` (shared with the other sites already there).
-**One server, one site, two domains:** `lms.micromaxonline.uk` (the site name) and `lyallpurhospital.pk` + `www.lyallpurhospital.pk`
+**One server, one site, two domains:** `lyallpurhospital.pk` (the site name) and `www.lyallpurhospital.pk` + `lms.micromaxonline.uk`
 (`EXTRA_DOMAINS`). All three open the same site with the same data and login; one Let's Encrypt certificate covers them.
-Every path below works on each domain, e.g. `https://lyallpurhospital.pk/hms/site`.
+Every path below works on each domain, e.g. `https://lms.micromaxonline.uk/hms/site`.
 
 One Frappe site serves everything. The website, the hospital ERP and the desk share the login, the data and the domain:
 
 | URL | What |
 |---|---|
-| `https://lms.micromaxonline.uk/hms/site` | LMC public website (v2): departments, doctors, booking, online visits |
-| `https://lms.micromaxonline.uk/hms/login` | staff sign-in → the hospital ERP at `/hms` (React, `frontend/`) |
-| `https://lms.micromaxonline.uk/hms/display/queue` | OPD queue TV (pharmacy, ward and other screens under `/hms/display/…`) |
-| `https://lms.micromaxonline.uk/app` | ERPNext desk |
+| `https://lyallpurhospital.pk/hms/site` | LMC public website (v2): departments, doctors, booking, online visits |
+| `https://lyallpurhospital.pk/hms/login` | staff sign-in → the hospital ERP at `/hms` (React, `frontend/`) |
+| `https://lyallpurhospital.pk/hms/display/queue` | OPD queue TV (pharmacy, ward and other screens under `/hms/display/…`) |
+| `https://lyallpurhospital.pk/app` | ERPNext desk |
 
 | File | Where it runs | What it does |
 |---|---|---|
@@ -41,14 +41,14 @@ One Frappe site serves everything. The website, the hospital ERP and the desk sh
 4. **Copy to the server** with the `rsync` command it prints, and copy this `deploy` folder too (or clone the repo).
 5. **Install** (on the server, as the bench user with sudo, not root):
    ```bash
-   RESTORE_DIR=~/lmc-data-<date> SITE=lms.micromaxonline.uk LETSENCRYPT_EMAIL=you@yourdomain.com bash install-production.sh
+   RESTORE_DIR=~/lmc-data-<date> SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=you@yourdomain.com bash install-production.sh
    ```
    The bench on that server already serves other sites, so add `APT_UPGRADE=0` to avoid restarting their services.
 6. **Before the scheduler sends anything:** the data has SMS and WhatsApp switched on (Clinic Settings) and FBR in *Mock*
    mode. Check the gateways and numbers on production — reminders and feedback requests go out every 5–15 minutes.
 7. **Delete the data folder** from both machines; it holds the site's encryption key and stored secrets.
 
-Options (environment variables): `SITE`, `EXTRA_DOMAINS` (default `lyallpurhospital.pk www.lyallpurhospital.pk`; `EXTRA_DOMAINS=""` = only SITE;
+Options (environment variables): `SITE`, `EXTRA_DOMAINS` (default `www.lyallpurhospital.pk lms.micromaxonline.uk`; `EXTRA_DOMAINS=""` = only SITE;
 adding a domain later = re-run with the longer list), `APT_UPGRADE=0`, `SSL=0`,
 `BENCH_NAME`, `ENABLE_UFW=0`, `DEMO_JOBS=1` (demo servers only: drug round 3× daily and the pharmacy day — never on a live
 hospital), and the pinned versions (`FRAPPE_BRANCH`, `ERPNEXT_BRANCH`, `HRMS_BRANCH`/`HRMS_REF`, `CRM_BRANCH`/`CRM_REF`),
@@ -60,11 +60,11 @@ Passwords (MariaDB root, and this site's `LMC_ADMIN_PASSWORD`) are generated on 
 ## Updating later
 
 ```bash
-cd ~/frappe-bench/apps/hospital_vvs/deploy && APT_UPGRADE=0 SITE=lms.micromaxonline.uk LETSENCRYPT_EMAIL=… bash install-production.sh
+cd ~/frappe-bench/apps/hospital_vvs/deploy && APT_UPGRADE=0 SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=… bash install-production.sh
 ```
 
 or by hand: `git -C apps/hospital_vvs pull`, `cd apps/hospital_vvs/frontend && npm ci && npm run build`,
-`bench --site lms.micromaxonline.uk migrate`, `bench build --app hospital_vvs`, `sudo supervisorctl restart all`.
+`bench --site lyallpurhospital.pk migrate`, `bench build --app hospital_vvs`, `sudo supervisorctl restart all`.
 
 ## Help centre videos
 

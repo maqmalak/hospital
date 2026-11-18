@@ -5,7 +5,7 @@
 #     bash apps/hospital_vvs/deploy/export-data.sh
 # It makes a backup with files of SITE and puts it in a folder of its own (default ~/lmc-data-<date>), then prints
 # the command that copies it to the server. On the server:
-#     RESTORE_DIR=~/lmc-data-<date> SITE=lms.micromaxonline.uk LETSENCRYPT_EMAIL=… bash install-production.sh
+#     RESTORE_DIR=~/lmc-data-<date> SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=… bash install-production.sh
 #
 # The folder holds the site's encryption key (in *-site_config_backup.json) and every stored secret (payment
 # gateway keys, SMS / WhatsApp / e-mail passwords). Copy it only over SSH (scp/rsync), never by email or chat, and
@@ -35,4 +35,4 @@ echo
 echo "Copy it to the server (only over SSH):"
 echo "    rsync -av --chmod=D700,F600 '$OUT/' $SERVER:~/$(basename "$OUT")/"
 echo "Then on the server:"
-echo "    RESTORE_DIR=~/$(basename "$OUT") SITE=lms.micromaxonline.uk LETSENCRYPT_EMAIL=you@yourdomain.com bash install-production.sh"
+echo "    RESTORE_DIR=~/$(basename "$OUT") SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=you@yourdomain.com bash install-production.sh"

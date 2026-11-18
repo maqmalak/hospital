@@ -7,9 +7,9 @@
 #
 #  Run as the Linux user that will own the bench (it must have sudo), NOT as root:
 #
-#      SITE=lms.micromaxonline.uk LETSENCRYPT_EMAIL=you@yourdomain.com bash install-production.sh
+#      SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=you@yourdomain.com bash install-production.sh
 #
-#  One site, two domains: lms.micromaxonline.uk (SITE) and lyallpurhospital.pk + www (EXTRA_DOMAINS) — same data,
+#  One site, two domains: lyallpurhospital.pk (SITE) and www.lyallpurhospital.pk + lms.micromaxonline.uk (EXTRA_DOMAINS) — same data,
 #  same login, one Let's Encrypt certificate for all three names. Every name needs its DNS A record → this server first.
 #
 #      → https://<SITE>/hms/site           LMC public website (v2)
@@ -37,8 +37,8 @@ HOME_DIR="${HOME_DIR:-/home/maqmalak}"
 BENCH_NAME="${BENCH_NAME:-frappe-bench}"
 BENCH_DIR="${HOME_DIR}/${BENCH_NAME}"
 
-SITE="${SITE:-lms.micromaxonline.uk}"               # Frappe site = its public host name
-EXTRA_DOMAINS="${EXTRA_DOMAINS-lyallpurhospital.pk www.lyallpurhospital.pk}"   # same site, more host names (space separated); EXTRA_DOMAINS="" = none
+SITE="${SITE:-lyallpurhospital.pk}"                 # Frappe site = its public host name (links in emails / SMS use it)
+EXTRA_DOMAINS="${EXTRA_DOMAINS-www.lyallpurhospital.pk lms.micromaxonline.uk}"   # same site, more host names (space separated); EXTRA_DOMAINS="" = none
 SSL="${SSL:-1}"                                      # 1 = Let's Encrypt certificate for SITE and EXTRA_DOMAINS
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"           # needed with SSL=1: certificate expiry notices go here
 

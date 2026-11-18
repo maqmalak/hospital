@@ -10,7 +10,7 @@
 set -euo pipefail
 
 BENCH="${BENCH:-$HOME/frappe-bench}"
-SITE="${SITE:-lms.micromaxonline.uk}"
+SITE="${SITE:-lyallpurhospital.pk}"
 INCLUDE_ADMINISTRATOR="${INCLUDE_ADMINISTRATOR:-0}"
 
 cd "$BENCH"
