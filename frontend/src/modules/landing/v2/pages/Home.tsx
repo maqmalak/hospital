@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarCheck, ChevronLeft, ChevronRight, MapPin, Phone, Pill, Siren, Stethoscope, UserRound, Building2, Quote } from "lucide-react";
+import { ArrowRight, CalendarCheck, ChevronLeft, ChevronRight, MapPin, Phone, Siren, Stethoscope, UserRound, Building2, Quote, HeartPulse } from "lucide-react";
 import { ARTICLES, CONFIG, DEPARTMENTS, PHOTOS, SERVICES } from "../content";
 import ServiceGlobe from "../ServiceGlobe";
 import DeptOrbit from "../DeptOrbit";
@@ -117,7 +117,7 @@ function Hero() {
 
 function Quick() {
   const { ui } = useS2();
-  const items: [typeof Stethoscope, string, boolean][] = [[Building2, "/site/departments", false], [Pill, "/site/pharmacy", false], [MapPin, "/site/directions", false], [Stethoscope, "/site/patients#portal", false]];
+  const items: [typeof Stethoscope, string, boolean][] = [[Building2, "/site/departments", false], [HeartPulse, "/site/services", false], [MapPin, "/site/directions", false], [Stethoscope, "/site/patients#portal", false]];
   return (
     <Wrap className="relative z-10 -mt-28">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -155,7 +155,7 @@ function Departments() {
   const { ui } = useS2();
   const [e, t, s] = ui.sections.depts;
   return (
-    <section className="pb-24">
+    <section className="pb-24 pt-16 sm:pt-20">
       <Wrap>
         <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-bl from-[#0E5E6F] via-[#08303A] to-[#062229] px-6 py-12 text-white sm:px-12 lg:py-6">
           <span aria-hidden className="absolute -end-24 -top-24 h-72 w-72 rounded-full bg-[#FF6B66]/10 blur-3xl" />

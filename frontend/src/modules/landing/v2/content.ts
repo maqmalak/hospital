@@ -39,7 +39,7 @@ export const UI = {
       all: "View all", menu: "Menu", close: "Close" },
     hero: { eyebrow: "Faisalabad · People's Colony", words: "Compassionate care, advanced medicine.", sub: "Consultants, round-the-clock emergency, modern diagnostics and comfortable rooms — under one roof, with one medical record that follows you from your first visit.",
       book: "Book appointment", find: "Find a doctor", emergency: "Emergency" },
-    quick: [["Departments", "Specialties under one roof"], ["Pharmacy", "In-house, open around the clock"], ["Get directions", "People's Colony No 1, Faisalabad"], ["Patient portal", "Reports, visits and bookings"]] as [string, string][],
+    quick: [["Departments", "Specialties under one roof"], ["Services", "Tests, scans, surgery and more"], ["Get directions", "People's Colony No 1, Faisalabad"], ["Patient portal", "Reports, visits and bookings"]] as [string, string][],
     stats: { beds: "Beds", doctors: "Consultants", departments: "Departments", floors: "Floors" },
     sections: {
       depts: ["Specialties", "Departments built around you", "Specialist teams who share one record, so your care is joined up from clinic to ward."],
@@ -67,7 +67,7 @@ export const UI = {
       all: "سب دیکھیں", menu: "مینو", close: "بند کریں" },
     hero: { eyebrow: "فیصل آباد · پیپلز کالونی", words: "ہمدردانہ نگہداشت، جدید علاج۔", sub: "ماہر کنسلٹنٹس، چوبیس گھنٹے ایمرجنسی، جدید تشخیص اور آرام دہ کمرے — ایک ہی چھت تلے، اور ایک ہی میڈیکل ریکارڈ جو پہلے دورے سے آپ کے ساتھ رہتا ہے۔",
       book: "اپائنٹمنٹ بک کریں", find: "ڈاکٹر تلاش کریں", emergency: "ایمرجنسی" },
-    quick: [["شعبے", "تمام شعبے ایک چھت تلے"], ["فارمیسی", "ہسپتال کے اندر، چوبیس گھنٹے"], ["راستہ معلوم کریں", "پیپلز کالونی نمبر 1، فیصل آباد"], ["مریض پورٹل", "رپورٹس، وزٹ اور بکنگ"]] as [string, string][],
+    quick: [["شعبے", "تمام شعبے ایک چھت تلے"], ["خدمات", "ٹیسٹ، اسکین، سرجری اور مزید"], ["راستہ معلوم کریں", "پیپلز کالونی نمبر 1، فیصل آباد"], ["مریض پورٹل", "رپورٹس، وزٹ اور بکنگ"]] as [string, string][],
     stats: { beds: "بستر", doctors: "کنسلٹنٹس", departments: "شعبے", floors: "منزلیں" },
     sections: {
       depts: ["شعبہ جات", "آپ کے لیے بنائے گئے شعبے", "ماہر ٹیمیں جو ایک ہی ریکارڈ سے کام کرتی ہیں، تاکہ کلینک سے وارڈ تک علاج مربوط رہے۔"],
