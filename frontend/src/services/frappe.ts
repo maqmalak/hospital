@@ -56,6 +56,15 @@ http.interceptors.request.use((config) => {
  * injection point. `mm_core.api.get_csrf_token_for_session` (every site) is a minimal
  * whitelisted wrapper for exactly this.
  */
+/** Frappe keeps the signed-in user in a readable `user_id` cookie ("Guest" or missing for a visitor). Lets public pages
+ *  skip the session calls that can only answer 403 for a guest (CSRF token, session boot, logged-user check). */
+export function hasUserSession(): boolean {
+  if (typeof document === "undefined") return true;
+  const m = document.cookie.match(/(?:^|;\s*)user_id=([^;]*)/);
+  const user = m ? decodeURIComponent(m[1]) : "";
+  return !!user && user !== "Guest";
+}
+
 export async function refreshCSRFToken(): Promise<void> {
   try {
     const res = await fetch("/api/method/mm_core.api.get_csrf_token_for_session", {

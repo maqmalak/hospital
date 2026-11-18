@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import i18n from "i18next";
-import { getCall, http, refreshCSRFToken } from "@/services/frappe";
+import { getCall, hasUserSession, http, refreshCSRFToken } from "@/services/frappe";
 import { setActiveCurrency } from "@/utils/currency";
 import { setLetterheadClinic } from "@/lib/letterhead";
 
@@ -40,6 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const reload = useCallback(async () => {
     try {
+      // a visitor (website, public pages): no session to load — the calls below could only answer 403
+      if (!hasUserSession()) { setBoot(null); return; }
       await refreshCSRFToken();
       const b = await getCall<Boot>("hospital_vvs.api.session.boot");
       (window as unknown as { csrf_token?: string }).csrf_token = b.csrf_token;
