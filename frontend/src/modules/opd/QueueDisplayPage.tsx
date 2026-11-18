@@ -48,12 +48,12 @@ export default function QueueDisplayPage() {
       {flash && <div className="mb-6 animate-pulse rounded-3xl bg-gradient-to-r from-amber-400 to-orange-500 p-6 text-center text-slate-950"><div className="text-xl font-bold">NOW CALLING · اب باری</div><div className="text-8xl font-black">{flash}</div></div>}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {(data?.doctors ?? []).map((d) => (
-          <div key={d.doctor} className={`relative overflow-hidden rounded-3xl border-2 bg-white/[0.12] p-6 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.75)] backdrop-blur ${d.now?.status === "In Consultation" ? "border-emerald-400/70" : "border-white/25"}`}>
+          <div key={d.doctor} className={`relative overflow-hidden rounded-3xl border-2 bg-white/[0.12] p-6 backdrop-blur ${d.now?.status === "In Consultation" ? "border-emerald-400 shadow-[0_0_0_1px_rgba(52,211,153,0.35),0_0_32px_-6px_rgba(52,211,153,0.55)]" : "border-white/25 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.75)]"}`}>
             <span aria-hidden className={`absolute inset-x-0 top-0 h-1.5 ${d.now?.status === "In Consultation" ? "bg-emerald-400" : "bg-gradient-to-r from-[#E0C77E] to-[#B8913A]"}`} />
             <div className="flex items-center justify-between gap-3"><div className="text-2xl font-extrabold">{d.doctor}</div><div className="shrink-0 rounded-full bg-white px-3.5 py-1 text-sm font-bold text-slate-900">Room {d.room || "–"}</div></div>
             {d.now?.status === "In Consultation" ? (
               <>
-                <div className="mt-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-emerald-300"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />With the doctor · <span className="font-urdu normal-case tracking-normal">ڈاکٹر کے پاس</span></div>
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-emerald-400 bg-emerald-400/10 px-3.5 py-0.5 text-sm font-bold uppercase tracking-widest text-emerald-300 shadow-[0_0_14px_-2px_rgba(52,211,153,0.6)]"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />With the doctor · <span className="font-urdu text-base normal-case leading-[1.9] tracking-normal text-emerald-300">ڈاکٹر کے پاس</span></div>
                 <div className="mt-1 flex items-center gap-4">
                   <span className="text-7xl font-black tabular-nums">{d.now.token}</span>
                   {d.now.name && <span className="min-w-0 border-s border-white/20 ps-4 text-2xl font-bold leading-tight text-white/90 [overflow-wrap:anywhere]">{d.now.name}</span>}
