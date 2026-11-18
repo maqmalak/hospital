@@ -9,6 +9,9 @@
 #
 #      SITE=lms.micromaxonline.uk LETSENCRYPT_EMAIL=you@yourdomain.com bash install-production.sh
 #
+#  One site, two domains: lms.micromaxonline.uk (SITE) and lyallpurhospital.pk + www (EXTRA_DOMAINS) — same data,
+#  same login, one Let's Encrypt certificate for all three names. Every name needs its DNS A record → this server first.
+#
 #      → https://<SITE>/hms/site           LMC public website (v2)
 #        https://<SITE>/hms/login          staff sign-in → https://<SITE>/hms (hospital ERP, React)
 #        https://<SITE>/hms/display/queue  OPD queue TV (and the other /hms/display/* screens)
@@ -35,7 +38,7 @@ BENCH_NAME="${BENCH_NAME:-frappe-bench}"
 BENCH_DIR="${HOME_DIR}/${BENCH_NAME}"
 
 SITE="${SITE:-lms.micromaxonline.uk}"               # Frappe site = its public host name
-EXTRA_DOMAINS="${EXTRA_DOMAINS-}"                    # more host names for the same site (space separated); empty = none
+EXTRA_DOMAINS="${EXTRA_DOMAINS-lyallpurhospital.pk www.lyallpurhospital.pk}"   # same site, more host names (space separated); EXTRA_DOMAINS="" = none
 SSL="${SSL:-1}"                                      # 1 = Let's Encrypt certificate for SITE and EXTRA_DOMAINS
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"           # needed with SSL=1: certificate expiry notices go here
 
