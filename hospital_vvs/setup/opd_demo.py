@@ -108,7 +108,7 @@ def run(new_patients=12, visits=30, seed=None):
 	frappe.flags.mute_messages = True
 	_shifts()
 	docs = [d for d in frappe.get_all("Doctor", filters={"is_active": 1, "user": ["is", "set"], "doctor_type": "Internal"}, fields=["name", "user"])]
-	existing = frappe.get_all("Patient", filters={"disabled": 0, "temporary_record": 0, "branch": "Lahore Main"}, pluck="name", order_by="modified desc", limit=200)
+	existing = frappe.get_all("Patient", filters={"disabled": 0, "temporary_record": 0, "branch": "Faisalabad Main"}, pluck="name", order_by="modified desc", limit=200)
 	made = {"patients": 0, "slips": 0, "prescriptions": 0, "waiting": 0, "lab_orders": 0}
 	fresh = []
 	for _ in range(cint(new_patients)):

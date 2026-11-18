@@ -69,7 +69,7 @@ class TestNursingComms(IntegrationTestCase):
 		if not frappe.db.exists("Branch", "QA Branch"):
 			frappe.get_doc({"doctype": "Branch", "branch": "QA Branch"}).insert()
 		frappe.get_doc({"doctype": "Nursing Station", "station_name": "NS-QA-Other", "branch": "QA Branch"}).insert()
-		frappe.set_user("nurse@vvs.demo")  # Lahore Main only (D-41)
+		frappe.set_user("nurse@vvs.demo")  # Faisalabad Main only (D-41)
 		self.assertNotIn("NS-QA-Other", [s.name for s in api.stations()])
 		with self.assertRaises(frappe.PermissionError):
 			api.board("NS-QA-Other")
@@ -115,7 +115,7 @@ class TestFeedback(IntegrationTestCase):
 		slip = self.done_visit(3)
 		svc.queue_feedback_requests()
 		pat = frappe.db.get_value("Queue Entry", slip.queue_entry, "patient")
-		self.assertIsNone(svc.request_feedback(pat, "Pharmacy", "Dispense Ticket", "DT-X", None, "Lahore Main"))  # within the gap
+		self.assertIsNone(svc.request_feedback(pat, "Pharmacy", "Dispense Ticket", "DT-X", None, "Faisalabad Main"))  # within the gap
 		phone = frappe.db.get_value("Patient", pat, "phone")
 		self.assertTrue(svc.whatsapp_rating(phone, "4"))
 		self.assertEqual(frappe.db.get_value("Patient Feedback", {"patient": pat}, "rating_value"), 4)

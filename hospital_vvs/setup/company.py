@@ -11,7 +11,7 @@ from hospital_vvs import roles as R
 
 COMPANY = "VVS Hospital"
 ABBR = "VVSH"
-BRANCHES = [("Lahore Main", "LHR", "Plot 669, Block A People's Colony No 1, Faisalabad, Pakistan", "+92 41 8530147")]
+BRANCHES = [("Faisalabad Main", "FSD", "Plot 669, Block A People's Colony No 1, Faisalabad, Pakistan", "+92 41 8530147")]
 BILLING_TYPES = {
 	# billing type: (income account, cost center, warehouse key)
 	"Fee": ("Consultation Fee Income", "OPD", "General Store"),
@@ -224,10 +224,10 @@ def fill_settings(company, profiles):
 
 COUNTERS = [
 	# name, branch, type, billing type, number
-	("Reception 1", "Lahore Main", "Reception", "OPD Slip", 1), ("Reception 2", "Lahore Main", "Reception", "OPD Slip", 2),
-	("Lab Counter", "Lahore Main", "Lab", "Lab", 4), ("Pharmacy 1", "Lahore Main", "Pharmacy Billing", "Medicine", 1),
-	("Pharmacy 2", "Lahore Main", "Pharmacy Billing", "Medicine", 2), ("Handover 3", "Lahore Main", "Pharmacy Handover", "Medicine", 3),
-	("IPD Desk", "Lahore Main", "IPD Desk", "IPD Slip", 5),
+	("Reception 1", "Faisalabad Main", "Reception", "OPD Slip", 1), ("Reception 2", "Faisalabad Main", "Reception", "OPD Slip", 2),
+	("Lab Counter", "Faisalabad Main", "Lab", "Lab", 4), ("Pharmacy 1", "Faisalabad Main", "Pharmacy Billing", "Medicine", 1),
+	("Pharmacy 2", "Faisalabad Main", "Pharmacy Billing", "Medicine", 2), ("Handover 3", "Faisalabad Main", "Pharmacy Handover", "Medicine", 3),
+	("IPD Desk", "Faisalabad Main", "IPD Desk", "IPD Slip", 5),
 ]
 
 

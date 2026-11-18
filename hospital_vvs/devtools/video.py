@@ -24,7 +24,7 @@ def info(what, **kw):
 		frappe.db.commit()
 		return _out({"ok": True})
 	if what == "free_bed":
-		wards = frappe.get_all("Ward", filters={"branch": "Lahore Main", "ward_type": kw.get("ward_type") or "General", "is_active": 1}, pluck="name")
+		wards = frappe.get_all("Ward", filters={"branch": "Faisalabad Main", "ward_type": kw.get("ward_type") or "General", "is_active": 1}, pluck="name")
 		bed = frappe.get_all("Hospital Bed", filters={"ward": ["in", wards or [""]], "status": "Available", "is_active": 1}, fields=["name", "bed_no", "ward"],
 			order_by="bed_no", limit=1)
 		return _out(bed[0] if bed else None)

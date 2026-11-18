@@ -169,7 +169,7 @@ class TestRecurringExpense(Base):
 		exp.ensure_setup()
 		cat = frappe.get_all("Expense Category", pluck="name", limit=1)[0]
 		return frappe.get_doc(dict({"doctype": "Recurring Expense", "title": "QA rent", "category": cat, "amount": 50000, "payee": "QA Landlord",
-			"mode_of_payment": "Cash", "branch": "Lahore Main", "frequency": "Monthly", "next_date": frappe.utils.add_months(frappe.utils.today(), -2),
+			"mode_of_payment": "Cash", "branch": "Faisalabad Main", "frequency": "Monthly", "next_date": frappe.utils.add_months(frappe.utils.today(), -2),
 			"description": "Building rent", "requested_by": "accounts@vvs.demo"}, **kw)).insert()
 
 	def test_catches_up_missed_months_once(self):

@@ -15,7 +15,7 @@ CATEGORIES = {
 	"Building & Infrastructure": ("Buildings", 300),
 	"IT Equipment": ("Office Equipment", 48),
 }
-LOCATIONS = ["Lahore Main", "Radiology", "Operation Theatre", "ICU", "Emergency", "General Ward", "Private Rooms", "Laboratory", "OPD", "Reception",
+LOCATIONS = ["Faisalabad Main", "Radiology", "Operation Theatre", "ICU", "Emergency", "General Ward", "Private Rooms", "Laboratory", "OPD", "Reception",
 	"Pharmacy", "Plant Room", "Admin Block"]
 
 
@@ -23,8 +23,8 @@ def ensure_setup(company="VVS Hospital"):
 	abbr = frappe.get_cached_value("Company", company, "abbr")
 	for loc in LOCATIONS:
 		if not frappe.db.exists("Location", loc):
-			frappe.get_doc({"doctype": "Location", "location_name": loc, "parent_location": None if loc == "Lahore Main" else "Lahore Main",
-				"is_group": 1 if loc == "Lahore Main" else 0}).insert(ignore_permissions=True)
+			frappe.get_doc({"doctype": "Location", "location_name": loc, "parent_location": None if loc == "Faisalabad Main" else "Faisalabad Main",
+				"is_group": 1 if loc == "Faisalabad Main" else 0}).insert(ignore_permissions=True)
 	for cat, (acc, months) in CATEGORIES.items():
 		if not frappe.db.exists("Asset Category", cat):
 			frappe.get_doc({"doctype": "Asset Category", "asset_category_name": cat, "enable_cwip_accounting": 0,

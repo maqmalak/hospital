@@ -44,7 +44,7 @@ class TestIpdQa(IntegrationTestCase):
 		self.assertRaises(frappe.ValidationError, api.add_vitals, json.dumps({"bed_allotment": adm.name, "pulse": 900}))
 		self.assertRaises(frappe.ValidationError, api.add_vitals, json.dumps({"bed_allotment": adm.name, "temperature": 150}))
 		api.add_vitals(json.dumps({"bed_allotment": adm.name, "pulse": 88, "temperature": 99.1}))
-		v = er.register(patient=p.name, branch="Lahore Main", chief_complaint="Test")
+		v = er.register(patient=p.name, branch="Faisalabad Main", chief_complaint="Test")
 		self.assertRaises(frappe.ValidationError, er.triage, v.name, "Green", {"pulse": 400})
 		_close(adm.name, bed)
 
@@ -92,7 +92,7 @@ class TestIpdQa(IntegrationTestCase):
 	def test_admin_identifies_unknown_er_patient(self):
 		from hospital_vvs.api import er as er_api
 
-		v = er.register(unknown={"gender": "Female", "approx_age": 25}, branch="Lahore Main", chief_complaint="Unconscious")
+		v = er.register(unknown={"gender": "Female", "approx_age": 25}, branch="Faisalabad Main", chief_complaint="Unconscious")
 		tmp = frappe.db.get_value("ER Visit", v.name, "patient")
 		real = new_patient("Identified Lady", gender="Female")
 		frappe.set_user("admin@vvs.demo")  # PW Admin, not System Manager

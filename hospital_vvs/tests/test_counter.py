@@ -28,7 +28,7 @@ class TestCounter(IntegrationTestCase):
 		self.shift = desk_shift()
 
 	def cart(self, patient=None, **kw):
-		return {"branch": "Lahore Main", "patient": patient, "lines": [{"kind": "Consultation", "doctor": doctor()}, {"kind": "Lab", "template": "Complete Blood Count"},
+		return {"branch": "Faisalabad Main", "patient": patient, "lines": [{"kind": "Consultation", "doctor": doctor()}, {"kind": "Lab", "template": "Complete Blood Count"},
 			{"kind": "Service", "item_code": "PROC-ECG", "qty": 1}], **kw}
 
 	def test_one_cart_split_tender(self):
@@ -73,7 +73,7 @@ class TestCounter(IntegrationTestCase):
 		as_user(DESK)
 		panel = counter.patient_panel(pat.name)
 		self.assertEqual(panel["admission"]["name"], adm.name)
-		r = counter.checkout({"branch": "Lahore Main", "patient": pat.name, "lines": [{"kind": "IPD Advance", "target": adm.name, "amount": 15000, "label": "Advance"}],
+		r = counter.checkout({"branch": "Faisalabad Main", "patient": pat.name, "lines": [{"kind": "IPD Advance", "target": adm.name, "amount": 15000, "label": "Advance"}],
 			"tenders": tenders(("Cash", 5000, None), ("Easypaisa", 10000, "EP-9"))})
 		pes = frappe.get_all("Payment Entry", filters={"hv_bed_allotment": adm.name, "docstatus": 1}, fields=["paid_amount", "mode_of_payment", "hv_shift"])
 		self.assertEqual(sorted(p.paid_amount for p in pes), [5000, 10000])
@@ -91,10 +91,10 @@ class TestCounter(IntegrationTestCase):
 
 	def test_offline_sync(self):
 		as_user(DESK)
-		pat = frappe.get_all("Patient", filters={"disabled": 0, "temporary_record": 0, "branch": "Lahore Main"}, pluck="name", limit=1)[0]
-		good = {"branch": "Lahore Main", "patient": pat, "client_ref": "off-good-1", "offline": 1, "offline_created": "2026-11-09 10:00:00",
+		pat = frappe.get_all("Patient", filters={"disabled": 0, "temporary_record": 0, "branch": "Faisalabad Main"}, pluck="name", limit=1)[0]
+		good = {"branch": "Faisalabad Main", "patient": pat, "client_ref": "off-good-1", "offline": 1, "offline_created": "2026-11-09 10:00:00",
 			"lines": [{"kind": "Service", "item_code": "PROC-ECG", "qty": 1}], "tenders": tenders(("Cash", 5000, None))}
-		bad = {"branch": "Lahore Main", "patient": pat, "client_ref": "off-bad-1", "lines": [{"kind": "Service", "item_code": "PROC-ECG", "qty": 1}],
+		bad = {"branch": "Faisalabad Main", "patient": pat, "client_ref": "off-bad-1", "lines": [{"kind": "Service", "item_code": "PROC-ECG", "qty": 1}],
 			"tenders": tenders(("Cash", 1, None))}
 		res = {r["client_ref"]: r for r in counter.sync([good, bad])}
 		self.assertEqual(res["off-good-1"]["ok"], 1)

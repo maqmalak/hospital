@@ -30,7 +30,7 @@ class TestOpdQA(IntegrationTestCase):
 
 		slip = make_slip(new_patient().name, demo_doctor())
 		item = frappe.db.get_value("Item", {"hv_is_medicine": 1, "disabled": 0, "item_name": ["like", "%Panadol%"]})
-		rx = frappe.get_doc({"doctype": "Prescription", "patient": slip.patient, "doctor": slip.doctor, "branch": "Lahore Main", "queue_entry": slip.queue_entry,
+		rx = frappe.get_doc({"doctype": "Prescription", "patient": slip.patient, "doctor": slip.doctor, "branch": "Faisalabad Main", "queue_entry": slip.queue_entry,
 			"medicines": [{"item": item, "dose": "1", "frequency": "1+1+1", "duration": "5 days", "override_reason": "test"}]})
 		rx.insert(ignore_permissions=True)
 		self.assertEqual(rx.medicines[0].qty, 15)

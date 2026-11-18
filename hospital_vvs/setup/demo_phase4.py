@@ -20,7 +20,7 @@ REQUESTS = [  # name, phone, gender, age, complaint, symptoms, method, proof?, s
 def seed():
 	frappe.set_user("Administrator")
 	frappe.flags.hv_sync_messages = True
-	_user("ovstaff", "Owais Online Desk", [R.OV_STAFF], "Lahore Main")
+	_user("ovstaff", "Owais Online Desk", [R.OV_STAFF], "Faisalabad Main")
 	for login in OV_DOCTORS:
 		email = f"{login}@vvs.demo"
 		if frappe.db.exists("User", email):

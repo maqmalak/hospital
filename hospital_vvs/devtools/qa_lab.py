@@ -62,7 +62,7 @@ def scenario(name):
 
 # ------------------------------------------------------------------ helpers
 def patients(n, category="Normal"):
-	rows = frappe.get_all("Patient", filters={"disabled": 0, "temporary_record": 0, "phone": ["is", "set"], "category": category, "branch": "Lahore Main"},
+	rows = frappe.get_all("Patient", filters={"disabled": 0, "temporary_record": 0, "phone": ["is", "set"], "category": category, "branch": "Faisalabad Main"},
 		fields=["name", "patient_name", "phone", "gender"], order_by="modified desc", limit=60)
 	random.Random(7).shuffle(rows)
 	return rows[:n]
@@ -187,7 +187,7 @@ def s01():
 		f"{o['status']} {si}")
 	from hospital_vvs.services.billing import pos_profile_for
 
-	want = frappe.db.get_value("POS Profile", pos_profile_for("Lab", "Lahore Main"), "income_account")
+	want = frappe.db.get_value("POS Profile", pos_profile_for("Lab", "Faisalabad Main"), "income_account")
 	check("S01-3", "lab income booked on the Lab POS profile income account", frappe.db.get_value("Sales Invoice Item", {"parent": si}, "income_account") == want,
 		frappe.db.get_value("Sales Invoice Item", {"parent": si}, "income_account"))
 	ss = samples_of(o["name"])
@@ -486,7 +486,7 @@ def s11():
 	as_user("Administrator")
 	doc = frappe.db.get_value("Doctor", {"doctor_name": "Dr. Ayesha Siddiqui"})
 	item = frappe.db.get_value("Item", {"hv_is_medicine": 1, "disabled": 0})
-	rx = frappe.get_doc({"doctype": "Prescription", "patient": p.name, "doctor": doc, "branch": "Lahore Main",
+	rx = frappe.get_doc({"doctype": "Prescription", "patient": p.name, "doctor": doc, "branch": "Faisalabad Main",
 		"medicines": [{"item": item, "dose": "1", "frequency": "1+0+1", "qty": 10, "override_reason": "QA"}],
 		"lab_tests": [{"test_name": "Complete Blood Count"}, {"test_name": "Dengue NS1"}]})
 	as_user(DOCTOR)

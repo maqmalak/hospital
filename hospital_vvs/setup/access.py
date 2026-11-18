@@ -1,15 +1,15 @@
 """Branch and counter access for the demo staff (D-41).
 
 bench --site hospital execute hospital_vvs.setup.access.run
-Every non-admin user gets a Branch user permission (Lahore Main unless listed), and each counter's POS Profile
+Every non-admin user gets a Branch user permission (Faisalabad Main unless listed), and each counter's POS Profile
 lists the staff allowed to open a shift on it (Applicable for Users). Safe to run again."""
 
 import frappe
 
 from hospital_vvs.utils import is_admin
 
-BRANCH = {}  # one branch since 2026-11-10 (Islamabad removed): everyone on Lahore Main
-DEFAULT_BRANCH = "Lahore Main"
+BRANCH = {}  # one branch since 2026-11-10 (Islamabad removed): everyone on Faisalabad Main
+DEFAULT_BRANCH = "Faisalabad Main"
 STAFF = {
 	"Pharmacy 1": ["cashier@vvs.demo"],
 	"Pharmacy 2": ["cashier2@vvs.demo"],

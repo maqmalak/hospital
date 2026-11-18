@@ -27,7 +27,7 @@ class TestHandReport(IntegrationTestCase):
 
 		pat = a_patient()
 		shift_for("lab@vvs.demo", "Lab Counter")
-		ti = lab.create_order(pat, ["Vitamin D (25-OH)"], "Lahore Main")
+		ti = lab.create_order(pat, ["Vitamin D (25-OH)"], "Faisalabad Main")
 		lab.pay(ti.name, "Cash")
 		s = frappe.get_all("Lab Sample", filters={"test_invoice": ti.name}, pluck="name")[0]
 		lab.collect(s)

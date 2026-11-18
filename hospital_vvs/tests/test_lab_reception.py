@@ -50,7 +50,7 @@ class TestLabAtReception(IntegrationTestCase):
 		line = {"kind": "Lab Order", "target": ti, "discount": disc}
 		priced = counter.price({"patient": mr, "lines": [line]})
 		self.assertAlmostEqual(priced["total"], gross - disc, delta=1)
-		auths = counter.request_discounts({"patient": mr, "branch": "Lahore Main", "lines": [line], "discount_reason": "Staff family"})
+		auths = counter.request_discounts({"patient": mr, "branch": "Faisalabad Main", "lines": [line], "discount_reason": "Staff family"})
 		a = auths[f"LabOrder:{ti}"]
 		if a["status"] not in ("Within Limit", "Approved"):  # above the receptionist's limit → supervisor approves
 			from hospital_vvs.services import discounts
@@ -58,7 +58,7 @@ class TestLabAtReception(IntegrationTestCase):
 			as_user("supervisor@vvs.demo")
 			discounts.decide(a["name"], 1, "OK")
 			as_user(DESK)
-		rc = counter.checkout({"patient": mr, "branch": "Lahore Main", "lines": [line], "auths": {f"LabOrder:{ti}": a["name"]},
+		rc = counter.checkout({"patient": mr, "branch": "Faisalabad Main", "lines": [line], "auths": {f"LabOrder:{ti}": a["name"]},
 			"tenders": [{"mode_of_payment": "Cash", "amount": gross}]})
 		self.assertAlmostEqual(flt(rc["patient_total"]), gross - disc, delta=1)
 		self.assertAlmostEqual(flt(rc["change_amount"]), disc, delta=1)
@@ -78,7 +78,7 @@ class TestLabAtReception(IntegrationTestCase):
 		as_user(DESK)
 		price = flt(frappe.db.get_value("Lab Test Template", "Complete Blood Count", "price"))
 		new = {"patient_name": f"Desk Lab {random.randint(100, 999)}", "gender": "Male", "age": 41, "phone": f"+92303{random.randint(1000000, 9999999)}"}
-		rc = counter.checkout({"branch": "Lahore Main", "new_patient": new, "lines": [{"kind": "Lab", "template": "Complete Blood Count"}],
+		rc = counter.checkout({"branch": "Faisalabad Main", "new_patient": new, "lines": [{"kind": "Lab", "template": "Complete Blood Count"}],
 			"tenders": [{"mode_of_payment": "Cash", "amount": price}]})
 		ti = rc["lines"][0]["reference_name"]
 		self.assertEqual(frappe.db.get_value("Test Invoice", ti, "status"), "Paid")

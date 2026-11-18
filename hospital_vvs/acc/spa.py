@@ -25,7 +25,7 @@ def boot() -> dict:
 	user = frappe.session.user
 	if user == "Guest":
 		return {"user": None, "roles": []}
-	return {"user": user, "full_name": frappe.utils.get_fullname(user), "roles": frappe.get_roles(user), "company": branch_company("Lahore Main"),
+	return {"user": user, "full_name": frappe.utils.get_fullname(user), "roles": frappe.get_roles(user), "company": branch_company("Faisalabad Main"),
 		"csrf_token": frappe.sessions.get_csrf_token(), "default_project": None, "mock_mode": False}
 
 

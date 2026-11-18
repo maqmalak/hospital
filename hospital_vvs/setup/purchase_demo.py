@@ -19,8 +19,8 @@ from hospital_vvs.services import assets as A
 from hospital_vvs.services import buying as B
 
 PH, HO = "VVS Pharmacy (Contract)", "VVS Hospital"
-PH_STORE = "Pharmacy Store LHR - VVSP"
-MAIN = "Main Store LHR - VVSH"
+PH_STORE = "Pharmacy Store FSD - VVSP"
+MAIN = "Main Store FSD - VVSH"
 
 # Pakistani pharmaceutical companies (manufacturers / their distributors) and the brands bought from each
 PHARMA = {

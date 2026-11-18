@@ -29,7 +29,7 @@ def tearDownModule():
 	if _commit_patch:
 		_commit_patch.stop()
 
-IPD_WH = f"IPD Dispensing LHR - {ABBR}"
+IPD_WH = f"IPD Dispensing FSD - {ABBR}"
 DESK = "ipd.desk.test@vvs.demo"
 
 
@@ -39,9 +39,9 @@ def desk_shift():
 	from hospital_vvs.setup.demo import _user
 
 	as_user("Administrator")
-	_user("ipd.desk.test", "Ipd Desk Test", [R.RECEPTIONIST], "Lahore Main")
+	_user("ipd.desk.test", "Ipd Desk Test", [R.RECEPTIONIST], "Faisalabad Main")
 	if not frappe.db.exists("Counter", "IPD Desk Test"):
-		frappe.get_doc({"doctype": "Counter", "counter_name": "IPD Desk Test", "branch": "Lahore Main", "counter_type": "IPD Desk",
+		frappe.get_doc({"doctype": "Counter", "counter_name": "IPD Desk Test", "branch": "Faisalabad Main", "counter_type": "IPD Desk",
 			"billing_type": "IPD Slip", "number": 9}).insert()
 	as_user(DESK)
 	s = shifts.current_shift()
@@ -65,7 +65,7 @@ def _seg(bed, start, end=None, rate=1000, icu=0, ward="W"):
 
 
 def free_bed(ward_type="General", exclude=()):
-	wards = frappe.get_all("Ward", filters={"branch": "Lahore Main", "ward_type": ward_type}, pluck="name")
+	wards = frappe.get_all("Ward", filters={"branch": "Faisalabad Main", "ward_type": ward_type}, pluck="name")
 	beds = frappe.get_all("Hospital Bed", filters={"ward": ["in", wards], "status": "Available", "name": ["not in", list(exclude) or [""]]}, pluck="name")
 	if not beds:  # live demo data may have every bed of this type taken or being cleaned: free a cleaned one inside the test transaction
 		beds = frappe.get_all("Hospital Bed", filters={"ward": ["in", wards], "status": "Cleaning", "name": ["not in", list(exclude) or [""]]}, pluck="name")
@@ -78,7 +78,7 @@ def free_bed(ward_type="General", exclude=()):
 
 def new_patient(name="Test Ipd Patient", **kw):
 	p = frappe.get_doc({"doctype": "Patient", "patient_name": f"{name} {frappe.generate_hash(length=4)}", "gender": "Male", "dob": "1980-05-05",
-		"branch": "Lahore Main", "phone": f"+92300{random.randint(1000000, 9999999)}",
+		"branch": "Faisalabad Main", "phone": f"+92300{random.randint(1000000, 9999999)}",
 		"duplicate_reason": "test", **kw})
 	p.insert(ignore_permissions=True)
 	return p
@@ -300,13 +300,13 @@ class TestW18Emergency(IntegrationTestCase):
 		frappe.clear_document_cache("Clinic Settings")
 
 	def test_w18_unknown_patient_to_admission_and_merge(self):
-		v = er.register(unknown={"gender": "Male", "approx_age": 40}, branch="Lahore Main", arrival_mode="Ambulance (1122)",
+		v = er.register(unknown={"gender": "Male", "approx_age": 40}, branch="Faisalabad Main", arrival_mode="Ambulance (1122)",
 			chief_complaint="RTA", medico_legal=1)
 		tmp = frappe.db.get_value("ER Visit", v.name, "patient")
 		self.assertTrue(tmp.startswith("TMP-"))
 		self.assertIn("Unknown Male ~40", frappe.db.get_value("Patient", tmp, "patient_name"))
 		er.triage(v.name, "Red", {"pulse": 130, "spo2": 88})
-		b = er.board("Lahore Main")
+		b = er.board("Faisalabad Main")
 		open_rows = [r for r in b["visits"] if r.status != "Disposed"]
 		pos = [r.name for r in open_rows].index(v.name)
 		self.assertTrue(all(r.triage_rank == 1 for r in open_rows[:pos + 1]))  # red: above every yellow / green / untriaged visit

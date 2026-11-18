@@ -52,7 +52,7 @@ class TestCardGateway(Base):
 		p = new_patient()
 		cust = frappe.db.get_value("Patient", p.name, "customer")
 		item = frappe.db.get_value("Item", {"is_stock_item": 0, "disabled": 0, "is_fixed_asset": 0, "is_sales_item": 1})
-		si = billing.create_invoice(customer=cust, patient=p.name, lines=[{"item_code": item, "rate": 2500}], billing_type="General", branch="Lahore Main",
+		si = billing.create_invoice(customer=cust, patient=p.name, lines=[{"item_code": item, "rate": 2500}], billing_type="General", branch="Faisalabad Main",
 			reference_doctype="Patient", reference_name=p.name, pos=False)
 		r = api.create_link(si)
 		tok = r["url"].rsplit("/", 1)[1]
@@ -64,7 +64,7 @@ class TestCardGateway(Base):
 		self.assertEqual(flt(frappe.db.get_value("Sales Invoice", si, "outstanding_amount")), 0)
 		with self.assertRaises(frappe.ValidationError):
 			api.create_link(si)  # nothing left to pay
-		si2 = billing.create_invoice(customer=cust, patient=p.name, lines=[{"item_code": item, "rate": 900}], billing_type="General", branch="Lahore Main",
+		si2 = billing.create_invoice(customer=cust, patient=p.name, lines=[{"item_code": item, "rate": 900}], billing_type="General", branch="Faisalabad Main",
 			reference_doctype="Patient", reference_name=new_patient().name, pos=False)
 		tok3 = api.create_link(si2)["url"].rsplit("/", 1)[1]
 		frappe.db.set_value("Online Payment", {"token_hash": gateway._hash(tok3)}, "expires_at", add_to_date(now_datetime(), hours=-1))
@@ -77,7 +77,7 @@ class TestCardGateway(Base):
 		from hospital_vvs.services import billing
 
 		si = billing.create_invoice(customer=frappe.db.get_value("Patient", p.name, "customer"), patient=p.name, lines=[{"item_code": frappe.db.get_value("Item", {"is_stock_item": 0, "disabled": 0, "is_fixed_asset": 0, "is_sales_item": 1}), "rate": 100}],
-			billing_type="General", branch="Lahore Main", reference_doctype="Patient", reference_name=p.name, pos=False)
+			billing_type="General", branch="Faisalabad Main", reference_doctype="Patient", reference_name=p.name, pos=False)
 		with self.assertRaises(frappe.ValidationError):
 			api.create_link(si)
 

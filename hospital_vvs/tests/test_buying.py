@@ -22,7 +22,7 @@ class TestBuying(IntegrationTestCase):
 		ph = frappe.db.get_single_value("Clinic Settings", "pharmacy_company")
 		sup = B.ensure_supplier("QA Pharma Test", "Pharmaceutical")
 		frappe.set_user("store@vvs.demo")
-		r = api.save_order(frappe.as_json({"company": ph, "supplier": sup, "warehouse": "Pharmacy Store LHR - VVSP", "lines": [{"item_code": "PANADOL-500MG", "qty": 10, "rate": 250}]}), 1)
+		r = api.save_order(frappe.as_json({"company": ph, "supplier": sup, "warehouse": "Pharmacy Store FSD - VVSP", "lines": [{"item_code": "PANADOL-500MG", "qty": 10, "rate": 250}]}), 1)
 		self.assertEqual(r["docstatus"], 0)  # store keeper drafts; the accountant approves
 		frappe.set_user("accounts@vvs.demo")
 		api.approve_order(r["name"])
@@ -55,10 +55,10 @@ class TestBuying(IntegrationTestCase):
 
 	def test_issue_charges_the_department(self):
 		item = frappe.db.get_value("Item", {"item_group": "Consumable", "has_batch_no": 0})
-		if not item or not frappe.db.get_value("Bin", {"item_code": item, "warehouse": "Main Store LHR - VVSH", "actual_qty": [">", 5]}):
+		if not item or not frappe.db.get_value("Bin", {"item_code": item, "warehouse": "Main Store FSD - VVSH", "actual_qty": [">", 5]}):
 			self.skipTest("run setup.purchase_demo first")
 		frappe.set_user("store@vvs.demo")
-		se = api.issue("Main Store LHR - VVSH", "OPD - VVSH", frappe.as_json([{"item_code": item, "qty": 2}]), "QA issue")
+		se = api.issue("Main Store FSD - VVSH", "OPD - VVSH", frappe.as_json([{"item_code": item, "qty": 2}]), "QA issue")
 		gl = frappe.db.get_value("GL Entry", {"voucher_no": se, "account": ["like", "Medical Consumables Consumed%"]}, ["cost_center", "debit"], as_dict=True)
 		self.assertEqual(gl.cost_center, "OPD - VVSH")
 		self.assertGreater(gl.debit, 0)

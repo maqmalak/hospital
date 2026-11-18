@@ -44,7 +44,7 @@ def demo_doctor(name="Dr. Ayesha Siddiqui"):
 
 def new_patient(**kw):
 	d = {"doctype": "Patient", "patient_name": kw.pop("patient_name", "Test Patient " + frappe.generate_hash(length=5)), "gender": "Male",
-		"dob": "1990-01-01", "phone": kw.pop("phone", f"+92333{random.randint(1000000, 9999999)}"), "branch": "Lahore Main", "duplicate_reason": "test"}
+		"dob": "1990-01-01", "phone": kw.pop("phone", f"+92333{random.randint(1000000, 9999999)}"), "branch": "Faisalabad Main", "duplicate_reason": "test"}
 	d.update(kw)
 	return frappe.get_doc(d).insert(ignore_permissions=True)
 
@@ -52,7 +52,7 @@ def new_patient(**kw):
 class TestIdentity(IntegrationTestCase):
 	def test_patient_gets_mr_customer_and_masked_cnic(self):
 		p = new_patient(cnic="35202-1234567-9")
-		self.assertTrue(p.name.startswith("MR-LHR-"))
+		self.assertTrue(p.name.startswith("MR-FSD-"))
 		self.assertTrue(frappe.db.get_value("Patient", p.name, "customer"))
 		self.assertEqual(frappe.db.get_value("Patient", p.name, "cnic_masked"), "*****-*******-9")
 		row = frappe.db.sql("select cnic from tabPatient where name=%s", p.name)[0][0]
@@ -66,8 +66,8 @@ class TestIdentity(IntegrationTestCase):
 		self.assertIn(a.name, [d["name"] for d in dups])
 		frappe.set_user("Administrator")
 		with self.assertRaises(frappe.ValidationError):
-			api.register({"patient_name": "Kamran Yusaf", "phone": "03219990001", "gender": "Male", "age": 30, "branch": "Lahore Main"})
-		b = api.register({"patient_name": "Kamran Yusaf", "phone": "03219990001", "gender": "Male", "age": 30, "branch": "Lahore Main"},
+			api.register({"patient_name": "Kamran Yusaf", "phone": "03219990001", "gender": "Male", "age": 30, "branch": "Faisalabad Main"})
+		b = api.register({"patient_name": "Kamran Yusaf", "phone": "03219990001", "gender": "Male", "age": 30, "branch": "Faisalabad Main"},
 			duplicate_reason="Different person")["name"]
 		slip = make_slip(b)
 		api.merge(a.name, b, b)
@@ -108,12 +108,12 @@ def admin_shift():
 	frappe.set_user("Administrator")
 	if retire_stale_shift("Administrator"):
 		return
-	for c in frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main", "open_shift": ["is", "set"]}, pluck="current_user"):
+	for c in frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Faisalabad Main", "open_shift": ["is", "set"]}, pluck="current_user"):
 		if c:
 			retire_stale_shift(c)
-	free = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main", "open_shift": ["is", "not set"]}, pluck="name")
+	free = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Faisalabad Main", "open_shift": ["is", "not set"]}, pluck="name")
 	if not free:  # every reception counter is in use today (real shifts): borrow one for this test only — the test transaction rolls it back
-		c = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Lahore Main"}, fields=["name", "open_shift"], limit=1)[0]
+		c = frappe.get_all("Counter", filters={"counter_type": "Reception", "branch": "Faisalabad Main"}, fields=["name", "open_shift"], limit=1)[0]
 		frappe.db.set_value("POS Opening Entry", c.open_shift, "status", "Closed")
 		frappe.db.set_value("Counter", c.name, {"open_shift": None, "current_user": None})
 		free = [c.name]
@@ -126,7 +126,7 @@ def admin_shift():
 def make_slip(patient, doctor=None, **kw):
 	admin_shift()
 	frappe.set_user("Administrator")
-	slip = frappe.get_doc(dict({"doctype": "OPD Slip", "patient": patient, "doctor": doctor or demo_doctor(), "branch": "Lahore Main",
+	slip = frappe.get_doc(dict({"doctype": "OPD Slip", "patient": patient, "doctor": doctor or demo_doctor(), "branch": "Faisalabad Main",
 		"posting_date": today(), "payment_mode": "Cash"}, **kw))
 	slip.insert(ignore_permissions=True)
 	slip.submit()
@@ -145,7 +145,7 @@ class TestOPD(IntegrationTestCase):
 		self.assertEqual(si.is_created_using_pos, 1)  # collected inside the cashier's shift
 		self.assertTrue(slip.pos_opening_entry)
 		self.assertEqual(si.items[0].income_account, "OPD Income - VVSH")
-		self.assertEqual(si.branch, "Lahore Main")
+		self.assertEqual(si.branch, "Faisalabad Main")
 		self.assertTrue(slip.token_no >= 1)
 		# no vitals at the counter → the nurse takes them first (D-52); with vitals it would be Waiting
 		self.assertEqual(frappe.db.get_value("Queue Entry", slip.queue_entry, "status"),
@@ -181,19 +181,19 @@ class TestOPD(IntegrationTestCase):
 			"doctype": "Account", "account_name": "Test Service Tax", "parent_account": acct, "company": company, "account_type": "Tax"}).insert().name
 		tpl = frappe.db.get_value("Sales Taxes and Charges Template", {"title": "Test 5pc"}) or frappe.get_doc({"doctype": "Sales Taxes and Charges Template",
 			"title": "Test 5pc", "company": company, "taxes": [{"charge_type": "On Net Total", "account_head": tax_acct, "rate": 5, "description": "Tax"}]}).insert().name
-		frappe.db.set_value("POS Profile", "General - LHR", "taxes_and_charges", tpl)
-		frappe.clear_document_cache("POS Profile", "General - LHR")
+		frappe.db.set_value("POS Profile", "General - FSD", "taxes_and_charges", tpl)
+		frappe.clear_document_cache("POS Profile", "General - FSD")
 		admin_shift()
 		try:
 			p = new_patient()
 			si = frappe.get_doc("Sales Invoice", billing.create_invoice(customer=p.customer or frappe.db.get_value("Patient", p.name, "customer"),
-				patient=p.name, lines=[{"item_code": "PROC-ECG", "qty": 1, "rate": 1000}], billing_type="General", branch="Lahore Main",
+				patient=p.name, lines=[{"item_code": "PROC-ECG", "qty": 1, "rate": 1000}], billing_type="General", branch="Faisalabad Main",
 				reference_doctype="Patient", reference_name=p.name, discount_amount=100))
 			self.assertAlmostEqual(flt(si.total_taxes_and_charges), 50)
 			self.assertAlmostEqual(flt(si.grand_total), 950)
 		finally:
-			frappe.db.set_value("POS Profile", "General - LHR", "taxes_and_charges", None)
-			frappe.clear_document_cache("POS Profile", "General - LHR")
+			frappe.db.set_value("POS Profile", "General - FSD", "taxes_and_charges", None)
+			frappe.clear_document_cache("POS Profile", "General - FSD")
 
 
 class TestDiscounts(IntegrationTestCase):
@@ -229,7 +229,7 @@ class TestSafety(IntegrationTestCase):
 		self.assertEqual(res[0]["alerts"][0]["type"], "Allergy")
 		self.assertTrue(res[1]["blocking"])  # warfarin + ibuprofen: Major
 		frappe.set_user("Administrator")
-		rx = frappe.get_doc({"doctype": "Prescription", "patient": p.name, "doctor": demo_doctor(), "branch": "Lahore Main",
+		rx = frappe.get_doc({"doctype": "Prescription", "patient": p.name, "doctor": demo_doctor(), "branch": "Faisalabad Main",
 			"medicines": [{"item": "AMOXIL-500MG", "dose": "1", "frequency": "1+0+1"}, {"item": "BRUFEN-400MG", "dose": "1", "frequency": "1+1+1"}]})
 		rx.insert()
 		with self.assertRaises(frappe.ValidationError):
@@ -317,7 +317,7 @@ class TestWhatsAppBot(IntegrationTestCase):
 		handle_inbound(phone, reply_id="lang:ur")
 		handle_inbound(phone, reply_id="menu:book")
 		if frappe.db.get_value("WhatsApp Conversation", {"phone": phone}, "current_step") == "branch":
-			handle_inbound(phone, reply_id="branch:Lahore Main")
+			handle_inbound(phone, reply_id="branch:Faisalabad Main")
 		handle_inbound(phone, reply_id="spec:General Physician")
 		doc = next(o[0] for o in opts() if demo_doctor() in o[0])
 		handle_inbound(phone, reply_id=doc)
@@ -416,7 +416,7 @@ class TestBookingMessages(IntegrationTestCase):
 
 	def test_first_available_and_priority(self):
 		svc.generate_slots(10)
-		s = svc.first_available("General Physician", branch="Lahore Main")
+		s = svc.first_available("General Physician", branch="Faisalabad Main")
 		self.assertTrue(s and s["doctor"])
 		p = new_patient()
 		appt = svc.book(doctor=s["doctor"], slot=s["slot"], patient=p.name, priority="Urgent")

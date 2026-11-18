@@ -15,7 +15,7 @@ from hospital_vvs.api import pharmacy as api
 from hospital_vvs.services import pharmacy, shifts
 from hospital_vvs.tests.test_phase2 import as_user, retire_stale_shift
 
-RETAIL = "Pharmacy Retail LHR - VVSP"
+RETAIL = "Pharmacy Retail FSD - VVSP"
 CASHIER, FINDER, PHARMACIST, DISPENSER = "cashier@vvs.demo", "finder@vvs.demo", "pharmacist@vvs.demo", "dispenser@vvs.demo"
 VVSP = "VVS Pharmacy (Contract)"
 
@@ -36,12 +36,12 @@ def stock(code, near_months=2, far_months=24, packs=5):
 	a, b = f"{code[-5:]}-N{tag}", f"{code[-5:]}-F{tag}"
 	pharmacy.receive_stock("Muller & Phipps Pakistan", RETAIL, [
 		{"item_code": code, "batch_no": a, "expiry": add_months(today(), near_months), "mrp_per_pack": 200, "rate_per_pack": 150, "packs": packs},
-		{"item_code": code, "batch_no": b, "expiry": add_months(today(), far_months), "mrp_per_pack": 240, "rate_per_pack": 170, "packs": packs}], branch="Lahore Main")
+		{"item_code": code, "batch_no": b, "expiry": add_months(today(), far_months), "mrp_per_pack": 240, "rate_per_pack": 170, "packs": packs}], branch="Faisalabad Main")
 	return a, b
 
 
 def patient():
-	return frappe.get_all("Patient", filters={"disabled": 0, "temporary_record": 0, "branch": "Lahore Main", "phone": ["is", "set"]}, pluck="name", limit=1)[0]
+	return frappe.get_all("Patient", filters={"disabled": 0, "temporary_record": 0, "branch": "Faisalabad Main", "phone": ["is", "set"]}, pluck="name", limit=1)[0]
 
 
 def open_shift(user, counter):
@@ -226,7 +226,7 @@ class TestPharmacyQA(IntegrationTestCase):
 		with self.assertRaises(frappe.ValidationError):  # controlled: no sale without a prescription
 			self.sell([{"item_code": ctl, "uom": "Strip", "qty": 1}])
 		as_user("Administrator")
-		rx = frappe.get_doc({"doctype": "Prescription", "patient": self.pat, "doctor": frappe.db.get_value("Doctor", {"is_active": 1}), "branch": "Lahore Main",
+		rx = frappe.get_doc({"doctype": "Prescription", "patient": self.pat, "doctor": frappe.db.get_value("Doctor", {"is_active": 1}), "branch": "Faisalabad Main",
 			"medicines": [{"item": ctl, "dose": "1", "frequency": "1+0+1", "qty": 10, "override_reason": "QA"}]})
 		rx.insert()
 		rx.submit()
@@ -305,7 +305,7 @@ class TestPharmacyPOSOptions(IntegrationTestCase):
 		self.assertIn(self.pat, [p.name for p in api.customers(phone[-10:])["patients"]])
 		self.assertIn(self.pat, [p.name for p in api.customers(self.pat)["patients"]])
 		as_user("Administrator")
-		rx = frappe.get_doc({"doctype": "Prescription", "patient": self.pat, "doctor": frappe.db.get_value("Doctor", {"is_active": 1}), "branch": "Lahore Main",
+		rx = frappe.get_doc({"doctype": "Prescription", "patient": self.pat, "doctor": frappe.db.get_value("Doctor", {"is_active": 1}), "branch": "Faisalabad Main",
 			"medicines": [{"item": self.code, "dose": "1", "frequency": "0+0+1", "qty": 10}]})
 		rx.insert()
 		rx.submit()
@@ -333,7 +333,7 @@ class TestCounterAccess(IntegrationTestCase):
 		from hospital_vvs.utils import user_branches
 
 		as_user(CASHIER)
-		self.assertEqual(user_branches(), ["Lahore Main"])
+		self.assertEqual(user_branches(), ["Faisalabad Main"])
 		self.assertEqual([c.name for c in shifts.counters_for()], ["Pharmacy 1"])
 		retire_stale_shift(CASHIER)
 		for other in ("Pharmacy 2", "Handover 3", "Reception 1"):
@@ -364,7 +364,7 @@ class TestCounterAccess(IntegrationTestCase):
 		self.assertEqual(user_branches(), [])
 		self.assertEqual(shifts.counters_for(), [])
 		as_user("Administrator")
-		self.assertIn("Lahore Main", user_branches())
+		self.assertIn("Faisalabad Main", user_branches())
 
 
 class TestPaperPrescription(IntegrationTestCase):

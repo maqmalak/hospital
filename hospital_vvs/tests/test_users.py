@@ -18,14 +18,14 @@ class TestUsersRoles(IntegrationTestCase):
 
 	def test_admin_creates_user_with_roles_and_branch(self):
 		email = f"qa.{frappe.generate_hash(length=6)}@vvs.demo"
-		r = api.save_user(json.dumps({"email": email, "full_name": "QA Nurse Test", "roles": ["PW Nurse", "System Manager"], "branches": ["Lahore Main"]}))
+		r = api.save_user(json.dumps({"email": email, "full_name": "QA Nurse Test", "roles": ["PW Nurse", "System Manager"], "branches": ["Faisalabad Main"]}))
 		self.assertTrue(r["created"])
 		self.assertEqual(set(frappe.get_roles(email)) & {"PW Nurse", "System Manager"}, {"PW Nurse"})  # only hospital roles are managed here
-		self.assertTrue(frappe.db.exists("User Permission", {"user": email, "allow": "Branch", "for_value": "Lahore Main"}))
+		self.assertTrue(frappe.db.exists("User Permission", {"user": email, "allow": "Branch", "for_value": "Faisalabad Main"}))
 		self.assertRaises(frappe.ValidationError, api.save_user, json.dumps({"email": email, "full_name": "QA", "roles": []}))
 
 	def test_no_lock_out_and_admin_only(self):
-		self.assertRaises(frappe.ValidationError, api.save_user, json.dumps({"email": "admin@vvs.demo", "full_name": "Nadia Admin", "roles": ["PW Nurse"], "branches": ["Lahore Main"]}))
+		self.assertRaises(frappe.ValidationError, api.save_user, json.dumps({"email": "admin@vvs.demo", "full_name": "Nadia Admin", "roles": ["PW Nurse"], "branches": ["Faisalabad Main"]}))
 		self.assertRaises(frappe.ValidationError, api.set_enabled, "admin@vvs.demo", 0)
 		self.assertRaises(frappe.ValidationError, api.save_user, json.dumps({"email": "Administrator", "full_name": "x", "roles": ["PW Nurse"]}))
 		frappe.set_user("reception@vvs.demo")

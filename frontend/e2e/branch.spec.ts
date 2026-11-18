@@ -6,7 +6,7 @@ test.describe("reception", () => {
   test.use(as("reception"));
   test("only its own branch is offered and another branch is refused", async ({ page }) => {
     await open(page, "/pw-home");
-    await expect(page.getByText("Lahore Main").first()).toBeVisible();
+    await expect(page.getByText("Faisalabad Main").first()).toBeVisible();
     for (const [m, a] of [["hospital_vvs.api.opd.queue", { branch: "Other Branch" }], ["hospital_vvs.api.opd.recent_slips", { branch: "Other Branch" }]] as const) {
       expect((await apiCall(page, m, a)).status, m).toBe(403);
     }

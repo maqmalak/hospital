@@ -24,7 +24,7 @@ def doctor():
 
 
 def free_bed(ward_type="General", skip=()):
-	wards = frappe.get_all("Ward", filters={"branch": "Lahore Main", "ward_type": ward_type, "is_active": 1}, pluck="name")
+	wards = frappe.get_all("Ward", filters={"branch": "Faisalabad Main", "ward_type": ward_type, "is_active": 1}, pluck="name")
 	beds = frappe.get_all("Hospital Bed", filters={"ward": ["in", wards or [""]], "status": "Available", "is_active": 1, "name": ["not in", list(skip) or [""]]},
 		pluck="name", order_by="bed_no")
 	return beds[0] if beds else None
@@ -63,7 +63,7 @@ def i01():
 	bed = free_bed("General")
 	as_user(REC)
 	raises("I01-1", "admission needs a bed", lambda: api.admit(J({"patient": p, "doctor": doctor(), "reason": "Fever"})), Exception)
-	occupied = frappe.db.get_value("Hospital Bed", {"status": "Occupied", "branch": "Lahore Main"})
+	occupied = frappe.db.get_value("Hospital Bed", {"status": "Occupied", "branch": "Faisalabad Main"})
 	raises("I01-2", "an occupied bed cannot be given to a second patient", lambda: api.admit(J({"patient": p, "bed": occupied, "doctor": doctor(), "reason": "Fever"})), frappe.ValidationError)
 	r = api.admit(J({"patient": p, "bed": bed, "doctor": doctor(), "reason": "High grade fever, dehydration", "diagnosis": "Enteric fever?",
 		"planned_days": 3, "advance": 10000, "payment_mode": "Cash"}))
@@ -377,7 +377,7 @@ def i10():
 	bm = ward.bed_map()
 	beds = bm.get("beds", [])
 	occ = sum(1 for b in beds if b["status"] == "Occupied")
-	admitted = frappe.db.count("Bed Allotment", {"status": ["in", ["Admitted", "Discharge Pending"]], "branch": "Lahore Main"})
+	admitted = frappe.db.count("Bed Allotment", {"status": ["in", ["Admitted", "Discharge Pending"]], "branch": "Faisalabad Main"})
 	check("I10-4", "every open admission has an occupied bed on the map", occ >= admitted, f"occupied={occ} admissions={admitted}")
 
 

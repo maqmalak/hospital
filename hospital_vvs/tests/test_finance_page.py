@@ -18,7 +18,7 @@ class TestFinancePage(IntegrationTestCase):
 		self.addCleanup(as_user, "Administrator")
 
 	def _draft_jv(self):
-		company = branch_company("Lahore Main")
+		company = branch_company("Faisalabad Main")
 		cash = frappe.db.get_value("Account", {"company": company, "account_type": "Cash", "is_group": 0})
 		exp = frappe.db.get_value("Account", {"company": company, "root_type": "Expense", "is_group": 0})
 		cc = frappe.db.get_value("Company", company, "cost_center")

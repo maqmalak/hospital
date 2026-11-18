@@ -102,7 +102,7 @@ def o02():
 	CTX["cnic"] = cnic
 	r, d = register(REC, patient_name=nm, gender="Male", cnic=cnic, blood_group="B+")
 	p = frappe.get_doc("Patient", r["name"])
-	check("O02-2", "MR number given in the branch series (MR-LHR-…)", p.name.startswith("MR-LHR-"), p.name)
+	check("O02-2", "MR number given in the branch series (MR-FSD-…)", p.name.startswith("MR-FSD-"), p.name)
 	check("O02-3", "phone stored in +92 format", (p.phone or "").startswith("+92"), p.phone)
 	check("O02-4", "CNIC kept masked and hashed, never in clear", p.cnic_masked and "*" in (p.cnic_masked or "") and p.cnic_hash and set((p.get("cnic") or "*").replace("-", "")) == {"*"}, p.cnic_masked)
 	check("O02-5", "customer created for billing", bool(r.get("customer")))

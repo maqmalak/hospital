@@ -11,7 +11,7 @@ from hospital_vvs.tests.test_phase2 import a_patient, as_user, shift_for
 
 def received_order(tests, priority="Normal"):
 	shift_for("lab@vvs.demo", "Lab Counter")
-	ti = lab.create_order(a_patient(), tests, "Lahore Main", priority=priority)
+	ti = lab.create_order(a_patient(), tests, "Faisalabad Main", priority=priority)
 	lab.pay(ti.name, "Cash")
 	for s in frappe.get_all("Lab Sample", filters={"test_invoice": ti.name}, pluck="name"):
 		lab.receive(s)
@@ -86,10 +86,10 @@ class TestLabQA(IntegrationTestCase):
 		names = {}
 		for p in ("Normal", "Priority", "Urgent"):
 			shift_for("lab@vvs.demo", "Lab Counter")
-			ti = lab.create_order(a_patient(), ["Blood Sugar Random"], "Lahore Main", priority=p)
+			ti = lab.create_order(a_patient(), ["Blood Sugar Random"], "Faisalabad Main", priority=p)
 			lab.pay(ti.name, "Cash")
 			names[p] = ti.name
-		self.assertEqual(lab.create_order(a_patient(), ["TSH"], "Lahore Main", priority="Routine").priority, "Normal")  # legacy value
+		self.assertEqual(lab.create_order(a_patient(), ["TSH"], "Faisalabad Main", priority="Routine").priority, "Normal")  # legacy value
 		as_user("lab@vvs.demo")
 		order = [s.test_invoice for s in api.samples("Pending") if s.test_invoice in names.values()]
 		self.assertEqual(order, [names["Urgent"], names["Priority"], names["Normal"]])
@@ -119,7 +119,7 @@ class TestLabPrint(IntegrationTestCase):
 		first = self.released("2.0")
 		pat = first.patient
 		shift_for("lab@vvs.demo", "Lab Counter")
-		ti = lab.create_order(pat, ["TSH"], "Lahore Main")
+		ti = lab.create_order(pat, ["TSH"], "Faisalabad Main")
 		lab.pay(ti.name, "Cash")
 		for s in frappe.get_all("Lab Sample", filters={"test_invoice": ti.name}, pluck="name"):
 			lab.receive(s)

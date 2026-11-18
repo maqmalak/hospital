@@ -11,9 +11,9 @@ from hospital_vvs.services import lab, pharmacy, shifts
 from hospital_vvs.setup.company import ABBR
 
 # contract pharmacy (D-38): medicine stock lives in the contractor's company
-RETAIL = "Pharmacy Retail LHR - VVSP"
-MAIN = "Pharmacy Store LHR - VVSP"
-QUAR = "Pharmacy Quarantine LHR - VVSP"
+RETAIL = "Pharmacy Retail FSD - VVSP"
+MAIN = "Pharmacy Store FSD - VVSP"
+QUAR = "Pharmacy Quarantine FSD - VVSP"
 DIST = "Muller & Phipps Pakistan"
 
 
@@ -78,19 +78,19 @@ def receive(code, warehouse=RETAIL, near_months=6):
 	a, b = f"{code[-6:]}-A{tag}", f"{code[-6:]}-B{tag}"
 	pharmacy.receive_stock(DIST, warehouse, [
 		{"item_code": code, "batch_no": a, "expiry": add_months(today(), near_months), "mrp_per_pack": 300, "rate_per_pack": 220, "packs": 10},
-		{"item_code": code, "batch_no": b, "expiry": add_months(today(), 24), "mrp_per_pack": 330, "rate_per_pack": 240, "packs": 10}], branch="Lahore Main")
+		{"item_code": code, "batch_no": b, "expiry": add_months(today(), 24), "mrp_per_pack": 330, "rate_per_pack": 240, "packs": 10}], branch="Faisalabad Main")
 	return a, b
 
 
 def a_patient():
-	return frappe.get_all("Patient", filters={"branch": "Lahore Main", "disabled": 0, "temporary_record": 0, "phone": ["is", "set"]}, pluck="name",
+	return frappe.get_all("Patient", filters={"branch": "Faisalabad Main", "disabled": 0, "temporary_record": 0, "phone": ["is", "set"]}, pluck="name",
 		limit=1)[0]
 
 
 def signed_rx(patient, item, qty=30, lab_tests=()):
 	as_user("Administrator")
 	doc = frappe.db.get_value("Doctor", {"doctor_name": "Dr. Ayesha Siddiqui"})
-	rx = frappe.get_doc({"doctype": "Prescription", "patient": patient, "doctor": doc, "branch": "Lahore Main",
+	rx = frappe.get_doc({"doctype": "Prescription", "patient": patient, "doctor": doc, "branch": "Faisalabad Main",
 		"medicines": [{"item": item, "dose": "1", "frequency": "1+0+1", "qty": qty, "override_reason": "test"}], "lab_tests": [{"test_name": t} for t in lab_tests]})
 	rx.insert()
 	rx.submit()
@@ -158,7 +158,7 @@ class TestPharmacy(IntegrationTestCase):
 		pharmacy.approve(t)
 		as_user("dispenser@vvs.demo")
 		pharmacy.call(t, "Handover 3")
-		self.assertEqual(pharmacy.queue_state("Lahore Main")["ready"][0]["token"], r["token"])
+		self.assertEqual(pharmacy.queue_state("Faisalabad Main")["ready"][0]["token"], r["token"])
 		pharmacy.handover(t, r["token"])
 		self.assertEqual(frappe.db.get_value("Dispense Ticket", t, "status"), "Handed Over")
 		as_user("Administrator")
@@ -215,12 +215,12 @@ class TestStore(IntegrationTestCase):
 		mr = store.create_request(RETAIL, [{"item_code": code, "qty": 60}], source=MAIN)
 		se = store.transfer(mr)
 		self.assertEqual(frappe.db.get_value("Stock Entry Detail", {"parent": se}, "batch_no"), a)  # FEFO from the store
-		cc = pharmacy.cycle_count_create(RETAIL, "Lahore Main", "Rack", rack="Z9-99")
+		cc = pharmacy.cycle_count_create(RETAIL, "Faisalabad Main", "Rack", rack="Z9-99")
 		counts = {r.name: (r.system_qty - 25 if r.item_code == code else r.system_qty) for r in cc.items}
 		cc = pharmacy.cycle_count_submit(cc.name, counts)
 		frappe.db.set_single_value("Clinic Settings", "cycle_variance_threshold", 0)
 		frappe.clear_document_cache("Clinic Settings")
-		cc2 = pharmacy.cycle_count_create(RETAIL, "Lahore Main", "Rack", rack="Z9-99")
+		cc2 = pharmacy.cycle_count_create(RETAIL, "Faisalabad Main", "Rack", rack="Z9-99")
 		cc2 = pharmacy.cycle_count_submit(cc2.name, {r.name: r.system_qty - 1 for r in cc2.items})
 		self.assertEqual(cc2.status, "Pending Approval")
 		as_user("admin@vvs.demo")
@@ -249,7 +249,7 @@ class TestLab(IntegrationTestCase):
 	def test_w3_flow(self):
 		pat = frappe.get_doc("Patient", a_patient())
 		shift_for("lab@vvs.demo", "Lab Counter")
-		ti = lab.create_order(pat.name, ["Complete Blood Count", "Renal Function Tests"], "Lahore Main")
+		ti = lab.create_order(pat.name, ["Complete Blood Count", "Renal Function Tests"], "Faisalabad Main")
 		lab.pay(ti.name, "Cash")
 		ti.reload()
 		self.assertEqual(ti.status, "Paid")
@@ -306,7 +306,7 @@ class TestLab(IntegrationTestCase):
 	def test_outsourced(self):
 		pat = a_patient()
 		shift_for("lab@vvs.demo", "Lab Counter")
-		ti = lab.create_order(pat, ["Vitamin D (25-OH)"], "Lahore Main")
+		ti = lab.create_order(pat, ["Vitamin D (25-OH)"], "Faisalabad Main")
 		lab.pay(ti.name, "Cash")
 		s = frappe.get_all("Lab Sample", filters={"test_invoice": ti.name}, pluck="name")[0]
 		lab.collect(s)
@@ -341,14 +341,14 @@ class TestCash(IntegrationTestCase):
 			frappe.db.set_value("Counter", cur.hv_counter, {"open_shift": None, "current_user": None})
 		make_staff("Reception 2")
 		sh = shifts.open_shift("Reception 2", {"Cash": 5000})
-		pat = frappe.get_all("Patient", filters={"branch": "Lahore Main"}, pluck="name", limit=5)
+		pat = frappe.get_all("Patient", filters={"branch": "Faisalabad Main"}, pluck="name", limit=5)
 		cust = frappe.db.get_value("Patient", pat[0], "customer")
 		billing.create_invoice(customer=cust, patient=pat[0], lines=[{"item_code": "PROC-ECG", "qty": 35, "rate": 1200}], billing_type="General",
-			branch="Lahore Main", reference_doctype="Patient", reference_name=pat[0], payment_mode="Cash")
+			branch="Faisalabad Main", reference_doctype="Patient", reference_name=pat[0], payment_mode="Cash")
 		billing.create_invoice(customer=cust, patient=pat[1], lines=[{"item_code": "PROC-ECG", "qty": 1, "rate": 8000}], billing_type="General",
-			branch="Lahore Main", reference_doctype="Patient", reference_name=pat[1], payment_mode="Card")
+			branch="Faisalabad Main", reference_doctype="Patient", reference_name=pat[1], payment_mode="Card")
 		r = billing.create_invoice(customer=cust, patient=pat[2], lines=[{"item_code": "PROC-DRESSING", "qty": 1, "rate": 500}], billing_type="General",
-			branch="Lahore Main", reference_doctype="Patient", reference_name=pat[2], payment_mode="Cash")
+			branch="Faisalabad Main", reference_doctype="Patient", reference_name=pat[2], payment_mode="Cash")
 		billing.refund_invoice(r, "wrong patient")
 		shifts.add_movement("Pay Out", 1200, "printer paper")
 		d = shifts.add_movement("Cash Drop", 30000, "to safe")
@@ -361,7 +361,7 @@ class TestCash(IntegrationTestCase):
 		self.assertEqual(sc.status, "Pending Approval")
 		with self.assertRaises(frappe.ValidationError):
 			billing.create_invoice(customer=cust, patient=pat[0], lines=[{"item_code": "PROC-ECG", "qty": 1, "rate": 10}], billing_type="General",
-				branch="Lahore Main", reference_doctype="Patient", reference_name=pat[3], payment_mode="Cash")
+				branch="Faisalabad Main", reference_doctype="Patient", reference_name=pat[3], payment_mode="Cash")
 		as_user("supervisor@vvs.demo")
 		sc = shifts.decide(sc.name, "approve", "counted twice")
 		self.assertEqual(sc.status, "Approved")
@@ -374,11 +374,11 @@ class TestCash(IntegrationTestCase):
 		as_user("reception2@vvs.demo")
 		make_staff("Reception 2")
 		sh2 = shifts.open_shift("Reception 2", {"Cash": 1000})
-		fresh = [p for p in frappe.get_all("Patient", filters={"branch": "Lahore Main", "customer": ["is", "set"]}, pluck="name", limit=200)
+		fresh = [p for p in frappe.get_all("Patient", filters={"branch": "Faisalabad Main", "customer": ["is", "set"]}, pluck="name", limit=200)
 			if not billing.existing_invoice("Patient", p)][:2]  # invoices are idempotent per reference
 		for (mode, rate), px in zip((("Card", 2500), ("JazzCash", 1500)), fresh):
 			billing.create_invoice(customer=frappe.db.get_value("Patient", px, "customer"), patient=px, lines=[{"item_code": "PROC-ECG", "qty": 1, "rate": rate}], billing_type="General",
-				branch="Lahore Main", reference_doctype="Patient", reference_name=px, payment_mode=mode)
+				branch="Faisalabad Main", reference_doctype="Patient", reference_name=px, payment_mode=mode)
 		# card / JazzCash are auto-filled: a mode the cashier did not send counts as the system figure, not as zero
 		sc2 = shifts.close_shift({"1000": 1, "10": 3}, {"Card": 2500})
 		got = {m.mode_of_payment: (m.expected, m.counted) for m in sc2.modes}

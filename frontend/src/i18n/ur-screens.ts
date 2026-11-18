@@ -77,7 +77,7 @@ export const urScreens: Record<string, string> = {
   "Age from–to": "عمر سے–تک",
   "Age or date of birth": "عمر یا تاریخ پیدائش",
   "Agreed bed rate": "طے شدہ بستر ریٹ",
-  "Ali Khan · MR-LHR-000012 · 0300… · 35202-… · RX-…": "Ali Khan · MR-LHR-000012 · 0300… · 35202-… · RX-…",
+  "Ali Khan · MR-FSD-000012 · 0300… · 35202-… · RX-…": "Ali Khan · MR-FSD-000012 · 0300… · 35202-… · RX-…",
   "All": "تمام",
   "All answers": "تمام جوابات",
   "All apps": "تمام ایپس",

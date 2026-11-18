@@ -67,7 +67,7 @@ CUSTOM_FIELDS = {
 	],
 	"Branch": [
 		{"fieldname": "hv_branch_code", "fieldtype": "Data", "label": "Branch Code", "insert_after": "branch",
-			"description": "Short code used in MR numbers, e.g. LHR"},
+			"description": "Short code used in MR numbers, e.g. FSD"},
 		{"fieldname": "hv_company", "fieldtype": "Link", "options": "Company", "label": "Company", "insert_after": "hv_branch_code"},
 		{"fieldname": "hv_address", "fieldtype": "Small Text", "label": "Address", "insert_after": "hv_company"},
 		{"fieldname": "hv_phone", "fieldtype": "Data", "label": "Phone", "insert_after": "hv_address"},

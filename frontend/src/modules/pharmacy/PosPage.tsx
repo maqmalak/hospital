@@ -603,7 +603,7 @@ function RxDialog({ onClose, onLoad }: { onClose: () => void; onLoad: (code: str
   return (
     <Dialog open onClose={onClose} title="Load prescription" description="Search by patient name, MR, mobile, CNIC or Rx number — or scan the prescription QR." size="lg">
       <div className="relative"><Search className="absolute start-3 top-3.5 h-5 w-5 text-muted-foreground" />
-        <input className={inputCls + " h-12 ps-10 text-lg"} autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && q.trim().toUpperCase().startsWith("RX-") && onLoad(q.trim())} placeholder="Ali Khan · MR-LHR-000012 · 0300… · 35202-… · RX-…" /></div>
+        <input className={inputCls + " h-12 ps-10 text-lg"} autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && q.trim().toUpperCase().startsWith("RX-") && onLoad(q.trim())} placeholder="Ali Khan · MR-FSD-000012 · 0300… · 35202-… · RX-…" /></div>
       <div className="mt-3 max-h-[50vh] space-y-2 overflow-y-auto">{(rows ?? []).map((r) => (
         <button key={r.name} onClick={() => onLoad(r.name)} className="flex w-full items-center gap-3 rounded-xl border border-border p-3 text-start hover:border-sky-500 hover:bg-sky-50/50 dark:hover:bg-sky-500/5">
           <FileText className="h-5 w-5 text-sky-600" /><div className="min-w-0 flex-1"><div className="font-bold">{r.patient_name} <span className="font-mono text-xs font-normal text-muted-foreground">{r.patient}</span></div>

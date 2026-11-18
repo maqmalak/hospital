@@ -58,7 +58,7 @@ def masters():
 			frappe.get_doc({"doctype": "Service Package", "package_name": name, "procedure_type": proc, "price": price, "days": days,
 				"inclusions": [{"charge_type": c, "limit_amount": lim} for c, lim in inc]}).insert(ignore_permissions=True)
 		ipd.package_item(frappe.get_doc("Service Package", name))
-	er_ward = frappe.db.get_value("Ward", {"ward_type": "Emergency", "branch": "Lahore Main"})
+	er_ward = frappe.db.get_value("Ward", {"ward_type": "Emergency", "branch": "Faisalabad Main"})
 	if er_ward and not frappe.db.get_single_value("Clinic Settings", "er_ward"):
 		frappe.db.set_single_value("Clinic Settings", "er_ward", er_ward)
 	frappe.clear_document_cache("Clinic Settings")
@@ -68,7 +68,7 @@ def ipd_stock():
 	"""Move a shelf of every medicine to the IPD dispensing store (ward medicines are issued from there)."""
 	from hospital_vvs.services import pharmacy
 
-	main, ipd_wh = f"Main Store LHR - {ABBR}", f"IPD Dispensing LHR - {ABBR}"
+	main, ipd_wh = f"Main Store FSD - {ABBR}", f"IPD Dispensing FSD - {ABBR}"
 	items = frappe.get_all("Item", filters={"hv_is_medicine": 1}, fields=["name", "hv_units_per_strip", "hv_strips_per_pack"], order_by="name")
 	moves = []
 	for it in items:
@@ -85,9 +85,9 @@ def nurses():
 	from hospital_vvs.services import roster
 
 	for login, name in NURSES:
-		_user(login, name, [R.NURSE], "Lahore Main")
+		_user(login, name, [R.NURSE], "Faisalabad Main")
 	types = [t[0] for t in roster.shift_types()]
-	wards = frappe.get_all("Ward", filters={"branch": "Lahore Main", "ward_type": ["in", ["General", "ICU", "Private", "Emergency"]]}, pluck="name")
+	wards = frappe.get_all("Ward", filters={"branch": "Faisalabad Main", "ward_type": ["in", ["General", "ICU", "Private", "Emergency"]]}, pluck="name")
 	start = getdate(add_days(today(), -1))
 	plan = [("nurse", 0), ("nurse2", 1), ("nurse3", 2), ("headnurse", 0)]
 	for d in range(8):
@@ -96,7 +96,7 @@ def nurses():
 			user = f"{login}@vvs.demo"
 			st = types[(shift_i + d) % len(types)] if login != "headnurse" else types[0]
 			ward = wards[(i + d) % len(wards)] if login != "headnurse" else wards[0]
-			emp = roster.ensure_employee(user, "Lahore Main")
+			emp = roster.ensure_employee(user, "Faisalabad Main")
 			if frappe.db.exists("Shift Assignment", {"employee": emp, "start_date": day, "docstatus": 1}):
 				continue
 			roster.assign(user, ward, day, st, head=1 if login == "headnurse" else 0)
@@ -107,9 +107,9 @@ def activity():
 
 	rnd = random.Random(33)
 	ipd.adopt_occupied_beds()
-	open_adms = frappe.get_all("Bed Allotment", filters={"status": "Admitted", "branch": "Lahore Main"}, fields=["name", "patient", "admitting_doctor", "ward"])
+	open_adms = frappe.get_all("Bed Allotment", filters={"status": "Admitted", "branch": "Faisalabad Main"}, fields=["name", "patient", "admitting_doctor", "ward"])
 	meds = frappe.get_all("Item", filters={"hv_is_medicine": 1, "hv_prescription_required": 0}, pluck="name", limit=40)
-	ipd_wh = f"IPD Dispensing LHR - {ABBR}"
+	ipd_wh = f"IPD Dispensing FSD - {ABBR}"
 	from hospital_vvs.services import pharmacy
 
 	meds = [m for m in meds if pharmacy.stock_units(m, ipd_wh) > 20][:12]
@@ -144,20 +144,20 @@ def activity():
 	# pre-auth for an insurance patient
 	ins = frappe.db.get_value("Customer", {"customer_group": "Insurance Providers"})
 	if ins and not frappe.db.exists("Insurance Pre-Auth", {"payer": ins}):
-		pat = frappe.db.get_value("Patient", {"branch": "Lahore Main", "disabled": 0, "temporary_record": 0})
+		pat = frappe.db.get_value("Patient", {"branch": "Faisalabad Main", "disabled": 0, "temporary_record": 0})
 		frappe.get_doc({"doctype": "Insurance Pre-Auth", "patient": pat, "payer": ins, "policy_no": "SLIC-778812", "procedure_type": "Appendectomy",
 			"requested_amount": 150000, "approved_amount": 120000, "approval_no": "SL-PA-2026-0441", "status": "Approved",
 			"valid_till": add_days(today(), 20), "decided_on": today()}).insert(ignore_permissions=True)
 	# ER: an unknown red, a yellow, a green
 	if not frappe.db.exists("ER Visit", {"status": ["!=", "Disposed"]}):
-		v = er.register(unknown={"gender": "Male", "approx_age": 40}, branch="Lahore Main", arrival_mode="Ambulance (1122)", brought_by="Rescue 1122",
+		v = er.register(unknown={"gender": "Male", "approx_age": 40}, branch="Faisalabad Main", arrival_mode="Ambulance (1122)", brought_by="Rescue 1122",
 			chief_complaint="Road traffic accident, head injury, unconscious", medico_legal=1, mlc_no="MLC-2026-118", police_station="Model Town")
 		er.triage(v.name, "Red", {"bp_systolic": 90, "bp_diastolic": 60, "pulse": 124, "spo2": 89, "gcs": 9})
-		pats = frappe.get_all("Patient", filters={"branch": "Lahore Main", "disabled": 0, "temporary_record": 0}, pluck="name", limit=40)
+		pats = frappe.get_all("Patient", filters={"branch": "Faisalabad Main", "disabled": 0, "temporary_record": 0}, pluck="name", limit=40)
 		pats = [p for p in pats if not ipd.open_admission(p)]
-		v2 = er.register(patient=pats[3], branch="Lahore Main", chief_complaint="Chest pain for 2 hours")
+		v2 = er.register(patient=pats[3], branch="Faisalabad Main", chief_complaint="Chest pain for 2 hours")
 		er.triage(v2.name, "Yellow", {"bp_systolic": 150, "bp_diastolic": 95, "pulse": 98, "spo2": 96})
-		v3 = er.register(patient=pats[7], branch="Lahore Main", chief_complaint="Cut on left hand")
+		v3 = er.register(patient=pats[7], branch="Faisalabad Main", chief_complaint="Cut on left hand")
 		er.triage(v3.name, "Green", {"bp_systolic": 120, "bp_diastolic": 80, "pulse": 82, "spo2": 99})
 		doc = frappe.db.get_value("Doctor", {"is_active": 1, "doctor_type": ["!=", "External Referring"]})
 		er.assign(v.name, doctor=doc)

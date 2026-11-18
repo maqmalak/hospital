@@ -19,7 +19,7 @@ from frappe.utils import add_days, flt, getdate, now_datetime, today
 from hospital_vvs.setup.opd_demo import REC, REC2, _as, _new_patient, _shifts
 
 NURSE, HEAD, DOC_USER = "nurse@vvs.demo", "headnurse@vvs.demo", "dr.ayesha@vvs.demo"
-BRANCH = "Lahore Main"
+BRANCH = "Faisalabad Main"
 J = json.dumps
 
 REASONS = [("High grade fever, vomiting", "Enteric fever"), ("Shortness of breath", "Community acquired pneumonia"),

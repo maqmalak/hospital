@@ -24,14 +24,14 @@ SPECS = [("General Physician", "جنرل فزیشن", "General Medicine"), ("Pae
 	("Dermatologist", "ماہر امراض جلد", "Dermatology")]
 DOCTORS = [
 	# name, urdu, spec, fee, follow-up fee, room, color, branch, days, start, end, user
-	("Dr. Ayesha Siddiqui", "ڈاکٹر عائشہ صدیقی", "General Physician", 1500, 800, "OPD-1", "#0d9488", "Lahore Main", "Mon Tue Wed Thu Fri Sat", "09:00", "14:00", "dr.ayesha"),
-	("Dr. Usman Tariq", "ڈاکٹر عثمان طارق", "Cardiologist", 3000, 1500, "OPD-2", "#dc2626", "Lahore Main", "Mon Wed Fri", "16:00", "20:00", "dr.usman"),
-	("Dr. Sana Malik", "ڈاکٹر ثناء ملک", "Paediatrician", 2000, 1000, "OPD-3", "#f59e0b", "Lahore Main", "Mon Tue Wed Thu Fri Sat", "10:00", "15:00", "dr.sana"),
-	("Dr. Farah Naz", "ڈاکٹر فرح ناز", "Gynaecologist", 2500, 1200, "OPD-4", "#db2777", "Lahore Main", "Tue Thu Sat", "11:00", "17:00", "dr.farah"),
-	("Dr. Bilal Ahmed", "ڈاکٹر بلال احمد", "Orthopaedic Surgeon", 2500, 1200, "OPD-5", "#2563eb", "Lahore Main", "Mon Wed Sat", "15:00", "19:00", None),
-	("Dr. Hina Raza", "ڈاکٹر حنا رضا", "ENT Specialist", 2000, 1000, "OPD-6", "#7c3aed", "Lahore Main", "Tue Thu", "17:00", "21:00", None),
-	("Dr. Kamran Shah", "ڈاکٹر کامران شاہ", "Dermatologist", 2200, 1100, "OPD-7", "#ea580c", "Lahore Main", "Mon Thu Sat", "12:00", "16:00", None),
-	("Dr. Imran Qureshi", "ڈاکٹر عمران قریشی", "General Physician", 1200, 600, "Room 8", "#0891b2", "Lahore Main", "Mon Tue Wed Thu Fri", "09:00", "13:00", "dr.imran"),
+	("Dr. Ayesha Siddiqui", "ڈاکٹر عائشہ صدیقی", "General Physician", 1500, 800, "OPD-1", "#0d9488", "Faisalabad Main", "Mon Tue Wed Thu Fri Sat", "09:00", "14:00", "dr.ayesha"),
+	("Dr. Usman Tariq", "ڈاکٹر عثمان طارق", "Cardiologist", 3000, 1500, "OPD-2", "#dc2626", "Faisalabad Main", "Mon Wed Fri", "16:00", "20:00", "dr.usman"),
+	("Dr. Sana Malik", "ڈاکٹر ثناء ملک", "Paediatrician", 2000, 1000, "OPD-3", "#f59e0b", "Faisalabad Main", "Mon Tue Wed Thu Fri Sat", "10:00", "15:00", "dr.sana"),
+	("Dr. Farah Naz", "ڈاکٹر فرح ناز", "Gynaecologist", 2500, 1200, "OPD-4", "#db2777", "Faisalabad Main", "Tue Thu Sat", "11:00", "17:00", "dr.farah"),
+	("Dr. Bilal Ahmed", "ڈاکٹر بلال احمد", "Orthopaedic Surgeon", 2500, 1200, "OPD-5", "#2563eb", "Faisalabad Main", "Mon Wed Sat", "15:00", "19:00", None),
+	("Dr. Hina Raza", "ڈاکٹر حنا رضا", "ENT Specialist", 2000, 1000, "OPD-6", "#7c3aed", "Faisalabad Main", "Tue Thu", "17:00", "21:00", None),
+	("Dr. Kamran Shah", "ڈاکٹر کامران شاہ", "Dermatologist", 2200, 1100, "OPD-7", "#ea580c", "Faisalabad Main", "Mon Thu Sat", "12:00", "16:00", None),
+	("Dr. Imran Qureshi", "ڈاکٹر عمران قریشی", "General Physician", 1200, 600, "Room 8", "#0891b2", "Faisalabad Main", "Mon Tue Wed Thu Fri", "09:00", "13:00", "dr.imran"),
 ]
 DAY = {"Mon": "Monday", "Tue": "Tuesday", "Wed": "Wednesday", "Thu": "Thursday", "Fri": "Friday", "Sat": "Saturday", "Sun": "Sunday"}
 CLASSES = [("Penicillins", 1), ("Cephalosporins", 1), ("Macrolides", 1), ("Fluoroquinolones", 1), ("NSAIDs", 1), ("Analgesics", 0),
@@ -90,12 +90,12 @@ DIAGNOSES = [("J06.9", "Acute upper respiratory infection", "Respiratory"), ("J0
 	("H66.9", "Otitis media", "Ear"), ("J01.9", "Acute sinusitis", "Respiratory"), ("D50.9", "Iron deficiency anaemia", "Blood"),
 	("O80", "Normal delivery", "Pregnancy"), ("Z34.9", "Supervision of normal pregnancy", "Pregnancy"), ("R50.9", "Fever, unspecified", "Symptoms"),
 	("R51", "Headache", "Symptoms"), ("F41.1", "Generalized anxiety disorder", "Mental health")]
-WARDS = [("General Ward (Male)", "جنرل وارڈ (مرد)", "General", "Male", "Ground", 3500, 12, "Lahore Main", "#0d9488"),
-	("General Ward (Female)", "جنرل وارڈ (خواتین)", "General", "Female", "Ground", 3500, 12, "Lahore Main", "#db2777"),
-	("Private Rooms", "پرائیویٹ کمرے", "Private", "Mixed", "First", 12000, 8, "Lahore Main", "#7c3aed"),
-	("ICU", "آئی سی یو", "ICU", "Mixed", "First", 25000, 6, "Lahore Main", "#dc2626"),
-	("Children Ward", "بچوں کا وارڈ", "General", "Children", "Second", 4000, 10, "Lahore Main", "#f59e0b"),
-	("Emergency Bay", "ایمرجنسی", "Emergency", "Mixed", "Ground", 5000, 8, "Lahore Main", "#b91c1c")]
+WARDS = [("General Ward (Male)", "جنرل وارڈ (مرد)", "General", "Male", "Ground", 3500, 12, "Faisalabad Main", "#0d9488"),
+	("General Ward (Female)", "جنرل وارڈ (خواتین)", "General", "Female", "Ground", 3500, 12, "Faisalabad Main", "#db2777"),
+	("Private Rooms", "پرائیویٹ کمرے", "Private", "Mixed", "First", 12000, 8, "Faisalabad Main", "#7c3aed"),
+	("ICU", "آئی سی یو", "ICU", "Mixed", "First", 25000, 6, "Faisalabad Main", "#dc2626"),
+	("Children Ward", "بچوں کا وارڈ", "General", "Children", "Second", 4000, 10, "Faisalabad Main", "#f59e0b"),
+	("Emergency Bay", "ایمرجنسی", "Emergency", "Mixed", "Ground", 5000, 8, "Faisalabad Main", "#b91c1c")]
 FIRST_M = ["Muhammad", "Ali", "Ahmed", "Hassan", "Usman", "Bilal", "Hamza", "Imran", "Zubair", "Kashif", "Tariq", "Faisal", "Asad", "Shahid", "Naveed"]
 FIRST_F = ["Ayesha", "Fatima", "Zainab", "Maryam", "Sana", "Hina", "Rabia", "Amna", "Nida", "Saima", "Sadia", "Iqra", "Mehwish", "Kiran", "Bushra"]
 LAST = ["Khan", "Ahmed", "Malik", "Butt", "Chaudhry", "Sheikh", "Qureshi", "Raza", "Hussain", "Iqbal", "Mirza", "Javed", "Aslam", "Akhtar"]
@@ -250,7 +250,7 @@ def make_patients(rnd, n=60):
 		p = frappe.get_doc({"doctype": "Patient", "patient_name": f"{first} {last}", "patient_name_ur": f"{UR.get(first, '')} {UR.get(last, '')}".strip() or None,
 			"gender": "Female" if female else "Male", "dob": add_days(today(), -int(age * 365.25) - rnd.randint(0, 300)), "phone": phone,
 			"relation_type": "D/O" if female else "S/O", "guardian_name": f"{rnd.choice(FIRST_M)} {last}", "city": "Islamabad" if i % 8 == 0 else "Lahore",
-			"branch": "Lahore Main", "category": category, "preferred_language": "ur" if i % 3 else "en",
+			"branch": "Faisalabad Main", "category": category, "preferred_language": "ur" if i % 3 else "en",
 			"panel": "Pakistan Telecom Panel" if category == "Panel" else None, "employee_id": f"PTCL-{1000 + i}" if category == "Panel" else None,
 			"panel_relation": "Self" if category == "Panel" else None, "insurance_provider": "State Life Insurance" if category == "Insurance" else None,
 			"policy_no": f"SLIC-{50000 + i}" if category == "Insurance" else None, "blood_group": rnd.choice(["A+", "B+", "O+", "AB+", "O-", "B-"]),
@@ -270,7 +270,7 @@ def make_patients(rnd, n=60):
 	return out
 
 
-def _slip(patient, doctor, date, rnd, branch="Lahore Main", time=None, submit=True):
+def _slip(patient, doctor, date, rnd, branch="Faisalabad Main", time=None, submit=True):
 	d = frappe.get_doc("Doctor", doctor)
 	slip = frappe.get_doc({"doctype": "OPD Slip", "patient": patient, "doctor": doctor, "branch": branch, "posting_date": date,
 		"posting_time": time or f"{rnd.randint(9, 19):02d}:{rnd.randint(0, 59):02d}:00", "purpose": "Consultation",
@@ -321,7 +321,7 @@ def _times(q, date, rnd):
 def history(rnd, patients, days=30):
 	if frappe.db.count("OPD Slip", {"posting_date": ["<", today()]}) > 50:
 		return
-	lhr = [d for d in frappe.get_all("Doctor", filters={"branch": "Lahore Main"}, pluck="name")]
+	lhr = [d for d in frappe.get_all("Doctor", filters={"branch": "Faisalabad Main"}, pluck="name")]
 	isb = frappe.get_all("Doctor", filters={"branch": "Islamabad"}, pluck="name")
 	for back in range(days, 0, -1):
 		date = add_days(today(), -back)
@@ -340,8 +340,8 @@ def history(rnd, patients, days=30):
 def today_activity(rnd, patients):
 	if frappe.db.count("OPD Slip", {"posting_date": today()}) >= 8:
 		return
-	lhr = frappe.get_all("Doctor", filters={"branch": "Lahore Main", "user": ["is", "set"]}, pluck="name")
-	lhr_patients = [p for p in patients if frappe.db.get_value("Patient", p, "branch") == "Lahore Main"]
+	lhr = frappe.get_all("Doctor", filters={"branch": "Faisalabad Main", "user": ["is", "set"]}, pluck="name")
+	lhr_patients = [p for p in patients if frappe.db.get_value("Patient", p, "branch") == "Faisalabad Main"]
 	for i in range(14):
 		slip = _slip(lhr_patients[i], lhr[i % len(lhr)], today(), rnd, time=f"{9 + i // 3:02d}:{(i * 13) % 60:02d}:00")
 		if i < 5:
@@ -363,7 +363,7 @@ def today_activity(rnd, patients):
 			svc.book(doctor=doc, slot=slot[0].name, patient=lhr_patients[20 + i], source_channel=channel,
 				payment_channel="Payment Proof" if channel == "WhatsApp" else "At Clinic")
 	# beds: some occupied, reserved, cleaning
-	beds = frappe.get_all("Hospital Bed", filters={"branch": "Lahore Main", "status": "Available"}, fields=["name", "ward"], order_by="name")
+	beds = frappe.get_all("Hospital Bed", filters={"branch": "Faisalabad Main", "status": "Available"}, fields=["name", "ward"], order_by="name")
 	from hospital_vvs.api import ward as wapi
 
 	frappe.set_user("Administrator")
@@ -393,7 +393,7 @@ def seed_recurring():
 			("Internet & phone lines", pick("utilit", "internet", "phone"), 18500, "Nayatel", "Fibre internet + PTCL lines")):
 		if not frappe.db.exists("Recurring Expense", {"title": title}):
 			frappe.get_doc({"doctype": "Recurring Expense", "title": title, "category": cat, "amount": amount, "payee": payee, "mode_of_payment": "Bank Transfer"
-				if frappe.db.exists("Mode of Payment", "Bank Transfer") else "Cash", "branch": "Lahore Main", "frequency": "Monthly", "next_date": first,
+				if frappe.db.exists("Mode of Payment", "Bank Transfer") else "Cash", "branch": "Faisalabad Main", "frequency": "Monthly", "next_date": first,
 				"description": desc, "requested_by": "accounts@vvs.demo"}).insert(ignore_permissions=True)
 	frappe.db.commit()
 
