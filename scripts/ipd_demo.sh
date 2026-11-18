@@ -3,6 +3,8 @@
 # Run after opd_demo.sh (admissions come from today's OPD patients).
 #   scripts/ipd_demo.sh                       # admit 3, discharge 3, 3 ER arrivals on site "hospital"
 #   ADMIT=4 DISCHARGE=2 ER=5 SITE=hospital scripts/ipd_demo.sh
+#   CASES=5 scripts/ipd_demo.sh               # also 5 full cases (medicine chart, vitals, procedure, tests, nursing, advances, bill)
+#   ADMIT=0 DISCHARGE=0 ER=0 CASES=5 scripts/ipd_demo.sh   # full cases only
 # Daily at 09:15 (crontab -e):
 #   15 9 * * * /home/maqmalak/erpnext-react/apps/hospital_vvs/scripts/ipd_demo.sh >> /home/maqmalak/erpnext-react/logs/ipd_demo.log 2>&1
 set -euo pipefail
@@ -11,3 +13,6 @@ BENCH="${BENCH:-/home/maqmalak/erpnext-react}"
 SITE="${SITE:-hospital}"
 cd "$BENCH"
 bench --site "$SITE" execute hospital_vvs.setup.ipd_demo.run --kwargs "{'admit_n': ${ADMIT:-3}, 'discharge_n': ${DISCHARGE:-3}, 'er_n': ${ER:-3}}"
+if [ "${CASES:-0}" -gt 0 ]; then
+  bench --site "$SITE" execute hospital_vvs.setup.ipd_cases.run --kwargs "{'n': ${CASES}}"
+fi
