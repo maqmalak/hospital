@@ -405,6 +405,12 @@ if [ "$SSL" = "1" ]; then
 	CERT_DIR="/etc/letsencrypt/live/${SITE}"
 	bench --site "$SITE" set-config ssl_certificate "${CERT_DIR}/fullchain.pem"
 	bench --site "$SITE" set-config ssl_certificate_key "${CERT_DIR}/privkey.pem"
+	# Every extra domain gets its own nginx server block, with SSL only when the certificate is stored on that domain's
+	# entry in site_config "domains" — otherwise nginx answers HTTPS for it with another site's certificate.
+	for d in $EXTRA_DOMAINS; do
+		bench setup remove-domain "$d" --site "$SITE" >/dev/null 2>&1 || true
+		bench setup add-domain "$d" --site "$SITE" --ssl-certificate "${CERT_DIR}/fullchain.pem" --ssl-certificate-key "${CERT_DIR}/privkey.pem"
+	done
 	bench setup nginx --yes --log_format combined
 	sudo nginx -t && sudo systemctl reload nginx
 	sudo certbot renew --dry-run --cert-name "$SITE" >/dev/null && info "automatic renewal works"
