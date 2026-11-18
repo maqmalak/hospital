@@ -20,7 +20,7 @@ import { NAV, type NavGroup, type NavItem } from "@/lib/nav";
 import { setShell, useShell } from "@/lib/shell";
 import { appOfRoute } from "@/lib/apps";
 import { cn } from "@/utils/cn";
-import { HOSPITAL_TAGLINE, HospitalLogo } from "@/components/brand";
+import { HospitalLogo, LmcMark } from "@/components/brand";
 
 const PINS = "hv.nav.pins";
 const OPEN = "hv.nav.open";
@@ -220,7 +220,7 @@ export function Sidebar({ variant }: { variant: "desktop" | "drawer" }) {
       <div className={cn("flex items-center gap-3 px-4 pb-3 pt-4", rail && "justify-center px-0")}>
         <Link to="/pw-home" onClick={closeDrawer} className="group flex min-w-0 items-center gap-3" aria-label={clinicName}>
           <HospitalLogo onDark className="h-10 w-10 transition-transform duration-500 motion-safe:group-hover:scale-105" />
-          {!rail && <span className="min-w-0"><span className="block truncate text-sm font-bold">{clinicName}</span><span className="block truncate text-[10.5px] uppercase tracking-[0.12em] text-sidebar-muted">{t(HOSPITAL_TAGLINE)}</span></span>}
+          {!rail && <span className="min-w-0"><span className="block truncate text-sm font-bold">{clinicName}</span><LmcMark className="mt-1 text-sidebar-muted" size={10.5} /></span>}
         </Link>
         {variant === "drawer" && <button type="button" onClick={closeDrawer} className="ms-auto grid h-9 w-9 place-items-center rounded-lg text-sidebar-muted hover:bg-white/10 hover:text-white" aria-label={t("Close menu")}><X className="h-5 w-5" /></button>}
       </div>

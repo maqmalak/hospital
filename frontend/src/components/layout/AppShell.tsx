@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </label>
             </div>
             <button onClick={toggleTheme} className="rounded-lg border border-border p-2 hover:bg-muted" aria-label="Theme">{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}</button>
-            <a href="/hms/vvsdesk" target="_blank" rel="noreferrer" title={t("Visit website")} aria-label={t("Visit website")}
+            <a href="/hms/site" target="_blank" rel="noreferrer" title={t("Visit website")} aria-label={t("Visit website")}
               className="rounded-lg border border-border p-2 text-teal-700 hover:border-teal-500/60 hover:bg-teal-500/10 dark:text-teal-300"><Globe className="h-4 w-4" /></a>
             <a href="/desk" target="_blank" rel="noreferrer" className="hidden rounded-lg border border-border px-2 py-1.5 text-xs font-semibold hover:bg-muted md:block">Desk</a>
             <UserMenu name={boot.full_name} user={boot.user} image={boot.image} onLogout={() => void logout()} />
@@ -108,7 +108,7 @@ function UserMenu({ name, user, image, onLogout }: { name: string; user: string;
           </div>
           <div className="py-1">
             <Link role="menuitem" to="/account" className={item}><UserRound className="h-4 w-4 text-muted-foreground" />{t("My account")}</Link>
-            <a role="menuitem" href="/hms/vvsdesk" target="_blank" rel="noreferrer" className={item}><Globe className="h-4 w-4 text-muted-foreground" />{t("Visit site")}<ExternalLink className="ms-auto h-3.5 w-3.5 text-muted-foreground" /></a>
+            <a role="menuitem" href="/hms/site" target="_blank" rel="noreferrer" className={item}><Globe className="h-4 w-4 text-muted-foreground" />{t("Visit site")}<ExternalLink className="ms-auto h-3.5 w-3.5 text-muted-foreground" /></a>
           </div>
           <div className="border-t border-border pt-1">
             <button role="menuitem" onClick={onLogout} className={cn(item, "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10")}><LogOut className="h-4 w-4" />{t("Sign out")}</button>

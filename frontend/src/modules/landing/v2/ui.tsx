@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { LmcMark } from "@/components/brand";
 import { Link } from "react-router-dom";
 import {
   Activity, Ambulance, ArrowRight, Baby, Bone, Brain, CalendarCheck, Clock3, Droplets, Ear, FlaskConical, HeartPulse, Pill, ScanLine, Scissors, Siren,
@@ -92,7 +93,11 @@ export function LogoMedallion() {
       <span className="s2-spin-rev absolute inset-[22px]"><span className="absolute -top-[5px] left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#FF6B66] shadow-[0_0_14px_3px_rgba(255,107,102,0.6)]" /></span>
       <span className="s2-spin absolute inset-0"><span className="absolute -bottom-[4px] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#9FE3DA] shadow-[0_0_12px_3px_rgba(159,227,218,0.55)]" /></span>
       <span className="relative grid h-[236px] w-[236px] place-items-center rounded-full bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6),0_0_0_10px_rgba(255,255,255,0.08)]">
-        <img src={`${import.meta.env.BASE_URL}brand/lyallpur-logo.webp`} alt="" width={520} height={403} className="w-[172px]" />
+        <span className="flex flex-col items-center">
+          {/* the logo without its small baked-in L·M·C line (rows below 376 of 403), which is redrawn larger underneath */}
+          <span className="block h-[126px] w-[174px] overflow-hidden"><img src={`${import.meta.env.BASE_URL}brand/lyallpur-logo.webp`} alt="" width={520} height={403} className="w-[174px] max-w-none" /></span>
+          <LmcMark color="#0E5E6F" accent="#E5483F" size={17} className="mt-2.5" />
+        </span>
       </span>
     </div>
   );

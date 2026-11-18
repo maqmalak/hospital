@@ -32,7 +32,7 @@ export type Lang = "en" | "ur";
 /** Shared chrome + home page copy, English and Urdu. Inner pages are English for now. */
 export const UI = {
   en: {
-    name: "Lyallpur Medical Complex", tagline: "Medical & Research Center", city: "Faisalabad, Pakistan",
+    name: "Lyallpur Medical Complex", tagline: "LMC", city: "Faisalabad, Pakistan",
     top: { emergency: "Emergency 24/7", search: "Search", lang: "اردو", theme: "Theme" },
     nav: { home: "Home", about: "About", departments: "Departments", services: "Services", doctors: "Doctors", rooms: "Rooms", patients: "Patients & Visitors",
       pharmacy: "Pharmacy", map: "Hospital map", directions: "Directions", news: "Health blog", careers: "Careers", contact: "Contact", book: "Book appointment",
@@ -60,7 +60,7 @@ export const UI = {
     common: { book: "Book appointment", more: "Learn more", next: "Next available", today: "Available today", fee: "Consultation", profile: "View profile", directions: "Get directions", openMap: "Open in Google Maps", call: "Call" },
   },
   ur: {
-    name: "لائل پور میڈیکل کمپلیکس", tagline: "میڈیکل اینڈ ریسرچ سینٹر", city: "فیصل آباد، پاکستان",
+    name: "لائل پور میڈیکل کمپلیکس", tagline: "LMC", city: "فیصل آباد، پاکستان",
     top: { emergency: "ایمرجنسی 24/7", search: "تلاش", lang: "English", theme: "تھیم" },
     nav: { home: "ہوم", about: "ہمارے بارے میں", departments: "شعبے", services: "خدمات", doctors: "ڈاکٹر", rooms: "کمرے", patients: "مریض اور ملاقاتی",
       pharmacy: "فارمیسی", map: "ہسپتال کا نقشہ", directions: "راستہ", news: "صحت بلاگ", careers: "ملازمتیں", contact: "رابطہ", book: "اپائنٹمنٹ بک کریں",

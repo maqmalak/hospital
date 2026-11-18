@@ -56,4 +56,20 @@ export function HospitalLogo({ variant = "mark", className = "h-10 w-10", alt = 
 }
 
 /** Second line under the hospital name. */
-export const HOSPITAL_TAGLINE = "Medical & Research Center";
+export const HOSPITAL_TAGLINE = "LMC";
+
+/** The LMC monogram under the hospital name: serif capitals, wide tracking, between two fine hairlines that fade out.
+ *  color = letters, accent = hairlines (website: teal + coral; ERP: inherits the text colour + VVS gold). */
+export function LmcMark({ color = "currentColor", accent = "#C9A24D", size = 11, className = "" }: { color?: string; accent?: string; size?: number; className?: string }) {
+  const line = (dir: "r" | "l") => (
+    <span aria-hidden className="h-px w-5 shrink-0" style={{ background: `linear-gradient(to ${dir === "r" ? "right" : "left"}, transparent, ${accent})` }} />
+  );
+  return (
+    <span dir="ltr" className={`inline-flex items-center gap-2 ${className}`} aria-label={HOSPITAL_TAGLINE}>
+      {line("r")}
+      <span style={{ fontFamily: "'Fraunces', 'Cormorant Garamond', Georgia, serif", fontSize: size, letterSpacing: "0.5em", marginRight: "-0.5em", color }}
+        className="font-semibold leading-none">L<span style={{ color: accent }}>·</span>M<span style={{ color: accent }}>·</span>C</span>
+      {line("l")}
+    </span>
+  );
+}

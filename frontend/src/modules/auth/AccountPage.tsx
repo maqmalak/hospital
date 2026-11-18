@@ -37,7 +37,7 @@ export default function AccountPage() {
             <p className="flex items-center gap-1.5 text-sm text-white/70"><Mail className="h-4 w-4" />{boot.user}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <a href="/hms/vvsdesk" target="_blank" rel="noreferrer"><Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10"><Globe className="h-4 w-4" />Visit site</Button></a>
+            <a href="/hms/site" target="_blank" rel="noreferrer"><Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10"><Globe className="h-4 w-4" />Visit site</Button></a>
             <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={() => void logout()}><LogOut className="h-4 w-4" />Sign out</Button>
           </div>
         </div>

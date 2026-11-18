@@ -12,7 +12,7 @@ export function PublicShell({ clinic, clinicUr, phone, address, children, wide }
         <div className="absolute inset-0 opacity-[0.05] [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:26px_26px]" />
       </div>
       <header className={`relative mx-auto flex items-center gap-3 px-4 py-5 text-white ${wide ? "max-w-6xl" : "max-w-xl"}`}>
-        <a href="/hms/vvsdesk" className="flex min-w-0 flex-1 items-center gap-3" aria-label={clinic || "Lyallpur Medical Complex"}>
+        <a href="/hms/site" className="flex min-w-0 flex-1 items-center gap-3" aria-label={clinic || "Lyallpur Medical Complex"}>
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white shadow-lg shadow-black/30"><img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark.webp`} alt="" className="h-9 w-9 object-contain" /></span>
           <span className="min-w-0"><span className="block truncate text-lg font-extrabold tracking-wide">{clinic || "Lyallpur Medical Complex"}</span>
             <span className="block truncate text-[10.5px] font-semibold uppercase tracking-[0.2em] text-[#8FCBE0]">{clinicUr ? <span className="font-urdu normal-case tracking-normal text-sm">{clinicUr}</span> : "Medical & Research Center"}</span></span>

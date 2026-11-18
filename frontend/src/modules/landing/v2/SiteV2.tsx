@@ -3,6 +3,7 @@
  * live doctors, departments, ward rates and packages from the ERP. v1 stays at /hms/vvsdesk (git tag website-v1).
  * Design: off-white #F7FAFA, deep teal #0E5E6F, mint, coral CTA (the logo red), Fraunces display + Plus Jakarta Sans.
  */
+import { LmcMark } from "@/components/brand";
 import { ORBIT_CSS } from "./orbitCss";
 import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
@@ -115,7 +116,7 @@ function Logo({ small }: { small?: boolean }) {
       <img src={`${import.meta.env.BASE_URL}brand/${dark ? "lyallpur-mark-dark.webp" : "lyallpur-mark.webp"}`} alt="" className={`shrink-0 transition-all ${small ? "h-10 w-10" : "h-12 w-12"}`} />
       <span className="min-w-0 leading-tight">
         <span className="s2-display block truncate text-[18px] font-semibold text-[var(--ink)]">{ui.name}</span>
-        <span className="block truncate text-[10.5px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]">{ui.tagline}</span>
+        <LmcMark color="var(--primary)" accent="var(--accent)" size={11.5} className="mt-1" />
       </span>
     </Link>
   );
@@ -241,7 +242,7 @@ function Footer() {
       <div className="pointer-events-none absolute -end-24 -top-24 h-96 w-96 rounded-full bg-[#0E5E6F]/40 blur-3xl" />
       <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.3fr_1fr_1fr_1.2fr]">
         <div>
-          <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark-dark.webp`} alt="" className="h-12 w-12" /><div><div className="s2-display text-lg font-semibold text-white">{ui.name}</div><div className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-[#9FE3DA]">{ui.tagline}</div></div></div>
+          <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark-dark.webp`} alt="" className="h-12 w-12" /><div><div className="s2-display text-lg font-semibold text-white">{ui.name}</div><LmcMark color="#9FE3DA" accent="#E5483F" size={11.5} className="mt-1.5" /></div></div>
           <p className="mt-5 max-w-sm text-sm leading-relaxed">{ui.footer.about}</p>
           <div className="mt-6 flex gap-2">{social.filter(([k]) => CONFIG.social[k]).map(([k, I]) => <a key={k} href={CONFIG.social[k]} target="_blank" rel="noopener noreferrer" aria-label={k} className="grid h-10 w-10 place-items-center rounded-full bg-white/10 hover:bg-white/20"><I className="h-4 w-4" /></a>)}</div>
           {CONFIG.accreditations.length > 0 && <div className="mt-6 flex flex-wrap gap-2">{CONFIG.accreditations.map((a) => <span key={a.name} className="rounded-full border border-white/15 px-3 py-1 text-xs">{a.name}</span>)}</div>}

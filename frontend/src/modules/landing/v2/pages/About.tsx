@@ -21,7 +21,7 @@ export default function About() {
       <section className="py-24">
         <Wrap className="grid items-center gap-14 lg:grid-cols-2">
           <Reveal>
-            <SectionHead eyebrow="Our story" title="Medical & Research Center for Faisalabad" />
+            <SectionHead eyebrow="Our story" title="LMC, caring for Faisalabad" />
             <div className="-mt-6 space-y-4 text-[1.05rem] leading-relaxed text-[var(--muted)]">
               <p>Faisalabad deserves specialist care close to home. Lyallpur Medical Complex was planned so families no longer need to travel to Lahore or Islamabad for consultants, advanced imaging or intensive care.</p>
               <p>The eight-floor building puts emergency, pharmacy and reception on the ground floor, clinics and diagnostics above, and theatres, critical care and wards on the upper floors — so every journey through the hospital is short and signposted.</p>

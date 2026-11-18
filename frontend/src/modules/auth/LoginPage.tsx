@@ -7,7 +7,7 @@ import { humanizeError } from "@/lib/api";
 import { getCall } from "@/services/frappe";
 import { LANGUAGES } from "@/i18n";
 import { cn } from "@/utils/cn";
-import { HOSPITAL_TAGLINE, HospitalLogo, Wordmark } from "@/components/brand";
+import { HospitalLogo, LmcMark, Wordmark } from "@/components/brand";
 import DeptOrbit from "@/modules/landing/v2/DeptOrbit";
 import { ORBIT_CSS } from "@/modules/landing/v2/orbitCss";
 
@@ -88,7 +88,7 @@ export default function LoginPage() {
         <span aria-hidden className="absolute -bottom-32 -start-24 h-96 w-96 rounded-full bg-[#14B8A6]/10 blur-3xl" />
         <div className="relative flex items-center gap-3 px-10 pt-9">
           <HospitalLogo onDark className="h-12 w-12" />
-          <div><div className="lg2-display text-xl">{name}</div><div className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9FE3DA]">{t(HOSPITAL_TAGLINE)}</div></div>
+          <div><div className="lg2-display text-xl">{name}</div><LmcMark color="#9FE3DA" accent="#E5483F" size={11.5} className="mt-1.5" /></div>
         </div>
         <div className="relative flex flex-1 flex-col items-center justify-center px-10 xl:px-14">
           <div className="w-full max-w-xl">
