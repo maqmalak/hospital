@@ -133,7 +133,7 @@ function Departments() {
           <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
             <div className="lg:py-10">
               <Reveal><Eyebrow light>{e}</Eyebrow></Reveal>
-              <Reveal delay={80}><h2 className="s2-display max-w-xl text-[2.2rem] leading-[1.08] sm:text-[3rem]">{t}</h2></Reveal>
+              <Reveal delay={80}><h2 className="s2-display max-w-xl text-[2.2rem] leading-[1.08] sm:text-[3rem] xl:max-w-none xl:whitespace-nowrap xl:text-[2.6rem]">{t}</h2></Reveal>
               <Reveal delay={140}><p className="mt-4 max-w-lg text-[17px] leading-relaxed text-white/75">{s}</p></Reveal>
               <Reveal delay={200}><ul className="mt-7 flex max-w-xl flex-wrap gap-2">
                 {DEPARTMENTS.map((d) => { const I = ICONS[d.icon] ?? Stethoscope; return (
