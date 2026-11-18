@@ -78,12 +78,12 @@ function Hero() {
 
 function Quick() {
   const { ui } = useS2();
-  const items: [typeof Stethoscope, string, boolean][] = [[UserRound, "/site/doctors", false], [Building2, "/site/departments", false], [Pill, "/site/pharmacy", false], [MapPin, "/site/directions", false], [Stethoscope, "/site/patients#portal", false]];
+  const items: [typeof Stethoscope, string, boolean][] = [[Building2, "/site/departments", false], [Pill, "/site/pharmacy", false], [MapPin, "/site/directions", false], [Stethoscope, "/site/patients#portal", false]];
   return (
     <Wrap className="relative z-10 -mt-28">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {ui.quick.map(([t, d], i) => { const [I, to] = items[i]; return (
-          <Reveal key={t} delay={i * 70} className={i === 4 ? "col-span-2 sm:col-span-1" : ""}>
+          <Reveal key={t} delay={i * 70}>
             <Link to={to} className="group flex h-full flex-col gap-3 rounded-[22px] border border-white/40 s2-glass p-5 shadow-[0_24px_50px_-28px_rgba(8,48,58,0.55)] backdrop-blur-xl transition hover:-translate-y-1 dark:border-white/10">
               <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--accent)] text-white shadow-[0_10px_22px_-10px_var(--accent)] transition group-hover:bg-[var(--primary)] group-hover:shadow-[0_10px_22px_-10px_var(--primary)]"><I className="h-5 w-5" /></span>
               <span><span className="block font-bold">{t}</span><span className="block text-sm text-[var(--muted)]">{d}</span></span>
