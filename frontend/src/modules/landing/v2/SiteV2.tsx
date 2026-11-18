@@ -3,6 +3,7 @@
  * live doctors, departments, ward rates and packages from the ERP. v1 stays at /hms/vvsdesk (git tag website-v1).
  * Design: off-white #F7FAFA, deep teal #0E5E6F, mint, coral CTA (the logo red), Fraunces display + Plus Jakarta Sans.
  */
+import { ORBIT_CSS } from "./orbitCss";
 import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { ArrowUp, ChevronDown, Languages, Mail, MapPin, Menu, Moon, Phone, Search, Siren, Sun, X, LogIn, Facebook, Instagram, Youtube, Linkedin, Loader2 } from "lucide-react";
@@ -306,25 +307,15 @@ function CSS(rtl: boolean) {
   .s2-reveal.is-in{opacity:1;transform:none}
   .s2-word{display:inline-block;opacity:0;transform:translateY(.45em);animation:s2word .7s cubic-bezier(.2,.7,.2,1) forwards}
   @keyframes s2word{to{opacity:1;transform:none}}
-  .s2-kenburns{animation:s2kb 22s ease-in-out infinite alternate;transform-origin:60% 40%}
-  @keyframes s2kb{from{transform:scale(1.02)}to{transform:scale(1.12)}}
-  .s2-spin{animation:s2spin 40s linear infinite}.s2-spin-rev{animation:s2spin 28s linear infinite reverse}@keyframes s2spin{to{transform:rotate(360deg)}}
+  ${ORBIT_CSS}
   .s2-globe{animation:s2globe 26s linear infinite}@keyframes s2globe{to{transform:rotateY(360deg)}}
   .s2-orbit{animation:s2spin 14s linear infinite}
   .s2-sign{animation:s2sign 7s ease-in-out infinite}@keyframes s2sign{0%,100%{transform:rotateY(-32deg) rotateX(6deg)}50%{transform:rotateY(32deg) rotateX(-4deg)}}
   .s2-float{animation:s2float 5.5s ease-in-out infinite}@keyframes s2float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-  .s2-pulse-soft{animation:s2ps 3.2s ease-in-out infinite}@keyframes s2ps{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:.25}}
-  .s2-corona{background:repeating-conic-gradient(from 0deg,rgba(255,236,170,.0) 0deg 9deg,rgba(255,236,170,.22) 12deg,rgba(255,236,170,0) 15deg 24deg);
-    -webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%);filter:blur(1.5px);animation:s2spin 18s linear infinite}
-  .s2-halo{box-shadow:0 0 40px 12px rgba(255,236,170,.45),0 0 90px 30px rgba(159,227,218,.35);animation:s2halo 3.6s ease-in-out infinite}
-  @keyframes s2halo{0%,100%{box-shadow:0 0 36px 10px rgba(255,236,170,.40),0 0 80px 26px rgba(159,227,218,.30)}50%{box-shadow:0 0 60px 20px rgba(255,236,170,.65),0 0 130px 46px rgba(159,227,218,.45)}}
-  .s2-logo-glow{animation:s2lg 3.6s ease-in-out infinite}@keyframes s2lg{0%,100%{filter:drop-shadow(0 0 4px rgba(255,107,102,.35))}50%{filter:drop-shadow(0 0 14px rgba(255,107,102,.7)) brightness(1.08)}}
   .s2-logo-glow-dark{animation:s2lgd 3.6s ease-in-out infinite}@keyframes s2lgd{0%,100%{filter:drop-shadow(0 0 10px rgba(159,227,218,.5))}50%{filter:drop-shadow(0 0 22px rgba(159,227,218,.95)) drop-shadow(0 0 8px rgba(255,107,102,.6)) brightness(1.15)}}
   .s2-core{background:radial-gradient(circle,rgba(159,227,218,.55),rgba(159,227,218,0) 70%);animation:s2core 3.6s ease-in-out infinite}@keyframes s2core{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
   .s2-bring{border:2px solid rgba(255,236,170,.85);box-shadow:0 0 18px 4px rgba(255,236,170,.6);animation:s2bring 3.2s ease-out infinite}
   @keyframes s2bring{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.9)}}
-  .s2-sweep{background:linear-gradient(105deg,transparent 20%,rgba(255,255,255,.75) 50%,transparent 80%);transform:skewX(-18deg);animation:s2sweep 3.8s ease-in-out infinite}
-  @keyframes s2sweep{0%,40%{left:-60%}80%,100%{left:130%}}
   .s2-page{animation:s2fade .45s ease both}@keyframes s2fade{from{opacity:0}to{opacity:1}}
   .s2-pop{animation:s2pop .22s cubic-bezier(.2,.7,.2,1) both}@keyframes s2pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
   .s2-drawer{animation:s2drawer .3s cubic-bezier(.2,.7,.2,1) both}@keyframes s2drawer{from{transform:translateX(${rtl ? "-" : ""}100%)}to{transform:none}}

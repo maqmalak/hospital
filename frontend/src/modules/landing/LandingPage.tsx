@@ -5,10 +5,12 @@
  * headings, Inter body, Noto Nastaliq for اردو. Name, address and phone come from Clinic Settings; copy is in content.ts.
  * The app's automatic translator skips this folder (own language toggle).
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BedDouble, Bone, Brain, CalendarCheck, CalendarDays, ClipboardList, Clock3, DoorOpen, Droplet, Droplets, Ear, FileText, FlaskConical, HeartPulse, Languages, LogIn, Magnet, Mail, MapPin, Menu, Navigation, Microscope, Phone, Pill, ScanLine, ScanSearch, Scissors, ShieldCheck, Siren, Sparkles, Stethoscope, TestTubes, UserRound, Users, Waves, X, type LucideIcon } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Accessibility, Activity, Ambulance, ArrowRight, Baby, BadgeCheck, BedDouble, Bone, Brain, CalendarCheck, ClipboardList, Clock3, DoorOpen, Droplet, Droplets, Ear, FileText, FlaskConical, HeartPulse, Languages, LogIn, Magnet, Mail, MapPin, Menu, Navigation, Microscope, Phone, Pill, ScanLine, ScanSearch, Scissors, ShieldCheck, Siren, Sparkles, Stethoscope, TestTubes, UserRound, Users, Waves, X, type LucideIcon } from "lucide-react";
 import { COPY, CONFIG, type Copy, type Lang } from "./content";
 import { Wordmark } from "@/components/brand";
+import DeptOrbit from "./v2/DeptOrbit";
+import { ORBIT_CSS } from "./v2/orbitCss";
 import { getCall } from "@/services/frappe";
 
 const BRAND = (f: string) => `${import.meta.env.BASE_URL}brand/${f}`;
@@ -146,29 +148,25 @@ function Header({ c, lang, setLang }: { c: Copy; lang: Lang; setLang: (l: Lang) 
   );
 }
 
-function Hero({ c, lang, opts, phone }: { c: Copy; lang: Lang; opts: Opts | null; phone?: string }) {
-  const next = useMemo(() => (opts?.doctors ?? []).map((d) => d.next_date).filter(Boolean).sort()[0], [opts]);
-  const fmt = (d?: string | null) => (d ? new Date(d + "T00:00").toLocaleDateString(lang === "ur" ? "ur-PK" : "en-PK", { weekday: "short", day: "numeric", month: "short" }) : "");
-  const nextCard = (
-    <div className="w-56 rounded-2xl border border-white/20 bg-[#0C2431]/70 p-4 text-white shadow-2xl backdrop-blur-xl">
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8FCBE0]"><CalendarDays className="h-4 w-4" />{next ? c.hero.cards.next : c.hero.cards.nextNone}</div>
-      <div className="hd mt-1 text-2xl font-semibold">{next ? fmt(next) : c.nav.book}</div>
-      <div className="text-xs text-white/65">{c.hero.cards.nextSub}</div>
-    </div>
-  );
-  const erCard = phone && (
-    <a href={tel(phone)} className="flex w-64 items-center gap-3 rounded-2xl bg-white p-3.5 text-[#0C2431] shadow-2xl transition hover:-translate-y-0.5">
-      <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#E5322F] text-white shadow-[0_10px_20px_-10px_rgba(229,50,47,0.9)]"><Siren className="h-5 w-5" /></span>
-      <span className="min-w-0"><span className="block text-sm font-bold">{c.hero.cards.er} · 24/7</span><span className="block truncate text-xs text-[#0C2431]/60" dir="ltr">{phone}</span></span>
-    </a>
-  );
+function Hero({ c, phone }: { c: Copy; phone?: string }) {
+  const photo = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const f = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (photo.current) photo.current.style.transform = `translateY(${Math.min(window.scrollY, 700) * 0.18}px)`; }); };
+    window.addEventListener("scroll", f, { passive: true });
+    return () => { window.removeEventListener("scroll", f); cancelAnimationFrame(raf); };
+  }, []);
   return (
     <section id="top" className="relative overflow-hidden bg-[#0C2431] text-white">
       {/* the building behind the whole hero, every screen size; navy overlay keeps the text readable */}
       <div className="pointer-events-none absolute inset-0">
-        <img src={BRAND("site/building.webp")} alt={c.hero.photo} className="h-full w-full object-cover object-[62%_30%] lg:object-[50%_30%]" {...{ fetchpriority: "high" }} />
+        {/* slow zoom (s2-kenburns) and a gentle parallax on scroll, as on website v2 */}
+        <div ref={photo} className="absolute inset-0 will-change-transform">
+          <img src={BRAND("site/building.webp")} alt={c.hero.photo} className="s2-kenburns h-[112%] w-full object-cover object-[62%_30%] lg:object-[50%_30%]" style={{ transformOrigin: "70% 30%" }} {...{ fetchpriority: "high" }} />
+        </div>
         <div className="absolute inset-0 bg-[#0C2431]/75 lg:hidden" />
-        <div className="absolute inset-0 hidden bg-gradient-to-r from-[#0C2431] via-[#0C2431]/80 to-[#0C2431]/10 lg:block rtl:bg-gradient-to-l" />
+        <div className="absolute inset-0 hidden bg-gradient-to-r from-[#0C2431] via-[#0C2431]/80 to-[#0C2431]/55 lg:block rtl:bg-gradient-to-l" />
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0C2431] to-transparent" />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_520px_at_0%_0%,rgba(43,110,133,0.5),transparent_60%)]" />
@@ -195,19 +193,8 @@ function Hero({ c, lang, opts, phone }: { c: Copy; lang: Lang; opts: Opts | null
             ))}
           </Reveal>
         </div>
-        {/* phone / tablet: emergency card under the text (the photo is the hero background) */}
-        {erCard && <Reveal delay={200} className="lg:hidden">{erCard}</Reveal>}
-        {/* lg+: floating cards over the photo */}
-        <div className="relative hidden h-full lg:block">
-          <Reveal delay={260} className="absolute end-2 top-2">
-            <div className="flex items-center gap-3 rounded-full border border-white/25 bg-white/90 py-2 pe-5 ps-2 text-[#0C2431] shadow-2xl backdrop-blur">
-              <img src={BRAND("lyallpur-mark.webp")} alt="" className="h-10 w-10" />
-              <span className="svc text-[13px] font-semibold uppercase tracking-[0.2em] text-[#2B6E85]">{c.hero.badge}</span>
-            </div>
-          </Reveal>
-          <Reveal delay={340} className="absolute start-2 top-[42%]">{nextCard}</Reveal>
-          {erCard && <Reveal delay={420} className="absolute bottom-0 start-24">{erCard}</Reveal>}
-        </div>
+        {/* lg+: the hospital logo as a glowing sun with the departments circling it (from website v2) */}
+        <Reveal delay={200} className="hidden justify-self-center lg:block"><DeptOrbit to={() => "#departments"} /></Reveal>
       </div>
     </section>
   );
@@ -545,12 +532,13 @@ export default function LandingPage() {
         .vvsl .svc { font-family: ${rtl ? "'Noto Nastaliq Urdu', serif" : "Oswald, 'Arial Narrow', sans-serif"}; ${rtl ? "text-transform:none;letter-spacing:0;line-height:1.7;" : ""} }
         .vvsl .hd { font-family: ${rtl ? "'Noto Nastaliq Urdu', serif" : "'Cormorant Garamond', Georgia, serif"}; ${rtl ? "line-height:1.6;" : ""} }
         ${rtl ? ".vvsl p, .vvsl li { line-height: 2.1; }" : ""}
+        ${ORBIT_CSS}
         html { scroll-behavior: smooth; }
         @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
       `}</style>
       <Header c={c} lang={lang} setLang={setLang} />
       <main>
-        <Hero c={c} lang={lang} opts={opts} phone={phone} />
+        <Hero c={c} phone={phone} />
         <QuickActions c={c} phone={phone} />
         <About c={c} opts={opts} />
         <Facilities c={c} />

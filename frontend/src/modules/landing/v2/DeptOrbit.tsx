@@ -2,9 +2,9 @@ import { DEPARTMENTS } from "./content";
 import Orbit from "./Orbit";
 
 /** Departments hero: the hospital logo as the sun, every department a planet (opens its page). */
-export default function DeptOrbit() {
+export default function DeptOrbit({ to = (slug: string) => `/site/departments/${slug}` }: { to?: (slug: string) => string }) {
   return (
-    <Orbit split={5} items={DEPARTMENTS.map((d) => ({ key: d.slug, label: d.name.replace(/ \(.*\)$/, ""), icon: d.icon, to: `/site/departments/${d.slug}` }))}
+    <Orbit split={5} items={DEPARTMENTS.map((d) => ({ key: d.slug, label: d.name.replace(/ \(.*\)$/, ""), icon: d.icon, to: to(d.slug) }))}
       center={
         <div className="relative grid h-[156px] w-[156px] place-items-center">
           {/* corona: soft turning rays + breathing halo behind the sun */}
