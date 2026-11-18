@@ -25,7 +25,7 @@ interface Ctx { lang: Lang; ui: UICopy; site: Site | null; phone: string; dark: 
 const S2 = createContext<Ctx>({ lang: "en", ui: UI.en, site: null, phone: "", dark: false });
 export const useS2 = () => useContext(S2);
 
-const FONTS = "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap";
+const FONTS = "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap";
 const store = { get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } } };
 
 export default function SiteV2() {
@@ -300,6 +300,7 @@ function CSS(rtl: boolean) {
   .s2{--bg:#F7FAFA;--surface:#FFFFFF;--soft:#EEF5F5;--mint:#DDF3EF;--ink:#14262E;--muted:#5B7079;--line:#E1EAEB;--primary:#0E5E6F;--accent:#E5483F;--ink2:rgba(20,38,46,.75);--primary-ring:rgba(14,94,111,.18);--accent-ring:rgba(229,72,63,.3);
     font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "'Plus Jakarta Sans',Inter,system-ui,sans-serif"};}
   .s2.s2-dark{--bg:#071C22;--surface:#0D2730;--soft:#12313B;--mint:#11393F;--ink:#E7F1F2;--muted:#9AB2B8;--line:#1D3C46;--primary:#5CC3C9;--accent:#F0574E;--ink2:rgba(231,241,242,.78);--primary-ring:rgba(92,195,201,.25);--accent-ring:rgba(240,87,78,.35);}
+  .s2 .s2-num{font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "Oswald,'Arial Narrow',sans-serif"}}
   .s2-glass{background:color-mix(in srgb,var(--surface) 82%,transparent)}
   .s2 .s2-display{font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "Fraunces,Georgia,serif"};font-weight:500;letter-spacing:-0.015em;${rtl ? "line-height:1.7;letter-spacing:0;" : ""}}
   ${rtl ? ".s2 p,.s2 li{line-height:2.05}" : ""}
