@@ -154,7 +154,7 @@ function NavBar() {
           {link("/site/about", ui.nav.about)}{megaBtn("depts", ui.nav.departments)}{megaBtn("services", ui.nav.services)}{link("/site/doctors", ui.nav.doctors)}{link("/site/rooms", ui.nav.rooms)}{link("/site/patients", ui.nav.patients)}{link("/site/contact", ui.nav.contact)}
         </nav>
         <div className="ms-auto flex items-center gap-2 xl:ms-3">
-          <a href="/hms/book-appointment" className={`${btn.primary} hidden px-5 py-2.5 text-sm sm:inline-flex`}>{ui.nav.book}</a>
+          <a href="/hms/login" className={`${btn.teal} hidden px-5 py-2.5 text-sm sm:inline-flex`}><LogIn className="h-4 w-4 rtl:-scale-x-100" />{ui.footer.staff}</a>
           <button type="button" onClick={() => setOpen(true)} className="rounded-full p-2.5 hover:bg-[var(--soft)] xl:hidden" aria-label={ui.nav.menu}><Menu className="h-6 w-6" /></button>
         </div>
       </div>
@@ -163,7 +163,7 @@ function NavBar() {
           <div className="s2-drawer absolute inset-y-0 end-0 flex w-[86%] max-w-sm flex-col overflow-y-auto bg-[var(--surface)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={ui.nav.menu}>
             <div className="mb-4 flex items-center justify-between"><Logo small /><button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 hover:bg-[var(--soft)]" aria-label={ui.nav.close}><X className="h-6 w-6" /></button></div>
             <nav className="flex flex-col">{mobile.map(([to, l]) => <NavLink key={to} to={to} end={to === "/site"} className={({ isActive }) => `border-b border-[var(--line)] py-3 text-[17px] font-medium ${isActive ? "text-[var(--primary)]" : ""}`}>{l}</NavLink>)}</nav>
-            <a href="/hms/book-appointment" className={`${btn.primary} mt-6 w-full`}>{ui.nav.book}</a>
+            <a href="/hms/login" className={`${btn.teal} mt-6 w-full`}><LogIn className="h-4 w-4 rtl:-scale-x-100" />{ui.footer.staff}</a>
           </div>
         </div>
       )}
@@ -317,6 +317,7 @@ function CSS(rtl: boolean) {
   .s2-core{background:radial-gradient(circle,rgba(159,227,218,.55),rgba(159,227,218,0) 70%);animation:s2core 3.6s ease-in-out infinite}@keyframes s2core{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
   .s2-bring{border:2px solid rgba(255,236,170,.85);box-shadow:0 0 18px 4px rgba(255,236,170,.6);animation:s2bring 3.2s ease-out infinite}
   @keyframes s2bring{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.9)}}
+  .s2-icon-glow{animation:s2ig 1.8s ease-in-out infinite}@keyframes s2ig{0%,100%{filter:drop-shadow(0 0 1px rgba(255,255,255,.6))}50%{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px rgba(255,236,170,.95))}}
   .s2-page{animation:s2fade .45s ease both}@keyframes s2fade{from{opacity:0}to{opacity:1}}
   .s2-pop{animation:s2pop .22s cubic-bezier(.2,.7,.2,1) both}@keyframes s2pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
   .s2-drawer{animation:s2drawer .3s cubic-bezier(.2,.7,.2,1) both}@keyframes s2drawer{from{transform:translateX(${rtl ? "-" : ""}100%)}to{transform:none}}
@@ -326,6 +327,6 @@ function CSS(rtl: boolean) {
   .s2-pulse{animation:s2pl 2.4s ease-in-out infinite}@keyframes s2pl{0%,100%{box-shadow:0 0 0 0 rgba(229,72,63,.45)}50%{box-shadow:0 0 0 12px rgba(229,72,63,0)}}
   .s2 input,.s2 select,.s2 textarea{transition:border-color .2s,box-shadow .2s}
   html{scroll-behavior:smooth}
-  @media (prefers-reduced-motion: reduce){.s2-reveal{opacity:1;transform:none;transition:none}.s2-word{animation:none;opacity:1;transform:none}.s2-kenburns,.s2-pulse,.s2-spin,.s2-spin-rev,.s2-globe,.s2-orbit,.s2-sign,.s2-corona,.s2-halo,.s2-logo-glow,.s2-logo-glow-dark,.s2-core,.s2-sweep,.s2-bring,.s2-pulse-soft,.s2-float,.s2-skel,.s2-page,.s2-pop,.s2-drawer{animation:none}html{scroll-behavior:auto}}
+  @media (prefers-reduced-motion: reduce){.s2-reveal{opacity:1;transform:none;transition:none}.s2-word{animation:none;opacity:1;transform:none}.s2-kenburns,.s2-pulse,.s2-spin,.s2-spin-rev,.s2-globe,.s2-orbit,.s2-sign,.s2-corona,.s2-halo,.s2-logo-glow,.s2-logo-glow-dark,.s2-core,.s2-sweep,.s2-bring,.s2-icon-glow,.s2-pulse-soft,.s2-float,.s2-skel,.s2-page,.s2-pop,.s2-drawer{animation:none}html{scroll-behavior:auto}}
   `;
 }

@@ -19,7 +19,6 @@ export default function Home() {
     <>
       <Hero />
       <Quick />
-      <Stats />
       <Departments />
       <ServicesOrbit />
       <DoctorsRail />
@@ -106,10 +105,11 @@ function Hero() {
         <h1 className="s2-display max-w-3xl text-[2.9rem] leading-[1.02] sm:text-[4.6rem]"><WordReveal text={ui.hero.words} /></h1>
         <Reveal delay={500}><p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">{ui.hero.sub}</p></Reveal>
         <Reveal delay={650} className="mt-9 flex flex-wrap gap-3">
-          <a href="/hms/book-appointment" className={btn.primary}><CalendarCheck className="h-5 w-5" />{ui.hero.book}</a>
+          <a href="/hms/book-appointment" className={btn.glass}><CalendarCheck className="h-5 w-5" />{ui.hero.book}</a>
           <Link to="/site/doctors" className={btn.glass}><UserRound className="h-5 w-5" />{ui.hero.find}</Link>
-          {er && <a href={tel(er)} className={`${btn.glass} border-[#FF8A84]/50`}><Siren className="h-5 w-5 text-[#FF8A84]" />{ui.hero.emergency}: <span dir="ltr">{er}</span></a>}
+          {er && <a href={tel(er)} className={btn.primary}><Siren className="s2-icon-glow h-5 w-5" />{ui.hero.emergency}: <span dir="ltr">{er}</span></a>}
         </Reveal>
+        <HeroStats />
       </Wrap>
     </section>
   );
@@ -133,23 +133,19 @@ function Quick() {
   );
 }
 
-function Stats() {
+/** Beds · consultants · departments · floors — a compact row under the hero buttons, as on v1 (no cards). */
+function HeroStats() {
   const { ui, site } = useS2();
   const stats: [number, string][] = [[CONFIG.beds || site?.beds || 0, ui.stats.beds], [site?.doctors ?? 0, ui.stats.doctors], [DEPARTMENTS.length, ui.stats.departments], [8, ui.stats.floors]];
   return (
-    <section className="py-16 sm:py-20">
-      <Wrap>
-        {/* no cards: big condensed figures with small tracked labels and hairline dividers */}
-        <div className="grid grid-cols-2 gap-y-8 lg:grid-cols-4">
-          {stats.map(([n, l], i) => (
-            <Reveal key={l} delay={i * 80} className={`px-6 sm:px-10 ${i % 2 ? "border-s border-[var(--line)]" : ""} ${i === 2 ? "lg:border-s" : ""}`}>
-              <div className="s2-num text-[2.8rem] font-semibold leading-none text-[var(--ink)] sm:text-[3.4rem]" dir="ltr">{site || i > 1 ? <Counter to={n} /> : <Skeleton className="h-12 w-20" />}</div>
-              <div className="mt-2 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--primary)]">{l}</div>
-            </Reveal>
-          ))}
+    <Reveal delay={800} className="mt-10 flex max-w-xl gap-y-5 divide-x divide-white/15 rtl:divide-x-reverse">
+      {stats.map(([n, l], i) => (
+        <div key={l} className="px-3 first:ps-0 last:pe-0 sm:px-7">
+          <div className="s2-num text-[1.7rem] font-semibold leading-none text-white sm:text-[2.2rem]" dir="ltr">{site || i > 1 ? <Counter to={n} /> : <Skeleton className="h-9 w-14" />}</div>
+          <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8FCBE0] sm:text-[12px] sm:tracking-[0.18em]">{l}</div>
         </div>
-      </Wrap>
-    </section>
+      ))}
+    </Reveal>
   );
 }
 
