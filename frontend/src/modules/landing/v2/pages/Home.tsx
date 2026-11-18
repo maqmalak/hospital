@@ -45,7 +45,7 @@ export default function Home() {
 /** The hospital logo drawn sharp over the logos in the building photo, with a glow, pulsing rings and a passing shine (facade roundel and the pylon sign). Positions are in the
  *  photo's own pixels (1158 × 956) and mapped through object-cover, so they stay on the logos at every screen size. */
 const PHOTO_W = 1158, PHOTO_H = 956;
-const LOGOS = [{ x: 513, y: 265, r: 44 }, { x: 1034, y: 529, r: 30 }];
+const LOGOS = [{ x: 1034, y: 529, r: 30 }]; // the signboard only — the facade roundel stays as in the photo
 function BuildingGlow() {
   const box = useRef<HTMLDivElement>(null);
   const [geo, setGeo] = useState<{ s: number; ox: number; oy: number } | null>(null);
