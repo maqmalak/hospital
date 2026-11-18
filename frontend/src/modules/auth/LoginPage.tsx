@@ -99,11 +99,12 @@ export default function LoginPage() {
             <p className="mt-2 font-urdu text-lg leading-loose text-white/75" dir="rtl">استقبالیہ سے بستر تک — ایک پرسکون نظام</p>
           </div>
           {/* the orbit is 480 × 460; the box reserves its scaled size so short screens don't scroll */}
-          <div className="grid h-[400px] w-full place-items-center [@media(max-height:820px)]:h-[300px]">
-            <div className="scale-[0.86] [@media(max-height:820px)]:scale-[0.64]"><DeptOrbit /></div>
+          {/* sizes by screen: narrow lg panel · short xl · normal xl · tall xl (ranges don't overlap) */}
+          <div className="grid w-full place-items-center [@media(max-width:1279px)]:h-[330px] [@media(min-width:1280px)_and_(max-height:820px)]:h-[370px] [@media(min-width:1280px)_and_(min-height:821px)_and_(max-height:979px)]:h-[520px] [@media(min-width:1280px)_and_(min-height:980px)]:h-[640px]">
+            <div className="[@media(max-width:1279px)]:scale-[0.7] [@media(min-width:1280px)_and_(max-height:820px)]:scale-[0.8] [@media(min-width:1280px)_and_(min-height:821px)_and_(max-height:979px)]:scale-[1.15] [@media(min-width:1280px)_and_(min-height:980px)]:scale-[1.38]"><DeptOrbit /></div>
           </div>
         </div>
-        <div className="relative grid grid-cols-3 gap-3 px-10 pb-9">
+        <div className="relative grid grid-cols-3 gap-3 px-10 pb-9 [@media(max-height:820px)]:hidden">
           {[[CalendarCheck, "Web + WhatsApp booking"], [Stethoscope, "Signed prescriptions"], [ShieldCheck, "Audit on every record"]].map(([I, l]) => {
             const Icon = I as typeof Lock;
             return <div key={l as string} className="flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-2 text-xs font-medium text-white/85 backdrop-blur"><Icon className="h-4 w-4 shrink-0 text-[#FF8A85]" />{l as string}</div>;
