@@ -42,13 +42,46 @@ export default function Home() {
   );
 }
 
+/** The hospital logo drawn sharp over the logos in the building photo, with a glow, pulsing rings and a passing shine (facade roundel and the pylon sign). Positions are in the
+ *  photo's own pixels (1158 × 956) and mapped through object-cover, so they stay on the logos at every screen size. */
+const PHOTO_W = 1158, PHOTO_H = 956;
+const LOGOS = [{ x: 513, y: 265, r: 44 }, { x: 1034, y: 529, r: 30 }];
+function BuildingGlow() {
+  const box = useRef<HTMLDivElement>(null);
+  const [geo, setGeo] = useState<{ s: number; ox: number; oy: number } | null>(null);
+  useEffect(() => {
+    const el = box.current; if (!el) return;
+    const fit = () => {
+      const W = el.clientWidth, H = el.clientHeight, s = Math.max(W / PHOTO_W, H / PHOTO_H);
+      const [px, py] = window.innerWidth >= 1024 ? [0.5, 0.2] : [0.7, 0.25]; // matches the img's object-position
+      setGeo({ s, ox: (W - PHOTO_W * s) * px, oy: (H - PHOTO_H * s) * py });
+    };
+    fit(); const ro = new ResizeObserver(fit); ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={box} aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {geo && LOGOS.map((l, i) => { const r = l.r * geo.s; return (
+        <div key={i} className="absolute" style={{ left: geo.ox + l.x * geo.s - r, top: geo.oy + l.y * geo.s - r, width: r * 2, height: r * 2 }}>
+          <span className="s2-bring absolute inset-0 rounded-full" style={{ animationDelay: `${i * 0.8}s` }} />
+          <span className="s2-bring absolute inset-0 rounded-full" style={{ animationDelay: `${i * 0.8 + 1.6}s` }} />
+          <span className="s2-halo absolute inset-0 overflow-hidden rounded-full bg-white ring-2 ring-white/80" style={{ animationDelay: `${i * 0.8}s` }}>
+            <img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark.webp`} alt="" className="s2-logo-glow absolute inset-[9%] h-[82%] w-[82%] object-contain" />
+            <span className="s2-sweep absolute inset-y-0 -left-1/2 w-1/2 opacity-70" style={{ animationDelay: `${i * 1.2}s` }} />
+          </span>
+        </div>); })}
+    </div>
+  );
+}
+
 function Hero() {
   const { ui, phone } = useS2();
-  const img = useRef<HTMLImageElement>(null);
+  const img = useRef<HTMLDivElement>(null);
+  const glow = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (reduced()) return;
     let raf = 0;
-    const f = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (img.current) img.current.style.transform = `translateY(${Math.min(window.scrollY, 700) * 0.18}px)`; }); };
+    const f = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { const t = `translateY(${Math.min(window.scrollY, 700) * 0.18}px)`; for (const r of [img, glow]) if (r.current) r.current.style.transform = t; }); };
     window.addEventListener("scroll", f, { passive: true });
     return () => { window.removeEventListener("scroll", f); cancelAnimationFrame(raf); };
   }, []);
@@ -57,10 +90,16 @@ function Hero() {
     <section className="relative isolate overflow-hidden bg-[#08303A] text-white">
       {/* the building: full background on phones; the right ~60% on wide screens so the whole facade shows */}
       <div ref={img} className="absolute inset-y-0 end-0 -z-10 w-full will-change-transform lg:w-[62%]">
-        <img src={PHOTOS.building} alt={ui.name} className="s2-kenburns h-[112%] w-full object-cover object-[70%_25%] lg:object-[50%_20%]" style={{ transformOrigin: "70% 30%" }} {...{ fetchpriority: "high" }} />
+        <div className="s2-kenburns relative h-[112%] w-full" style={{ transformOrigin: "70% 30%" }}>
+          <img src={PHOTOS.building} alt={ui.name} className="h-full w-full object-cover object-[70%_25%] lg:object-[50%_20%]" {...{ fetchpriority: "high" }} />
+        </div>
       </div>
       <div className="absolute inset-0 -z-10 bg-[#08303A]/70 lg:hidden" />
       <div className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-[#062229] from-[38%] via-[#08303A]/60 via-[55%] to-transparent lg:block rtl:bg-gradient-to-l" />
+      {/* the glowing logos sit above the dark gradients so they stay bright; same parallax and zoom as the photo */}
+      <div ref={glow} className="pointer-events-none absolute inset-y-0 end-0 -z-10 hidden w-full will-change-transform lg:block lg:w-[62%]">
+        <div className="s2-kenburns relative h-[112%] w-full" style={{ transformOrigin: "70% 30%" }}><BuildingGlow /></div>
+      </div>
       <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-[var(--bg)] to-transparent" />
       <Wrap className="flex min-h-[calc(100svh-124px)] flex-col justify-center pb-40 pt-16 lg:min-h-[720px]">
         <Reveal><Eyebrow light>{ui.hero.eyebrow}</Eyebrow></Reveal>
