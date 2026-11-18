@@ -185,8 +185,8 @@ def call_next(doctor, branch=None):
 
 @frappe.whitelist()
 def display(branch=None):
-	"""Waiting-room display: token and room (first names when the setting allows). The patient already with the doctor
-	(In Consultation) is shown with token and full name (owner request 2026-11-18)."""
+	"""Waiting-room display: token and room (first names when the setting allows). The patient with the doctor (Called or
+	In Consultation — the queue board's "With the doctor" column) is shown with token and full name (owner request 2026-11-18)."""
 	branch = scope_branch(branch, required=False)
 	branch = branch or default_branch()
 	show_name = cint(setting("show_first_name_on_display"))
@@ -199,7 +199,7 @@ def display(branch=None):
 		name = (r.patient_name or "").split(" ")[0] if show_name else None
 		if r.status in ("Called", "In Consultation"):
 			if not d["now"] or (r.called_at and str(r.called_at) > str(d["now"].get("called_at") or "")):
-				d["now"] = {"token": r.token_no, "name": r.patient_name if r.status == "In Consultation" else name, "status": r.status,
+				d["now"] = {"token": r.token_no, "name": r.patient_name, "status": r.status,
 					"called_at": str(r.called_at or "")}
 		else:
 			d["waiting"] += 1
