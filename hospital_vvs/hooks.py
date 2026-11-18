@@ -21,6 +21,12 @@ website_route_rules = [
 	{"from_route": "/hms/<path:app_path>", "to_route": "hms"},
 ]
 
+# The bare domain (https://lyallpurhospital.pk/) opens the LMC website (D-89). Matches only "/" (Frappe matches the
+# stripped path against "<source>$"); /app, /hms/*, /api/* are untouched. 302, not 301: browsers do not cache it for good.
+website_redirects = [
+	{"source": "/", "target": "/hms/site", "redirect_http_status": 302},
+]
+
 # called by Prescription.on_submit (signed): lab order and draft medicine invoice
 hv_on_prescription_signed = [
 	"hospital_vvs.services.lab.on_prescription_signed",
