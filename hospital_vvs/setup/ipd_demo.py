@@ -213,6 +213,77 @@ def ward_care(rnd):
 	print(f"ward care: {len(rows)} inpatients, {charted} doses charted")
 
 
+# doctor's starter plan for an inpatient with no active medicine order: diagnosis keyword → (item, dose, frequency, route, days)
+PLANS = [("enteric", [("CIPROXIN-500MG", "1", "BD", "Oral", 7), ("PANADOL-500MG", "1", "TDS", "Oral", 5)]),
+	("typhoid", [("CIPROXIN-500MG", "1", "BD", "Oral", 7), ("PANADOL-500MG", "1", "TDS", "Oral", 5)]),
+	("pneumonia", [("AUGMENTIN-625MG", "1", "TDS", "Oral", 7), ("AZOMAX-500MG", "1", "OD", "Oral", 3), ("PANADOL-500MG", "1", "TDS", "Oral", 5)]),
+	("gastro", [("ONSET-4MG", "1", "BD", "IV", 3), ("RISEK-20MG", "1", "OD", "Oral", 5)]),
+	("diabet", [("GLUCOPHAGE-500MG", "1", "BD", "Oral", 7), ("AMARYL-2MG", "1", "OD", "Oral", 7)]),
+	("sugar", [("GLUCOPHAGE-500MG", "1", "BD", "Oral", 7), ("AMARYL-2MG", "1", "OD", "Oral", 7)]),
+	("angina", [("LOPRIN-75MG", "1", "OD", "Oral", 7), ("CONCOR-5MG", "1", "OD", "Oral", 7), ("ROSUVAS-10MG", "1", "OD", "Oral", 7)]),
+	("chest", [("LOPRIN-75MG", "1", "OD", "Oral", 7), ("CONCOR-5MG", "1", "OD", "Oral", 7), ("ROSUVAS-10MG", "1", "OD", "Oral", 7)]),
+	("append", [("LEFLOX-500MG", "1", "BD", "IV", 5), ("TRAMAL-50MG", "1", "BD", "Oral", 3)]),
+	("dengue", [("PANADOL-500MG", "1", "TDS", "Oral", 5), ("FOLIC-ACID-5MG", "1", "OD", "Oral", 5)])]
+DEFAULT_PLAN = [("PANADOL-500MG", "1", "TDS", "Oral", 5), ("RISEK-20MG", "1", "OD", "Oral", 5)]
+
+
+def start_missing_orders(rnd):
+	"""Doctor's round before the drug round: every open admission without an active medicine order gets a plan for its diagnosis."""
+	from hospital_vvs.api import ipd as api
+
+	have = set(frappe.get_all("IPD Medication Order", filters={"status": "Active", "bed_allotment": ["is", "set"]}, pluck="bed_allotment"))
+	fields = ["name", "admitting_doctor"] + [f for f in ("diagnosis", "provisional_diagnosis", "admission_reason", "reason") if frappe.get_meta("Bed Allotment").has_field(f)]
+	started = 0
+	for adm in frappe.get_all("Bed Allotment", filters={"status": "Admitted", "branch": BRANCH}, fields=fields):
+		if adm.name in have:
+			continue
+		text = " ".join(str(adm.get(f) or "") for f in fields[2:]).lower()
+		plan = next((p for k, p in PLANS if k in text), DEFAULT_PLAN)
+		_as(_doctor_of(adm))
+		for item, dose, freq, route, days in plan:
+			if _step(f"order {item} · {adm.name}", api.order_medicine, J({"bed_allotment": adm.name, "item": item, "dose": dose, "frequency": freq,
+					"route": route, "days": days, "override_reason": "Demo: reviewed by consultant"})):
+				started += 1
+	return started
+
+
+HOLD = [("Held", "Patient NPO for procedure"), ("Held", "BP low, doctor informed"), ("Refused", "Patient refused, counselled"),
+	("Held", "Patient asleep, will give on waking")]
+
+
+def drug_round(slot=None, seed=None, ahead_hours=0):
+	"""Nurses' drug round (scripts/drug_round.sh, 3× a day): the doctor clears doses waiting at the approval gate, then the nurse on
+	duty charts every dose due up to now for every open admission — mostly given, now and then held or refused with a reason."""
+	from hospital_vvs.api import ipd as api
+	from hospital_vvs.services import ipd as svc
+	from hospital_vvs.services.roster import on_duty
+
+	rnd = random.Random(seed if seed is not None else int(now_datetime().strftime("%Y%m%d%H")))
+	slot = slot or ("Morning" if now_datetime().hour < 12 else "Afternoon" if now_datetime().hour < 18 else "Night")
+	started = start_missing_orders(rnd)
+	due = [d for d in svc.due_doses(BRANCH, None, ahead_hours) if d.get("bed_allotment")]
+	gate = [d["name"] for d in due if d.get("status") == "Pending Approval"]
+	if gate:
+		_as(DOC_USER)
+		_step("approve doses", api.approve_dose, J(gate))
+	nurses = [r.user for r in on_duty(branch=BRANCH) if r.get("user")] or [NURSE]
+	given = held = failed = 0
+	for d in due:
+		_as(rnd.choice(nurses))
+		status, reason = ("Administered", None) if rnd.random() > 0.06 else rnd.choice(HOLD)
+		if _step(f"{d['name']} {d.get('item_name') or d['item']} · {d.get('patient_name')}", api.chart_dose, d["name"], status, reason):
+			if status == "Administered":
+				given += 1
+			else:
+				held += 1
+		else:
+			failed += 1
+	_as("Administrator")
+	pts = len({d["bed_allotment"] for d in due})
+	print(f"[{now_datetime():%F %T}] drug round ({slot}): {started} new orders, {pts} patients, {given} given, {held} held/refused, {failed} not charted")
+	return {"patients": pts, "given": given, "held": held, "failed": failed}
+
+
 def run(admit_n=3, discharge_n=3, er_n=3, seed=None):
 	rnd = random.Random(seed if seed is not None else int(getdate(today()).strftime("%Y%m%d")) + 61)
 	print(f"[{now_datetime():%F %T}] IPD demo: admit {admit_n}, discharge {discharge_n}, ER {er_n}")
