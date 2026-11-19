@@ -14,6 +14,7 @@ import { cn } from "@/utils/cn";
 import { IdleLock } from "./IdleLock";
 import { MobileDrawer, MobileTabBar, Sidebar } from "./Sidebar";
 import { BackBar, useTrail } from "@/lib/trail";
+import { PALETTES, usePalette } from "@/lib/palette";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { boot, branch, setBranch, logout } = useAuth();
@@ -110,11 +111,32 @@ function UserMenu({ name, user, image, onLogout }: { name: string; user: string;
             <Link role="menuitem" to="/account" className={item}><UserRound className="h-4 w-4 text-muted-foreground" />{t("My account")}</Link>
             <a role="menuitem" href="/hms/site" target="_blank" rel="noreferrer" className={item}><Globe className="h-4 w-4 text-muted-foreground" />{t("Visit site")}<ExternalLink className="ms-auto h-3.5 w-3.5 text-muted-foreground" /></a>
           </div>
+          <PalettePicker />
           <div className="border-t border-border pt-1">
             <button role="menuitem" onClick={onLogout} className={cn(item, "text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10")}><LogOut className="h-4 w-4" />{t("Sign out")}</button>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Colour theme choice in the account menu (D-90): Lime (default) or the VVS Gold. Per browser; light / dark is separate. */
+function PalettePicker() {
+  const { t } = useTranslation();
+  const [palette, setPalette] = usePalette();
+  return (
+    <div className="border-t border-border px-3 py-2.5">
+      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("Colour theme")}</div>
+      <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label={t("Colour theme")}>
+        {PALETTES.map((p) => (
+          <button key={p.id} role="radio" aria-checked={palette === p.id} onClick={() => setPalette(p.id)}
+            className={cn("flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-sm transition-colors",
+              palette === p.id ? "border-primary bg-primary/10 font-semibold" : "border-border hover:bg-muted")}>
+            <span className="h-4 w-4 shrink-0 rounded-full ring-1 ring-black/10 dark:ring-white/20" style={{ background: p.swatch }} />{t(p.label)}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

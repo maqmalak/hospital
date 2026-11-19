@@ -59,8 +59,8 @@ export function HospitalLogo({ variant = "mark", className = "h-10 w-10", alt = 
 export const HOSPITAL_TAGLINE = "LMC";
 
 /** The LMC monogram under the hospital name: serif capitals, wide tracking, between two fine hairlines that fade out.
- *  color = letters, accent = hairlines (website: teal + coral; ERP: inherits the text colour + VVS gold). */
-export function LmcMark({ color = "currentColor", accent = "#C9A24D", size = 11, className = "" }: { color?: string; accent?: string; size?: number; className?: string }) {
+ *  color = letters, accent = hairlines (website: teal + coral; ERP: inherits the text colour + the palette accent). */
+export function LmcMark({ color = "currentColor", accent = "rgb(var(--tl-500))", size = 11, className = "" }: { color?: string; accent?: string; size?: number; className?: string }) {
   const line = (dir: "r" | "l") => (
     <span aria-hidden className="h-px w-5 shrink-0" style={{ background: `linear-gradient(to ${dir === "r" ? "right" : "left"}, transparent, ${accent})` }} />
   );

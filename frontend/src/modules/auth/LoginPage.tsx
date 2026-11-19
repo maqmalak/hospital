@@ -10,6 +10,8 @@ import { cn } from "@/utils/cn";
 import { HospitalLogo, LmcMark, Wordmark } from "@/components/brand";
 import DeptOrbit from "@/modules/landing/v2/DeptOrbit";
 import { ORBIT_CSS } from "@/modules/landing/v2/orbitCss";
+import { PALETTES, usePalette } from "@/lib/palette";
+import LimeLogin from "./LimeLogin";
 
 /* Same look as website v2: Fraunces display + Plus Jakarta Sans, deep teal, mint, coral CTA. */
 const V2_FONTS = "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap";
@@ -19,7 +21,8 @@ const CSS = `${ORBIT_CSS}
 
 const REMEMBER = "hv.login.user";
 
-export default function LoginPage() {
+/** Sign-in state and actions shared by the Lime and Gold login designs. */
+export function useLogin() {
   const { boot, login } = useAuth();
   const { t, i18n } = useTranslation();
   const nav = useNavigate();
@@ -37,13 +40,8 @@ export default function LoginPage() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const now = useClock();
-  useEffect(() => {
-    if (document.querySelector(`link[href="${V2_FONTS}"]`)) return;
-    const l = document.createElement("link"); l.rel = "stylesheet"; l.href = V2_FONTS; document.head.appendChild(l);
-  }, []);
 
   useEffect(() => { void getCall<{ clinic: { name: string; name_ur?: string; phone?: string } }>("hospital_vvs.api.appointments.public_options").then((o) => setClinic(o.clinic)).catch(() => undefined); }, []);
-  if (boot) return <Navigate to={loc.state?.from || "/pw-home"} replace />;
 
   const toggleTheme = () => {
     const next = !dark;
@@ -79,6 +77,28 @@ export default function LoginPage() {
   const hour = now.getHours();
   const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
+  return { boot, loc, t, i18n, usr, setUsr, pwd, setPwd, show, setShow, remember, setRemember, caps, setCaps, otp, setOtp, verify, setVerify,
+    busy, error, setError, clinic, dark, toggleTheme, otpRefs, now, submit, setDigit, name, greet };
+}
+
+export default function LoginPage() {
+  const L = useLogin();
+  const [palette] = usePalette();
+  if (L.boot) return <Navigate to={L.loc.state?.from || "/pw-home"} replace />;
+  return palette === "lime" ? <LimeLogin L={L} /> : <GoldLogin L={L} />;
+}
+
+type LoginState = ReturnType<typeof useLogin>;
+
+/** The VVS gold / website-v2 login (D-72 / v2 look): teal brand panel with the department orbit. */
+function GoldLogin({ L }: { L: LoginState }) {
+  const { t, i18n, usr, setUsr, pwd, setPwd, show, setShow, remember, setRemember, caps, setCaps, otp, setOtp, verify, setVerify,
+    busy, error, setError, clinic, dark, toggleTheme, otpRefs, now, submit, setDigit, name, greet } = L;
+  const [palette, setPalette] = usePalette();
+  useEffect(() => {
+    if (document.querySelector(`link[href="${V2_FONTS}"]`)) return;
+    const l = document.createElement("link"); l.rel = "stylesheet"; l.href = V2_FONTS; document.head.appendChild(l);
+  }, []);
   return (
     <div className="lg2 relative grid min-h-full overflow-hidden bg-[#F7FAFA] text-[#14262E] dark:bg-[#071C22] dark:text-[#E7F1F2] lg:grid-cols-[1.1fr_1fr]">
       <style>{CSS}</style>
@@ -125,6 +145,13 @@ export default function LoginPage() {
               <select value={i18n.language} onChange={(e) => void i18n.changeLanguage(e.target.value)} className="bg-transparent outline-none">
                 {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}</select></label>
             <button onClick={toggleTheme} aria-label="Theme" className="rounded-full border border-[#E1EAEB] bg-white p-2 transition hover:border-[#0E5E6F] dark:border-white/10 dark:bg-white/5">{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}</button>
+            <div className="flex items-center gap-0.5 rounded-full border border-[#E1EAEB] bg-white p-1 dark:border-white/10 dark:bg-white/5" role="radiogroup" aria-label={t("Colour theme")}>
+              {PALETTES.map((p) => (
+                <button key={p.id} role="radio" aria-checked={palette === p.id} onClick={() => setPalette(p.id)} title={t(p.label)}
+                  className={cn("flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs transition", palette === p.id ? "bg-[#0E5E6F]/10 font-semibold text-[#0E5E6F] dark:bg-white/10 dark:text-white" : "text-muted-foreground hover:text-foreground")}>
+                  <span className="h-3 w-3 rounded-full ring-1 ring-black/10" style={{ background: p.swatch }} />{t(p.label)}
+                </button>))}
+            </div>
           </div>
         </header>
 

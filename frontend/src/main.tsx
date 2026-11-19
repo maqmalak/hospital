@@ -7,6 +7,7 @@ import "@/styles/globals.css";
 import "@/i18n";
 import { AuthProvider } from "@/lib/auth";
 import App from "@/App";
+import { applyPalette } from "@/lib/palette";
 import { useTranslation } from "react-i18next";
 
 /** Screen texts are translated at render time (scripts/i18n-jsx.ts), so a language switch redraws the whole app. */
@@ -23,6 +24,7 @@ try {
   const theme = localStorage.getItem("hv.theme");
   if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) document.documentElement.classList.add("dark");
 } catch { /* storage blocked */ }
+applyPalette(); // lime (default) or gold, before the first paint (D-90)
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

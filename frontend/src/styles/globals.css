@@ -422,3 +422,113 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
   }
   .dark .site-theme { --background: 206 52% 7.5%; --primary: 194 50% 55%; }
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+   Lime palette (D-90, default): after the aaghaz.ai login — black surfaces, lime accent, a green glow from the
+   bottom-left. <html data-palette="lime">; "gold" keeps the VVS gold theme above. Light mode uses a deep lime-green
+   primary (lime on white is unreadable). .site-theme (public patient pages) and the website keep their own colours.
+   --------------------------------------------------------------------------------------------------------------- */
+@layer base {
+  html[data-palette="lime"] {
+    --background: 75 20% 97%;
+    --foreground: 0 0% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+    --primary: 85 78% 27%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 78 35% 93%;
+    --secondary-foreground: 85 60% 16%;
+    --muted: 75 15% 94%;
+    --muted-foreground: 0 0% 38%;
+    --accent: 76 75% 90%;
+    --accent-foreground: 85 60% 18%;
+    --border: 75 12% 86%;
+    --input: 75 8% 66%;
+    --input-bg: 0 0% 100%;
+    --ring: 85 78% 33%;
+    --sidebar: 0 0% 4%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-muted: 0 0% 64%;
+    --tl-50: 247 254 231; --tl-100: 236 252 203; --tl-200: 217 249 157; --tl-300: 190 242 100; --tl-400: 163 230 53; --tl-500: 132 204 22;
+    --tl-600: 101 163 13; --tl-700: 77 124 15; --tl-800: 63 98 18; --tl-900: 54 83 20; --tl-950: 26 46 5;
+    --ink: 10 10 10; --ink-900: 5 5 5;
+    --grad: linear-gradient(135deg, #A3E635 0%, #D9F99D 50%, #84CC16 100%); --grad-text: #0A0A0A; --grad-glow: rgb(132 204 22 / 0.7);
+  }
+  html.dark[data-palette="lime"] {
+    --background: 0 0% 3%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 74 88% 52%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 11%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 75 40% 12%;
+    --accent-foreground: 74 80% 85%;
+    --destructive: 0 84% 62%;
+    --border: 0 0% 16%;
+    --input: 0 0% 32%;
+    --input-bg: 0 0% 6%;
+    --success: 142 70% 45%;
+    --warning: 38 92% 55%;
+    --ring: 74 88% 52%;
+    --sidebar: 0 0% 2%;
+    --sidebar-foreground: 0 0% 94%;
+    --sidebar-muted: 0 0% 60%;
+    --tl-50: 247 254 231; --tl-100: 236 252 203; --tl-200: 217 249 157; --tl-300: 196 240 26; --tl-400: 174 226 30; --tl-500: 150 205 20;
+    --tl-600: 120 170 15; --tl-700: 90 130 14; --tl-800: 63 98 18; --tl-900: 40 62 12; --tl-950: 20 32 6;
+    --ink: 10 10 10; --ink-900: 5 5 5;
+    --grad: linear-gradient(135deg, #B6E617 0%, #D4F75A 50%, #9FD412 100%); --grad-text: #0A0A0A; --grad-glow: rgb(196 240 26 / 0.45);
+  }
+}
+@layer components {
+  html[data-palette="lime"] body { background-image: radial-gradient(1100px 480px at 0% 0%, rgb(132 204 22 / 0.08), transparent 60%); }
+  html.dark[data-palette="lime"] body {
+    background-image:
+      radial-gradient(1100px 700px at 0% 100%, rgb(22 163 74 / 0.20), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgb(196 240 26 / 0.05), transparent 55%);
+  }
+  html[data-palette="lime"] .vvs-gold-text { background-image: linear-gradient(110deg, #3F6212, #65A30D 45%, #4D7C0F 70%, #365314); }
+  html.dark[data-palette="lime"] .vvs-gold-text { background-image: linear-gradient(110deg, #C4F01A, #D9F99D 40%, #4ADE80 75%, #22C55E); }
+  html.dark[data-palette="lime"] .tab-gold { box-shadow: 0 6px 16px -8px var(--grad-glow), inset 0 -2px 0 #16A34A; }
+}
+/* Lime dark cards (D-90), after the aaghaz.ai content cards: near-black #121212 surface, hairline border, a lime glow
+   along the top edge and a faint lime wash at the top of summary / form cards. */
+@layer components {
+  html.dark[data-palette="lime"] .bg-card.border, html.dark[data-palette="lime"] .bg-card.rounded-2xl, html.dark[data-palette="lime"] .bg-card.rounded-xl {
+    border-color: #1F1F1F;
+    box-shadow: inset 0 1px 0 rgb(196 240 26 / 0.18), 0 10px 30px -14px rgb(0 0 0 / 0.9);
+  }
+  html.dark[data-palette="lime"] .kpi-card {
+    background: linear-gradient(180deg, rgb(196 240 26 / 0.07) 0%, rgb(196 240 26 / 0) 45%), #121212;
+    box-shadow: inset 0 1px 0 rgb(196 240 26 / 0.45), 0 18px 40px -22px rgb(0 0 0 / 0.95);
+  }
+  html.dark[data-palette="lime"] .form-card {
+    border-color: #1F1F1F; background: #121212;
+    box-shadow: inset 0 1px 0 rgb(196 240 26 / 0.35), 0 14px 34px -16px rgb(0 0 0 / 0.95);
+  }
+  html.dark[data-palette="lime"] .form-card-head { background: linear-gradient(90deg, rgb(196 240 26 / 0.10), rgb(196 240 26 / 0.02) 45%, transparent); }
+  html.dark[data-palette="lime"] .icon-tile { box-shadow: 0 10px 22px -10px rgb(196 240 26 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.2); }
+}
+/* Lime dark form fields (D-90): the dark field rules above hard-code navy; lime uses neutral near-black wells. */
+@layer components {
+  html.dark[data-palette="lime"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  html.dark[data-palette="lime"] select,
+  html.dark[data-palette="lime"] textarea { background-color: #121212; border-color: #2E2E2E; color: hsl(0 0% 95%); }
+  html.dark[data-palette="lime"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(:disabled):hover,
+  html.dark[data-palette="lime"] select:not(:disabled):hover,
+  html.dark[data-palette="lime"] textarea:not(:disabled):hover { border-color: rgb(196 240 26 / 0.45); }
+  html.dark[data-palette="lime"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visible,
+  html.dark[data-palette="lime"] select:focus-visible,
+  html.dark[data-palette="lime"] textarea:focus-visible { background-color: #161616; }
+  html.dark[data-palette="lime"] input:disabled, html.dark[data-palette="lime"] select:disabled,
+  html.dark[data-palette="lime"] textarea:disabled { background-color: #0C0C0C; color: hsl(0 0% 72%); }
+  html.dark[data-palette="lime"] input::placeholder, html.dark[data-palette="lime"] textarea::placeholder { color: hsl(0 0% 50%); }
+  html.dark[data-palette="lime"] select option { background-color: #121212; }
+}
