@@ -127,7 +127,7 @@ export default function RadiologyBook() {
 
   return (
     <div className="bg-[var(--soft)] pb-24">
-      <section className="relative overflow-hidden bg-[#08303A] pb-28 pt-12 text-white">
+      <section className="relative overflow-hidden bg-[var(--hero)] pb-28 pt-12 text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_300px_at_0%_0%,rgba(92,195,201,0.25),transparent_60%),radial-gradient(600px_300px_at_100%_100%,rgba(229,72,63,0.2),transparent_60%)]" />
         <Wrap className="relative">
           <Link to="/site/radiology" className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white"><ArrowLeft className="h-4 w-4 rtl:rotate-180" />Radiology & Imaging</Link>

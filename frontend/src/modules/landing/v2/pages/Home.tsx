@@ -28,7 +28,7 @@ export default function Home() {
       <News />
       <section className="pb-24">
         <Wrap>
-          <Reveal className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0E5E6F] to-[#08303A] p-10 text-white sm:p-14">
+          <Reveal className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[var(--btn-from)] to-[var(--hero)] p-10 text-white sm:p-14">
             <img src={PHOTOS.lounge} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" loading="lazy" />
             <div className="relative flex flex-wrap items-center justify-between gap-8">
               <div className="max-w-xl"><h2 className="s2-display text-[2.2rem] leading-tight sm:text-[2.8rem]">{ui.cta.title}</h2><p className="mt-3 text-white/75">{ui.cta.sub}</p></div>
@@ -87,15 +87,15 @@ function Hero() {
   }, []);
   const er = phoneOf("emergency", phone);
   return (
-    <section className="relative isolate overflow-hidden bg-[#08303A] text-white">
+    <section className="relative isolate overflow-hidden bg-[var(--hero)] text-white">
       {/* the building: full background on phones; the right ~60% on wide screens so the whole facade shows */}
       <div ref={img} className="absolute inset-y-0 end-0 -z-10 w-full will-change-transform lg:w-[62%]">
         <div className="s2-kenburns relative h-[112%] w-full" style={{ transformOrigin: "70% 30%" }}>
           <img src={PHOTOS.building} alt={ui.name} className="h-full w-full object-cover object-[70%_25%] lg:object-[50%_20%]" {...{ fetchpriority: "high" }} />
         </div>
       </div>
-      <div className="absolute inset-0 -z-10 bg-[#08303A]/70 lg:hidden" />
-      <div className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-[#062229] from-[38%] via-[#08303A]/60 via-[55%] to-transparent lg:block rtl:bg-gradient-to-l" />
+      <div className="absolute inset-0 -z-10 bg-[color-mix(in_srgb,var(--hero)_70%,transparent)] lg:hidden" />
+      <div className="absolute inset-0 -z-10 hidden bg-gradient-to-r from-[var(--hero3)] from-[38%] via-[color-mix(in_srgb,var(--hero)_60%,transparent)] via-[55%] to-transparent lg:block rtl:bg-gradient-to-l" />
       {/* the glowing logos sit above the dark gradients so they stay bright; same parallax and zoom as the photo */}
       <div ref={glow} className="pointer-events-none absolute inset-y-0 end-0 -z-10 hidden w-full will-change-transform lg:block lg:w-[62%]">
         <div className="s2-kenburns relative h-[112%] w-full" style={{ transformOrigin: "70% 30%" }}><BuildingGlow /></div>
@@ -158,7 +158,7 @@ function Departments() {
   return (
     <section className="pb-24 pt-16 sm:pt-20">
       <Wrap>
-        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-bl from-[#0E5E6F] via-[#08303A] to-[#062229] px-6 py-12 text-white sm:px-12 lg:py-6">
+        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-bl from-[var(--btn-from)] via-[var(--hero)] to-[var(--hero3)] px-6 py-12 text-white sm:px-12 lg:py-6">
           <span aria-hidden className="absolute -end-24 -top-24 h-72 w-72 rounded-full bg-[#FF6B66]/10 blur-3xl" />
           <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
             <div className="lg:py-10">
@@ -187,8 +187,8 @@ function ServicesOrbit() {
   return (
     <section className="pb-24">
       <Wrap>
-        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#0E5E6F] via-[#08303A] to-[#062229] px-6 py-12 text-white sm:px-12 lg:py-6">
-          <span aria-hidden className="absolute -start-24 -top-24 h-72 w-72 rounded-full bg-[#9FE3DA]/10 blur-3xl" />
+        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[var(--btn-from)] via-[var(--hero)] to-[var(--hero3)] px-6 py-12 text-white sm:px-12 lg:py-6">
+          <span aria-hidden className="absolute -start-24 -top-24 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--hero-accent)_10%,transparent)] blur-3xl" />
           <div className="relative grid items-center gap-8 lg:grid-cols-[auto_1fr]">
             <Reveal delay={150} className="hidden lg:block"><ServiceGlobe base="/site/services#" /></Reveal>
             <div className="lg:py-10">
@@ -197,8 +197,8 @@ function ServicesOrbit() {
               <Reveal delay={140}><p className="mt-4 max-w-lg text-[17px] leading-relaxed text-white/75">{s}</p></Reveal>
               <Reveal delay={200}><ul className="mt-7 flex max-w-xl flex-wrap gap-2">
                 {SERVICES.map((sv) => { const I = ICONS[sv.icon] ?? Stethoscope; return (
-                  <li key={sv.id}><Link to={serviceLink(sv)} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-2 text-sm font-medium text-white/90 backdrop-blur transition hover:border-[#9FE3DA]/60 hover:bg-white/15">
-                    <I className="h-4 w-4 text-[#9FE3DA]" />{sv.title}</Link></li>); })}
+                  <li key={sv.id}><Link to={serviceLink(sv)} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-2 text-sm font-medium text-white/90 backdrop-blur transition hover:border-[color-mix(in_srgb,var(--hero-accent)_60%,transparent)] hover:bg-white/15">
+                    <I className="h-4 w-4 text-[var(--hero-accent)]" />{sv.title}</Link></li>); })}
               </ul></Reveal>
               <Reveal delay={260}><Link to="/site/services" className={`${btn.primary} mt-8`}>{ui.nav.all}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link></Reveal>
             </div>
@@ -248,7 +248,7 @@ function Tour() {
               {to && <Link to={to} className="absolute inset-0 z-10" aria-label={label} />}
               {src ? <img src={src} alt={label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                 : <UnitArt kind={label === "NICU" || label === "این آئی سی یو" ? "nicu" : "nursery"} className="absolute inset-0 h-full transition duration-700 group-hover:scale-105" />}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#08303A]/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[color-mix(in_srgb,var(--hero)_80%,transparent)] via-transparent to-transparent" />
               <span className="absolute bottom-4 start-4 rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-md">{label}</span>
             </Reveal>
           ))}

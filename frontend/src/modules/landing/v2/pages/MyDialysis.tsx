@@ -62,7 +62,7 @@ export default function MyDialysis() {
   const emergency = phoneOf("emergency", phone);
   return (
     <div className="min-h-[70vh] bg-[var(--soft)] pb-24">
-      <section className="relative overflow-hidden bg-[#08303A] pb-28 pt-12 text-white">
+      <section className="relative overflow-hidden bg-[var(--hero)] pb-28 pt-12 text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_300px_at_100%_0%,rgba(56,189,248,0.22),transparent_60%),radial-gradient(500px_260px_at_0%_100%,rgba(139,92,246,0.2),transparent_60%)]" />
         <Wrap className="relative flex flex-wrap items-end justify-between gap-4">
           <div><Link to="/site/nephrology" className="text-sm text-white/70 hover:text-white">← {NEPH[lang].title}</Link>

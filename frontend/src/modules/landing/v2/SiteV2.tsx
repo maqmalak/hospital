@@ -7,7 +7,7 @@ import { LmcMark } from "@/components/brand";
 import { ORBIT_CSS } from "./orbitCss";
 import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { ArrowUp, ChevronDown, Languages, Mail, MapPin, Menu, Moon, Phone, Search, Siren, Sun, X, LogIn, Facebook, Instagram, Youtube, Linkedin, Loader2 } from "lucide-react";
+import { ArrowUp, ChevronDown, Languages, Mail, MapPin, Menu, Phone, Search, Siren, X, LogIn, Facebook, Instagram, Youtube, Linkedin, Loader2 } from "lucide-react";
 import { postCall } from "@/services/frappe";
 import { CONFIG, DEPARTMENTS, FLOORS, SERVICES, UI, serviceLink, type Lang, type UICopy } from "./content";
 import { hasWa, phoneOf, tel, useDoctors, useSite, slugDoc, type Site } from "./data";
@@ -28,8 +28,9 @@ const Pages = {
   RadiologyShared: lazy(() => import("./pages/RadiologyVerify").then((m) => ({ default: m.RadiologyShared }))),
 };
 
-interface Ctx { lang: Lang; ui: UICopy; site: Site | null; phone: string; dark: boolean }
-const S2 = createContext<Ctx>({ lang: "en", ui: UI.en, site: null, phone: "", dark: false });
+export type SiteTheme = "logo" | "lime" | "light";
+interface Ctx { lang: Lang; ui: UICopy; site: Site | null; phone: string; dark: boolean; theme: SiteTheme }
+const S2 = createContext<Ctx>({ lang: "en", ui: UI.en, site: null, phone: "", dark: false, theme: "light" });
 export const useS2 = () => useContext(S2);
 
 const FONTS = "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap";
@@ -37,7 +38,10 @@ const store = { get: (k: string) => { try { return localStorage.getItem(k); } ca
 
 export default function SiteV2() {
   const [lang, setLang] = useState<Lang>(() => (store.get("hv.site.lang") as Lang) || "en");
-  const [dark, setDark] = useState(() => store.get("hv.site2.theme") === "dark");
+  // three website themes: Logo (dark teal + logo red), Lime (the MRI & CT dark green / lime / gold), Light (mint). Old "dark" → Logo.
+  const [theme, setThemeS] = useState<SiteTheme>(() => { const t = store.get("hv.site2.theme"); return t === "dark" || t === "logo" ? "logo" : t === "lime" ? "lime" : "light"; });
+  const dark = theme !== "light";
+  const setTheme = (t: SiteTheme) => { setThemeS(t); store.set("hv.site2.theme", t); };
   const [site] = useSite();
   const ui = UI[lang];
   const phone = site?.clinic.phone || "";
@@ -55,13 +59,13 @@ export default function SiteV2() {
     go();
   }, [loc.pathname, loc.hash]);
   const rtl = lang === "ur";
-  const ctx = useMemo(() => ({ lang, ui, site, phone, dark }), [lang, ui, site, phone, dark]);
+  const ctx = useMemo(() => ({ lang, ui, site, phone, dark, theme }), [lang, ui, site, phone, dark, theme]);
   return (
     <S2.Provider value={ctx}>
-      <div className={`s2 min-h-screen bg-[var(--bg)] text-[var(--ink)] antialiased ${dark ? "dark s2-dark" : ""}`} dir={rtl ? "rtl" : "ltr"} lang={lang} translate="no">
+      <div className={`s2 min-h-screen bg-[var(--bg)] text-[var(--ink)] antialiased ${dark ? "dark s2-dark" : ""} ${theme === "lime" ? "s2-lime" : ""}`} dir={rtl ? "rtl" : "ltr"} lang={lang} translate="no">
         <style>{CSS(rtl)}</style>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-[var(--ink)]">Skip to content</a>
-        <TopBar setLang={(l) => { setLang(l); store.set("hv.site.lang", l); }} dark={dark} setDark={(d) => { setDark(d); store.set("hv.site2.theme", d ? "dark" : "light"); }} />
+        <TopBar setLang={(l) => { setLang(l); store.set("hv.site.lang", l); }} theme={theme} setTheme={setTheme} />
         <NavBar />
         <main id="main" key={loc.pathname} className="s2-page">
           <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-24"><div className="s2-skel h-72 rounded-3xl" /></div>}>
@@ -107,20 +111,25 @@ export default function SiteV2() {
 }
 
 // ------------------------------------------------------------------ chrome
-function TopBar({ setLang, dark, setDark }: { setLang: (l: Lang) => void; dark: boolean; setDark: (d: boolean) => void }) {
+function TopBar({ setLang, theme, setTheme }: { setLang: (l: Lang) => void; theme: SiteTheme; setTheme: (t: SiteTheme) => void }) {
   const { ui, lang, phone } = useS2();
   const er = phoneOf("emergency", phone);
   const [q, setQ] = useState(false);
   useEffect(() => { const f = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setQ(true); } }; window.addEventListener("keydown", f); return () => window.removeEventListener("keydown", f); }, []);
   return (
-    <div className="bg-[#08303A] text-[13px] text-white/85">
+    <div className="bg-[var(--hero)] text-[13px] text-white/85">
       <div className="mx-auto flex h-10 max-w-7xl items-center gap-4 px-4 sm:px-6">
         {er && <a href={tel(er)} className="flex items-center gap-1.5 font-semibold text-white"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#FF6B66] opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[#FF5A55]" /></span>{ui.top.emergency}<span dir="ltr" className="hidden sm:inline">· {er}</span></a>}
         {CONFIG.email && <a href={`mailto:${CONFIG.email}`} className="hidden items-center gap-1.5 hover:text-white md:flex"><Mail className="h-3.5 w-3.5" />{CONFIG.email}</a>}
         <div className="ms-auto flex items-center gap-1">
           <button type="button" onClick={() => setQ(true)} className="flex items-center gap-1.5 rounded-full px-2.5 py-1 hover:bg-white/10" aria-label={ui.top.search}><Search className="h-3.5 w-3.5" /><span className="hidden sm:inline">{ui.top.search}</span><kbd className="hidden rounded border border-white/20 px-1 text-[10px] lg:inline">Ctrl K</kbd></button>
           <button type="button" onClick={() => setLang(lang === "en" ? "ur" : "en")} className="flex items-center gap-1.5 rounded-full px-2.5 py-1 hover:bg-white/10" aria-label="Language"><Languages className="h-3.5 w-3.5" />{ui.top.lang}</button>
-          <button type="button" onClick={() => setDark(!dark)} className="rounded-full p-1.5 hover:bg-white/10" aria-label={ui.top.theme} aria-pressed={dark}>{dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}</button>
+          <div role="radiogroup" aria-label={ui.top.theme} className="ms-1 flex items-center gap-0.5 rounded-full bg-white/10 p-0.5">
+            {(([["logo", ui.top.themes[0], "linear-gradient(135deg,#0E5E6F 50%,#E5483F 50%)"], ["lime", ui.top.themes[1], "linear-gradient(135deg,#0B1A12 50%,#bef264 50%)"], ["light", ui.top.themes[2], "linear-gradient(135deg,#F7FAFA 50%,#5CC3C9 50%)"]]) as [SiteTheme, string, string][]).map(([k, l, sw]) => (
+              <button key={k} type="button" role="radio" aria-checked={theme === k} onClick={() => setTheme(k)} title={l}
+                className={`flex items-center gap-1.5 rounded-full px-2 py-1 transition ${theme === k ? "bg-white text-[#0b1f26]" : "hover:bg-white/10"}`}>
+                <span className="h-3.5 w-3.5 rounded-full ring-1 ring-white/50" style={{ background: sw }} /><span className="hidden lg:inline">{l}</span></button>))}
+          </div>
         </div>
       </div>
       {q && <SearchDialog onClose={() => setQ(false)} />}
@@ -181,7 +190,7 @@ function NavBar() {
         </div>
       </div>
       {open && (
-        <div className="fixed inset-0 z-50 bg-[#08303A]/60 backdrop-blur-sm xl:hidden" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--hero)_60%,transparent)] backdrop-blur-sm xl:hidden" onClick={() => setOpen(false)}>
           <div className="s2-drawer absolute inset-y-0 end-0 flex w-[86%] max-w-sm flex-col overflow-y-auto bg-[var(--surface)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={ui.nav.menu}>
             <div className="mb-4 flex items-center justify-between"><Logo small /><button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 hover:bg-[var(--soft)]" aria-label={ui.nav.close}><X className="h-6 w-6" /></button></div>
             <nav className="flex flex-col">{mobile.map(([to, l]) => <NavLink key={to} to={to} end={to === "/site"} className={({ isActive }) => `border-b border-[var(--line)] py-3 text-[17px] font-medium ${isActive ? "text-[var(--primary)]" : ""}`}>{l}</NavLink>)}</nav>
@@ -224,7 +233,7 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
   }, [q, all, ui]);
   const go = (h: Hit) => { onClose(); nav(h.to); };
   return (
-    <div className="fixed inset-0 z-[90] flex items-start justify-center bg-[#08303A]/60 p-4 pt-[12vh] backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[90] flex items-start justify-center bg-[color-mix(in_srgb,var(--hero)_60%,transparent)] p-4 pt-[12vh] backdrop-blur-sm" onClick={onClose}>
       <div className="s2-pop w-full max-w-xl overflow-hidden rounded-[24px] border border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] shadow-2xl" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={ui.top.search}>
         <div className="flex items-center gap-3 border-b border-[var(--line)] px-5"><Search className="h-5 w-5 text-[var(--muted)]" />
           <input ref={ref} value={q} onChange={(e) => { setQ(e.target.value); setI(0); }} placeholder={ui.search.ph} aria-label={ui.search.ph}
@@ -262,8 +271,8 @@ function Footer() {
   const social: [string, typeof Facebook][] = [["facebook", Facebook], ["instagram", Instagram], ["youtube", Youtube], ["linkedin", Linkedin]];
   const quick: [string, string][] = [["/site/about", ui.nav.about], ["/site/radiology", "Radiology & Imaging"], ["/site/mri-ct", "MRI & CT Scan"], ["/site/nephrology", "Nephrology & Dialysis"], ["/site/radiology/reports", "Download my report"], ["/site/doctors", ui.nav.doctors], ["/site/rooms", ui.nav.rooms], ["/site/pharmacy", ui.nav.pharmacy], ["/site/map", ui.nav.map], ["/site/patients", ui.nav.patients], ["/site/news", ui.nav.news], ["/site/careers", ui.nav.careers]];
   return (
-    <footer className="relative overflow-hidden bg-[#08303A] text-white/75">
-      <div className="pointer-events-none absolute -end-24 -top-24 h-96 w-96 rounded-full bg-[#0E5E6F]/40 blur-3xl" />
+    <footer className="relative overflow-hidden bg-[var(--hero)] text-white/75">
+      <div className="pointer-events-none absolute -end-24 -top-24 h-96 w-96 rounded-full bg-[color-mix(in_srgb,var(--btn-from)_40%,transparent)] blur-3xl" />
       <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.3fr_1fr_1fr_1.2fr]">
         <div>
           <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}brand/lyallpur-mark-dark.webp`} alt="" className="h-12 w-12" /><div><div className="s2-display text-lg font-semibold text-white">{ui.name}</div><LmcMark color="#9FE3DA" accent="#E5483F" size={11.5} className="mt-1.5" /></div></div>
@@ -283,7 +292,7 @@ function Footer() {
           <form className="mt-6" onSubmit={subscribe}>
             <div className="text-sm font-semibold text-white">{ui.footer.newsletter}</div><div className="text-xs">{ui.footer.newsSub}</div>
             {done ? <div className="mt-3 rounded-2xl bg-white/10 px-4 py-3 text-sm text-white">{ui.footer.thanks}</div> : (
-              <div className="mt-3 flex overflow-hidden rounded-full bg-white/10 p-1 focus-within:ring-2 focus-within:ring-[#9FE3DA]/50">
+              <div className="mt-3 flex overflow-hidden rounded-full bg-white/10 p-1 focus-within:ring-2 focus-within:ring-[color-mix(in_srgb,var(--hero-accent)_50%,transparent)]">
                 <input type="email" required value={mail} onChange={(e) => setMail(e.target.value)} placeholder={ui.footer.emailPh} aria-label={ui.footer.emailPh} className="min-w-0 flex-1 bg-transparent px-4 text-sm text-white outline-none placeholder:text-white/50" />
                 <button disabled={busy} className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : ui.footer.subscribe}</button></div>)}
             {subErr && <p className="mt-2 text-xs text-[#FFB4B1]" role="alert">{subErr}</p>}
@@ -322,9 +331,11 @@ export const Wrap = ({ children, className = "" }: { children: ReactNode; classN
 
 function CSS(rtl: boolean) {
   return `
-  .s2{--bg:#F7FAFA;--surface:#FFFFFF;--soft:#EEF5F5;--mint:#DDF3EF;--ink:#14262E;--muted:#5B7079;--line:#E1EAEB;--primary:#0E5E6F;--accent:#E5483F;--ink2:rgba(20,38,46,.75);--primary-ring:rgba(14,94,111,.18);--accent-ring:rgba(229,72,63,.3);
+  .s2{--hero:#08303A;--hero2:#0B4552;--hero3:#062229;--hero-accent:#9FE3DA;--btn-from:#0E5E6F;--btn-to:#178A8F;--bg:#F7FAFA;--surface:#FFFFFF;--soft:#EEF5F5;--mint:#DDF3EF;--ink:#14262E;--muted:#5B7079;--line:#E1EAEB;--primary:#0E5E6F;--accent:#E5483F;--ink2:rgba(20,38,46,.75);--primary-ring:rgba(14,94,111,.18);--accent-ring:rgba(229,72,63,.3);
     font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "'Plus Jakarta Sans',Inter,system-ui,sans-serif"};}
   .s2.s2-dark{--bg:#071C22;--surface:#0D2730;--soft:#12313B;--mint:#11393F;--ink:#E7F1F2;--muted:#9AB2B8;--line:#1D3C46;--primary:#5CC3C9;--accent:#F0574E;--ink2:rgba(231,241,242,.78);--primary-ring:rgba(92,195,201,.25);--accent-ring:rgba(240,87,78,.35);}
+  .s2.s2-lime{--hero:#0B1A12;--hero2:#1A2E1F;--hero3:#07120B;--hero-accent:#D9F99D;--btn-from:#4D7C0F;--btn-to:#3F6212;--bg:#08130C;--surface:#102016;--soft:#14271A;--mint:#1C3A16;--ink:#EEF7E8;--muted:#A9BBA0;--line:#22402A;--primary:#BEF264;--accent:#F0574E;--ink2:rgba(238,247,232,.78);--primary-ring:rgba(190,242,100,.25);--accent-ring:rgba(240,87,78,.35);}
+  .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}
   .s2 .s2-num{font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "Oswald,'Arial Narrow',sans-serif"}}
   .s2-glass{background:color-mix(in srgb,var(--surface) 82%,transparent)}
   .s2 .s2-display{font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "Fraunces,Georgia,serif"};font-weight:500;letter-spacing:-0.015em;${rtl ? "line-height:1.7;letter-spacing:0;" : ""}}

@@ -25,10 +25,10 @@ function Globe() {
       <div className="absolute inset-0" style={{ perspective: 900 }}>
         <div className="h-full w-full" style={{ transformStyle: "preserve-3d", transform: "rotateX(-16deg) rotateZ(14deg)" }}>
           <div className="s2-globe relative h-full w-full" style={{ transformStyle: "preserve-3d" }}>
-            {[0, 30, 60, 90, 120, 150].map((a) => <span key={a} className="absolute inset-0 rounded-full border border-[#9FE3DA]/35" style={{ transform: `rotateY(${a}deg)` }} />)}
+            {[0, 30, 60, 90, 120, 150].map((a) => <span key={a} className="absolute inset-0 rounded-full border border-[color-mix(in_srgb,var(--hero-accent)_35%,transparent)]" style={{ transform: `rotateY(${a}deg)` }} />)}
             {[-60, -30, 0, 30, 60].map((lat) => {
               const r = Math.cos((lat * Math.PI) / 180) * R, y = Math.sin((lat * Math.PI) / 180) * R;
-              return <span key={lat} className={`absolute rounded-full border ${lat === 0 ? "border-[#9FE3DA]/55" : "border-[#9FE3DA]/25"}`}
+              return <span key={lat} className={`absolute rounded-full border ${lat === 0 ? "border-[color-mix(in_srgb,var(--hero-accent)_55%,transparent)]" : "border-[color-mix(in_srgb,var(--hero-accent)_25%,transparent)]"}`}
                 style={{ width: r * 2, height: r * 2, left: R - r, top: R - r, transform: `translateY(${-y}px) rotateX(90deg)` }} />;
             })}
             {[[20, 25, "#FF6B66"], [110, -15, "#9FE3DA"], [200, 40, "#FF6B66"], [290, 5, "#FFFFFF"], [160, -45, "#9FE3DA"]].map(([lon, lat, c], i) => (

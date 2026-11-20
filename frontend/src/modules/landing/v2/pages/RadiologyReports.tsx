@@ -45,7 +45,7 @@ export default function RadiologyReports() {
 
   return (
     <div className="min-h-[70vh] bg-[var(--soft)] pb-24">
-      <section className="relative overflow-hidden bg-[#08303A] pb-28 pt-12 text-white">
+      <section className="relative overflow-hidden bg-[var(--hero)] pb-28 pt-12 text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_300px_at_100%_0%,rgba(92,195,201,0.25),transparent_60%)]" />
         <Wrap className="relative flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -197,7 +197,7 @@ function Studies({ data, session, reload }: { data: List; session: string; reloa
 function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   useEffect(() => { const f = (e: KeyboardEvent) => e.key === "Escape" && onClose(); window.addEventListener("keydown", f); document.body.style.overflow = "hidden"; return () => { window.removeEventListener("keydown", f); document.body.style.overflow = ""; }; }, [onClose]);
   return (
-    <div className="fixed inset-0 z-[95] flex items-end justify-center bg-[#08303A]/70 p-0 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[95] flex items-end justify-center bg-[color-mix(in_srgb,var(--hero)_70%,transparent)] p-0 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}>
       <div role="dialog" aria-modal aria-label={title} onClick={(e) => e.stopPropagation()} className={`s2-pop flex max-h-[94vh] w-full flex-col overflow-hidden rounded-t-[26px] bg-[var(--surface)] text-[var(--ink)] shadow-2xl sm:rounded-[26px] ${wide ? "max-w-4xl" : "max-w-lg"}`}>
         <div className="flex items-center gap-3 border-b border-[var(--line)] px-5 py-4"><h2 className="min-w-0 flex-1 truncate text-lg font-bold">{title}</h2><button onClick={onClose} aria-label="Close" className="rounded-full p-2 hover:bg-[var(--soft)]"><X className="h-5 w-5" /></button></div>
         <div className="overflow-y-auto">{children}</div>
@@ -303,7 +303,7 @@ function Gallery({ s, session, onClose }: { s: Study; session: string; onClose: 
           <button onClick={() => setInv(!inv)} aria-pressed={inv} className="rounded-full bg-white/10 px-3 py-1.5 text-sm">Invert</button>
           <span className="ms-auto text-sm text-white/60">{urls.length ? `${i + 1} / ${s.images}` : ""}</span>
         </div>
-        <div className="flex gap-2 overflow-x-auto px-4 pb-4">{urls.map((u, k) => <button key={k} onClick={() => setI(k)} className={`h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 ${k === i ? "border-[#9FE3DA]" : "border-transparent opacity-60"}`}><img src={u} alt="" className="h-full w-full object-cover" /></button>)}</div>
+        <div className="flex gap-2 overflow-x-auto px-4 pb-4">{urls.map((u, k) => <button key={k} onClick={() => setI(k)} className={`h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 ${k === i ? "border-[var(--hero-accent)]" : "border-transparent opacity-60"}`}><img src={u} alt="" className="h-full w-full object-cover" /></button>)}</div>
       </div>
       <p className="px-5 py-3 text-xs text-[var(--muted)]">Key images chosen by the radiologist. For the full study (all images) request a CD from radiology.</p>
     </Modal>

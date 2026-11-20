@@ -55,7 +55,7 @@ export default function MyBaby() {
   useEffect(() => { if (session) void load(session); }, [session, load]);
   return (
     <div className="min-h-[70vh] bg-[var(--soft)] pb-24">
-      <section className="relative overflow-hidden bg-[#08303A] pb-28 pt-12 text-white">
+      <section className="relative overflow-hidden bg-[var(--hero)] pb-28 pt-12 text-white">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_300px_at_100%_0%,rgba(207,230,247,0.22),transparent_60%),radial-gradient(500px_260px_at_0%_100%,rgba(247,214,218,0.14),transparent_60%)]" />
         <Wrap className="relative flex flex-wrap items-end justify-between gap-4">
           <div><Eyebrow light>{NURSERY[lang].hero.eyebrow}</Eyebrow>
@@ -185,7 +185,7 @@ export function MyBabyVerify() {
     <section className="min-h-[60vh] bg-[var(--soft)] py-16"><Wrap className="max-w-2xl">
       {!c ? <div className={`${card} flex justify-center p-16`}><Loader2 className="h-6 w-6 animate-spin text-[var(--muted)]" /></div> : (
         <div className={`${card} overflow-hidden hover:translate-y-0`}>
-          <div className={`px-6 py-10 text-center text-white ${c.valid ? "bg-gradient-to-br from-emerald-600 to-[#0E5E6F]" : "bg-gradient-to-br from-rose-600 to-rose-800"}`}>
+          <div className={`px-6 py-10 text-center text-white ${c.valid ? "bg-gradient-to-br from-emerald-600 to-[var(--btn-from)]" : "bg-gradient-to-br from-rose-600 to-rose-800"}`}>
             <span className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-white/15">{c.valid ? <ShieldCheck className="h-10 w-10" /> : <ShieldAlert className="h-10 w-10" />}</span>
             <h1 className="s2-display mt-5 text-[2rem]">{c.valid ? "Genuine document" : "Not verified"}</h1>
             <p className="mt-2 text-white/80">{c.valid ? "Issued and signed by Lyallpur Medical Complex." : "This code does not match a document we issued. Please contact the hospital."}</p></div>

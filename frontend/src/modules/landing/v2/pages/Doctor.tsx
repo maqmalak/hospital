@@ -27,7 +27,7 @@ export default function Doctor() {
       <section className="py-16">
         <Wrap className="grid gap-8 lg:grid-cols-[340px_1fr]">
           <Reveal className={`${card} h-fit p-7 text-center hover:translate-y-0`}>
-            {d.photo ? <img src={d.photo} alt={d.doctor_name} className="mx-auto h-36 w-36 rounded-[28px] object-cover" /> : <span className="mx-auto grid h-36 w-36 place-items-center rounded-[28px] bg-gradient-to-br from-[var(--primary)] to-[#178A8F] text-5xl font-bold text-white">{initials(d.doctor_name)}</span>}
+            {d.photo ? <img src={d.photo} alt={d.doctor_name} className="mx-auto h-36 w-36 rounded-[28px] object-cover" /> : <span className="mx-auto grid h-36 w-36 place-items-center rounded-[28px] bg-gradient-to-br from-[var(--primary)] to-[var(--btn-to)] text-5xl font-bold text-white">{initials(d.doctor_name)}</span>}
             <h2 className="mt-5 text-xl font-bold">{d.doctor_name}</h2>{d.doctor_name_ur && <div className="text-[var(--muted)]">{d.doctor_name_ur}</div>}
             <div className={`mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold ${today ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-[var(--soft)] text-[var(--muted)]"}`}>
               <span className={`h-2 w-2 rounded-full ${today ? "bg-emerald-500" : "bg-[var(--muted)]"}`} />{today ? "Available today" : d.next_date ? `Next available ${fmtDate(d.next_date, lang === "ur")}` : "No open slots — call to ask"}</div>

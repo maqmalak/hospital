@@ -41,9 +41,9 @@ export default function Nursery() {
     <div className="nz">
       <style>{NZ_CSS}</style>
       {/* ------------------------------------------------ hero */}
-      <section className="relative overflow-hidden bg-[#08303A] text-white">
+      <section className="relative overflow-hidden bg-[var(--hero)] text-white">
         <img src={PHOTOS.room} alt="" className="s2-kenburns absolute inset-0 h-full w-full object-cover opacity-35" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#08303A] via-[#08303A]/88 to-[#0B4552]/55 rtl:bg-gradient-to-l" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--hero)] via-[color-mix(in_srgb,var(--hero)_88%,transparent)] to-[color-mix(in_srgb,var(--hero2)_55%,transparent)] rtl:bg-gradient-to-l" />
         <div className="pointer-events-none absolute -bottom-32 -end-24 h-[460px] w-[460px] rounded-full bg-[#CFE6F7]/15 blur-3xl" />
         <div className="pointer-events-none absolute -top-24 start-1/3 h-72 w-72 rounded-full bg-[#F7D6DA]/10 blur-3xl" />
         <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 pt-14 sm:px-6 sm:pt-20 lg:grid-cols-[1.15fr_1fr] lg:items-center">
@@ -131,14 +131,14 @@ export default function Nursery() {
       </section>
 
       {/* ------------------------------------------------ safety + visiting */}
-      <section className="relative overflow-hidden bg-[#08303A] py-24 text-white">
+      <section className="relative overflow-hidden bg-[var(--hero)] py-24 text-white">
         <div className="pointer-events-none absolute -end-32 top-10 h-96 w-96 rounded-full bg-[#CFE6F7]/10 blur-3xl" />
         <Wrap className="relative grid gap-12 lg:grid-cols-[1.1fr_1fr]">
           <div>
             <SectionHead light eyebrow={T.safety[0]} title={T.safety[1]} sub={T.safety[2]} />
             <div className="grid gap-4 sm:grid-cols-2">
               {T.safetyList.map(([t, d], i) => { const I = SAFETY_ICON[i] ?? ShieldCheck; return (
-                <Reveal key={t} delay={i * 60} className={`group rounded-[22px] border border-white/10 bg-white/[0.05] p-5 backdrop-blur transition hover:-translate-y-1 hover:border-[#9FE3DA]/40 ${i === 4 ? "sm:col-span-2" : ""}`}>
+                <Reveal key={t} delay={i * 60} className={`group rounded-[22px] border border-white/10 bg-white/[0.05] p-5 backdrop-blur transition hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--hero-accent)_40%,transparent)] ${i === 4 ? "sm:col-span-2" : ""}`}>
                   <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#E5483F] text-white"><I className="h-5 w-5" /></span>
                   <h3 className="mt-3 font-bold">{t}</h3><p className="mt-1 text-sm leading-relaxed text-white/70">{d}</p>
                 </Reveal>); })}
@@ -199,7 +199,7 @@ export default function Nursery() {
         <Wrap className="grid gap-12 lg:grid-cols-[1.2fr_1fr]">
           <div><SectionHead eyebrow={T.faq[0]} title={T.faq[1]} /><Accordion items={T.faqList.map(([q, a]) => ({ title: q, body: <p>{a}</p> }))} /></div>
           <div className="space-y-5">
-            <Reveal className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[#0E5E6F] to-[#08303A] p-8 text-white">
+            <Reveal className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[var(--btn-from)] to-[var(--hero)] p-8 text-white">
               <div className="pointer-events-none absolute -end-14 -top-14 h-48 w-48 rounded-full border border-white/10" />
               <MapPin className="h-9 w-9 text-[#FF6B66]" /><h2 className="s2-display mt-4 text-3xl">{T.where.title}</h2><p className="mt-3 text-white/75">{T.where.text}</p>
               <div className="mt-6 flex flex-wrap gap-3"><Link to="/site/map?q=nursery" className={btn.glass}><MapPin className="h-4 w-4" />{T.where.map}</Link><Link to="/site/directions" className={btn.glass}>{T.where.dir}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link></div>
@@ -259,7 +259,7 @@ function CradleArt() {
         </svg>
       </div>
       <div className="absolute end-0 top-14 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white shadow-xl backdrop-blur-xl"><div className="text-[10px] font-semibold tracking-[0.2em] text-white/60">ID BAND</div>
-        <div className="mt-0.5 flex items-center gap-2 text-sm font-bold"><ShieldCheck className="h-4 w-4 text-[#9FE3DA]" />Mother ↔ baby matched</div></div>
+        <div className="mt-0.5 flex items-center gap-2 text-sm font-bold"><ShieldCheck className="h-4 w-4 text-[var(--hero-accent)]" />Mother ↔ baby matched</div></div>
       <div className="absolute bottom-6 start-0 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white shadow-xl backdrop-blur-xl"><div className="text-[10px] font-semibold tracking-[0.2em] text-white/60">APGAR · 5 MIN</div>
         <div className="mt-0.5 flex items-center gap-2 text-sm font-bold"><HeartPulse className="h-4 w-4 text-[#FF8A84]" />Paediatrician at birth</div></div>
     </div>

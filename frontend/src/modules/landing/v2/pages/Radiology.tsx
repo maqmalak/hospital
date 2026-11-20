@@ -90,14 +90,14 @@ export default function Radiology() {
     <>
       <style>{RD_CSS}</style>
       {/* ------------------------------------------------ hero */}
-      <section className="relative overflow-hidden bg-[#08303A] text-white">
+      <section className="relative overflow-hidden bg-[var(--hero)] text-white">
         <img src={PHOTOS.icu} alt="" className="s2-kenburns absolute inset-0 h-full w-full object-cover opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#08303A] via-[#08303A]/90 to-[#0B4552]/60 rtl:bg-gradient-to-l" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--hero)] via-[color-mix(in_srgb,var(--hero)_90%,transparent)] to-[color-mix(in_srgb,var(--hero2)_60%,transparent)] rtl:bg-gradient-to-l" />
         <div className="pointer-events-none absolute -bottom-40 -start-40 h-[520px] w-[520px] rounded-full bg-[#5CC3C9]/20 blur-3xl" />
         <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 pt-14 sm:px-6 sm:pt-20 lg:grid-cols-[1.1fr_1fr] lg:items-center">
           <div>
             <Reveal><Eyebrow light>Radiology & Imaging · 2nd floor</Eyebrow></Reveal>
-            <Reveal delay={80}><h1 className="s2-display text-[2.6rem] leading-[1.04] sm:text-[4rem]">Precise imaging.<br /><span className="text-[#9FE3DA]">Fast, reliable reports.</span></h1></Reveal>
+            <Reveal delay={80}><h1 className="s2-display text-[2.6rem] leading-[1.04] sm:text-[4rem]">Precise imaging.<br /><span className="text-[var(--hero-accent)]">Fast, reliable reports.</span></h1></Reveal>
             <Reveal delay={160}><p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">Digital X-ray around the clock, high-definition and 4D ultrasound, Doppler and contrast studies — read by consultant radiologists, signed digitally and ready on your phone.</p></Reveal>
             <Reveal delay={240} className="mt-9 flex flex-wrap gap-3">
               <Link to="/site/radiology/book" className={btn.primary}><CalendarCheck className="h-5 w-5" />Book a scan</Link>
@@ -107,7 +107,7 @@ export default function Radiology() {
             </Reveal>
             <Reveal delay={300} className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/70">
               <span className="flex items-center gap-2"><Siren className="h-4 w-4 text-[#FF6B66]" />Emergency imaging 24/7</span>
-              <span className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-[#9FE3DA]" />X-ray walk-in, no appointment</span>
+              <span className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-[var(--hero-accent)]" />X-ray walk-in, no appointment</span>
             </Reveal>
           </div>
           <Reveal delay={200} className="hidden justify-self-center lg:block"><ScanVisual /></Reveal>
@@ -180,14 +180,14 @@ export default function Radiology() {
       </section>
 
       {/* ------------------------------------------------ safety */}
-      <section className="relative overflow-hidden bg-[#08303A] py-24 text-white">
+      <section className="relative overflow-hidden bg-[var(--hero)] py-24 text-white">
         <div className="pointer-events-none absolute -end-32 top-10 h-96 w-96 rounded-full bg-[#5CC3C9]/15 blur-3xl" />
         <Wrap className="relative">
           <SectionHead light eyebrow="Safety & quality" title="Careful with every exposure" sub="Modern equipment is only half of it. These are the commitments behind every scan we perform." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {SAFETY.map(([I, t, d], i) => (
-              <Reveal key={t} delay={i * 60} className="group rounded-[22px] border border-white/10 bg-white/[0.05] p-6 backdrop-blur transition hover:-translate-y-1 hover:border-[#9FE3DA]/40 hover:bg-white/[0.08]">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#9FE3DA]/15 text-[#9FE3DA] transition group-hover:scale-110"><I className="h-6 w-6" /></span>
+              <Reveal key={t} delay={i * 60} className="group rounded-[22px] border border-white/10 bg-white/[0.05] p-6 backdrop-blur transition hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--hero-accent)_40%,transparent)] hover:bg-white/[0.08]">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[color-mix(in_srgb,var(--hero-accent)_15%,transparent)] text-[var(--hero-accent)] transition group-hover:scale-110"><I className="h-6 w-6" /></span>
                 <h3 className="mt-4 text-lg font-bold">{t}</h3><p className="mt-1.5 text-sm leading-relaxed text-white/70">{d}</p>
               </Reveal>))}
           </div>
@@ -205,7 +205,7 @@ export default function Radiology() {
               {rads.map((r, i) => (
                 <Reveal key={r.name} delay={i * 80} className={`${card} flex flex-col gap-5 p-6 sm:flex-row`}>
                   {r.photo ? <img src={r.photo} alt={r.doctor_name} className="h-28 w-28 shrink-0 rounded-3xl object-cover" loading="lazy" />
-                    : <span className="grid h-28 w-28 shrink-0 place-items-center rounded-3xl bg-gradient-to-br from-[var(--primary)] to-[#178A8F] text-3xl font-bold text-white">{initials(r.doctor_name)}</span>}
+                    : <span className="grid h-28 w-28 shrink-0 place-items-center rounded-3xl bg-gradient-to-br from-[var(--primary)] to-[var(--btn-to)] text-3xl font-bold text-white">{initials(r.doctor_name)}</span>}
                   <div className="min-w-0 flex-1">
                     <h3 className="s2-display text-2xl">{r.doctor_name}</h3>
                     <div className="mt-0.5 font-semibold text-[var(--primary)]">Consultant Radiologist</div>
@@ -232,7 +232,7 @@ export default function Radiology() {
                   {live && <span className="hidden items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-700 sm:flex dark:text-emerald-400"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />Open now</span>}</li>))}
             </ul>
           </Reveal>
-          <Reveal delay={100} className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#0E5E6F] to-[#08303A] p-8 text-white shadow-[0_30px_60px_-30px_rgba(8,48,58,0.7)]">
+          <Reveal delay={100} className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[var(--btn-from)] to-[var(--hero)] p-8 text-white shadow-[0_30px_60px_-30px_rgba(8,48,58,0.7)]">
             <div className="pointer-events-none absolute -end-16 -top-16 h-56 w-56 rounded-full border border-white/10" /><div className="pointer-events-none absolute -end-6 -top-6 h-36 w-36 rounded-full border border-dashed border-white/20" />
             <MapPin className="h-9 w-9 text-[#FF6B66]" />
             <h2 className="s2-display mt-4 text-3xl">Where to find us</h2>
@@ -348,7 +348,7 @@ function ScanVisual() {
     <div aria-hidden className="relative h-[440px] w-[440px]">
       <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(92,195,201,0.25),transparent_65%)]" />
       <div className="s2-float absolute start-6 top-4 h-[360px] w-[290px] overflow-hidden rounded-[28px] border border-white/15 bg-[#031418]/80 p-4 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.8)] backdrop-blur">
-        <div className="mb-2 flex items-center justify-between text-[10px] font-semibold tracking-[0.2em] text-[#9FE3DA]/80"><span>CHEST · PA</span><span className="flex items-center gap-1"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#FF6B66]" />LIVE</span></div>
+        <div className="mb-2 flex items-center justify-between text-[10px] font-semibold tracking-[0.2em] text-[color-mix(in_srgb,var(--hero-accent)_80%,transparent)]"><span>CHEST · PA</span><span className="flex items-center gap-1"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#FF6B66]" />LIVE</span></div>
         <svg viewBox="0 0 260 300" className="h-[300px] w-full">
           <defs>
             <radialGradient id="lung" cx="50%" cy="45%" r="60%"><stop offset="0" stopColor="#0a2a30" /><stop offset="1" stopColor="#123c44" /></radialGradient>
@@ -366,7 +366,7 @@ function ScanVisual() {
           <path d="M70 46 C 100 36, 160 36, 190 46" stroke="url(#bone)" strokeWidth="6" fill="none" opacity=".8" />
         </svg>
         <div className="rd-sweep pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-[#5CC3C9]/30 to-transparent" />
-        <div className="rd-sweep-line pointer-events-none absolute inset-x-4 top-12 h-[2px] bg-[#9FE3DA] shadow-[0_0_14px_3px_rgba(159,227,218,0.8)]" />
+        <div className="rd-sweep-line pointer-events-none absolute inset-x-4 top-12 h-[2px] bg-[var(--hero-accent)] shadow-[0_0_14px_3px_rgba(159,227,218,0.8)]" />
       </div>
       <div className="s2-float absolute bottom-2 end-0 w-[230px] rounded-[24px] border border-white/15 bg-white/10 p-4 shadow-2xl backdrop-blur-xl" style={{ animationDelay: "-2.5s" }}>
         <div className="mb-2 flex items-center justify-between text-[10px] font-semibold tracking-[0.2em] text-white/70"><span>ULTRASOUND</span><span>4D</span></div>
@@ -380,7 +380,7 @@ function ScanVisual() {
       </div>
       <div className="absolute -end-4 top-[150px] rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white shadow-xl backdrop-blur-xl">
         <div className="text-[10px] font-semibold tracking-[0.2em] text-white/60">REPORT</div>
-        <div className="mt-0.5 flex items-center gap-2 text-sm font-bold"><BadgeCheck className="h-4 w-4 text-[#9FE3DA]" />Digitally signed</div>
+        <div className="mt-0.5 flex items-center gap-2 text-sm font-bold"><BadgeCheck className="h-4 w-4 text-[var(--hero-accent)]" />Digitally signed</div>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ export function RadiologyVerify() {
       <Wrap className="max-w-2xl">
         {!c ? <div className={`${card} flex items-center justify-center gap-2 p-16 text-[var(--muted)]`}><Loader2 className="h-5 w-5 animate-spin" />Checking…</div> : (
           <Reveal className={`${card} overflow-hidden hover:translate-y-0`}>
-            <div className={`relative px-6 py-10 text-center text-white ${ok ? "bg-gradient-to-br from-emerald-600 to-[#0E5E6F]" : c.superseded ? "bg-gradient-to-br from-amber-600 to-amber-700" : "bg-gradient-to-br from-rose-600 to-rose-800"}`}>
+            <div className={`relative px-6 py-10 text-center text-white ${ok ? "bg-gradient-to-br from-emerald-600 to-[var(--btn-from)]" : c.superseded ? "bg-gradient-to-br from-amber-600 to-amber-700" : "bg-gradient-to-br from-rose-600 to-rose-800"}`}>
               <span className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-white/15 ring-8 ring-white/10">{ok ? <ShieldCheck className="h-10 w-10" /> : c.superseded ? <AlertTriangle className="h-10 w-10" /> : <ShieldAlert className="h-10 w-10" />}</span>
               <h1 className="s2-display mt-5 text-[2rem]">{ok ? "Genuine report" : c.superseded ? "A newer version exists" : "Not verified"}</h1>
               <p className="mx-auto mt-2 max-w-md text-white/80">{ok ? "This report was issued and digitally signed by Lyallpur Medical Complex and has not been changed since."

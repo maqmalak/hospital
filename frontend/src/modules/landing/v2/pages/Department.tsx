@@ -41,7 +41,7 @@ export default function Department() {
               <h3 className="mt-4 text-lg font-bold">Where to find us</h3>
               <p className="mt-1 flex items-center gap-2 text-[var(--muted)]"><MapPin className="h-4 w-4 text-[var(--accent)]" />{floor?.label ?? "Ask at reception"}</p>
               <Link to="/site/map" className={`${btn.ghost} mt-5 w-full py-2.5 text-sm`}>Open the floor map</Link></Reveal>
-            <Reveal delay={80} className="rounded-[22px] bg-gradient-to-br from-[#0E5E6F] to-[#08303A] p-6 text-white"><h3 className="s2-display text-2xl">Ready to book?</h3><p className="mt-2 text-sm text-white/75">Choose a consultant and a time — confirmation by SMS.</p><a href={book} className={`${btn.primary} mt-5 w-full`}>{ui.common.book}</a></Reveal>
+            <Reveal delay={80} className="rounded-[22px] bg-gradient-to-br from-[var(--btn-from)] to-[var(--hero)] p-6 text-white"><h3 className="s2-display text-2xl">Ready to book?</h3><p className="mt-2 text-sm text-white/75">Choose a consultant and a time — confirmation by SMS.</p><a href={book} className={`${btn.primary} mt-5 w-full`}>{ui.common.book}</a></Reveal>
             {(d.slug === "paediatrics" || d.slug === "gynaecology") && <Reveal delay={120} className={`${card} p-6`}><span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--accent)] text-white"><Baby className="h-5 w-5" /></span>
               <h3 className="mt-3 text-lg font-bold">Nursery & Newborn Care</h3><p className="mt-1 text-sm text-[var(--muted)]">Rooming-in, nursery and NICU — paediatricians present at every birth.</p>
               <Link to="/site/nursery" className={`${btn.ghost} mt-4 w-full py-2.5 text-sm`}>Visit the newborn unit</Link></Reveal>}

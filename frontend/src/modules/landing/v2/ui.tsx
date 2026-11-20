@@ -57,8 +57,8 @@ export function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
 }
 
 export function Eyebrow({ children, light }: { children: ReactNode; light?: boolean }) {
-  return <div className={`mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11.5px] font-bold uppercase tracking-[0.18em] ${light ? "bg-white/10 text-[#9FE3DA]" : "bg-[var(--mint)] text-[var(--primary)]"}`}>
-    <span className={`h-1.5 w-1.5 rounded-full ${light ? "bg-[#9FE3DA]" : "bg-[var(--accent)]"}`} />{children}</div>;
+  return <div className={`mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11.5px] font-bold uppercase tracking-[0.18em] ${light ? "bg-white/10 text-[var(--hero-accent)]" : "bg-[var(--mint)] text-[var(--primary)]"}`}>
+    <span className={`h-1.5 w-1.5 rounded-full ${light ? "bg-[var(--hero-accent)]" : "bg-[var(--accent)]"}`} />{children}</div>;
 }
 
 export function SectionHead({ eyebrow, title, sub, center, light, action }: { eyebrow: string; title: string; sub?: string; center?: boolean; light?: boolean; action?: ReactNode }) {
@@ -89,9 +89,9 @@ export function LogoMedallion() {
     <div aria-hidden className="pointer-events-none relative grid h-[380px] w-[380px] place-items-center">
       <span className="absolute inset-0 rounded-full border border-white/10" />
       <span className="s2-spin absolute inset-[22px] rounded-full border border-dashed border-white/25" />
-      <span className="absolute inset-[48px] rounded-full border border-[#9FE3DA]/30 bg-white/[0.04] backdrop-blur-[2px]" />
+      <span className="absolute inset-[48px] rounded-full border border-[color-mix(in_srgb,var(--hero-accent)_30%,transparent)] bg-white/[0.04] backdrop-blur-[2px]" />
       <span className="s2-spin-rev absolute inset-[22px]"><span className="absolute -top-[5px] left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#FF6B66] shadow-[0_0_14px_3px_rgba(255,107,102,0.6)]" /></span>
-      <span className="s2-spin absolute inset-0"><span className="absolute -bottom-[4px] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#9FE3DA] shadow-[0_0_12px_3px_rgba(159,227,218,0.55)]" /></span>
+      <span className="s2-spin absolute inset-0"><span className="absolute -bottom-[4px] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[var(--hero-accent)] shadow-[0_0_12px_3px_rgba(159,227,218,0.55)]" /></span>
       <span className="relative grid h-[236px] w-[236px] place-items-center rounded-full bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6),0_0_0_10px_rgba(255,255,255,0.08)]">
         <span className="flex flex-col items-center">
           {/* the logo without its small baked-in L·M·C line (rows below 376 of 403), which is redrawn larger underneath */}
@@ -105,9 +105,9 @@ export function LogoMedallion() {
 
 export function PageHero({ eyebrow, title, sub, img, children, aside }: { eyebrow: string; title: string; sub?: string; img: string; children?: ReactNode; aside?: ReactNode }) {
   return (
-    <section className="relative overflow-hidden bg-[#08303A] text-white">
+    <section className="relative overflow-hidden bg-[var(--hero)] text-white">
       <img src={img} alt="" className="s2-kenburns absolute inset-0 h-full w-full object-cover opacity-45" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#08303A] via-[#08303A]/85 to-[#08303A]/30 rtl:bg-gradient-to-l" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[var(--hero)] via-[color-mix(in_srgb,var(--hero)_85%,transparent)] to-[color-mix(in_srgb,var(--hero)_30%,transparent)] rtl:bg-gradient-to-l" />
       <div className={`relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20 ${aside ? "lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12" : ""}`}>
         <div>
         <Reveal><Eyebrow light>{eyebrow}</Eyebrow></Reveal>
@@ -135,7 +135,7 @@ export function DoctorCard({ d, ur = false, labels }: { d: Doctor; ur?: boolean;
     <div className={`${card} group flex h-full flex-col overflow-hidden`}>
       <div className="relative flex items-center gap-4 p-5 pb-4">
         {d.photo ? <img src={d.photo} alt={d.doctor_name} className="h-16 w-16 rounded-2xl object-cover" loading="lazy" />
-          : <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[#178A8F] text-xl font-bold text-white">{initials(d.doctor_name)}</span>}
+          : <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[var(--btn-to)] text-xl font-bold text-white">{initials(d.doctor_name)}</span>}
         <div className="min-w-0">
           <Link to={`/site/doctors/${slugDoc(d)}`} className="block truncate text-[1.05rem] font-bold text-[var(--ink)] hover:text-[var(--primary)]">{d.doctor_name}</Link>
           {ur && d.doctor_name_ur && <div className="text-sm text-[var(--muted)]">{d.doctor_name_ur}</div>}

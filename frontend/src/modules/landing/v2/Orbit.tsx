@@ -62,10 +62,10 @@ export default function Orbit({ items, split, center, rings = [128, 212], period
         const I = ICONS[p.icon] ?? ICONS.stethoscope;
         const cls = "group absolute left-0 top-0 flex flex-col items-center will-change-transform focus:outline-none";
         const body = (<>
-          <span className={`grid place-items-center rounded-full shadow-[0_12px_28px_-10px_rgba(0,0,0,0.7)] ring-1 ring-white/30 transition-[background-color,color,box-shadow] duration-500 group-hover:bg-[#FF6B66] group-hover:text-white group-data-[front=1]:bg-[#FF6B66] group-data-[front=1]:text-white group-data-[front=1]:shadow-[0_0_22px_4px_rgba(255,107,102,0.45)] group-focus-visible:ring-4 group-focus-visible:ring-[#9FE3DA] ${r ? "h-12 w-12 bg-white text-[#0E5E6F]" : "h-11 w-11 bg-[#9FE3DA] text-[#08303A]"}`}>
+          <span className={`grid place-items-center rounded-full shadow-[0_12px_28px_-10px_rgba(0,0,0,0.7)] ring-1 ring-white/30 transition-[background-color,color,box-shadow] duration-500 group-hover:bg-[#FF6B66] group-hover:text-white group-data-[front=1]:bg-[#FF6B66] group-data-[front=1]:text-white group-data-[front=1]:shadow-[0_0_22px_4px_rgba(255,107,102,0.45)] group-focus-visible:ring-4 group-focus-visible:ring-[var(--hero-accent)] ${r ? "h-12 w-12 bg-white text-[var(--btn-from)]" : "h-11 w-11 bg-[var(--hero-accent)] text-[var(--hero)]"}`}>
             <I className="h-5 w-5" />
           </span>
-          <span className="mt-1.5 whitespace-nowrap rounded-full bg-[#062229]/70 px-2.5 py-0.5 text-[11px] font-semibold text-white opacity-0 backdrop-blur transition-opacity duration-500 group-hover:opacity-100 group-data-[front=1]:opacity-100">{p.label}</span>
+          <span className="mt-1.5 whitespace-nowrap rounded-full bg-[color-mix(in_srgb,var(--hero3)_70%,transparent)] px-2.5 py-0.5 text-[11px] font-semibold text-white opacity-0 backdrop-blur transition-opacity duration-500 group-hover:opacity-100 group-data-[front=1]:opacity-100">{p.label}</span>
         </>);
         const set = (el: HTMLAnchorElement | null) => { refs.current[i] = el; };
         return p.to.startsWith("#")

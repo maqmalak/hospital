@@ -21,11 +21,11 @@ export default function Services() {
             <Reveal key={s.id}>
               <article id={s.id} className={`${card} grid scroll-mt-28 overflow-hidden hover:translate-y-0 ${i % 2 ? "md:grid-cols-[1fr_320px]" : "md:grid-cols-[320px_1fr]"}`}>
                 <div className={`relative h-56 md:h-auto ${i % 2 ? "md:order-2" : ""}`}>{s.img ? <img src={s.img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /> : (
-                  <div aria-hidden className="absolute inset-0 grid place-items-center overflow-hidden bg-gradient-to-br from-[#0E5E6F] via-[#08303A] to-[#062229]">
+                  <div aria-hidden className="absolute inset-0 grid place-items-center overflow-hidden bg-gradient-to-br from-[var(--btn-from)] via-[var(--hero)] to-[var(--hero3)]">
                     <span className="absolute h-64 w-64 rounded-full border border-white/10" /><span className="absolute h-44 w-44 rounded-full border border-dashed border-white/20" />
                     <span className="absolute h-56 w-56 rounded-full bg-[#14B8A6]/20 blur-3xl" />
-                    <span className="relative grid h-24 w-24 place-items-center rounded-full bg-white text-[#0E5E6F] shadow-[0_0_0_10px_rgba(255,255,255,0.08),0_24px_50px_-16px_rgba(0,0,0,0.6)]"><I className="h-11 w-11" /></span>
-                    <span className="absolute bottom-5 start-6 text-[11px] font-bold uppercase tracking-[0.2em] text-[#9FE3DA]">{s.title}</span>
+                    <span className="relative grid h-24 w-24 place-items-center rounded-full bg-white text-[var(--btn-from)] shadow-[0_0_0_10px_rgba(255,255,255,0.08),0_24px_50px_-16px_rgba(0,0,0,0.6)]"><I className="h-11 w-11" /></span>
+                    <span className="absolute bottom-5 start-6 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--hero-accent)]">{s.title}</span>
                   </div>)}</div>
                 <div className="p-7 sm:p-9">
                   <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--mint)] text-[var(--primary)]"><I className="h-6 w-6" /></span>
