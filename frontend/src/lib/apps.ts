@@ -28,7 +28,7 @@ export const APPS: App[] = [
     flow: ["/opd/vitals", "/physician-queue", "/pw-prescription", "/pw-history"], flowTitle: "Token to prescription", manual: "doctor" },
   { slug: "lab", label: "Laboratory", desc: "Orders, samples, results, verification", icon: FlaskConical, hue: "violet", color: "from-violet-500 to-purple-600", routes: group("Laboratory"),
     flow: ["/lab/orders", "/lab/samples", "/tests", "/lab/verify"], flowTitle: "Order to report", manual: "lab" },
-  { slug: "radiology", label: "Radiology", desc: "X-ray, ultrasound, Doppler — worklist, reports, analytics", icon: ScanSearch, hue: "cyan", color: "from-cyan-500 to-teal-600", routes: group("Radiology"),
+  { slug: "radiology", label: "Imaging", desc: "X-ray, ultrasound, Doppler, MRI, CT — worklist, reports, analytics", icon: ScanSearch, hue: "cyan", color: "from-cyan-500 to-teal-600", routes: group("Imaging"),
     flow: ["/radiology"], flowTitle: "Booking to signed report" },
   { slug: "nursery", label: "Nursery & NICU", desc: "Newborns: cots, charting, security, discharge papers", icon: Baby, hue: "pink", color: "from-pink-500 to-rose-500", routes: group("Nursery & NICU"),
     flow: ["/nursery/register", "/nursery", "/nursery/security"], flowTitle: "Birth to discharge" },

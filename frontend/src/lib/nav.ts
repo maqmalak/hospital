@@ -33,9 +33,9 @@ export const NAV: NavGroup[] = [
     { route: "/lab/outsourced", label: "Outsourced tests", icon: Send, color: "from-slate-500 to-slate-700", desc: "Reference lab dispatch" },
     { route: "/lab/templates", label: "Test templates", icon: FlaskConical, color: "from-fuchsia-600 to-purple-700", desc: "Tests, ranges, prices, turnaround" },
   ] },
-  { label: "Radiology", items: [
-    { route: "/radiology", label: "Radiology worklist", icon: ScanSearch, color: "from-cyan-500 to-teal-600", desc: "X-ray, ultrasound, Doppler: register, scan, report" },
-    { route: "/radiology/analytics", label: "Radiology analytics", icon: BarChart3, color: "from-sky-500 to-indigo-600", desc: "Volumes, turnaround, revenue, workload" },
+  { label: "Imaging", items: [
+    { route: "/radiology", label: "Imaging worklist", icon: ScanSearch, color: "from-cyan-500 to-teal-600", desc: "X-ray, ultrasound, Doppler, MRI, CT: register, scan, report" },
+    { route: "/radiology/analytics", label: "Imaging analytics", icon: BarChart3, color: "from-sky-500 to-indigo-600", desc: "Volumes, turnaround, revenue, workload" },
     { route: "/radiology/catalogue", label: "Imaging catalogue", icon: BookOpen, color: "from-teal-600 to-emerald-700", desc: "Scans, prices, preparation, report templates" },
   ] },
   { label: "Nursery & NICU", items: [
