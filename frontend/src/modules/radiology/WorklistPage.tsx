@@ -72,7 +72,7 @@ export default function WorklistPage() {
 
   return (
     <div className="mx-auto max-w-[1400px]">
-      <PageHeader title="Radiology worklist" icon={ScanLine} subtitle={<>X-ray · Ultrasound · Doppler · MRI · CT — {from === to ? new Date(from + "T00:00").toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long" }) : `${from} → ${to}`}</>}
+      <PageHeader title="Imaging Worklist" icon={ScanLine} subtitle={<>X-ray · Ultrasound · Doppler · MRI · CT — {from === to ? new Date(from + "T00:00").toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long" }) : `${from} → ${to}`}</>}
         actions={<>
           {isRad && <Link to="/radiology/analytics"><Button variant="outline" size="sm"><BarChart3 className="h-4 w-4" />Analytics</Button></Link>}
           {isRad && <Link to="/radiology/catalogue"><Button variant="outline" size="sm"><BookOpen className="h-4 w-4" />Catalogue</Button></Link>}

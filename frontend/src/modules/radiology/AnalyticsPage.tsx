@@ -33,7 +33,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px]">
-      <PageHeader title="Radiology analytics" icon={BarChart3} subtitle="Volumes, turnaround, revenue and workload"
+      <PageHeader title="Imaging Analytics" icon={BarChart3} subtitle="Volumes, turnaround, revenue and workload"
         actions={<div className="flex gap-2"><Field label="From" className="w-36"><input type="date" className={inputCls} value={from} onChange={(e) => setFrom(e.target.value)} /></Field>
           <Field label="To" className="w-36"><input type="date" className={inputCls} value={to} min={from} onChange={(e) => setTo(e.target.value)} /></Field></div>} />
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">

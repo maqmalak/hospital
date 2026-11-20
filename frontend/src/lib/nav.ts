@@ -34,8 +34,8 @@ export const NAV: NavGroup[] = [
     { route: "/lab/templates", label: "Test templates", icon: FlaskConical, color: "from-fuchsia-600 to-purple-700", desc: "Tests, ranges, prices, turnaround" },
   ] },
   { label: "Imaging", items: [
-    { route: "/radiology", label: "Imaging worklist", icon: ScanSearch, color: "from-cyan-500 to-teal-600", desc: "X-ray, ultrasound, Doppler, MRI, CT: register, scan, report" },
-    { route: "/radiology/analytics", label: "Imaging analytics", icon: BarChart3, color: "from-sky-500 to-indigo-600", desc: "Volumes, turnaround, revenue, workload" },
+    { route: "/radiology", label: "Imaging Worklist", icon: ScanSearch, color: "from-cyan-500 to-teal-600", desc: "X-ray, ultrasound, Doppler, MRI, CT: register, scan, report" },
+    { route: "/radiology/analytics", label: "Imaging Analytics", icon: BarChart3, color: "from-sky-500 to-indigo-600", desc: "Volumes, turnaround, revenue, workload" },
     { route: "/radiology/catalogue", label: "Imaging catalogue", icon: BookOpen, color: "from-teal-600 to-emerald-700", desc: "Scans, prices, preparation, report templates" },
   ] },
   { label: "Nursery & NICU", items: [
