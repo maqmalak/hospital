@@ -140,3 +140,40 @@ def report(from_date=None, to_date=None, branch=None):
 		fields=["name", "customer_name", "grand_total", "creation", "hv_token"], limit=50)
 	return {"from_date": str(from_date), "to_date": str(to_date), "closings": closings, "by_mode": by_mode, "cashiers": cashiers, "open_shifts": open_shifts,
 		"pending_drops": frappe.db.count("Cash Movement", {"status": "Pending Confirmation", "branch": branch}), "uncollected_drafts": drafts}
+
+
+# ------------------------------------------------------------------ admin shift control (D-97)
+@frappe.whitelist()
+def shift_board(branch=None):
+	branch = scope_branch(branch, required=False) or default_branch()
+	require_roles(R.ADMIN)
+	return {"branch": branch, "counters": shifts.board(branch), "denominations": shifts.denominations(), "tolerance": flt(setting("cash_tolerance")),
+		"pending": frappe.get_all("Shift Closing", filters={"branch": branch, "status": "Pending Approval"}, fields=["name", "counter", "user", "difference", "explanation"])}
+
+
+@frappe.whitelist(methods=["POST"])
+def admin_open(counter, user, cash_float=0):
+	require_roles(R.ADMIN)
+	poe = shifts.open_shift(counter, {"Cash": flt(cash_float)} if flt(cash_float) else {}, user=user)
+	return {"name": poe.name}
+
+
+@frappe.whitelist(methods=["POST"])
+def admin_close(shift, cash_total=None, explanation=None):
+	require_roles(R.ADMIN)
+	sc = shifts.admin_close(shift, cash_total, None, explanation)
+	return {"name": sc.name, "status": sc.status, "difference": sc.difference}
+
+
+@frappe.whitelist(methods=["POST"])
+def admin_close_all(explanation, branch=None):
+	require_roles(R.ADMIN)
+	branch = scope_branch(branch, required=False) or default_branch()
+	return shifts.admin_close_all(branch, explanation)
+
+
+@frappe.whitelist(methods=["POST"])
+def admin_open_all(assignments, cash_float=0):
+	require_roles(R.ADMIN)
+	a = frappe.parse_json(assignments) if isinstance(assignments, str) else assignments
+	return shifts.admin_open_all(a, {c: {"Cash": flt(cash_float)} for c in a} if flt(cash_float) else None)

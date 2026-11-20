@@ -78,6 +78,7 @@ DEFAULT_ROUTES = [
 	("/cash/close", "Close shift", CASH_ROLES, "enable_shifts"),
 	("/cash/approvals", "Cash approvals", [CASH_SUPERVISOR], "enable_shifts"),
 	("/cash/reports", "Cash reports", [CASH_SUPERVISOR, ACCOUNTANT], "enable_shifts"),
+	("/cash/control", "Shift control (admin)", [ADMIN], "enable_shifts"),
 	("/lab/orders", "Lab orders", [LAB_USER, RECEPTIONIST], "enable_lab"),
 	("/lab/outsourced", "Outsourced tests", [LAB_USER, PATHOLOGIST], "enable_lab"),
 	("/lab/templates", "Lab test templates", [PATHOLOGIST], "enable_lab"),

@@ -125,11 +125,15 @@ def open_shift(counter, balances=None, user=None):
 	user = user or frappe.session.user
 	c = frappe.get_doc("Counter", counter)
 	check_branch(c.branch)
-	check_counter(c.name, user)
+	from hospital_vvs.utils import is_admin
+
+	if not is_admin():  # the admin may open a counter for any cash staff member (Shift control, D-97)
+		check_counter(c.name, user)
 	if not c.is_active:
 		frappe.throw(_("Counter {0} is not active.").format(counter))
 	if current_shift(user):
-		frappe.throw(_("You already have an open shift. Close it first."))
+		frappe.throw(_("You already have an open shift. Close it first.") if user == frappe.session.user else
+			_("{0} already has an open shift. Close it first.").format(frappe.db.get_value("User", user, "full_name") or user))
 	profile = ensure_counter_profile(c)
 	other = frappe.db.get_value("POS Opening Entry", {"pos_profile": profile, "status": "Open", "docstatus": 1}, "user")
 	if other:
@@ -281,12 +285,12 @@ def denominations():
 	return [flt(x) for x in (setting("denominations") or "5000,1000,500,100,50,20,10,5,2,1").split(",") if flt(x) > 0]
 
 
-def close_shift(counts, other_modes=None, explanation=None, user=None):
+def close_shift(counts, other_modes=None, explanation=None, user=None, cash_total=None):
 	"""Blind count. counts: {denomination: number of notes}; other_modes: {mode: amount from the terminal slip}."""
 	user = user or frappe.session.user
 	shift = current_shift(user)
 	if not shift:
-		frappe.throw(_("You have no open shift."))
+		frappe.throw(_("You have no open shift.") if user == frappe.session.user else _("{0} has no open shift.").format(user))
 	existing = frappe.db.get_value("Shift Closing", {"opening_entry": shift.name, "status": ["in", ["Pending Approval", "Recount", "Draft"]]}, "name")
 	sc = frappe.get_doc("Shift Closing", existing) if existing else frappe.new_doc("Shift Closing")
 	if existing and sc.status == "Pending Approval":
@@ -296,7 +300,7 @@ def close_shift(counts, other_modes=None, explanation=None, user=None):
 	bad = [d for d in (counts or {}) if flt(d) not in allowed or cint((counts or {})[d]) < 0]
 	if bad:  # QA 2026-11-10: "Cash: 5500" used to count as zero
 		frappe.throw(_("Enter the number of notes for each denomination ({0}); not valid: {1}").format(", ".join(str(int(x)) for x in sorted(allowed, reverse=True)), ", ".join(map(str, bad))))
-	cash_counted = sum(flt(d) * cint(n) for d, n in (counts or {}).items())
+	cash_counted = flt(cash_total) if cash_total is not None else sum(flt(d) * cint(n) for d, n in (counts or {}).items())
 	other_modes = other_modes or {}
 	sc.update({"opening_entry": shift.name, "counter": shift.hv_counter, "branch": shift.hv_branch, "user": user,
 		"period_start": shift.period_start_date, "period_end": now_datetime(), "explanation": explanation})
@@ -362,8 +366,8 @@ def finalize(sc, liability=False):
 
 def decide(name, action, note=None, approver=None):
 	approver = approver or frappe.session.user
-	if not has_any_role(R.CASH_SUPERVISOR, user=approver):
-		frappe.throw(_("Only the cash supervisor decides shift closings."), frappe.PermissionError)
+	if not has_any_role(R.CASH_SUPERVISOR, R.ADMIN, user=approver):
+		frappe.throw(_("Only the cash supervisor or the admin decides shift closings."), frappe.PermissionError)
 	sc = frappe.get_doc("Shift Closing", name)
 	if sc.status != "Pending Approval":
 		frappe.throw(_("This closing is {0}.").format(sc.status))
@@ -381,3 +385,82 @@ def decide(name, action, note=None, approver=None):
 
 def counts_json(sc):
 	return json.dumps({str(int(d.denomination)): d.count for d in sc.denominations})
+
+
+# ------------------------------------------------------------------ admin shift control (D-97)
+def board(branch):
+	"""Every active counter of the branch with its open shift (if any), expected cash and the staff who may take it."""
+	rows = frappe.get_all("Counter", filters={"is_active": 1, "branch": branch}, fields=["name", "counter_name", "counter_type", "billing_type", "number", "pos_profile"],
+		order_by="counter_name")
+	cash_users = set(frappe.get_all("Has Role", filters={"role": ["in", [R.RECEPTIONIST, R.LAB_USER, R.PHARMACY_CASHIER, R.DISPENSER, R.CASH_SUPERVISOR]],
+		"parenttype": "User"}, pluck="parent"))
+	users = {u.name: u.full_name for u in frappe.get_all("User", filters={"name": ["in", list(cash_users) or [""]], "enabled": 1}, fields=["name", "full_name"])}
+	out = []
+	for c in rows:
+		profile = c.pos_profile or frappe.db.get_value("POS Profile", {"name": ["like", f"%{c.counter_name}%"]}, "name")
+		shift = frappe.db.get_value("POS Opening Entry", {"hv_counter": c.name, "status": "Open", "docstatus": 1}, ["name", "user", "period_start_date", "posting_date"], as_dict=True)
+		last = frappe.db.get_value("POS Opening Entry", {"hv_counter": c.name, "docstatus": 1}, "user", order_by="creation desc")
+		staff = [u for u in counter_staff(c.name) if u in users] or sorted(users, key=lambda u: users[u])
+		row = {**c, "staff": [{"user": u, "name": users.get(u, u)} for u in staff], "last_user": last if last in users else None}
+		if shift:
+			summ = summary(shift.name)
+			pend = frappe.db.get_value("Shift Closing", {"opening_entry": shift.name, "status": ["in", ["Pending Approval", "Recount"]]}, ["name", "status", "difference"], as_dict=True)
+			row["shift"] = {"name": shift.name, "user": shift.user, "user_name": users.get(shift.user) or frappe.db.get_value("User", shift.user, "full_name"),
+				"opened_at": str(shift.period_start_date)[:16], "old": str(shift.posting_date) != today(), "expected": summ["total_expected"],
+				"cash_expected": next((m["expected"] for m in summ["modes"] if m["mode_of_payment"] == CASH), 0.0), "modes": summ["modes"],
+				"invoices": summ["invoice_count"], "pending": pend}
+		out.append(row)
+	return out
+
+
+def admin_close(shift_name, cash_total=None, other_modes=None, explanation=None):
+	"""Close another user's shift. cash_total None = take the system figure (recorded as not counted by the cashier)."""
+	from hospital_vvs.utils import is_admin
+
+	if not is_admin():
+		frappe.throw(_("Only the admin can close other users' shifts."), frappe.PermissionError)
+	poe = frappe.get_doc("POS Opening Entry", shift_name)
+	if poe.status != "Open" or poe.docstatus != 1:
+		frappe.throw(_("This shift is not open."))
+	if not (explanation or "").strip():
+		frappe.throw(_("Give a reason for closing this shift for the cashier."))
+	summ = summary(poe.name)
+	counted = flt(cash_total) if cash_total not in (None, "") else next((m["expected"] for m in summ["modes"] if m["mode_of_payment"] == CASH), 0.0)
+	note = f"Closed by admin {frappe.session.user}{'' if cash_total not in (None, '') else ' at the system figure (not counted by the cashier)'}: {explanation.strip()}"
+	return close_shift({}, other_modes or {}, note, user=poe.user, cash_total=counted)
+
+
+def admin_close_all(branch, explanation):
+	out = []
+	for name in frappe.get_all("POS Opening Entry", filters={"hv_branch": branch, "status": "Open", "docstatus": 1}, pluck="name"):
+		if pending_closing(name):
+			out.append({"shift": name, "ok": False, "message": _("Count waiting for the supervisor")})
+			continue
+		try:
+			sc = admin_close(name, None, None, explanation)
+			out.append({"shift": name, "ok": True, "status": sc.status})
+			frappe.db.commit()
+		except Exception as e:
+			frappe.db.rollback()
+			out.append({"shift": name, "ok": False, "message": str(e)[:200]})
+	return out
+
+
+def admin_open_all(assignments, balances=None):
+	"""assignments: {counter: user} — opens a shift per idle counter for the chosen user."""
+	from hospital_vvs.utils import is_admin
+
+	if not is_admin():
+		frappe.throw(_("Only the admin can open shifts for others."), frappe.PermissionError)
+	out = []
+	for counter, user in (assignments or {}).items():
+		if not user:
+			continue
+		try:
+			poe = open_shift(counter, (balances or {}).get(counter) or {}, user=user)
+			out.append({"counter": counter, "ok": True, "shift": poe.name})
+			frappe.db.commit()
+		except Exception as e:
+			frappe.db.rollback()
+			out.append({"counter": counter, "ok": False, "message": str(e)[:200]})
+	return out

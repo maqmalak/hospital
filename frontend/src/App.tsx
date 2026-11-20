@@ -43,6 +43,7 @@ const DoctorsPage = lazy(() => import("@/modules/admin/DoctorsPage"));
 const CashShiftPage = lazy(() => import("@/modules/cash/ShiftPage"));
 const CashClosePage = lazy(() => import("@/modules/cash/ClosePage"));
 const CashApprovalsPage = lazy(() => import("@/modules/cash/ApprovalsPage"));
+const CashControlPage = lazy(() => import("@/modules/cash/ControlPage"));
 const CashReportsPage = lazy(() => import("@/modules/cash/ReportsPage"));
 const LabOrdersPage = lazy(() => import("@/modules/lab/OrdersPage"));
 const LabSamplesPage = lazy(() => import("@/modules/lab/SamplesPage"));
@@ -208,6 +209,7 @@ export default function App() {
         <Route path="/cash/close" element={g("/cash/close", <CashClosePage />)} />
         <Route path="/cash/approvals" element={g("/cash/approvals", <CashApprovalsPage />)} />
         <Route path="/cash/reports" element={g("/cash/reports", <CashReportsPage />)} />
+        <Route path="/cash/control" element={g("/cash/control", <CashControlPage />)} />
         <Route path="/doctor-share" element={g("/doctor-share", <DoctorSharePage />)} />
         <Route path="/my-share" element={g("/my-share", <MySharePage />)} />
         <Route path="/opd/vitals" element={g("/opd/vitals", <VitalsPage />)} />

@@ -149,7 +149,7 @@ export default function CounterPage() {
   const shopLabs = labs.filter((l) => (!dept || l.department === dept) && (!term || `${l.name} ${l.test_code}`.toLowerCase().includes(term)));
   const ready = lines.length > 0 && (patient || (newP?.patient_name.trim() && newP.gender));
   return (
-    <div className="-mt-4 flex h-[calc(100vh-72px)] flex-col overflow-hidden rounded-2xl bg-muted/40 sm:-mt-6">
+    <div className="flex h-[calc(100vh-128px)] flex-col overflow-hidden rounded-2xl bg-muted/40">
       {/* top bar */}
       <div className="flex flex-wrap items-center gap-2 bg-[#06302c] px-4 py-2 text-white">
         <span className="flex items-center gap-2 text-lg font-extrabold"><ReceiptText className="h-5 w-5" />Reception counter</span>

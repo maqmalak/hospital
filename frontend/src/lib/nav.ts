@@ -63,6 +63,7 @@ export const NAV: NavGroup[] = [
     { route: "/cash/close", label: "Close shift", icon: LockIcon, color: "from-slate-600 to-slate-800", desc: "Blind count and close" },
     { route: "/cash/approvals", label: "Cash approvals", icon: HandCoins, color: "from-amber-500 to-yellow-600", desc: "Closings and cash drops" },
     { route: "/cash/reports", label: "Cash reports", icon: ScrollText, color: "from-blue-600 to-indigo-700", desc: "Shifts, day-end, excess/short" },
+    { route: "/cash/control", label: "Shift control", icon: ShieldCheck, color: "from-rose-600 to-red-700", desc: "Admin: open / close any or all shifts" },
   ] },
   { label: "Inpatient", items: [
     { route: "/er", label: "Emergency", icon: HeartPulse, color: "from-red-500 to-rose-600", desc: "Triage board, unknown patients, disposition" },
