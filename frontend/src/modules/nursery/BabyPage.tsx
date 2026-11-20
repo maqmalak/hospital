@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
-  AlertTriangle, ArrowLeft, Baby, Bed, Check, ClipboardCheck, Download, Eye, FileText, Heart, ImagePlus, Loader2, Lock, MoveRight, Plus, Printer, ShieldCheck, Sun, Syringe, Wind,
+  AlertTriangle, ArrowLeft, Baby, Bed, Check, ClipboardCheck, Download, Eye, FileText, Heart, ImagePlus, Loader2, Lock, MoveRight, Pencil, Plus, Printer, ShieldCheck, Sun, Syringe, Trash2, Wind,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { call, useApi } from "@/lib/api";
@@ -53,6 +53,7 @@ export default function BabyPage() {
   const [add, setAdd] = useState<string | null>(null);
   const [move, setMove] = useState(false);
   const [strike, setStrike] = useState<E | null>(null);
+  const [edit, setEdit] = useState<E | null>(null);
   const clinical = hasRole("PW Nursery Nurse", "PW NICU Nurse", "PW Neonatologist");
   const doctor = hasRole("PW Neonatologist");
   if (!c) return <div className="flex items-center justify-center gap-2 p-20 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />Loading chart…</div>;
@@ -92,8 +93,8 @@ export default function BabyPage() {
 
       {!!c.alerts.length && <div className="mb-4 grid gap-2 md:grid-cols-2">{c.alerts.map((a, i) => <div key={i} className={cn("flex items-start gap-2 rounded-xl border px-3 py-2 text-sm", SEVERITY[a.severity])}><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><span><b className="uppercase">{a.kind}</b> · {a.text}</span></div>)}</div>}
 
-      <div className="mb-4 flex gap-1 overflow-x-auto rounded-xl bg-muted p-1" role="tablist">
-        {TABS.filter((t) => t !== "NICU support" || c.unit === "NICU" || list(["NICU Support"]).length).map((t) => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
+      <div className="mb-4 flex flex-wrap gap-1 rounded-xl bg-muted p-1" role="tablist">
+        {TABS.map((t) => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
           className={cn("shrink-0 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors", tab === t ? "tab-gold" : "text-muted-foreground hover:text-foreground")}>{t}</button>)}
       </div>
 
@@ -105,7 +106,7 @@ export default function BabyPage() {
         {tab === "Weight" && <SeriesChart rows={list(["Weight"])} k="weight_g" label="Weight (g)" refY={c.birth_weight_g * 0.9} refLabel="−10% of birth weight" />}
         {tab === "Jaundice" && <JaundiceChart rows={list(["Bilirubin"])} ga={c.gestation_weeks ?? 40} />}
         {tab === "Medicines & vaccines" && <EpiTable epi={c.epi} />}
-        <EntryTable rows={list(types)} types={types} onStrike={clinical && !done ? setStrike : undefined} />
+        <EntryTable rows={list(types)} types={types} onStrike={clinical && !done ? setStrike : undefined} onEdit={clinical && !done ? setEdit : undefined} />
       </section>}
       {tab === "Security" && <SecurityTab c={c} onDone={() => void refetch()} />}
       {tab === "Parent updates" && <UpdatesTab c={c} onDone={() => void refetch()} canPost={clinical && !done} />}
@@ -113,6 +114,7 @@ export default function BabyPage() {
       {tab === "Papers" && <PapersTab c={c} />}
 
       {add && <AddEntry type={add} c={c} onClose={() => setAdd(null)} onDone={() => { setAdd(null); void refetch(); }} />}
+      {edit && <AddEntry type={edit.entry_type} c={c} entry={edit} onClose={() => setEdit(null)} onDone={() => { setEdit(null); void refetch(); }} />}
       {move && <MoveModal c={c} onClose={() => setMove(false)} onDone={() => { setMove(false); void refetch(); }} />}
       {strike && <StrikeModal e={strike} onClose={() => setStrike(null)} onDone={() => { setStrike(null); void refetch(); }} />}
     </div>
@@ -136,20 +138,24 @@ function Overview({ c }: { c: Chart }) {
   );
 }
 
-function EntryTable({ rows, types, onStrike }: { rows: E[]; types: string[]; onStrike?: (e: E) => void }) {
+function EntryTable({ rows, types, onStrike, onEdit }: { rows: E[]; types: string[]; onStrike?: (e: E) => void; onEdit?: (e: E) => void }) {
   const cols = Array.from(new Map(types.flatMap((t) => COLS[t] ?? []).map((c) => [c[0], c])).values());
   if (!rows.length) return <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Nothing charted yet.</p>;
   return (
     <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
       <table className="w-full min-w-[720px] text-sm"><thead className="bg-muted/50 text-[11px] uppercase text-muted-foreground"><tr><th className="px-3 py-2 text-start">Time</th>{types.length > 1 && <th className="text-start">Type</th>}
-        {cols.map(([k, l]) => <th key={k} className="px-2 text-start">{l}</th>)}<th className="px-2 text-start">Alerts</th><th className="px-2 text-start">By</th><th /></tr></thead>
-        <tbody>{rows.map((e) => <tr key={e.name} className={cn("border-t border-border/60 align-top", e.cancelled && "text-muted-foreground line-through decoration-rose-500/70")}>
+        {cols.map(([k, l]) => <th key={k} className="px-2 text-start">{l}</th>)}<th className="px-2 text-start">Alerts</th><th className="px-2 text-start">By</th><th className="w-24 px-3 text-end">Actions</th></tr></thead>
+        <tbody>{rows.map((e) => <tr key={e.name} className={cn("group border-t border-border/60 align-top transition hover:bg-muted/30", e.cancelled && "bg-muted/20 text-muted-foreground line-through decoration-rose-500/70")}>
           <td className="whitespace-nowrap px-3 py-2 tabular-nums">{e.recorded_at.slice(5)}<div className="text-[10px] text-muted-foreground no-underline">{ageLabel(e.age_hours as number)}</div></td>
           {types.length > 1 && <td className="py-2">{e.entry_type}</td>}
           {cols.map(([k]) => <td key={k} className="max-w-[320px] px-2 py-2">{e[k] != null && e[k] !== "" && e[k] !== 0 ? String(e[k]) : ""}</td>)}
           <td className="px-2 py-2 text-xs font-semibold text-rose-600">{e.alert_flags ? String(e.alert_flags).split("\n").map((x) => <div key={x}>⚠ {x}</div>) : ""}</td>
           <td className="whitespace-nowrap px-2 py-2 text-xs">{e.by_name}{e.cancelled ? <div className="text-rose-600 no-underline">struck: {e.cancel_reason}</div> : null}</td>
-          <td className="px-2 py-1.5">{onStrike && !e.cancelled && <button onClick={() => onStrike(e)} className="rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-muted hover:text-rose-600">Strike</button>}</td></tr>)}</tbody></table>
+          <td className="px-3 py-1.5"><div className="flex justify-end gap-1 no-underline opacity-70 transition group-hover:opacity-100">
+            {e.cancelled ? <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 no-underline dark:bg-rose-500/15 dark:text-rose-200">STRUCK</span> : <>
+              {onEdit && <button onClick={() => onEdit(e)} className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary" aria-label="Edit entry" title="Edit (correct)"><Pencil className="h-4 w-4" /></button>}
+              {onStrike && <button onClick={() => onStrike(e)} className="rounded-lg p-2 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600" aria-label="Delete entry" title="Delete (strike through)"><Trash2 className="h-4 w-4" /></button>}</>}
+          </div></td></tr>)}</tbody></table>
     </div>
   );
 }
@@ -225,22 +231,26 @@ const FORM: Record<string, [string, string, string?, string[]?][]> = {
 };
 const VACCINES = ["BCG", "OPV-0", "Hepatitis B (birth dose)", "OPV-1", "Pentavalent-1", "PCV-1", "Rotavirus-1", "IPV-1"];
 
-function AddEntry({ type, c, onClose, onDone }: { type: string; c: Chart; onClose: () => void; onDone: () => void }) {
+function AddEntry({ type, c, entry, onClose, onDone }: { type: string; c: Chart; entry?: E; onClose: () => void; onDone: () => void }) {
   const nowLocal = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
-  const [v, setV] = useState<Record<string, string | boolean>>({ recorded_at: nowLocal(), ...(type === "Phototherapy" ? { photo_on: c.phototherapy_on ? "Stopped" : "Started" } : {}) });
+  const [v, setV] = useState<Record<string, string | boolean>>(() => entry
+    ? { recorded_at: entry.recorded_at.replace(" ", "T").slice(0, 16), ...Object.fromEntries((FORM[type] ?? []).map(([k, , kind]) => [k, kind === "check" ? !!entry[k] : entry[k] == null || entry[k] === 0 && k !== "urine" ? "" : String(entry[k])])) }
+    : { recorded_at: nowLocal(), ...(type === "Phototherapy" ? { photo_on: c.phototherapy_on ? "Stopped" : "Started" } : {}) });
+  const [why, setWhy] = useState("");
   const [busy, setBusy] = useState(false);
   const save = async () => {
     setBusy(true);
     try {
       const data = Object.fromEntries(Object.entries(v).filter(([, x]) => x !== "" && x !== false).map(([k, x]) => [k, x === true ? 1 : x]));
       data.recorded_at = String(v.recorded_at).replace("T", " ") + ":00";
-      const r = await call<{ alert_flags?: string }>("nursery.add_entry", { name: c.name, entry_type: type, data: JSON.stringify(data) });
-      if (r.alert_flags) toast.error(`Alert: ${r.alert_flags.split("\n")[0]}`, { duration: 8000 }); else toast.success(`${type} saved`);
+      const r = entry ? await call<{ alert_flags?: string }>("nursery.amend_entry", { entry: entry.name, data: JSON.stringify(data), reason: why || undefined })
+        : await call<{ alert_flags?: string }>("nursery.add_entry", { name: c.name, entry_type: type, data: JSON.stringify(data) });
+      if (r.alert_flags) toast.error(`Alert: ${r.alert_flags.split("\n")[0]}`, { duration: 8000 }); else toast.success(entry ? `${type} corrected — the old entry stays struck through` : `${type} saved`);
       onDone();
     } catch (e) { toast.error(humanizeError(e), { duration: 6000 }); } finally { setBusy(false); }
   };
   return (
-    <Modal title={`${type} · ${c.baby_name}`} onClose={onClose} footer={<><Button variant="outline" onClick={onClose}>Close</Button><Button variant="submit" disabled={busy} onClick={() => void save()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}Save</Button></>}>
+    <Modal title={`${entry ? "Edit" : type === "Phototherapy" ? "" : "Add"} ${type.toLowerCase()} · ${c.baby_name}`} onClose={onClose} footer={<><Button variant="outline" onClick={onClose}>Close</Button><Button variant="submit" disabled={busy} onClick={() => void save()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}Save</Button></>}>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Time" className="sm:col-span-2"><input type="datetime-local" className={inputCls} value={String(v.recorded_at)} max={nowLocal()} onChange={(e) => setV({ ...v, recorded_at: e.target.value })} /></Field>
         {(FORM[type] ?? []).map(([k, l, kind, opts]) => (
@@ -252,6 +262,8 @@ function AddEntry({ type, c, onClose, onDone }: { type: string; c: Chart; onClos
               : <input className={inputCls} inputMode={kind === "number" ? "decimal" : undefined} value={String(v[k] ?? "")} onChange={(e) => setV({ ...v, [k]: e.target.value })} />}
           </Field>))}
       </div>
+      {entry && <Field label="Reason for the correction (optional)" className="mt-3"><input className={inputCls} value={why} onChange={(e) => setWhy(e.target.value)} placeholder="Typing error / wrong time" /></Field>}
+      {entry && <p className="mt-2 text-xs text-muted-foreground">The original entry stays in the chart, struck through, so the audit trail is complete.</p>}
       {type === "Bilirubin" && <p className="mt-3 text-xs text-muted-foreground">Phototherapy line at {ageLabel(c.age_hours)}: {c.threshold_now} mg/dL [placeholder]. Values at or above the line raise an alert.</p>}
       {type === "Vitals" && <p className="mt-3 text-xs text-muted-foreground">Alert limits [confirm]: temp 36.5–37.5 °C · HR 100–180 · RR 30–60 · SpO₂ ≥ {c.unit === "NICU" ? 90 : 95}%.</p>}
     </Modal>
@@ -279,7 +291,7 @@ function StrikeModal({ e, onClose, onDone }: { e: E; onClose: () => void; onDone
   const [reason, setReason] = useState("");
   const go = async () => { try { await call("nursery.strike", { entry: e.name, reason }); toast.success("Entry struck through"); onDone(); } catch (x) { toast.error(humanizeError(x)); } };
   return (
-    <Modal title="Strike this entry?" onClose={onClose} footer={<><Button variant="outline" onClick={onClose}>Keep</Button><Button variant="danger" disabled={reason.trim().length < 4} onClick={() => void go()}>Strike through</Button></>}>
+    <Modal title="Delete this entry?" onClose={onClose} footer={<><Button variant="outline" onClick={onClose}>Keep</Button><Button variant="danger" disabled={reason.trim().length < 4} onClick={() => void go()}><Trash2 className="h-4 w-4" />Delete (strike through)</Button></>}>
       <p className="text-sm">{e.entry_type} at {e.recorded_at}. The entry stays visible, struck through, with your name, the time and the reason — it is never deleted.</p>
       <Field label="Reason" className="mt-3"><input className={inputCls} value={reason} onChange={(x) => setReason(x.target.value)} placeholder="Entered on the wrong baby / wrong value" autoFocus /></Field>
     </Modal>

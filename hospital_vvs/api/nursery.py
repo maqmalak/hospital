@@ -124,6 +124,12 @@ def strike(entry, reason):
 
 
 @frappe.whitelist(methods=["POST"])
+def amend_entry(entry, data, reason=None):
+	require_roles(*CLIN)
+	return nz.amend(entry, frappe.parse_json(data), reason).as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
 def set_status(name, status):
 	require_roles(*CLIN)
 	return nz.set_status(name, status).as_dict()

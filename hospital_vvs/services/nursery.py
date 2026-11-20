@@ -233,6 +233,21 @@ def strike(entry, reason):
 	return e
 
 
+def amend(entry, data, reason=None):
+	"""Correct an entry: the old one is struck through ("corrected"), a new one with the fixed values is charted at the same time."""
+	old = frappe.get_doc("Newborn Chart Entry", entry)
+	if old.cancelled:
+		frappe.throw(_("This entry was already struck through."))
+	nb = frappe.get_doc("Newborn", old.newborn)
+	if nb.status == "Discharged":
+		frappe.throw(_("This baby has been discharged."))
+	new = _entry(nb, old.entry_type, {**data, "recorded_at": data.get("recorded_at") or old.recorded_at})
+	old.cancelled = 1
+	old.cancel_reason = f"Corrected{(': ' + reason.strip()) if (reason or '').strip() else ''} — replaced by a new entry · {frappe.session.user} {_now():%Y-%m-%d %H:%M}"
+	old.save(ignore_permissions=True)
+	return new
+
+
 def set_status(name, status):
 	if status == "Discharged":
 		frappe.throw(_("Use the discharge checklist."))
