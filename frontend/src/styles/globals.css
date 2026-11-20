@@ -542,3 +542,43 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
   html.dark[data-palette="lime"] input::placeholder, html.dark[data-palette="lime"] textarea::placeholder { color: hsl(0 0% 50%); }
   html.dark[data-palette="lime"] select option { background-color: #121212; }
 }
+
+/* Lime content cards (user reference, 2026-11-20): near-black card, lime top-edge glow, lime badge, title + link turn lime on hover.
+   Markup: .lx-card > .lx-badge, .lx-title, .lx-link. Outside Lime they fall back to the normal card look. */
+@layer components {
+  .lx-card { position: relative; overflow: hidden; }
+  .lx-badge { display: inline-flex; align-items: center; border-radius: 9999px; padding: 2px 10px; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+  .lx-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: hsl(var(--muted-foreground)); transition: color .2s, gap .2s; }
+  .lx-card:hover .lx-link { color: hsl(var(--primary)); gap: 9px; }
+  .lx-title { transition: color .2s; }
+  html[data-palette="lime"] .lx-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, #65A30D, #A3E635 45%, rgb(163 230 53 / 0) 100%); }
+  html[data-palette="lime"] .lx-card { transition: border-color .25s, transform .25s, box-shadow .25s; }
+  html[data-palette="lime"] .lx-card:hover { border-color: rgb(101 163 13 / .55); transform: translateY(-2px); box-shadow: 0 18px 40px -24px rgb(132 204 22 / .55); }
+  html[data-palette="lime"] .lx-badge { background: #ECFCCB; color: #3F6212; }
+  html[data-palette="lime"] .lx-card:hover .lx-title, html[data-palette="lime"] .lx-card:hover .lx-link { color: #4D7C0F; }
+  html.dark[data-palette="lime"] .lx-card { background: #111012 !important; border-color: #1F1F1F !important; box-shadow: none; }
+  html.dark[data-palette="lime"] .lx-card:hover { border-color: rgb(196 240 26 / .45) !important; box-shadow: 0 18px 40px -26px rgb(196 240 26 / .45); }
+  html.dark[data-palette="lime"] .lx-badge { background: rgb(196 240 26 / .12); color: #C4F01A; }
+  html.dark[data-palette="lime"] .lx-title { color: #FFFFFF; }
+  html.dark[data-palette="lime"] .lx-card p, html.dark[data-palette="lime"] .lx-muted { color: #A3A3A3; }
+  html.dark[data-palette="lime"] .lx-link { color: #D4D4D4; }
+  html.dark[data-palette="lime"] .lx-card:hover .lx-title, html.dark[data-palette="lime"] .lx-card:hover .lx-link { color: #C4F01A; }
+}
+
+/* Lime tabs + secondary buttons (user, 2026-11-20): active tab = the action gradient; outline / neutral / secondary / menu buttons are a
+   lime-tinted version that fills with the gradient on hover. Selected chips and toggles (bg-primary) already take the gradient. */
+@layer components {
+  html[data-palette="lime"] .tab-gold, html[data-palette="lime"] [role="tab"][aria-selected="true"].bg-primary {
+    background-image: linear-gradient(90deg, #4D7C0F 0%, #65A30D 48%, #84CC16 100%) !important; color: #FFFFFF !important;
+    box-shadow: 0 8px 20px -10px rgb(132 204 22 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.18) !important;
+  }
+  html[data-palette="lime"] .tab-gold span { background: rgb(255 255 255 / 0.22) !important; color: #FFFFFF !important; }
+  html[data-palette="lime"] .btn-soft { background-color: #F7FEE7 !important; border-color: rgb(132 204 22 / 0.55) !important; color: #3F6212 !important;
+    transition: background .2s, color .2s, box-shadow .2s, transform .2s; }
+  html.dark[data-palette="lime"] .btn-soft { background-color: rgb(196 240 26 / 0.07) !important; border-color: rgb(196 240 26 / 0.28) !important; color: #D9F99D !important; background-image: none; }
+  html[data-palette="lime"] .btn-soft:hover:not(:disabled) {
+    background-image: linear-gradient(90deg, #4D7C0F 0%, #65A30D 48%, #84CC16 100%) !important; color: #FFFFFF !important; border-color: transparent !important;
+    box-shadow: 0 10px 24px -12px rgb(132 204 22 / 0.7) !important; transform: translateY(-1px);
+  }
+}

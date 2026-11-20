@@ -305,6 +305,28 @@ def save_procedure(name, data):
 
 
 @frappe.whitelist(methods=["POST"])
+def create_procedure(data):
+	"""New scan in the catalogue (name, modality, category required); billing item is created on first bill."""
+	require_roles(R.RADIOLOGIST)
+	d = frappe.parse_json(data)
+	name = " ".join(str(d.get("procedure_name") or "").split())
+	if len(name) < 3:
+		frappe.throw(_("Name the procedure."))
+	if frappe.db.exists("Imaging Procedure", name):
+		frappe.throw(_("{0} is already in the catalogue.").format(name))
+	if d.get("modality") not in ("X-Ray", "Ultrasound", "Doppler"):
+		frappe.throw(_("Choose the modality."))
+	cats = ("X-Ray", "Contrast Study", "Ultrasound", "Pregnancy", "Doppler", "Guided Procedure")
+	doc = frappe.get_doc({"doctype": "Imaging Procedure", "procedure_name": name, "modality": d["modality"],
+		"category": d.get("category") if d.get("category") in cats else {"X-Ray": "X-Ray", "Ultrasound": "Ultrasound", "Doppler": "Doppler"}[d["modality"]],
+		"code": (d.get("code") or "").strip().upper() or None, "body_region": d.get("body_region"),
+		"report_kind": d.get("report_kind") if d.get("report_kind") in ("General", "Obstetric", "Abdomen") else "General",
+		"female_only": cint(d.get("female_only")), **{k: d[k] for k in PROC_EDIT if k in d}})
+	doc.insert(ignore_permissions=True)
+	return doc.as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
 def save_template(data):
 	require_roles(R.RADIOLOGIST)
 	d = frappe.parse_json(data)
