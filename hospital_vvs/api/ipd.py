@@ -8,7 +8,21 @@ from hospital_vvs import roles as R
 from hospital_vvs.services import discounts, ipd
 from hospital_vvs.utils import can_see_clinical, check_branch, default_branch, has_any_role, log_access, require_roles, setting, settings
 
-CLINICAL = (R.DOCTOR, R.NURSE)
+# Nursery staff work through the same IPD records for their babies (D-96): the neonatologist counts as a doctor, nursery / NICU nurses
+# as nurses — but only on newborn admissions (see _newborn_only).
+DOCTORS = (R.DOCTOR, R.NEONATOLOGIST)
+NURSES = (R.NURSE, R.NURSERY_NURSE, R.NICU_NURSE)
+CLINICAL = (*DOCTORS, *NURSES)
+GENERAL = (R.ADMIN, R.DOCTOR, R.NURSE, R.RECEPTIONIST, R.DEO, R.ACCOUNTANT, R.CASH_SUPERVISOR)
+
+
+def _newborn_only(adm=None, patient=None):
+	"""Nursery-only staff may open / chart an admission only when it belongs to a newborn."""
+	if has_any_role(*GENERAL) or not (adm or patient):
+		return
+	patient = patient or frappe.db.get_value("Bed Allotment", adm, "patient")
+	if not frappe.db.exists("Newborn", {"baby_patient": patient}):
+		frappe.throw(_("Nursery staff can open newborn admissions only."), frappe.PermissionError)
 DESK = (R.RECEPTIONIST,)
 BILL = (R.RECEPTIONIST, R.ACCOUNTANT, R.CASH_SUPERVISOR)
 
@@ -19,7 +33,12 @@ def _d(data):
 
 def _target(d):
 	"""(admission, er_visit) from a payload; the admission wins when both are given."""
-	return d.get("bed_allotment") or None, (None if d.get("bed_allotment") else d.get("er_visit"))
+	adm = d.get("bed_allotment") or None
+	if adm:
+		_newborn_only(adm)
+	elif d.get("er_visit") and not has_any_role(*GENERAL):
+		frappe.throw(_("Nursery staff can open newborn admissions only."), frappe.PermissionError)
+	return adm, (None if adm else d.get("er_visit"))
 
 
 # ------------------------------------------------------------------ context / lists
@@ -126,6 +145,7 @@ def chart(name):
 	require_roles(*CLINICAL, *DESK, R.DEO)
 	adm = frappe.get_doc("Bed Allotment", name)
 	check_branch(adm.branch)
+	_newborn_only(patient=adm.patient)
 	clinical = can_see_clinical()
 	log_access("IPD chart", patient=adm.patient, reference_doctype="Bed Allotment", reference_name=adm.name, branch=adm.branch)
 	pat = frappe.db.get_value("Patient", adm.patient, ["name", "patient_name", "patient_name_ur", "gender", "dob", "phone", "photo", "category",
@@ -154,7 +174,7 @@ def chart(name):
 	out["mar"] = frappe.get_all("MAR Entry", filters=dict(scope, scheduled_at=[">=", add_days(now_datetime(), -3)]), fields=["name",
 		"medication_order", "item_name", "dose", "route", "scheduled_at", "status", "administered_by", "administered_at", "reason", "approved_by",
 		"batch_no"], order_by="scheduled_at", limit=600)
-	out["vitals"] = frappe.get_all("Vitals Chart", filters=scope, fields=["name", "recorded_at", "bp_systolic", "bp_diastolic", "pulse", "temperature",
+	out["vitals"] = frappe.get_all("Vitals Chart", filters=dict(scope, cancelled=["!=", 1]), fields=["name", "recorded_at", "bp_systolic", "bp_diastolic", "pulse", "temperature",
 		"spo2", "resp_rate", "rbs", "pain_score", "gcs", "intake_ml", "output_ml", "note", "recorded_by"], order_by="recorded_at desc", limit=200)
 	out["diet"] = frappe.get_all("Diet Order", filters=scope, fields=["name", "diet_date", "diet_type", "breakfast", "lunch", "dinner", "snacks", "status",
 		"charge", "instructions"], order_by="diet_date desc")
@@ -173,6 +193,12 @@ def chart(name):
 	from hospital_vvs.services.roster import on_duty
 
 	out["on_duty"] = on_duty(adm.ward)
+	# newborn admissions: the nursery record (feeds, weight, jaundice, NICU support live there; vitals / notes / medicines are these IPD rows — D-96)
+	nb = frappe.db.get_value("Newborn", {"baby_patient": adm.patient}, ["name", "baby_name", "status", "unit", "birth_weight_g", "current_weight_g", "last_feed_at",
+		"last_bilirubin", "phototherapy_on", "resp_support", "mother_name", "gestation_weeks"], as_dict=True)
+	if nb:
+		nb["last_feed_at"] = str(nb.last_feed_at or "")[:16]
+	out["newborn"] = nb
 	return out
 
 
@@ -193,7 +219,7 @@ def add_note(data):
 
 @frappe.whitelist(methods=["POST"])
 def add_round(data):
-	require_roles(R.DOCTOR)
+	require_roles(*DOCTORS)
 	d = _d(data)
 	adm = ipd.get_open(d["bed_allotment"])
 	w = frappe.get_doc({"doctype": "Ward Round", "bed_allotment": adm.name, "patient": adm.patient, "branch": adm.branch,
@@ -233,7 +259,7 @@ def check_medicine(patient, item, dose=None, frequency=None, bed_allotment=None,
 
 @frappe.whitelist(methods=["POST"])
 def order_medicine(data):
-	require_roles(R.DOCTOR)
+	require_roles(*DOCTORS)
 	d = _d(data)
 	adm, er = _target(d)
 	patient = frappe.db.get_value("Bed Allotment" if adm else "ER Visit", adm or er, "patient")
@@ -246,7 +272,7 @@ def order_medicine(data):
 
 @frappe.whitelist(methods=["POST"])
 def stop_order(name, reason):
-	require_roles(R.DOCTOR)
+	require_roles(*DOCTORS)
 	if not (reason or "").strip():
 		frappe.throw(_("Enter the reason."))
 	return ipd.stop_order(name, reason).name
@@ -254,7 +280,8 @@ def stop_order(name, reason):
 
 @frappe.whitelist(methods=["POST"])
 def chart_dose(name, status="Administered", reason=None):
-	require_roles(R.NURSE, R.DOCTOR)
+	require_roles(*NURSES, *DOCTORS)
+	_newborn_only(patient=frappe.db.get_value("MAR Entry", name, "patient"))
 	return ipd.chart_dose(name, status, reason).as_dict()
 
 
@@ -266,20 +293,20 @@ def approve_dose(names):
 
 		heads = {r.user for r in on_duty() if r.hv_is_head_nurse}
 		if frappe.session.user not in heads:
-			require_roles(R.DOCTOR)
+			require_roles(*DOCTORS)
 	names = frappe.parse_json(names) if isinstance(names, str) and names.startswith("[") else [names]
 	return [ipd.approve_dose(n).name for n in names]
 
 
 @frappe.whitelist(methods=["POST"])
 def prn_dose(order, note=None):
-	require_roles(R.NURSE, R.DOCTOR)
+	require_roles(*NURSES, *DOCTORS)
 	return ipd.prn_dose(order, note).name
 
 
 @frappe.whitelist()
 def mar_board(branch=None, ward=None, hours=2):
-	require_roles(R.NURSE, R.DOCTOR)
+	require_roles(*NURSES, *DOCTORS)
 	branch = branch or default_branch()
 	check_branch(branch)
 	from hospital_vvs.services.roster import on_duty
@@ -327,6 +354,7 @@ def schedule_procedure(data):
 @frappe.whitelist(methods=["POST"])
 def procedure_status(name, status, reason=None, notes=None):
 	require_roles(*CLINICAL)
+	_newborn_only(patient=frappe.db.get_value("IPD Procedure", name, "patient"))
 	return ipd.procedure_status(name, status, reason, notes).name
 
 
@@ -344,7 +372,7 @@ def record_consent(data):
 
 @frappe.whitelist(methods=["POST"])
 def order_labs(data):
-	require_roles(R.DOCTOR, R.NURSE, R.RECEPTIONIST)
+	require_roles(*DOCTORS, *NURSES, R.RECEPTIONIST)
 	d = _d(data)
 	adm, er = _target(d)
 	tests = d.get("tests") or []
@@ -398,6 +426,8 @@ def _print_header(adm):
 def bill(name=None, er_visit=None):
 	require_roles(*BILL, *CLINICAL)
 	if name:
+		_newborn_only(name)
+	if name:
 		adm = frappe.get_doc("Bed Allotment", name)
 		check_branch(adm.branch)
 		b = ipd.running_bill(name)
@@ -450,13 +480,13 @@ def take_payment(amount, payment_mode="Cash", purpose="Advance", name=None, er_v
 # ------------------------------------------------------------------ discharge
 @frappe.whitelist(methods=["POST"])
 def start_discharge(name, discharge_type="Normal"):
-	require_roles(R.DOCTOR, R.NURSE)
+	require_roles(*DOCTORS, *NURSES)
 	return ipd.start_discharge(name, discharge_type).name
 
 
 @frappe.whitelist(methods=["POST"])
 def sign_summary(name, data):
-	require_roles(R.DOCTOR)
+	require_roles(*DOCTORS)
 	return ipd.sign_summary(name, _d(data)).name
 
 
@@ -486,7 +516,7 @@ def cancel_final_bill(name, reason):
 
 @frappe.whitelist(methods=["POST"])
 def complete_discharge(name, override_reason=None):
-	require_roles(R.RECEPTIONIST, R.NURSE, R.DOCTOR)
+	require_roles(R.RECEPTIONIST, *NURSES, *DOCTORS)
 	if (override_reason or "").strip():
 		require_roles(R.DOCTOR, R.CASH_SUPERVISOR)
 	return ipd.complete_discharge(name, override_reason).name

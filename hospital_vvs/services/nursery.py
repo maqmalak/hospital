@@ -177,18 +177,120 @@ def _flags(nb, e):
 ENTRY_FIELDS = ("temp_c", "hr", "rr", "spo2", "feed_type", "feed_ml", "feed_min", "urine", "stool", "weight_g", "bilirubin", "bili_method", "photo_on", "item", "dose", "route",
 	"batch_no", "screening", "result", "resp_support", "fio2", "peep", "pip", "vent_rate", "iv_fluid", "iv_rate", "incubator_temp", "note", "share_with_parents")
 
+# ------------------------------------------------------------------ one source per record type (D-96)
+# Vitals → IPD "Vitals Chart" · notes → "IPD Note" · medicines & vaccines → "IPD Medication Order" + "MAR Entry" (stock / pharmacy / bill).
+# Newborn-only data (feeds, output, weight, bilirubin & phototherapy, screenings, NICU support) stays in "Newborn Chart Entry".
+# Every record is keyed to the baby's admission (Bed Allotment) and the baby's MR, so the IPD screen and the nursery chart read the same rows.
+IPD_TYPES = ("Vitals", "Doctor Note", "Nursing Note")
+MED_TYPES = ("Medication", "Vaccine")
+NOTE_TYPE = {"Doctor Note": "Progress", "Nursing Note": "Nursing"}
+
+# Newborn medicines / vaccines in the medicine master [confirm prices; EPI vaccines are free under the national programme].
+# code, name, dosage form, generic, EPI doses this item covers (in order), price, standing order (a nurse may give it per protocol)
+NEWBORN_ITEMS = [
+	("NB-VITK1", "Vitamin K1 (Phytomenadione) 1 mg/0.5 ml inj", "Injection", "Phytomenadione", [], 150, 1),
+	("NB-BCG", "BCG vaccine (EPI)", "Injection", "BCG vaccine", ["BCG"], 0, 1),
+	("NB-OPV", "Oral polio vaccine (EPI)", "Drops", "Poliovirus vaccine (oral)", ["OPV-0", "OPV-1", "OPV-2", "OPV-3"], 0, 1),
+	("NB-HEPB", "Hepatitis B vaccine paediatric (EPI)", "Injection", "Hepatitis B vaccine", ["Hepatitis B (birth dose)"], 0, 1),
+	("NB-CAFF", "Caffeine citrate 20 mg/ml inj", "Injection", "Caffeine citrate", [], 1200, 0),
+]
+VACCINE_ITEMS = {c: epi for c, _n, _f, _g, epi, _p, _s in NEWBORN_ITEMS if epi}
+STANDING_ITEMS = {c for c, *_r, st in NEWBORN_ITEMS if st}
+EPI_TO_ITEM = {e: c for c, epi in VACCINE_ITEMS.items() for e in epi}
+
+
+def c2f(c):
+	return round(flt(c) * 9 / 5 + 32, 1) if c not in (None, "") else None
+
+
+def f2c(f):
+	return round((flt(f) - 32) * 5 / 9, 1) if f not in (None, "", 0) else None
+
+
+def _need_admission(nb):
+	if not nb.admission:
+		frappe.throw(_("This baby has no cot admission — place the baby in a cot first (Move)."))
+	return nb.admission
+
+
+def _vitals_row(nb, v):
+	r = frappe._dict({"name": f"VC:{v.name}", "source": "Vitals Chart", "entry_type": "Vitals", "recorded_at": str(v.recorded_at)[:16], "recorded_by": v.recorded_by,
+		"temp_c": f2c(v.temperature), "hr": v.pulse, "rr": v.resp_rate, "spo2": v.spo2, "note": v.note, "cancelled": v.get("cancelled"), "cancel_reason": v.get("cancel_reason")})
+	r["age_hours"] = age_hours(nb, v.recorded_at)
+	r["alert_flags"] = "\n".join(_flags(nb, r)) or None
+	return r
+
+
+def _note_row(nb, n):
+	return frappe._dict({"name": f"NOTE:{n.name}", "source": "IPD Note", "entry_type": "Doctor Note" if n.note_type in ("Progress", "Consultant Visit") else "Nursing Note",
+		"recorded_at": str(n.recorded_at)[:16], "recorded_by": n.author, "note": n.note, "age_hours": age_hours(nb, n.recorded_at),
+		"cancelled": 1 if n.docstatus == 2 else 0, "cancel_reason": n.amendment_reason if n.docstatus == 2 else None})
+
+
+def _mar_row(nb, m):
+	vac = m.item in VACCINE_ITEMS
+	return frappe._dict({"name": f"MAR:{m.name}", "source": "MAR", "entry_type": "Vaccine" if vac else "Medication", "recorded_at": str(m.administered_at)[:16],
+		"recorded_by": m.administered_by, "item": m.item_name, "item_code": m.item, "dose": m.dose, "route": m.route, "batch_no": m.batch_no,
+		"age_hours": age_hours(nb, m.administered_at), "cancelled": 0})
+
+
+def entries(nb, start=None, end=None, types=None):
+	"""Every charted record for the baby, from all sources, newest first (the one list the chart, alerts and papers use)."""
+	rng = lambda f: {f: ["between", [start, end]]} if start and end else {}
+	out = []
+	if not types or set(types) - set(IPD_TYPES) - set(MED_TYPES):
+		out += [frappe._dict(e, source="Newborn Chart Entry") for e in frappe.get_all("Newborn Chart Entry", filters={"newborn": nb.name, **rng("recorded_at"),
+			**({"entry_type": ["in", list(types)]} if types else {})}, fields=["*"], order_by="recorded_at desc", limit=800)]
+	if nb.baby_patient and (not types or "Vitals" in types):
+		out += [_vitals_row(nb, v) for v in frappe.get_all("Vitals Chart", filters={"patient": nb.baby_patient, **rng("recorded_at")}, fields=["*"], limit=800)]
+	if nb.baby_patient and (not types or {"Doctor Note", "Nursing Note"} & set(types)):
+		out += [_note_row(nb, n) for n in frappe.get_all("IPD Note", filters={"patient": nb.baby_patient, "docstatus": ["in", [1, 2]], **rng("recorded_at")},
+			fields=["name", "note_type", "note", "recorded_at", "author", "docstatus", "amendment_reason"], limit=400)]
+	if nb.baby_patient and (not types or set(MED_TYPES) & set(types)):
+		out += [_mar_row(nb, m) for m in frappe.get_all("MAR Entry", filters={"patient": nb.baby_patient, "status": "Administered", **rng("administered_at")},
+			fields=["name", "item", "item_name", "dose", "route", "batch_no", "administered_at", "administered_by"], limit=400)]
+	for e in out:
+		e["recorded_at"] = str(e.recorded_at)[:16] if e.get("recorded_at") else ""
+	return sorted(out, key=lambda e: e.recorded_at, reverse=True)
+
 
 def _entry(nb, entry_type, data, at=None):
-	e = {"doctype": "Newborn Chart Entry", "newborn": nb.name, "entry_type": entry_type, "recorded_at": get_datetime(at or data.get("recorded_at") or _now()),
-		"recorded_by": frappe.session.user, **{k: data.get(k) for k in ENTRY_FIELDS if data.get(k) not in (None, "")}}
-	e["age_hours"] = age_hours(nb, e["recorded_at"])
+	when = get_datetime(at or data.get("recorded_at") or _now())
+	if entry_type == "Vitals":
+		from hospital_vvs.utils import check_vitals
+
+		adm = _need_admission(nb)
+		vals = {"temperature": c2f(data.get("temp_c")), "pulse": data.get("hr"), "resp_rate": data.get("rr"), "spo2": data.get("spo2")}
+		check_vitals({k: v for k, v in vals.items() if v not in (None, "")})
+		v = frappe.get_doc({"doctype": "Vitals Chart", "bed_allotment": adm, "patient": nb.baby_patient, "branch": nb.branch, "recorded_at": when,
+			"recorded_by": frappe.session.user, "note": data.get("note"), "source": "Nursery", **{k: x for k, x in vals.items() if x not in (None, "")}}).insert(ignore_permissions=True)
+		row = _vitals_row(nb, v)
+		frappe.db.set_value("Newborn", nb.name, "last_vitals_at", when)
+		if row.alert_flags:
+			publish("nursery", {"action": "alert", "name": nb.name, "baby": nb.baby_name, "flags": row.alert_flags.split("\n")}, nb.branch)
+		return row
+	if entry_type in NOTE_TYPE:
+		adm = _need_admission(nb)
+		n = frappe.get_doc({"doctype": "IPD Note", "bed_allotment": adm, "patient": nb.baby_patient, "branch": nb.branch, "note_type": NOTE_TYPE[entry_type],
+			"note": data.get("note"), "doctor": doctor_of() if entry_type == "Doctor Note" else None, "recorded_at": when})
+		n.insert(ignore_permissions=True)
+		n.submit()
+		if cint(data.get("share_with_parents")) and data.get("note"):
+			post_update(nb.name, data["note"], approve=True)
+		return _note_row(nb, n)
+	if entry_type in MED_TYPES:
+		code = data.get("item_code") or next((c for c, n, *_r in NEWBORN_ITEMS if n == data.get("item") or c == data.get("item")), None) \
+			or EPI_TO_ITEM.get(data.get("item") or "")
+		if not code:
+			frappe.throw(_("Choose the medicine from the medicine master."))
+		return give_now(nb.name, code, data.get("dose"), data.get("route"), data.get("batch_no"), at=when)
+	e = {"doctype": "Newborn Chart Entry", "newborn": nb.name, "entry_type": entry_type, "recorded_at": when, "recorded_by": frappe.session.user,
+		**{k: data.get(k) for k in ENTRY_FIELDS if data.get(k) not in (None, "")}}
+	e["age_hours"] = age_hours(nb, when)
 	fl = _flags(nb, e)
 	e["alert_flags"] = "\n".join(fl) or None
 	doc = frappe.get_doc(e).insert(ignore_permissions=True)
-	# keep the "current" summary on the baby in step
 	upd = {}
-	if entry_type == "Vitals":
-		upd["last_vitals_at"] = doc.recorded_at
 	if entry_type == "Feed":
 		upd["last_feed_at"] = doc.recorded_at
 	if entry_type == "Weight" and doc.weight_g:
@@ -218,24 +320,119 @@ def add_entry(name, entry_type, data):
 		frappe.throw(_("NICU support settings are charted by the NICU nurse or the doctor."))
 	if entry_type == "Doctor Note" and not has_any_role(R.NEONATOLOGIST):
 		frappe.throw(_("Doctor notes are written by the paediatrician."))
-	if entry_type in ("Medication", "Vaccine") and data.get("item") and not data.get("batch_no") and entry_type == "Vaccine":
-		frappe.throw(_("Enter the vaccine batch number."))
 	return _entry(nb, entry_type, data)
 
 
+# ------------------------------------------------------------------ medicines & vaccines through IPD orders + MAR (stock / pharmacy / bill)
+def give_now(name, item, dose=None, route=None, batch_no=None, at=None):
+	"""One dose given now: a STAT IPD order + its MAR dose charted as administered. Nurses may give standing-order items
+	(vitamin K, birth vaccines); anything else needs the paediatrician."""
+	from hospital_vvs.services import ipd
+
+	nb = frappe.get_doc("Newborn", name)
+	adm = _need_admission(nb)
+	if item not in STANDING_ITEMS and not has_any_role(R.NEONATOLOGIST):
+		frappe.throw(_("Only standing-order medicines (vitamin K, birth vaccines) can be given without the paediatrician's order."))
+	if item in VACCINE_ITEMS and not (batch_no or "").strip():
+		frappe.throw(_("Enter the vaccine batch number."))
+	meta = next((r for r in NEWBORN_ITEMS if r[0] == item), None)
+	doctor = doctor_of() or nb.attending_doctor or frappe.db.get_value("Bed Allotment", adm, "admitting_doctor")
+	route = route or ("Intradermal" if item == "NB-BCG" else "Oral" if item == "NB-OPV" else "IM")
+	mo, _alerts = ipd.order_medicine(patient=nb.baby_patient, item=item, dose=dose or ("0.05 ml" if item == "NB-BCG" else "2 drops" if item == "NB-OPV" else "1 dose"),
+		frequency="STAT", route=route, days=1, start_at=at or _now(), doctor=doctor, adm=adm,
+		override_reason=_("Newborn standing order") if meta and meta[6] else None)
+	mar = frappe.get_all("MAR Entry", filters={"medication_order": mo.name}, pluck="name", limit=1)
+	e = ipd.chart_dose(mar[0], "Administered")
+	upd = {"batch_no": (batch_no or e.batch_no or "").strip() or None}
+	if at:
+		upd["administered_at"] = get_datetime(at)
+	frappe.db.set_value("MAR Entry", e.name, upd)
+	e.reload()
+	return _mar_row(nb, e)
+
+
+def order(name, item, dose, frequency="OD", days=1, route=None, note=None):
+	"""Paediatrician's regular order (doses appear on the IPD medication chart / MAR for the nurse to give)."""
+	from hospital_vvs.services import ipd
+
+	if not has_any_role(R.NEONATOLOGIST):
+		frappe.throw(_("Medicine orders are written by the paediatrician."), frappe.PermissionError)
+	nb = frappe.get_doc("Newborn", name)
+	mo, alerts = ipd.order_medicine(patient=nb.baby_patient, item=item, dose=dose, frequency=frequency, route=route or "Oral", days=cint(days) or 1,
+		doctor=doctor_of(), adm=_need_admission(nb), override_reason=note)
+	return {"order": mo.name, "alerts": alerts}
+
+
+def give_dose(mar, batch_no=None, status="Administered", reason=None):
+	"""Chart a scheduled MAR dose from the nursery screen (same function as the IPD medication chart)."""
+	from hospital_vvs.services import ipd
+
+	e = ipd.chart_dose(mar, status, reason)
+	if batch_no:
+		frappe.db.set_value("MAR Entry", e.name, "batch_no", batch_no.strip())
+	return e
+
+
+def meds(nb):
+	if not nb.admission:
+		return {"orders": [], "doses": []}
+	orders = frappe.get_all("IPD Medication Order", filters={"bed_allotment": nb.admission}, fields=["name", "item", "item_name", "dose", "route", "frequency", "days",
+		"start_at", "status", "doctor", "alert_message"], order_by="creation desc")
+	doses = frappe.get_all("MAR Entry", filters={"bed_allotment": nb.admission, "status": ["in", ["Scheduled", "Pending Approval", "Held"]]},
+		fields=["name", "medication_order", "item", "item_name", "dose", "route", "scheduled_at", "status"], order_by="scheduled_at", limit=50)
+	for d in doses:
+		d["scheduled_at"] = str(d.scheduled_at)[:16]
+		d["overdue"] = get_datetime(d.scheduled_at) < _now()
+	return {"orders": orders, "doses": doses}
+
+
+def _split(entry):
+	src, _sep, name = entry.partition(":") if ":" in entry and entry.split(":")[0] in ("VC", "NOTE", "MAR") else ("NB", "", entry)
+	return src, name
+
+
 def strike(entry, reason):
-	"""Audit-safe correction: the entry stays, struck through with who / why (track_changes keeps the history)."""
+	"""Audit-safe correction, in whichever table the record lives: it stays, struck through with who / why."""
 	if len((reason or "").strip()) < 4:
 		frappe.throw(_("Give the reason for striking this entry."))
-	e = frappe.get_doc("Newborn Chart Entry", entry)
-	e.cancelled, e.cancel_reason = 1, f"{reason.strip()} — {frappe.session.user} {_now():%Y-%m-%d %H:%M}"
+	why = f"{reason.strip()} — {frappe.session.user} {_now():%Y-%m-%d %H:%M}"
+	src, name = _split(entry)
+	if src == "VC":
+		frappe.db.set_value("Vitals Chart", name, {"cancelled": 1, "cancel_reason": why})
+		return frappe._dict(name=entry)
+	if src == "NOTE":
+		n = frappe.get_doc("IPD Note", name)
+		n.flags.ignore_permissions = True
+		n.cancel()
+		frappe.db.set_value("IPD Note", name, "amendment_reason", why)
+		return frappe._dict(name=entry)
+	if src == "MAR":
+		frappe.throw(_("A given dose cannot be struck off. Record a correction note, and tell the pharmacy if the bill must change."))
+	e = frappe.get_doc("Newborn Chart Entry", name)
+	e.cancelled, e.cancel_reason = 1, why
 	e.save(ignore_permissions=True)
 	return e
 
 
 def amend(entry, data, reason=None):
 	"""Correct an entry: the old one is struck through ("corrected"), a new one with the fixed values is charted at the same time."""
-	old = frappe.get_doc("Newborn Chart Entry", entry)
+	src, name = _split(entry)
+	why = f"Corrected{(': ' + reason.strip()) if (reason or '').strip() else ''} — replaced by a new entry"
+	if src == "MAR":
+		frappe.throw(_("A given dose cannot be edited."))
+	if src == "VC":
+		v = frappe.get_doc("Vitals Chart", name)
+		nb = frappe.get_doc("Newborn", frappe.db.get_value("Newborn", {"baby_patient": v.patient}, "name"))
+		new = _entry(nb, "Vitals", {**data, "recorded_at": data.get("recorded_at") or v.recorded_at})
+		strike(entry, why)
+		return new
+	if src == "NOTE":
+		n = frappe.get_doc("IPD Note", name)
+		nb = frappe.get_doc("Newborn", frappe.db.get_value("Newborn", {"baby_patient": n.patient}, "name"))
+		strike(entry, why)
+		etype = "Doctor Note" if n.note_type in ("Progress", "Consultant Visit") else "Nursing Note"
+		return _entry(nb, etype, {**data, "recorded_at": data.get("recorded_at") or n.recorded_at})
+	old = frappe.get_doc("Newborn Chart Entry", name)
 	if old.cancelled:
 		frappe.throw(_("This entry was already struck through."))
 	nb = frappe.get_doc("Newborn", old.newborn)
@@ -243,9 +440,13 @@ def amend(entry, data, reason=None):
 		frappe.throw(_("This baby has been discharged."))
 	new = _entry(nb, old.entry_type, {**data, "recorded_at": data.get("recorded_at") or old.recorded_at})
 	old.cancelled = 1
-	old.cancel_reason = f"Corrected{(': ' + reason.strip()) if (reason or '').strip() else ''} — replaced by a new entry · {frappe.session.user} {_now():%Y-%m-%d %H:%M}"
+	old.cancel_reason = f"{why} · {frappe.session.user} {_now():%Y-%m-%d %H:%M}"
 	old.save(ignore_permissions=True)
 	return new
+
+
+def doctor_of(user=None):
+	return frappe.db.get_value("Doctor", {"user": user or frappe.session.user}, "name")
 
 
 def set_status(name, status):
@@ -328,14 +529,15 @@ def alerts(branch=None):
 	for nb in frappe.get_all("Newborn", filters={"status": ["!=", "Discharged"]}, fields=["name", "baby_name", "unit", "status", "birth_datetime", "last_vitals_at", "last_feed_at",
 		"tag_active", "gestation_weeks"]):
 		ah = age_hours(nb)
-		for f in frappe.get_all("Newborn Chart Entry", filters={"newborn": nb.name, "cancelled": 0, "alert_flags": ["is", "set"], "recorded_at": [">=", add_to_date(now, hours=-12)]},
-			fields=["alert_flags", "recorded_at", "entry_type"], order_by="recorded_at desc", limit=3):
-			out.append({"kind": "abnormal", "severity": "red", "name": nb.name, "baby": nb.baby_name, "text": f.alert_flags.split("\n")[0], "at": str(f.recorded_at)[:16]})
+		full = frappe.get_cached_doc("Newborn", nb.name)
+		recent = [e for e in entries(full, add_to_date(now, hours=-12), now) if e.get("alert_flags") and not e.get("cancelled")]
+		for f in recent[:3]:
+			out.append({"kind": "abnormal", "severity": "red", "name": nb.name, "baby": nb.baby_name, "text": f.alert_flags.split("\n")[0], "at": f.recorded_at})
 		last_feed = _last("Newborn Chart Entry", {"newborn": nb.name, "entry_type": "Feed", "cancelled": 0}, "recorded_at")
 		npo = _last("Newborn Chart Entry", {"newborn": nb.name, "entry_type": "Feed", "cancelled": 0, "feed_type": "Nil by mouth"}, "recorded_at")
 		if ah > 1 and not (npo and last_feed and npo >= last_feed) and (not last_feed or (now - get_datetime(last_feed)).total_seconds() / 3600 > FEED_GAP_HOURS):
 			out.append({"kind": "feed", "severity": "amber", "name": nb.name, "baby": nb.baby_name, "text": _("No feed charted for {0} h").format(round((now - get_datetime(last_feed or nb.birth_datetime)).total_seconds() / 3600, 1)), "at": str(last_feed or "")[:16]})
-		given = set(frappe.get_all("Newborn Chart Entry", filters={"newborn": nb.name, "entry_type": "Vaccine", "cancelled": 0}, pluck="item"))
+		given = {r["vaccine"] for r in epi_schedule(full) if r["given_at"]}
 		due = [v for v in BIRTH_VACCINES if v not in given]
 		if due and ah >= 12:
 			out.append({"kind": "vaccine", "severity": "amber" if ah < 24 else "red", "name": nb.name, "baby": nb.baby_name, "text": _("Birth vaccines due: {0}").format(", ".join(due)), "at": ""})
@@ -357,14 +559,17 @@ def alerts(branch=None):
 
 def chart(name):
 	nb = frappe.get_doc("Newborn", name)
-	entries = frappe.get_all("Newborn Chart Entry", filters={"newborn": name}, fields=["*"], order_by="recorded_at desc", limit=500)
-	for e in entries:
-		e["by_name"] = frappe.db.get_value("User", e.recorded_by, "full_name") if e.recorded_by else ""
-		e["recorded_at"] = str(e.recorded_at)[:16]
+	rows = entries(nb)
+	names = {}
+	for e in rows:
+		if e.recorded_by and e.recorded_by not in names:
+			names[e.recorded_by] = frappe.db.get_value("User", e.recorded_by, "full_name") or e.recorded_by
+		e["by_name"] = names.get(e.recorded_by, "")
 	sec = frappe.get_all("Newborn Security Event", filters={"newborn": name}, fields=["event", "at", "by_user", "staff_id", "with_whom", "band_match", "note"], order_by="at desc", limit=100)
 	upd = frappe.get_all("Newborn Parent Update", filters={"newborn": name}, fields=["name", "status", "text", "photo", "posted_at", "posted_by"], order_by="posted_at desc", limit=50)
 	out = nb.as_dict()
-	out.update({"age_hours": age_hours(nb), "entries": entries, "security": sec, "updates": upd, "epi": epi_schedule(nb), "alerts": [a for a in alerts() if a["name"] == name],
+	out.update({"age_hours": age_hours(nb), "entries": rows, "meds": meds(nb), "newborn_items": [{"code": c, "name": n, "form": f, "standing": st, "vaccine": bool(e)} for c, n, f, _g, e, _p, st in NEWBORN_ITEMS],
+		"security": sec, "updates": upd, "epi": epi_schedule(nb), "alerts": [a for a in alerts() if a["name"] == name],
 		"threshold_now": phototherapy_threshold(age_hours(nb), nb.gestation_weeks), "doctor_name": frappe.db.get_value("Doctor", nb.attending_doctor, "doctor_name") if nb.attending_doctor else None,
 		"cot_label": f"{frappe.db.get_value('Hospital Bed', nb.cot, 'ward')} · {frappe.db.get_value('Hospital Bed', nb.cot, 'bed_no')}" if nb.cot else None,
 		"siblings": frappe.get_all("Newborn", filters={"multiple_group": nb.multiple_group, "name": ["!=", name]}, fields=["name", "baby_name"]) if nb.multiple_group else [],
@@ -386,13 +591,21 @@ def _bill(nb):
 
 
 def epi_schedule(nb):
-	given = {e.item: e for e in frappe.get_all("Newborn Chart Entry", filters={"newborn": nb.name, "entry_type": "Vaccine", "cancelled": 0}, fields=["item", "recorded_at", "batch_no", "recorded_by"])}
+	"""EPI card: doses given come from the MAR (IPD medication chart), in order per vaccine item."""
+	given = {}
+	if nb.baby_patient:
+		for m in frappe.get_all("MAR Entry", filters={"patient": nb.baby_patient, "status": "Administered", "item": ["in", list(VACCINE_ITEMS)]},
+			fields=["item", "administered_at", "batch_no"], order_by="administered_at"):
+			names = VACCINE_ITEMS[m.item]
+			k = sum(1 for g in given if g in names)
+			if k < len(names):
+				given[names[k]] = m
 	bd = getdate(nb.birth_datetime)
 	out = []
 	for days, v in EPI:
 		g = given.get(v)
 		out.append({"vaccine": v, "due": str(add_days(bd, days)), "age": "Birth" if days == 0 else f"{days // 7} weeks" if days < 200 else f"{round(days / 30)} months",
-			"given_at": str(g.recorded_at)[:10] if g else None, "batch": g.batch_no if g else None})
+			"given_at": str(g.administered_at)[:10] if g else None, "batch": g.batch_no if g else None})
 	return out
 
 
@@ -525,7 +738,7 @@ def _ident(nb):
 
 
 def discharge_html(nb):
-	ents = frappe.get_all("Newborn Chart Entry", filters={"newborn": nb.name, "cancelled": 0}, fields=["entry_type", "recorded_at", "item", "batch_no", "screening", "result", "bilirubin", "photo_on"], order_by="recorded_at")
+	ents = [e for e in reversed(entries(nb)) if not e.get("cancelled")]
 	vacc = "".join(f"<tr><td>{esc(e.item)}</td><td>{str(e.recorded_at)[:16]}</td><td>{esc(e.batch_no or '')}</td></tr>" for e in ents if e.entry_type == "Vaccine")
 	scr = "".join(f"<tr><td>{esc(e.screening)}</td><td class='{'ok' if e.result in ('Pass', 'Normal') else 'flag'}'>{esc(e.result)}</td><td>{str(e.recorded_at)[:16]}</td></tr>" for e in ents if e.entry_type == "Screening")
 	bili = [e for e in ents if e.entry_type == "Bilirubin"]
@@ -566,7 +779,7 @@ def epi_html(nb):
 
 def nicu_html(nb, day=None):
 	day = getdate(day or today())
-	ents = frappe.get_all("Newborn Chart Entry", filters={"newborn": nb.name, "cancelled": 0, "recorded_at": ["between", [f"{day} 00:00:00", f"{day} 23:59:59"]]}, fields=["*"], order_by="recorded_at")
+	ents = [e for e in reversed(entries(nb, f"{day} 00:00:00", f"{day} 23:59:59")) if not e.get("cancelled")]
 	v = [e for e in ents if e.entry_type == "Vitals"]
 	rng = lambda k: (f"{min(flt(e[k]) for e in v if e[k] not in (None, 0))}–{max(flt(e[k]) for e in v if e[k] not in (None, 0))}" if any(e[k] for e in v) else "—")
 	feeds = [e for e in ents if e.entry_type == "Feed"]
@@ -695,7 +908,7 @@ def portal_home(s):
 		for u in ups:
 			u["has_photo"] = bool(u.pop("photo")) and cint(d.portal_photo_consent)
 			u["posted_at"] = str(u.posted_at)[:16]
-		notes = frappe.get_all("Newborn Chart Entry", filters={"newborn": d.name, "share_with_parents": 1, "cancelled": 0}, fields=["note", "recorded_at"], order_by="recorded_at desc", limit=10)
+		notes = []  # notes for parents are Parent Updates (approved) — one place
 		epi = epi_schedule(d)
 		nxt = next((r for r in epi if not r["given_at"]), None)
 		docs = [k for k in ("birth", "epi") if True] + (["discharge"] if d.status == "Discharged" else []) + (["nicu"] if d.unit == "NICU" and d.status != "Discharged" else [])

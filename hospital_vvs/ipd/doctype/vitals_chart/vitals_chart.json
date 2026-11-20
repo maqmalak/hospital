@@ -30,7 +30,10 @@
   "v6",
   "output_ml",
   "v7",
-  "note"
+  "note",
+  "cancelled",
+  "cancel_reason",
+  "source"
  ],
  "fields": [
   {
@@ -180,6 +183,24 @@
    "fieldname": "note",
    "fieldtype": "Small Text",
    "label": "Note"
+  },
+  {
+   "fieldname": "cancelled",
+   "fieldtype": "Check",
+   "label": "Struck Through",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancel_reason",
+   "fieldtype": "Small Text",
+   "label": "Strike Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Data",
+   "label": "Charted From",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,

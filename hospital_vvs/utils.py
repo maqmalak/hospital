@@ -160,7 +160,7 @@ def no_store(response=None, request=None):
 
 # ------------------------------------------------------------------ vitals sanity (OPD nurse, IPD chart, ER triage)
 VITAL_RANGES = {"bp_systolic": (50, 260), "bp_diastolic": (30, 160), "pulse": (25, 220), "temperature": (90, 110), "spo2": (50, 100), "weight": (0.5, 300),
-	"height": (30, 230), "rbs": (20, 700), "resp_rate": (4, 70), "gcs": (3, 15), "pain_score": (0, 10)}
+	"height": (30, 230), "rbs": (20, 700), "resp_rate": (4, 120), "gcs": (3, 15), "pain_score": (0, 10)}
 
 
 def check_vitals(v):

@@ -18,6 +18,37 @@ import { Button } from "@/components/ui/button";
 import { axisProps, TipBox, useViz } from "@/lib/viz";
 import { cn } from "@/utils/cn";
 import { ageLabel, Modal, SEVERITY, STATUSES, StatusChip, UNITS, useNurseryLive, type Alert } from "./shared";
+import { ChargesTable, LabsPanel, MedicationPanel, ProceduresPanel, type Dose, type LabOrder, type Order, type Proc } from "@/modules/ipd/panels";
+import type { Ctx } from "@/modules/ipd/shared";
+
+interface IpdChart { orders: Order[]; mar: Dose[]; labs: LabOrder[]; procedures: Proc[] }
+
+function NoAdm({ c }: { c: { baby_name: string } }) {
+  return <p className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">{c.baby_name} has no cot admission yet — place the baby in a cot (Move) to order labs, procedures or see the bill.</p>;
+}
+
+/** Standing-order dose (vitamin K, birth vaccines) given by the nurse: one STAT IPD order + its MAR dose, batch recorded. */
+function StandingDose({ c, onDone }: { c: { name: string; newborn_items: { code: string; name: string; standing: number; vaccine: boolean }[] }; onDone: () => void }) {
+  const items = c.newborn_items.filter((i) => i.standing);
+  const [item, setItem] = useState(items[0]?.code ?? "");
+  const [dose, setDose] = useState("");
+  const [batch, setBatch] = useState("");
+  const [busy, setBusy] = useState(false);
+  const sel = items.find((i) => i.code === item);
+  const go = async () => { setBusy(true); try { await call("nursery.give_now", { name: c.name, item, dose: dose || undefined, batch_no: batch || undefined }); toast.success(`${sel?.name} given — on the medication chart`); setBatch(""); setDose(""); onDone(); }
+    catch (e) { toast.error(humanizeError(e), { duration: 7000 }); } finally { setBusy(false); } };
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold"><Syringe className="h-4 w-4 text-primary" />Give now — newborn standing orders <span className="font-normal text-muted-foreground">(vitamin K, birth vaccines)</span></h3>
+      <div className="grid gap-3 sm:grid-cols-[1.4fr_1fr_1fr_auto] sm:items-end">
+        <Field label="Medicine / vaccine"><select className={inputCls} value={item} onChange={(e) => setItem(e.target.value)}>{items.map((i) => <option key={i.code} value={i.code}>{i.name}</option>)}</select></Field>
+        <Field label="Dose"><input className={inputCls} value={dose} onChange={(e) => setDose(e.target.value)} placeholder={item === "NB-BCG" ? "0.05 ml" : item === "NB-OPV" ? "2 drops" : "1 mg"} /></Field>
+        <Field label={sel?.vaccine ? "Batch no. (required)" : "Batch no."}><input className={inputCls} value={batch} onChange={(e) => setBatch(e.target.value)} /></Field>
+        <Button variant="submit" disabled={busy || !item || (!!sel?.vaccine && !batch.trim())} onClick={() => void go()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}Give</Button>
+      </div>
+    </div>
+  );
+}
 
 type E = Record<string, unknown> & { name: string; entry_type: string; recorded_at: string; by_name?: string; alert_flags?: string; cancelled?: number; cancel_reason?: string; age_hours?: number };
 interface Chart {
@@ -25,15 +56,15 @@ interface Chart {
   birth_datetime: string; delivery_type?: string; gestation_weeks?: number; gestation_days?: number; birth_weight_g: number; current_weight_g?: number; length_cm?: number; head_circ_cm?: number;
   apgar_1?: number; apgar_5?: number; blood_group?: string; band_no: string; tag_no?: string; tag_active: number; nicu_reason?: string; last_bilirubin?: number; phototherapy_on?: number; resp_support?: string;
   multiple_birth?: string; birth_order?: number; siblings: { name: string; baby_name: string }[]; doctor_name?: string; age_hours: number; threshold_now: number; portal_photo_consent: number;
-  entries: E[]; security: { event: string; at: string; by_user: string; staff_id?: string; with_whom?: string; band_match?: number; note?: string }[];
+  entries: E[]; admission?: string; newborn_items: { code: string; name: string; form: string; standing: number; vaccine: boolean }[]; security: { event: string; at: string; by_user: string; staff_id?: string; with_whom?: string; band_match?: number; note?: string }[];
   updates: { name: string; status: string; text: string; photo?: string; posted_at: string }[]; epi: { vaccine: string; due: string; age: string; given_at?: string | null; batch?: string | null }[];
   alerts: Alert[]; bill?: { admission: string; gross?: number; net?: number } | null; doc_version: number;
   [k: string]: unknown;
 }
-const TABS = ["Overview", "Vitals", "Feeds", "Output", "Weight", "Jaundice", "Medicines & vaccines", "Screenings", "Notes", "NICU support", "Security", "Parent updates", "Discharge", "Papers"] as const;
+const TABS = ["Overview", "Vitals", "Feeds", "Output", "Weight", "Jaundice", "Medicines & vaccines", "Labs", "Procedures", "Screenings", "Notes", "NICU support", "Security", "Parent updates", "Bill", "Discharge", "Papers"] as const;
 type Tab = (typeof TABS)[number];
 const TAB_TYPES: Partial<Record<Tab, string[]>> = { Vitals: ["Vitals"], Feeds: ["Feed"], Output: ["Output"], Weight: ["Weight"], Jaundice: ["Bilirubin", "Phototherapy"],
-  "Medicines & vaccines": ["Medication", "Vaccine"], Screenings: ["Screening"], Notes: ["Doctor Note", "Nursing Note"], "NICU support": ["NICU Support"] };
+  Screenings: ["Screening"], Notes: ["Doctor Note", "Nursing Note"], "NICU support": ["NICU Support"] };
 const COLS: Record<string, [string, string][]> = {
   Vitals: [["temp_c", "Temp °C"], ["hr", "HR"], ["rr", "RR"], ["spo2", "SpO₂"]], Feed: [["feed_type", "Type"], ["feed_ml", "ml"], ["feed_min", "min"], ["note", "Note"]],
   Output: [["urine", "Wet"], ["stool", "Stool"], ["note", "Note"]], Weight: [["weight_g", "g"], ["note", "Note"]], Bilirubin: [["bilirubin", "mg/dL"], ["bili_method", "Method"], ["photo_on", "Photo"]],
@@ -47,8 +78,14 @@ const threshold = (h: number, ga = 40) => Math.round(Math.min(5 + Math.min(Math.
 export default function BabyPage() {
   const { name = "" } = useParams();
   const { hasRole } = useAuth();
-  const { data: c, refetch } = useApi<Chart>("nursery.chart", { name });
-  useNurseryLive(["nursery.chart"]);
+  const { data: c, refetch: refetchNb } = useApi<Chart>("nursery.chart", { name });
+  const { branch } = useAuth();
+  // the baby's IPD admission: medicines (orders + MAR), labs, procedures and the bill are the same records the IPD screen shows (D-96)
+  const { data: ipdc, refetch: refetchIpd } = useApi<IpdChart>("ipd.chart", { name: c?.admission }, { enabled: !!c?.admission });
+  const { data: bill, refetch: refetchBill } = useApi<{ lines: Parameters<typeof ChargesTable>[0]["lines"]; gross?: number; net?: number; paid?: number; balance?: number }>("ipd.bill", { name: c?.admission }, { enabled: !!c?.admission });
+  const { data: ctx } = useApi<Ctx>("ipd.context", { branch });
+  const refetch = () => { void refetchNb(); void refetchIpd(); void refetchBill(); };
+  useNurseryLive(["nursery.chart", "ipd.chart", "ipd.bill"]);
   const [tab, setTab] = useState<Tab>("Overview");
   const [add, setAdd] = useState<string | null>(null);
   const [move, setMove] = useState(false);
@@ -108,6 +145,24 @@ export default function BabyPage() {
         {tab === "Medicines & vaccines" && <EpiTable epi={c.epi} />}
         <EntryTable rows={list(types)} types={types} onStrike={clinical && !done ? setStrike : undefined} onEdit={clinical && !done ? setEdit : undefined} />
       </section>}
+      {tab === "Medicines & vaccines" && <div className="space-y-4">
+        {!c.admission ? <p className="rounded-2xl border border-dashed border-border p-6 text-sm text-muted-foreground">Place the baby in a cot first — medicines are charted on the cot admission.</p> : <>
+          {!done && clinical && <StandingDose c={c} onDone={refetch} />}
+          {ipdc && <MedicationPanel target={{ bed_allotment: c.admission }} patient={c.baby_patient} orders={ipdc.orders} mar={ipdc.mar} refresh={refetch} gate={!!ctx?.flags?.mar_gate}
+            canOrder={!done && doctor} canChart={!done && clinical} />}
+          <EpiTable epi={c.epi} />
+          <p className="text-xs text-muted-foreground">One medication chart: orders and doses here are the same records as on the IPD admission ({c.admission}) — stock, the pharmacy and the bill follow automatically.</p></>}
+      </div>}
+      {tab === "Labs" && (ipdc ? <LabsPanel target={{ bed_allotment: c.admission! }} labs={ipdc.labs} ctx={ctx} refresh={refetch} canOrder={!done && clinical} /> : <NoAdm c={c} />)}
+      {tab === "Procedures" && (ipdc ? <ProceduresPanel target={{ bed_allotment: c.admission! }} procs={ipdc.procedures} ctx={ctx} refresh={refetch} canWrite={!done && clinical} /> : <NoAdm c={c} />)}
+      {tab === "Bill" && (c.admission ? <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex-1 text-sm"><b>Cot admission {c.admission}</b><div className="text-xs text-muted-foreground">Cot days, nursing, medicines, labs and procedures — the same bill the IPD and billing desks see.</div></div>
+          {bill?.gross != null && <div className="text-end"><div className="text-xs text-muted-foreground">Total so far</div><div className="text-xl font-extrabold tabular-nums">Rs {Math.round(bill.gross).toLocaleString()}</div></div>}
+          <Link to={`/ipd/${c.admission}?tab=charges`}><Button size="sm" variant="outline">Open IPD bill</Button></Link>
+        </div>
+        <ChargesTable lines={bill?.lines ?? []} />
+      </div> : <NoAdm c={c} />)}
       {tab === "Security" && <SecurityTab c={c} onDone={() => void refetch()} />}
       {tab === "Parent updates" && <UpdatesTab c={c} onDone={() => void refetch()} canPost={clinical && !done} />}
       {tab === "Discharge" && <DischargeTab c={c} doctor={doctor} onDone={() => void refetch()} />}
@@ -152,7 +207,7 @@ function EntryTable({ rows, types, onStrike, onEdit }: { rows: E[]; types: strin
           <td className="px-2 py-2 text-xs font-semibold text-rose-600">{e.alert_flags ? String(e.alert_flags).split("\n").map((x) => <div key={x}>⚠ {x}</div>) : ""}</td>
           <td className="whitespace-nowrap px-2 py-2 text-xs">{e.by_name}{e.cancelled ? <div className="text-rose-600 no-underline">struck: {e.cancel_reason}</div> : null}</td>
           <td className="px-3 py-1.5"><div className="flex justify-end gap-1 no-underline opacity-70 transition group-hover:opacity-100">
-            {e.cancelled ? <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 no-underline dark:bg-rose-500/15 dark:text-rose-200">STRUCK</span> : <>
+            {e.source === "MAR" ? <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold">MAR</span> : e.cancelled ? <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 no-underline dark:bg-rose-500/15 dark:text-rose-200">STRUCK</span> : <>
               {onEdit && <button onClick={() => onEdit(e)} className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary" aria-label="Edit entry" title="Edit (correct)"><Pencil className="h-4 w-4" /></button>}
               {onStrike && <button onClick={() => onStrike(e)} className="rounded-lg p-2 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600" aria-label="Delete entry" title="Delete (strike through)"><Trash2 className="h-4 w-4" /></button>}</>}
           </div></td></tr>)}</tbody></table>

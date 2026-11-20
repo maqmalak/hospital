@@ -551,7 +551,7 @@ def pharmacy_bills():
 	return (setting("ipd_medicine_billing") or "Pharmacy bills patient") != "Hospital IPD bill"
 
 
-ROUTE_MAP = {"PR": "Rectal", "SL": "Sublingual", "NG": "Oral", "Other": "Oral"}
+ROUTE_MAP = {"PR": "Rectal", "SL": "Sublingual", "NG": "Oral", "Other": "Oral", "Intradermal": "SC"}  # prescription has no intradermal (BCG)
 
 
 def ward_prescription(mo, qty_units, note=None):

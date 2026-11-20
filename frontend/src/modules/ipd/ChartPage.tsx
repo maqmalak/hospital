@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ArrowRightLeft, BedDouble, CalendarPlus, CheckCircle2, ClipboardCheck, FileText, IdCard, LogOut, Plus, Printer, Receipt, Smartphone, Soup, Users, X } from "lucide-react";
+import { AlertTriangle, Baby, ArrowRightLeft, BedDouble, CalendarPlus, CheckCircle2, ClipboardCheck, FileText, IdCard, LogOut, Plus, Printer, Receipt, Smartphone, Soup, Users, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { call, humanizeError, useApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -16,6 +16,7 @@ import { type SummaryPrint, summaryHtml, wristbandHtml } from "./prints";
 import { type Bill, Chip, type Ctx, dOnly, dt, IpdHero, rs, useIpdLive } from "./shared";
 
 interface Chart {
+  newborn?: { name: string; baby_name: string; status: string; unit: string; birth_weight_g: number; current_weight_g?: number; last_feed_at?: string; last_bilirubin?: number; phototherapy_on?: number; resp_support?: string; mother_name?: string; gestation_weeks?: number } | null;
   name: string; patient: string; patient_name: string; status: string; branch: string; bed: string; bed_no?: string; ward: string; admit_datetime: string; expected_discharge?: string;
   release_datetime?: string; admitting_doctor: string; doctor_name?: string; source: string; reason?: string; provisional_diagnosis?: string; payer_type: string; payer?: string;
   pre_auth?: string; service_package?: string; coverage_percent?: number; final_invoice?: string; discharge_type?: string; discharge_summary?: string; days: number; er_visit?: string;
@@ -73,6 +74,14 @@ export default function ChartPage() {
             <div key={k} className="rounded-xl bg-white/10 px-3 py-2 backdrop-blur"><div className="text-[10px] uppercase tracking-widest text-white/60">{k}</div><div className="truncate text-sm font-bold">{v}</div></div>))}
         </div>
       </IpdHero>
+      {c.newborn && <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-pink-300 bg-pink-50 px-4 py-3 text-sm dark:border-pink-500/40 dark:bg-pink-500/10">
+        <span className="grid h-10 w-10 place-items-center rounded-xl bg-pink-500 text-white"><Baby className="h-5 w-5" /></span>
+        <div className="min-w-0 flex-1"><b>Newborn · {c.newborn.unit}</b> — {c.newborn.status} · mother {c.newborn.mother_name}{c.newborn.gestation_weeks ? ` · ${c.newborn.gestation_weeks} wk` : ""}
+          <div className="text-xs text-muted-foreground">Weight {c.newborn.current_weight_g ?? c.newborn.birth_weight_g} g (birth {c.newborn.birth_weight_g} g){c.newborn.last_feed_at ? ` · last feed ${c.newborn.last_feed_at.slice(11)}` : ""}
+            {c.newborn.last_bilirubin ? ` · bilirubin ${c.newborn.last_bilirubin} mg/dL` : ""}{c.newborn.phototherapy_on ? " · phototherapy on" : ""}{c.newborn.resp_support && c.newborn.resp_support !== "Room air" ? ` · ${c.newborn.resp_support}` : ""}
+            {" · vitals, notes and medicines here are the same records as the nursery chart"}</div></div>
+        <Link to={`/nursery/baby/${c.newborn.name}`}><Button size="sm" variant="outline">Open baby chart</Button></Link>
+      </div>}
       {p.allergies.length > 0 && <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border-2 border-rose-400 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-800 dark:bg-rose-500/10 dark:text-rose-200">
         <AlertTriangle className="h-5 w-5" />Allergies: {p.allergies.map((a) => `${a.allergy}${a.severity ? ` (${a.severity})` : ""}`).join(", ")}</div>}
       <div className="mb-4 overflow-x-auto"><Tabs tabs={tabs} value={tab} onChange={setTab} /></div>

@@ -190,6 +190,7 @@ EXTRA_PERMS = {
 	"Payment Entry": {r: ["read", "create", "write", "submit", "print"] for r in (roles.RECEPTIONIST, roles.CASH_SUPERVISOR, roles.ACCOUNTANT, roles.ADMIN,
 		roles.OV_STAFF)},
 	"Sales Invoice": {r: ["read", "create", "write", "submit", "print"] for r in roles.MONEY + [roles.ADMIN, roles.OV_STAFF]},
+	"Prescription": {r: ["read", "create", "write", "submit"] for r in (roles.NEONATOLOGIST, roles.NURSERY_NURSE, roles.NICU_NURSE)},  # newborn ward orders (D-96)
 	"Shift Assignment": {r: ["read", "create", "write", "submit", "cancel"] for r in (roles.NURSE, roles.ADMIN)},
 	"Shift Type": {r: ["read"] for r in (roles.NURSE, roles.DOCTOR, roles.ADMIN, roles.RECEPTIONIST)},
 	"Employee": {r: ["read"] for r in (roles.NURSE, roles.ADMIN)},
@@ -199,7 +200,8 @@ EXTRA_PERMS = {
 def ensure_erpnext_permissions():
 	from frappe.permissions import add_permission, update_permission_property
 
-	readers = set(roles.MONEY + [roles.ADMIN, roles.OV_STAFF, roles.FINDER, roles.REVIEWER, roles.STORE_KEEPER, roles.DOCTOR, roles.NURSE, roles.PATHOLOGIST, roles.DEO])
+	readers = set(roles.MONEY + [roles.ADMIN, roles.OV_STAFF, roles.FINDER, roles.REVIEWER, roles.STORE_KEEPER, roles.DOCTOR, roles.NURSE, roles.PATHOLOGIST, roles.DEO,
+		roles.NEONATOLOGIST, roles.NURSERY_NURSE, roles.NICU_NURSE, roles.RADIOLOGIST, roles.RADIOGRAPHER, roles.SONOGRAPHER])  # ward orders → pharmacy draft (D-96)
 	for dt in READ_FOR_MONEY:
 		if not frappe.db.exists("DocType", dt):
 			continue

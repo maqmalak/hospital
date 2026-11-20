@@ -118,6 +118,13 @@ def add_entry(name, entry_type, data):
 
 
 @frappe.whitelist(methods=["POST"])
+def give_now(name, item, dose=None, route=None, batch_no=None):
+	"""Standing-order dose (vitamin K, birth vaccines) through the IPD medication chart: STAT order + administered MAR dose."""
+	require_roles(*CLIN)
+	return nz.give_now(name, item, dose, route, batch_no)
+
+
+@frappe.whitelist(methods=["POST"])
 def strike(entry, reason):
 	require_roles(*CLIN)
 	return nz.strike(entry, reason).as_dict()

@@ -583,11 +583,11 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
   }
 }
 
-/* Outfit everywhere in the staff ERP + lime headings in the Lime palette (user, 2026-11-20). Website (.s2) keeps its own fonts. */
+/* Outfit everywhere in the staff ERP + lime headings in the Lime palette (user, 2026-11-20). Only page titles (PageHeader) and headings inside
+   normal cards are recoloured — headings on dark banners keep their own (white) colour. Website (.s2) keeps its own fonts. */
 @layer components {
-  html[data-palette="lime"] main h1, html[data-palette="lime"] main h1.vvs-serif { color: #3F6212; }
-  html[data-palette="lime"] main section > div > h2, html[data-palette="lime"] main section > h2, html[data-palette="lime"] main section > div > h3 { color: #4D7C0F; }
-  html.dark[data-palette="lime"] main h1, html.dark[data-palette="lime"] main h1.vvs-serif { color: #C4F01A; }
-  html.dark[data-palette="lime"] main section > div > h2, html.dark[data-palette="lime"] main section > h2, html.dark[data-palette="lime"] main section > div > h3 { color: #C4F01A; }
-  html[data-palette="lime"] main [role="dialog"] h2, html[data-palette="lime"] main .s2 h1, html[data-palette="lime"] main .s2 h2 { color: inherit; }
+  html[data-palette="lime"] main h1.vvs-serif { color: #3F6212; }
+  html[data-palette="lime"] main section[class~="bg-card"] > div > h2, html[data-palette="lime"] main section[class~="bg-card"] > h2, html[data-palette="lime"] main section[class~="bg-card"] > div > h3 { color: #4D7C0F; }
+  html.dark[data-palette="lime"] main h1.vvs-serif { color: #C4F01A; }
+  html.dark[data-palette="lime"] main section[class~="bg-card"] > div > h2, html.dark[data-palette="lime"] main section[class~="bg-card"] > h2, html.dark[data-palette="lime"] main section[class~="bg-card"] > div > h3 { color: #C4F01A; }
 }

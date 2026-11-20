@@ -23,10 +23,30 @@ WARDS = [("Mother & Baby Rooms", "ماں اور بچے کے کمرے", "Maternit
 	("NICU", "این آئی سی یو", "NICU", "Second", 18000, 8, "NI", "ICU", "#7c3aed")]
 
 
+def ensure_items():
+	"""Newborn medicines / vaccines in the medicine master (D-96) so they go through IPD orders + MAR + pharmacy like any medicine."""
+	from hospital_vvs.services.nursery import NEWBORN_ITEMS
+
+	if not frappe.db.exists("Item Group", "Medicines"):
+		return
+	for code, name, form, generic, _epi, price, _st in NEWBORN_ITEMS:
+		if generic and not frappe.db.exists("Generic Name", generic):
+			frappe.get_doc({"doctype": "Generic Name", "generic_name": generic}).insert(ignore_permissions=True)
+		if not frappe.db.exists("Item", code):
+			it = frappe.get_doc({"doctype": "Item", "item_code": code, "item_name": name, "item_group": "Medicines", "stock_uom": "Nos", "is_stock_item": 1,
+				"has_batch_no": 1, "create_new_batch": 1, "has_expiry_date": 1, "shelf_life_in_days": 365, "hv_is_medicine": 1, "hv_generic": generic,
+				"hv_dosage_form": form, "hv_billing_type": "Medicine", "hv_prescription_required": 1, "include_item_in_manufacturing": 0})
+			it.flags.ignore_mandatory = True
+			it.insert(ignore_permissions=True)
+		if not frappe.db.exists("Item Price", {"item_code": code, "price_list": "Standard Selling"}):
+			frappe.get_doc({"doctype": "Item Price", "item_code": code, "price_list": "Standard Selling", "price_list_rate": price}).insert(ignore_permissions=True)
+
+
 def ensure_wards():
 	branch = frappe.db.get_value("Branch", {}, "name")
 	if not branch:
 		return
+	ensure_items()
 	for name, ur, wtype, floor, rate, cots, pre, btype, color in WARDS:
 		if not frappe.db.exists("Ward", name):
 			frappe.get_doc({"doctype": "Ward", "ward_name": name, "ward_name_ur": ur, "ward_type": wtype, "gender": "Children" if wtype != "Maternity" or pre == "RC" else "Female",
@@ -155,7 +175,7 @@ def run(seed=11):
 	nb = frappe.get_doc("Newborn", a)
 	for i, (v, batch) in enumerate((("BCG", "BCG-2611-07"), ("OPV-0", "OPV-2610-21"), ("Hepatitis B (birth dose)", "HBV-2609-14"))):
 		_as(nurse, nz._entry, nb, "Vaccine", {"item": v, "batch_no": batch, "route": "Intradermal" if v == "BCG" else "Oral" if "OPV" in v else "IM", "dose": "0.05 ml" if v == "BCG" else "2 drops" if "OPV" in v else "0.5 ml"}, at=add_to_date(nb.birth_datetime, hours=6 + i))
-	_as(nurse, nz._entry, nb, "Medication", {"item": "Vitamin K1 (phytomenadione)", "dose": "1 mg", "route": "IM", "batch_no": "VK-2610-03"}, at=add_to_date(nb.birth_datetime, hours=1))
+	_as(nurse, nz._entry, nb, "Medication", {"item_code": "NB-VITK1", "dose": "1 mg", "route": "IM", "batch_no": "VK-2610-03"}, at=add_to_date(nb.birth_datetime, hours=1))
 	for s, h in (("Hearing (OAE)", 30), ("CCHD pulse oximetry", 26)):
 		_as(nurse, nz._entry, nb, "Screening", {"screening": s, "result": "Pass"}, at=add_to_date(nb.birth_datetime, hours=h))
 	_as(sana, nz._entry, nb, "Doctor Note", {"note": "Examination normal. Feeding well, passing urine and meconium. Mild physiological jaundice, below phototherapy line.", "share_with_parents": 1}, at=add_to_date(nb.birth_datetime, hours=26))
@@ -178,8 +198,8 @@ def run(seed=11):
 			(20, {"resp_support": "CPAP", "fio2": 28, "peep": 5, "iv_fluid": "10% dextrose", "iv_rate": 5.0, "incubator_temp": 34.0}),
 			(44, {"resp_support": "Nasal oxygen", "fio2": 25, "iv_fluid": "10% dextrose + Na/K", "iv_rate": 3.5, "incubator_temp": 33.5})):
 		_as(nicu_nurse, nz._entry, nb, "NICU Support", sup, at=add_to_date(nb.birth_datetime, hours=h))
-	_as(nicu_nurse, nz._entry, nb, "Medication", {"item": "Vitamin K1 (phytomenadione)", "dose": "0.5 mg", "route": "IM", "batch_no": "VK-2610-03"}, at=add_to_date(nb.birth_datetime, hours=1))
-	_as(nicu_nurse, nz._entry, nb, "Medication", {"item": "Caffeine citrate", "dose": "20 mg/kg loading", "route": "IV", "batch_no": "CAF-2608-11"}, at=add_to_date(nb.birth_datetime, hours=3))
+	_as(nicu_nurse, nz._entry, nb, "Medication", {"item_code": "NB-VITK1", "dose": "0.5 mg", "route": "IM", "batch_no": "VK-2610-03"}, at=add_to_date(nb.birth_datetime, hours=1))
+	_as(sana, nz._entry, nb, "Medication", {"item_code": "NB-CAFF", "dose": "20 mg/kg loading", "route": "IV", "batch_no": "CAF-2608-11"}, at=add_to_date(nb.birth_datetime, hours=3))
 	_as(sana, nz._entry, nb, "Doctor Note", {"note": "32+3 week preterm, RDS on CPAP, weaned to nasal O2 at 44 h. Serum bilirubin 9.8 mg/dL at 56 h — above preterm line, phototherapy started. Plan: continue NG EBM, advance feeds, repeat bilirubin in 12 h."}, at=add_to_date(nb.birth_datetime, hours=57))
 	_as(nicu_nurse, nz.post_update, b, "Your son is breathing more comfortably today — off CPAP and on a little oxygen. He is under the blue light for jaundice, which is very common in early babies. Mum's milk is going down his tube well.", None, True)
 	frappe.db.set_value("Newborn", b, "status", "Phototherapy")

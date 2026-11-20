@@ -114,7 +114,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Route",
-   "options": "Oral\nIV\nIM\nSC\nInhalation\nTopical\nPR\nSL\nNG\nOther"
+   "options": "Oral\nIV\nIM\nSC\nIntradermal\nInhalation\nTopical\nPR\nSL\nNG\nOther"
   },
   {
    "fieldname": "m2",
