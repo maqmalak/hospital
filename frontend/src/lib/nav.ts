@@ -1,4 +1,4 @@
-import { Building2, CreditCard, FileCheck2, FileText, HandHeart, MessageSquareHeart, Radio, TrendingUp,
+import { Building2, CreditCard, Droplets, Wrench, FileCheck2, FileText, HandHeart, MessageSquareHeart, Radio, TrendingUp,
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
   ScanLine, ScanSearch, Send, Baby, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
   Activity, BarChart3, BedDouble, Receipt, ReceiptText, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
@@ -43,6 +43,13 @@ export const NAV: NavGroup[] = [
     { route: "/nursery/register", label: "Register a newborn", icon: UserPlus, color: "from-sky-500 to-cyan-500", desc: "Baby MR linked to the mother, twins" },
     { route: "/nursery/security", label: "Infant security", icon: ShieldCheck, color: "from-slate-500 to-slate-700", desc: "Tags, movements, band checks" },
     { route: "/nursery/reports", label: "Nursery reports", icon: BarChart3, color: "from-violet-500 to-purple-600", desc: "Births, occupancy, NICU, stay" },
+  ] },
+  { label: "Nephrology & Dialysis", items: [
+    { route: "/dialysis", label: "Dialysis board", icon: Droplets, color: "from-sky-500 to-violet-600", desc: "Stations × shifts, check-in, alerts, swaps" },
+    { route: "/dialysis/patients", label: "Dialysis patients", icon: UserPlus, color: "from-sky-500 to-cyan-500", desc: "Profiles, schedules, zones, slot requests" },
+    { route: "/nephrology/clinic", label: "CKD clinic", icon: Stethoscope, color: "from-violet-500 to-indigo-600", desc: "Kidney labs, CKD stage, start dialysis" },
+    { route: "/dialysis/unit", label: "Machines, water & stock", icon: Wrench, color: "from-slate-500 to-sky-700", desc: "Disinfection, RO water, consumables" },
+    { route: "/dialysis/reports", label: "Dialysis reports", icon: BarChart3, color: "from-violet-500 to-purple-600", desc: "Sessions, revenue, packages, claims" },
   ] },
   { label: "Pharmacy", items: [
     { route: "/medicine_invoice", label: "Pharmacy POS", icon: ShoppingCart, color: "from-emerald-500 to-teal-600", desc: "Bill medicines with FEFO batches" },

@@ -103,6 +103,13 @@ const NurseryRegisterPage = lazy(() => import("@/modules/nursery/RegisterPage"))
 const NurseryBabyPage = lazy(() => import("@/modules/nursery/BabyPage"));
 const NurserySecurityPage = lazy(() => import("@/modules/nursery/SecurityPage"));
 const NurseryReportsPage = lazy(() => import("@/modules/nursery/ReportsPage"));
+const DialysisBoardPage = lazy(() => import("@/modules/dialysis/BoardPage"));
+const DialysisPatientsPage = lazy(() => import("@/modules/dialysis/PatientsPage"));
+const DialysisPatientPage = lazy(() => import("@/modules/dialysis/PatientPage"));
+const DialysisSessionPage = lazy(() => import("@/modules/dialysis/SessionPage"));
+const DialysisUnitPage = lazy(() => import("@/modules/dialysis/UnitPage"));
+const DialysisReportsPage = lazy(() => import("@/modules/dialysis/ReportsPage"));
+const CkdClinicPage = lazy(() => import("@/modules/dialysis/CkdClinicPage"));
 const RadReportPage = lazy(() => import("@/modules/radiology/ReportEditorPage"));
 const RadAnalyticsPage = lazy(() => import("@/modules/radiology/AnalyticsPage"));
 const RadCataloguePage = lazy(() => import("@/modules/radiology/CataloguePage"));
@@ -241,6 +248,13 @@ export default function App() {
         <Route path="/nursery/baby/:name" element={g("/nursery/baby", <NurseryBabyPage />)} />
         <Route path="/nursery/security" element={g("/nursery/security", <NurserySecurityPage />)} />
         <Route path="/nursery/reports" element={g("/nursery/reports", <NurseryReportsPage />)} />
+        <Route path="/dialysis" element={g("/dialysis", <DialysisBoardPage />)} />
+        <Route path="/dialysis/patients" element={g("/dialysis/patients", <DialysisPatientsPage />)} />
+        <Route path="/dialysis/patient/:name" element={g("/dialysis/patient", <DialysisPatientPage />)} />
+        <Route path="/dialysis/session/:name" element={g("/dialysis/session", <DialysisSessionPage />)} />
+        <Route path="/dialysis/unit" element={g("/dialysis/unit", <DialysisUnitPage />)} />
+        <Route path="/dialysis/reports" element={g("/dialysis/reports", <DialysisReportsPage />)} />
+        <Route path="/nephrology/clinic" element={g("/nephrology/clinic", <CkdClinicPage />)} />
         <Route path="/radiology" element={g("/radiology", <RadWorklistPage />)} />
         <Route path="/radiology/report/:name" element={g("/radiology/report", <RadReportPage />)} />
         <Route path="/radiology/analytics" element={g("/radiology/analytics", <RadAnalyticsPage />)} />
