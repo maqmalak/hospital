@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-21 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Dialysis Viral Screen",
+ "module": "Dialysis",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "tested_on",
+  "hbsag",
+  "anti_hcv",
+  "hiv",
+  "lab_result",
+  "source",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "tested_on",
+   "fieldtype": "Date",
+   "label": "Tested on",
+   "in_list_view": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "hbsag",
+   "fieldtype": "Select",
+   "label": "HBsAg",
+   "options": "Unknown\nNegative\nPositive",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "anti_hcv",
+   "fieldtype": "Select",
+   "label": "Anti-HCV",
+   "options": "Unknown\nNegative\nPositive",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "hiv",
+   "fieldtype": "Select",
+   "label": "HIV",
+   "options": "Unknown\nNegative\nPositive",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "lab_result",
+   "fieldtype": "Link",
+   "label": "Lab result",
+   "options": "Lab Result"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Data",
+   "label": "Source (outside lab)"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "istable": 1,
+ "editable_grid": 1,
+ "permissions": []
+}

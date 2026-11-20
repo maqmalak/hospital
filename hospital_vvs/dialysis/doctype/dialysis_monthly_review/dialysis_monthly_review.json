@@ -1,0 +1,259 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-21 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Dialysis Monthly Review",
+ "module": "Dialysis",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "dialysis_patient",
+  "patient",
+  "patient_name",
+  "month",
+  "c1",
+  "status",
+  "lab_order",
+  "nephrologist",
+  "s",
+  "sessions_done",
+  "sessions_missed",
+  "avg_weight_gain",
+  "s1",
+  "urr",
+  "ktv",
+  "hb",
+  "labs_json",
+  "n",
+  "review_note",
+  "rx_changes",
+  "n1",
+  "signed_by",
+  "signed_at",
+  "signature_hash"
+ ],
+ "fields": [
+  {
+   "fieldname": "dialysis_patient",
+   "fieldtype": "Link",
+   "label": "Dialysis patient",
+   "options": "Dialysis Patient",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient name",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Date",
+   "label": "Month (1st)",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nSigned",
+   "default": "Draft",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "lab_order",
+   "fieldtype": "Link",
+   "label": "Lab order",
+   "options": "Test Invoice"
+  },
+  {
+   "fieldname": "nephrologist",
+   "fieldtype": "Link",
+   "label": "Nephrologist",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "s",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "fieldname": "sessions_done",
+   "fieldtype": "Int",
+   "label": "Sessions done"
+  },
+  {
+   "fieldname": "sessions_missed",
+   "fieldtype": "Int",
+   "label": "Missed"
+  },
+  {
+   "fieldname": "avg_weight_gain",
+   "fieldtype": "Float",
+   "label": "Avg weight gain (kg)"
+  },
+  {
+   "fieldname": "s1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "urr",
+   "fieldtype": "Float",
+   "label": "URR %"
+  },
+  {
+   "fieldname": "ktv",
+   "fieldtype": "Float",
+   "label": "Kt/V"
+  },
+  {
+   "fieldname": "hb",
+   "fieldtype": "Float",
+   "label": "Hb (g/dL)"
+  },
+  {
+   "fieldname": "labs_json",
+   "fieldtype": "Long Text",
+   "label": "Labs (snapshot)",
+   "hidden": 1
+  },
+  {
+   "fieldname": "n",
+   "fieldtype": "Section Break",
+   "label": "Nephrologist review"
+  },
+  {
+   "fieldname": "review_note",
+   "fieldtype": "Text",
+   "label": "Review"
+  },
+  {
+   "fieldname": "rx_changes",
+   "fieldtype": "Text",
+   "label": "Prescription changes"
+  },
+  {
+   "fieldname": "n1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "signed_by",
+   "fieldtype": "Link",
+   "label": "Signed by",
+   "options": "User"
+  },
+  {
+   "fieldname": "signed_at",
+   "fieldtype": "Datetime",
+   "label": "Signed at"
+  },
+  {
+   "fieldname": "signature_hash",
+   "fieldtype": "Data",
+   "label": "Signature hash",
+   "read_only": 1,
+   "hidden": 1
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "autoname": "DMR-.YY.-.####",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Nephrologist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis In-charge",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis Technician",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Doctor",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Receptionist",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Cash Supervisor",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Accountant",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  }
+ ],
+ "title_field": "patient_name",
+ "show_title_field_in_link": 1
+}

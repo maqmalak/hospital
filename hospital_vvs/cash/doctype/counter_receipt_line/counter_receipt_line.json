@@ -30,7 +30,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Kind",
-   "options": "Consultation\nService\nLab\nIPD Advance\nIPD Settlement\nOnline Fee\nDues\nImaging\nImaging Order",
+   "options": "Consultation\nService\nLab\nIPD Advance\nIPD Settlement\nOnline Fee\nDues\nImaging\nImaging Order\nDialysis\nDialysis Package",
    "reqd": 1
   },
   {

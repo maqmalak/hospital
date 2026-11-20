@@ -12,3 +12,4 @@ Online Visit
 Patient Comms
 Radiology
 Nursery
+Dialysis

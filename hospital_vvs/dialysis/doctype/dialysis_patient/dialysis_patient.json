@@ -1,0 +1,664 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-21 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Dialysis Patient",
+ "module": "Dialysis",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "status",
+  "request_type",
+  "branch",
+  "c0",
+  "patient",
+  "patient_name",
+  "gender",
+  "age",
+  "c00",
+  "phone",
+  "cnic",
+  "whatsapp_opt_in",
+  "rq",
+  "referring_doctor",
+  "external_referrer",
+  "current_hospital",
+  "pref_days",
+  "pref_shift",
+  "rq1",
+  "request_notes",
+  "request_file",
+  "requested_at",
+  "approved_by",
+  "approved_at",
+  "reject_reason",
+  "cl",
+  "nephrologist",
+  "diagnosis",
+  "ckd_cause",
+  "ckd_stage",
+  "cl1",
+  "dialysis_start",
+  "dry_weight",
+  "comorbidities",
+  "allergies_note",
+  "ac",
+  "access_type",
+  "access_site",
+  "ac1",
+  "access_created",
+  "access_status",
+  "accesses",
+  "vi",
+  "hbsag",
+  "anti_hcv",
+  "hiv",
+  "vi1",
+  "zone",
+  "viral_tested_on",
+  "viral_next_due",
+  "screenings",
+  "override_until",
+  "override_by",
+  "override_reason",
+  "rx",
+  "rx_duration_hrs",
+  "rx_per_week",
+  "dialyser",
+  "blood_flow",
+  "rx1",
+  "dialysate_flow",
+  "dialysate",
+  "heparin",
+  "uf_guidance",
+  "rx2",
+  "epo",
+  "iron",
+  "other_meds",
+  "sc",
+  "sched_days",
+  "sched_shift",
+  "station",
+  "sc1",
+  "schedule_from",
+  "schedule_until",
+  "schedule_active",
+  "bl",
+  "payer",
+  "panel",
+  "panel_ref",
+  "bl1",
+  "packages",
+  "ec",
+  "ec_name",
+  "ec_relation",
+  "ec1",
+  "ec_phone"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Requested\nActive\nPaused\nTransferred out\nDischarged\nDeceased\nRejected",
+   "default": "Requested",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "request_type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "New\nRegular\nGuest\nEmergency\nTransfer in",
+   "default": "New",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "c0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient (MR)",
+   "options": "Patient",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient name",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale\nOther"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "c00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Mobile"
+  },
+  {
+   "fieldname": "cnic",
+   "fieldtype": "Data",
+   "label": "CNIC"
+  },
+  {
+   "fieldname": "whatsapp_opt_in",
+   "fieldtype": "Check",
+   "label": "SMS / WhatsApp consent",
+   "default": "1"
+  },
+  {
+   "fieldname": "rq",
+   "fieldtype": "Section Break",
+   "label": "Request",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "referring_doctor",
+   "fieldtype": "Link",
+   "label": "Referring doctor",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "external_referrer",
+   "fieldtype": "Data",
+   "label": "Outside referrer"
+  },
+  {
+   "fieldname": "current_hospital",
+   "fieldtype": "Data",
+   "label": "Current dialysis centre (transfer)"
+  },
+  {
+   "fieldname": "pref_days",
+   "fieldtype": "Data",
+   "label": "Preferred days"
+  },
+  {
+   "fieldname": "pref_shift",
+   "fieldtype": "Data",
+   "label": "Preferred shift"
+  },
+  {
+   "fieldname": "rq1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "request_notes",
+   "fieldtype": "Small Text",
+   "label": "Request notes"
+  },
+  {
+   "fieldname": "request_file",
+   "fieldtype": "Attach",
+   "label": "Viral screening report (upload)"
+  },
+  {
+   "fieldname": "requested_at",
+   "fieldtype": "Datetime",
+   "label": "Requested at"
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved by",
+   "options": "User"
+  },
+  {
+   "fieldname": "approved_at",
+   "fieldtype": "Datetime",
+   "label": "Approved at"
+  },
+  {
+   "fieldname": "reject_reason",
+   "fieldtype": "Small Text",
+   "label": "Reject reason"
+  },
+  {
+   "fieldname": "cl",
+   "fieldtype": "Section Break",
+   "label": "Clinical"
+  },
+  {
+   "fieldname": "nephrologist",
+   "fieldtype": "Link",
+   "label": "Nephrologist",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "diagnosis",
+   "fieldtype": "Small Text",
+   "label": "Diagnosis"
+  },
+  {
+   "fieldname": "ckd_cause",
+   "fieldtype": "Select",
+   "label": "Cause",
+   "options": "\nDiabetic\nHypertensive\nGlomerulonephritis\nObstructive\nPolycystic\nAKI\nUnknown\nOther"
+  },
+  {
+   "fieldname": "ckd_stage",
+   "fieldtype": "Select",
+   "label": "CKD stage",
+   "options": "\n1\n2\n3a\n3b\n4\n5\n5D\nAKI"
+  },
+  {
+   "fieldname": "cl1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dialysis_start",
+   "fieldtype": "Date",
+   "label": "Dialysis start date"
+  },
+  {
+   "fieldname": "dry_weight",
+   "fieldtype": "Float",
+   "label": "Dry weight (kg)"
+  },
+  {
+   "fieldname": "comorbidities",
+   "fieldtype": "Small Text",
+   "label": "Comorbidities"
+  },
+  {
+   "fieldname": "allergies_note",
+   "fieldtype": "Small Text",
+   "label": "Allergies"
+  },
+  {
+   "fieldname": "ac",
+   "fieldtype": "Section Break",
+   "label": "Vascular access"
+  },
+  {
+   "fieldname": "access_type",
+   "fieldtype": "Select",
+   "label": "Current access",
+   "options": "\nAV fistula\nAV graft\nPermanent catheter (tunnelled)\nTemporary catheter"
+  },
+  {
+   "fieldname": "access_site",
+   "fieldtype": "Data",
+   "label": "Site"
+  },
+  {
+   "fieldname": "ac1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "access_created",
+   "fieldtype": "Date",
+   "label": "Created on"
+  },
+  {
+   "fieldname": "access_status",
+   "fieldtype": "Select",
+   "label": "Access status",
+   "options": "\nWorking\nMaturing\nProblem\nFailed"
+  },
+  {
+   "fieldname": "accesses",
+   "fieldtype": "Table",
+   "label": "Access history",
+   "options": "Dialysis Access"
+  },
+  {
+   "fieldname": "vi",
+   "fieldtype": "Section Break",
+   "label": "Viral status"
+  },
+  {
+   "fieldname": "hbsag",
+   "fieldtype": "Select",
+   "label": "HBsAg",
+   "options": "Unknown\nNegative\nPositive",
+   "default": "Unknown"
+  },
+  {
+   "fieldname": "anti_hcv",
+   "fieldtype": "Select",
+   "label": "Anti-HCV",
+   "options": "Unknown\nNegative\nPositive",
+   "default": "Unknown"
+  },
+  {
+   "fieldname": "hiv",
+   "fieldtype": "Select",
+   "label": "HIV",
+   "options": "Unknown\nNegative\nPositive",
+   "default": "Unknown"
+  },
+  {
+   "fieldname": "vi1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "zone",
+   "fieldtype": "Select",
+   "label": "Infection zone",
+   "options": "Negative\nHBV\nHCV\nHIV",
+   "default": "Negative",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "viral_tested_on",
+   "fieldtype": "Date",
+   "label": "Last screened",
+   "read_only": 1
+  },
+  {
+   "fieldname": "viral_next_due",
+   "fieldtype": "Date",
+   "label": "Next screening due",
+   "read_only": 1
+  },
+  {
+   "fieldname": "screenings",
+   "fieldtype": "Table",
+   "label": "Screening history",
+   "options": "Dialysis Viral Screen"
+  },
+  {
+   "fieldname": "override_until",
+   "fieldtype": "Date",
+   "label": "Screening override until"
+  },
+  {
+   "fieldname": "override_by",
+   "fieldtype": "Link",
+   "label": "Override by",
+   "options": "User"
+  },
+  {
+   "fieldname": "override_reason",
+   "fieldtype": "Small Text",
+   "label": "Override reason"
+  },
+  {
+   "fieldname": "rx",
+   "fieldtype": "Section Break",
+   "label": "Dialysis prescription"
+  },
+  {
+   "fieldname": "rx_duration_hrs",
+   "fieldtype": "Float",
+   "label": "Duration (hrs)",
+   "default": "4"
+  },
+  {
+   "fieldname": "rx_per_week",
+   "fieldtype": "Int",
+   "label": "Sessions / week",
+   "default": "2"
+  },
+  {
+   "fieldname": "dialyser",
+   "fieldtype": "Data",
+   "label": "Dialyser"
+  },
+  {
+   "fieldname": "blood_flow",
+   "fieldtype": "Int",
+   "label": "Blood flow (mL/min)"
+  },
+  {
+   "fieldname": "rx1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dialysate_flow",
+   "fieldtype": "Int",
+   "label": "Dialysate flow (mL/min)"
+  },
+  {
+   "fieldname": "dialysate",
+   "fieldtype": "Data",
+   "label": "Dialysate (K / Ca / bicarbonate)"
+  },
+  {
+   "fieldname": "heparin",
+   "fieldtype": "Data",
+   "label": "Anticoagulation / heparin"
+  },
+  {
+   "fieldname": "uf_guidance",
+   "fieldtype": "Small Text",
+   "label": "UF goal guidance"
+  },
+  {
+   "fieldname": "rx2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "epo",
+   "fieldtype": "Data",
+   "label": "EPO"
+  },
+  {
+   "fieldname": "iron",
+   "fieldtype": "Data",
+   "label": "Iron"
+  },
+  {
+   "fieldname": "other_meds",
+   "fieldtype": "Small Text",
+   "label": "Vitamins / other regular medicines"
+  },
+  {
+   "fieldname": "sc",
+   "fieldtype": "Section Break",
+   "label": "Recurring schedule"
+  },
+  {
+   "fieldname": "sched_days",
+   "fieldtype": "Data",
+   "label": "Days (e.g. Mon,Thu)",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "sched_shift",
+   "fieldtype": "Select",
+   "label": "Shift",
+   "options": "\nMorning\nAfternoon\nEvening\nNight",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Link",
+   "label": "Station",
+   "options": "Dialysis Station"
+  },
+  {
+   "fieldname": "sc1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "schedule_from",
+   "fieldtype": "Date",
+   "label": "Schedule from"
+  },
+  {
+   "fieldname": "schedule_until",
+   "fieldtype": "Date",
+   "label": "Generated until",
+   "read_only": 1
+  },
+  {
+   "fieldname": "schedule_active",
+   "fieldtype": "Check",
+   "label": "Schedule active"
+  },
+  {
+   "fieldname": "bl",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "payer",
+   "fieldtype": "Select",
+   "label": "Payer",
+   "options": "Self\nPanel\nSehat Card",
+   "default": "Self"
+  },
+  {
+   "fieldname": "panel",
+   "fieldtype": "Link",
+   "label": "Panel / insurer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "panel_ref",
+   "fieldtype": "Data",
+   "label": "Approval / card ref."
+  },
+  {
+   "fieldname": "bl1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "packages",
+   "fieldtype": "Table",
+   "label": "Packages",
+   "options": "Dialysis Package Purchase"
+  },
+  {
+   "fieldname": "ec",
+   "fieldtype": "Section Break",
+   "label": "Emergency contact"
+  },
+  {
+   "fieldname": "ec_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "ec_relation",
+   "fieldtype": "Data",
+   "label": "Relation"
+  },
+  {
+   "fieldname": "ec1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ec_phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "autoname": "DP-.YY.-.####",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Nephrologist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis In-charge",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis Technician",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Doctor",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Receptionist",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Cash Supervisor",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Accountant",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  }
+ ],
+ "title_field": "patient_name",
+ "show_title_field_in_link": 1,
+ "search_fields": "patient,patient_name,phone,zone"
+}

@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-21 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Dialysis Package Purchase",
+ "module": "Dialysis",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "purchased_on",
+  "package_name",
+  "item_code",
+  "sessions",
+  "used",
+  "amount",
+  "counter_receipt",
+  "valid_until",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "purchased_on",
+   "fieldtype": "Date",
+   "label": "Purchased on",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "package_name",
+   "fieldtype": "Data",
+   "label": "Package",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "sessions",
+   "fieldtype": "Int",
+   "label": "Sessions",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "used",
+   "fieldtype": "Int",
+   "label": "Used",
+   "in_list_view": 1,
+   "default": "0"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "counter_receipt",
+   "fieldtype": "Link",
+   "label": "Counter receipt",
+   "options": "Counter Receipt"
+  },
+  {
+   "fieldname": "valid_until",
+   "fieldtype": "Date",
+   "label": "Valid until"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nUsed up\nExpired\nRefunded",
+   "default": "Active",
+   "in_list_view": 1
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "istable": 1,
+ "editable_grid": 1,
+ "permissions": []
+}

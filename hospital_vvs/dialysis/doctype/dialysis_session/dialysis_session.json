@@ -1,0 +1,693 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-21 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Dialysis Session",
+ "module": "Dialysis",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "dialysis_patient",
+  "patient",
+  "patient_name",
+  "branch",
+  "c1",
+  "session_date",
+  "shift",
+  "station",
+  "zone",
+  "c2",
+  "status",
+  "session_type",
+  "source",
+  "ward_location",
+  "pay",
+  "payment_status",
+  "amount",
+  "counter_receipt",
+  "package_receipt",
+  "pay1",
+  "token_no",
+  "allow_reason",
+  "allowed_by",
+  "tm",
+  "checkin_at",
+  "start_at",
+  "tm1",
+  "end_at",
+  "pre",
+  "pre_weight",
+  "weight_gain",
+  "pre_bp_sys",
+  "pre_bp_dia",
+  "pre1",
+  "pre_pulse",
+  "pre_temp",
+  "access_check",
+  "pre2",
+  "pre_symptoms",
+  "pre_notes",
+  "set",
+  "machine_serial",
+  "dialyser_type",
+  "dialyser_use",
+  "reuse_no",
+  "set1",
+  "blood_flow",
+  "dialysate_flow",
+  "uf_goal",
+  "set2",
+  "heparin",
+  "duration_hrs",
+  "obs",
+  "observations",
+  "complications",
+  "medicines",
+  "post",
+  "post_weight",
+  "post_bp_sys",
+  "post_bp_dia",
+  "post1",
+  "post_pulse",
+  "total_uf",
+  "post2",
+  "haemostasis",
+  "condition",
+  "adq",
+  "pre_urea",
+  "post_urea",
+  "adq1",
+  "urr",
+  "ktv",
+  "cons",
+  "consumables",
+  "stock_entry",
+  "sg",
+  "alerts",
+  "nurse_signed_by",
+  "nurse_signed_at",
+  "sg1",
+  "doctor_signed_by",
+  "doctor_signed_at",
+  "doctor_note",
+  "x",
+  "missed_reason",
+  "swap_requested_date",
+  "swap_requested_shift",
+  "x1",
+  "swap_reason",
+  "swap_status",
+  "swapped_from",
+  "signature_hash"
+ ],
+ "fields": [
+  {
+   "fieldname": "dialysis_patient",
+   "fieldtype": "Link",
+   "label": "Dialysis patient",
+   "options": "Dialysis Patient",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient (MR)",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient name",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "session_date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Select",
+   "label": "Shift",
+   "options": "Morning\nAfternoon\nEvening\nNight",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Link",
+   "label": "Station",
+   "options": "Dialysis Station",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "zone",
+   "fieldtype": "Data",
+   "label": "Zone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "c2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Scheduled\nChecked-in\nIn Session\nCompleted\nMissed\nCancelled",
+   "default": "Scheduled",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "session_type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Regular\nExtra\nEmergency\nICU bedside\nGuest",
+   "default": "Regular"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Created by",
+   "options": "Schedule\nManual",
+   "default": "Manual"
+  },
+  {
+   "fieldname": "ward_location",
+   "fieldtype": "Data",
+   "label": "Ward / bed (ICU bedside)"
+  },
+  {
+   "fieldname": "pay",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment",
+   "options": "Unpaid\nPaid\nPackage\nPanel credit\nAllowed unpaid",
+   "default": "Unpaid",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Charge"
+  },
+  {
+   "fieldname": "counter_receipt",
+   "fieldtype": "Link",
+   "label": "Counter receipt",
+   "options": "Counter Receipt"
+  },
+  {
+   "fieldname": "package_receipt",
+   "fieldtype": "Link",
+   "label": "Package (receipt)",
+   "options": "Counter Receipt"
+  },
+  {
+   "fieldname": "pay1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "token_no",
+   "fieldtype": "Data",
+   "label": "Token"
+  },
+  {
+   "fieldname": "allow_reason",
+   "fieldtype": "Small Text",
+   "label": "Allowed unpaid — reason"
+  },
+  {
+   "fieldname": "allowed_by",
+   "fieldtype": "Link",
+   "label": "Allowed by",
+   "options": "User"
+  },
+  {
+   "fieldname": "tm",
+   "fieldtype": "Section Break",
+   "label": "Times"
+  },
+  {
+   "fieldname": "checkin_at",
+   "fieldtype": "Datetime",
+   "label": "Arrived"
+  },
+  {
+   "fieldname": "start_at",
+   "fieldtype": "Datetime",
+   "label": "Started"
+  },
+  {
+   "fieldname": "tm1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_at",
+   "fieldtype": "Datetime",
+   "label": "Ended"
+  },
+  {
+   "fieldname": "pre",
+   "fieldtype": "Section Break",
+   "label": "Pre-dialysis"
+  },
+  {
+   "fieldname": "pre_weight",
+   "fieldtype": "Float",
+   "label": "Weight (kg)"
+  },
+  {
+   "fieldname": "weight_gain",
+   "fieldtype": "Float",
+   "label": "Weight gain since last (kg)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pre_bp_sys",
+   "fieldtype": "Int",
+   "label": "BP sys"
+  },
+  {
+   "fieldname": "pre_bp_dia",
+   "fieldtype": "Int",
+   "label": "BP dia"
+  },
+  {
+   "fieldname": "pre1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pre_pulse",
+   "fieldtype": "Int",
+   "label": "Pulse"
+  },
+  {
+   "fieldname": "pre_temp",
+   "fieldtype": "Float",
+   "label": "Temp (°C)"
+  },
+  {
+   "fieldname": "access_check",
+   "fieldtype": "Select",
+   "label": "Access check",
+   "options": "\nGood thrill / bruit\nWeak thrill\nNo thrill\nCatheter site clean\nCatheter site red / discharge\nCatheter flow poor"
+  },
+  {
+   "fieldname": "pre2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pre_symptoms",
+   "fieldtype": "Small Text",
+   "label": "Symptoms"
+  },
+  {
+   "fieldname": "pre_notes",
+   "fieldtype": "Small Text",
+   "label": "Nurse notes"
+  },
+  {
+   "fieldname": "set",
+   "fieldtype": "Section Break",
+   "label": "Settings"
+  },
+  {
+   "fieldname": "machine_serial",
+   "fieldtype": "Data",
+   "label": "Machine"
+  },
+  {
+   "fieldname": "dialyser_type",
+   "fieldtype": "Data",
+   "label": "Dialyser"
+  },
+  {
+   "fieldname": "dialyser_use",
+   "fieldtype": "Select",
+   "label": "Dialyser",
+   "options": "New\nReuse",
+   "default": "New"
+  },
+  {
+   "fieldname": "reuse_no",
+   "fieldtype": "Int",
+   "label": "Reuse no."
+  },
+  {
+   "fieldname": "set1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "blood_flow",
+   "fieldtype": "Int",
+   "label": "Blood flow"
+  },
+  {
+   "fieldname": "dialysate_flow",
+   "fieldtype": "Int",
+   "label": "Dialysate flow"
+  },
+  {
+   "fieldname": "uf_goal",
+   "fieldtype": "Float",
+   "label": "UF goal (L)"
+  },
+  {
+   "fieldname": "set2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "heparin",
+   "fieldtype": "Data",
+   "label": "Heparin"
+  },
+  {
+   "fieldname": "duration_hrs",
+   "fieldtype": "Float",
+   "label": "Duration (hrs)"
+  },
+  {
+   "fieldname": "obs",
+   "fieldtype": "Section Break",
+   "label": "Intra-dialysis"
+  },
+  {
+   "fieldname": "observations",
+   "fieldtype": "Table",
+   "label": "Observations",
+   "options": "Dialysis Observation"
+  },
+  {
+   "fieldname": "complications",
+   "fieldtype": "Table",
+   "label": "Complications",
+   "options": "Dialysis Complication"
+  },
+  {
+   "fieldname": "medicines",
+   "fieldtype": "Table",
+   "label": "Medicines given",
+   "options": "Dialysis Session Medicine"
+  },
+  {
+   "fieldname": "post",
+   "fieldtype": "Section Break",
+   "label": "Post-dialysis"
+  },
+  {
+   "fieldname": "post_weight",
+   "fieldtype": "Float",
+   "label": "Weight (kg)"
+  },
+  {
+   "fieldname": "post_bp_sys",
+   "fieldtype": "Int",
+   "label": "BP sys"
+  },
+  {
+   "fieldname": "post_bp_dia",
+   "fieldtype": "Int",
+   "label": "BP dia"
+  },
+  {
+   "fieldname": "post1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "post_pulse",
+   "fieldtype": "Int",
+   "label": "Pulse"
+  },
+  {
+   "fieldname": "total_uf",
+   "fieldtype": "Float",
+   "label": "Total UF (L)"
+  },
+  {
+   "fieldname": "post2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "haemostasis",
+   "fieldtype": "Select",
+   "label": "Access haemostasis",
+   "options": "\nGood\nProlonged bleeding\nCatheter locked"
+  },
+  {
+   "fieldname": "condition",
+   "fieldtype": "Select",
+   "label": "Condition at discharge",
+   "options": "\nStable\nUnwell — observed\nAdmitted\nReferred"
+  },
+  {
+   "fieldname": "adq",
+   "fieldtype": "Section Break",
+   "label": "Adequacy"
+  },
+  {
+   "fieldname": "pre_urea",
+   "fieldtype": "Float",
+   "label": "Pre urea (mg/dL)"
+  },
+  {
+   "fieldname": "post_urea",
+   "fieldtype": "Float",
+   "label": "Post urea (mg/dL)"
+  },
+  {
+   "fieldname": "adq1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "urr",
+   "fieldtype": "Float",
+   "label": "URR %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ktv",
+   "fieldtype": "Float",
+   "label": "Kt/V (spKt/V)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cons",
+   "fieldtype": "Section Break",
+   "label": "Consumables"
+  },
+  {
+   "fieldname": "consumables",
+   "fieldtype": "Table",
+   "label": "Consumables used",
+   "options": "Dialysis Consumable Use"
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "label": "Stock entry",
+   "options": "Stock Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sg",
+   "fieldtype": "Section Break",
+   "label": "Sign-off"
+  },
+  {
+   "fieldname": "alerts",
+   "fieldtype": "Small Text",
+   "label": "Alerts",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nurse_signed_by",
+   "fieldtype": "Link",
+   "label": "Nurse",
+   "options": "User"
+  },
+  {
+   "fieldname": "nurse_signed_at",
+   "fieldtype": "Datetime",
+   "label": "Nurse signed"
+  },
+  {
+   "fieldname": "sg1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "doctor_signed_by",
+   "fieldtype": "Link",
+   "label": "Doctor",
+   "options": "User"
+  },
+  {
+   "fieldname": "doctor_signed_at",
+   "fieldtype": "Datetime",
+   "label": "Doctor signed"
+  },
+  {
+   "fieldname": "doctor_note",
+   "fieldtype": "Small Text",
+   "label": "Doctor note"
+  },
+  {
+   "fieldname": "x",
+   "fieldtype": "Section Break",
+   "label": "Missed / cancelled / swap",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "missed_reason",
+   "fieldtype": "Small Text",
+   "label": "Missed / cancel reason"
+  },
+  {
+   "fieldname": "swap_requested_date",
+   "fieldtype": "Date",
+   "label": "Swap — requested date"
+  },
+  {
+   "fieldname": "swap_requested_shift",
+   "fieldtype": "Data",
+   "label": "Swap — requested shift"
+  },
+  {
+   "fieldname": "x1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "swap_reason",
+   "fieldtype": "Small Text",
+   "label": "Swap reason"
+  },
+  {
+   "fieldname": "swap_status",
+   "fieldtype": "Select",
+   "label": "Swap status",
+   "options": "\nRequested\nApproved\nRejected"
+  },
+  {
+   "fieldname": "swapped_from",
+   "fieldtype": "Link",
+   "label": "Swapped from",
+   "options": "Dialysis Session"
+  },
+  {
+   "fieldname": "signature_hash",
+   "fieldtype": "Data",
+   "label": "Signature hash",
+   "read_only": 1,
+   "hidden": 1
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "autoname": "HD-.YY.-.#####",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Nephrologist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis In-charge",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis Technician",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Doctor",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Receptionist",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Cash Supervisor",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Accountant",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  }
+ ],
+ "title_field": "patient_name",
+ "show_title_field_in_link": 1,
+ "search_fields": "patient_name,patient,station"
+}

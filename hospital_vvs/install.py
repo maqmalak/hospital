@@ -290,6 +290,9 @@ def after_migrate():
 
 	ensure_catalogue()
 	ensure_mrct()  # MRI / CT studies + templates in the same Imaging Procedure master (D-98)  # imaging procedures + report templates (D-91); inserts only what is missing
+	from hospital_vvs.setup.dialysis import ensure_dialysis
+
+	ensure_dialysis()  # Nephrology & Dialysis items, store, lab templates, stations (D-99)
 	from hospital_vvs.setup.nursery import ensure_wards
 
 	ensure_wards()  # Mother & Baby Rooms, Rooming-in Cradles, Nursery, NICU cots (D-95); insert-only

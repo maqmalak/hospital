@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-21 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Dialysis Complication",
+ "module": "Dialysis",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "comp_time",
+  "complication",
+  "action",
+  "recorded_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "comp_time",
+   "fieldtype": "Time",
+   "label": "Time",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "complication",
+   "fieldtype": "Select",
+   "label": "Complication",
+   "options": "Hypotension\nCramps\nNausea / vomiting\nChest pain\nHeadache\nClotting\nFever / rigors\nAccess bleeding\nArrhythmia\nHypertension\nOther",
+   "in_list_view": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "action",
+   "fieldtype": "Small Text",
+   "label": "Action taken",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "recorded_by",
+   "fieldtype": "Link",
+   "label": "By",
+   "options": "User"
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "istable": 1,
+ "editable_grid": 1,
+ "permissions": []
+}

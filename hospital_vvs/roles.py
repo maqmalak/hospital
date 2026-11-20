@@ -26,10 +26,15 @@ WARD_ADMIN = "PW Ward Admin"
 SECURITY = "PW Security"
 MRI_TECH = "PW MRI Technologist"
 CT_TECH = "PW CT Technologist"
+NEPHROLOGIST = "PW Nephrologist"
+DIALYSIS_INCHARGE = "PW Dialysis In-charge"
+DIALYSIS_NURSE = "PW Dialysis Nurse"
+DIALYSIS_TECH = "PW Dialysis Technician"
+DIALYSIS_STAFF = [NEPHROLOGIST, DIALYSIS_INCHARGE, DIALYSIS_NURSE, DIALYSIS_TECH]
 
 ALL = [ADMIN, DOCTOR, RECEPTIONIST, LAB_USER, PATHOLOGIST, PHARMACY_CASHIER, FINDER, REVIEWER, DISPENSER,
 	STORE_KEEPER, CASH_SUPERVISOR, ACCOUNTANT, NURSE, DEO, OV_STAFF, OV_DOCTOR,
-	RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, WARD_ADMIN, SECURITY, MRI_TECH, CT_TECH]
+	RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, WARD_ADMIN, SECURITY, MRI_TECH, CT_TECH, NEPHROLOGIST, DIALYSIS_INCHARGE, DIALYSIS_NURSE, DIALYSIS_TECH]
 
 # Desk access: staff may open ERPNext Desk screens (POS for the pharmacy, stock screens for the store keeper).
 DESK = ALL
@@ -38,7 +43,7 @@ DESK = ALL
 TWO_FACTOR = [ADMIN, ACCOUNTANT, CASH_SUPERVISOR, PATHOLOGIST, RADIOLOGIST]
 
 # Clinical roles see diagnoses, notes, vitals, allergies and results (permlevel 1). Money roles do not.
-CLINICAL = [ADMIN, DOCTOR, NURSE, PATHOLOGIST, REVIEWER, DEO, OV_DOCTOR, RADIOLOGIST, RADIOGRAPHER, SONOGRAPHER, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, MRI_TECH, CT_TECH]
+CLINICAL = [ADMIN, DOCTOR, NURSE, PATHOLOGIST, REVIEWER, DEO, OV_DOCTOR, RADIOLOGIST, RADIOGRAPHER, SONOGRAPHER, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, MRI_TECH, CT_TECH, NEPHROLOGIST, DIALYSIS_INCHARGE, DIALYSIS_NURSE, DIALYSIS_TECH]
 FRONT_DESK = [ADMIN, RECEPTIONIST]
 MONEY = [RECEPTIONIST, LAB_USER, PHARMACY_CASHIER, DISPENSER, ACCOUNTANT, CASH_SUPERVISOR]
 CNIC_REVEAL = [ADMIN, RECEPTIONIST]
@@ -70,6 +75,10 @@ DESCRIPTIONS = {
 	SECURITY: "Infant security: tag events, in/out log, alarms (no clinical data)",
 	MRI_TECH: "MRI suite: safety screening, scanning, technologist record (protocol, contrast, sedation)",
 	CT_TECH: "CT suite: contrast checks, scanning, dose record (CTDI / DLP)",
+	NEPHROLOGIST: "Kidney specialist: CKD clinic, dialysis prescriptions, screening overrides, monthly reviews, doctor sign-off",
+	DIALYSIS_INCHARGE: "Dialysis unit in-charge: approves requests, stations and schedules, swaps, allows unpaid sessions, unit logs",
+	DIALYSIS_NURSE: "Dialysis nurse: check-in, session charting, medicines, nurse sign-off",
+	DIALYSIS_TECH: "Dialysis technician: machine set-up, disinfection, water plant and consumables",
 }
 
 

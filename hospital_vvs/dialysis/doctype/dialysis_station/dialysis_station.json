@@ -1,0 +1,186 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-21 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Dialysis Station",
+ "module": "Dialysis",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "station_no",
+  "label",
+  "zone",
+  "status",
+  "c1",
+  "branch",
+  "sort_order",
+  "out_of_service_reason",
+  "m",
+  "machine_serial",
+  "machine_model",
+  "machine_installed",
+  "m1",
+  "last_service",
+  "next_service",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "station_no",
+   "fieldtype": "Data",
+   "label": "Station no.",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "label": "Label"
+  },
+  {
+   "fieldname": "zone",
+   "fieldtype": "Select",
+   "label": "Infection zone",
+   "options": "Negative\nHBV\nHCV\nHIV",
+   "default": "Negative",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nOut of service\nRetired",
+   "default": "Active",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "sort_order",
+   "fieldtype": "Int",
+   "label": "Sort order"
+  },
+  {
+   "fieldname": "out_of_service_reason",
+   "fieldtype": "Small Text",
+   "label": "Out-of-service reason",
+   "depends_on": "eval:doc.status=='Out of service'"
+  },
+  {
+   "fieldname": "m",
+   "fieldtype": "Section Break",
+   "label": "Machine"
+  },
+  {
+   "fieldname": "machine_serial",
+   "fieldtype": "Data",
+   "label": "Machine serial no."
+  },
+  {
+   "fieldname": "machine_model",
+   "fieldtype": "Data",
+   "label": "Model"
+  },
+  {
+   "fieldname": "machine_installed",
+   "fieldtype": "Date",
+   "label": "Installed"
+  },
+  {
+   "fieldname": "m1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_service",
+   "fieldtype": "Date",
+   "label": "Last service"
+  },
+  {
+   "fieldname": "next_service",
+   "fieldtype": "Date",
+   "label": "Next service due"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "autoname": "field:station_no",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis In-charge",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Nephrologist",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis Nurse",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Dialysis Technician",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Receptionist",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  }
+ ],
+ "title_field": "station_no",
+ "show_title_field_in_link": 1,
+ "search_fields": "zone,machine_serial"
+}

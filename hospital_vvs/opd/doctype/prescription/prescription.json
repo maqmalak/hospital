@@ -26,6 +26,15 @@
   "diagnoses",
   "r3",
   "lab_tests",
+  "neph_sec",
+  "ckd_stage",
+  "ckd_cause",
+  "neph_comorbidities",
+  "neph_c1",
+  "neph_bp",
+  "neph_weight",
+  "neph_oedema",
+  "neph_urine_output",
   "notes_sec",
   "examination_notes",
   "r4",
@@ -181,6 +190,54 @@
    "label": "Lab Tests",
    "options": "Prescription Lab Test",
    "permlevel": 1
+  },
+  {
+   "fieldname": "neph_sec",
+   "fieldtype": "Section Break",
+   "label": "Nephrology / CKD",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "ckd_stage",
+   "fieldtype": "Select",
+   "label": "CKD stage",
+   "options": "\n1\n2\n3a\n3b\n4\n5\n5D\nAKI"
+  },
+  {
+   "fieldname": "ckd_cause",
+   "fieldtype": "Select",
+   "label": "Cause",
+   "options": "\nDiabetic\nHypertensive\nGlomerulonephritis\nObstructive\nPolycystic\nAKI\nUnknown\nOther"
+  },
+  {
+   "fieldname": "neph_comorbidities",
+   "fieldtype": "Small Text",
+   "label": "Comorbidities"
+  },
+  {
+   "fieldname": "neph_c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "neph_bp",
+   "fieldtype": "Data",
+   "label": "BP"
+  },
+  {
+   "fieldname": "neph_weight",
+   "fieldtype": "Float",
+   "label": "Weight (kg)"
+  },
+  {
+   "fieldname": "neph_oedema",
+   "fieldtype": "Select",
+   "label": "Oedema",
+   "options": "\nNone\nMild (ankle)\nModerate (leg)\nSevere / anasarca"
+  },
+  {
+   "fieldname": "neph_urine_output",
+   "fieldtype": "Data",
+   "label": "Urine output / day"
   },
   {
    "fieldname": "notes_sec",

@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-21 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Dialysis Session Medicine",
+ "module": "Dialysis",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "medicine",
+  "item_code",
+  "dose",
+  "route",
+  "batch_no",
+  "given_at",
+  "given_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "medicine",
+   "fieldtype": "Data",
+   "label": "Medicine",
+   "in_list_view": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "dose",
+   "fieldtype": "Data",
+   "label": "Dose",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Select",
+   "label": "Route",
+   "options": "IV\nSC\nIM\nOral\nVia circuit",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Data",
+   "label": "Batch no.",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "given_at",
+   "fieldtype": "Time",
+   "label": "Given at"
+  },
+  {
+   "fieldname": "given_by",
+   "fieldtype": "Link",
+   "label": "By",
+   "options": "User"
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "autoname": "hash",
+ "istable": 1,
+ "editable_grid": 1,
+ "permissions": []
+}

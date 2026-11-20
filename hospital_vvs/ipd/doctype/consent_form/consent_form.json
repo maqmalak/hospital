@@ -7,6 +7,8 @@
  "field_order": [
   "bed_allotment",
   "er_visit",
+  "dialysis_patient",
+  "signature",
   "patient",
   "patient_name",
   "branch",
@@ -43,6 +45,17 @@
    "options": "ER Visit"
   },
   {
+   "fieldname": "dialysis_patient",
+   "fieldtype": "Link",
+   "label": "Dialysis patient",
+   "options": "Dialysis Patient"
+  },
+  {
+   "fieldname": "signature",
+   "fieldtype": "Attach Image",
+   "label": "Signature"
+  },
+  {
    "fieldname": "patient",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -75,7 +88,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Consent Type",
-   "options": "Admission\nProcedure\nAnesthesia\nBlood Transfusion\nHigh Risk\nLAMA\nOther",
+   "options": "Admission\nProcedure\nAnesthesia\nBlood Transfusion\nHigh Risk\nLAMA\nOther\nHaemodialysis\nCatheter Insertion",
    "reqd": 1
   },
   {
