@@ -21,7 +21,7 @@ export default function Department() {
     <>
       <PageHero eyebrow="Department" title={d.name} sub={d.summary} img={d.img}>
         <div className="flex flex-wrap gap-3"><a href={book} className={btn.primary}><CalendarCheck className="h-5 w-5" />{isRad ? "Book a scan" : "Book with this department"}</a>
-          {isRad && <Link to="/site/radiology" className={btn.glass}>Services, prices & reports</Link>}
+          {isRad && <Link to="/site/radiology" className={btn.glass}>Services, prices & reports</Link>}{isRad && <Link to="/site/mri-ct" className={btn.glass}>MRI & CT</Link>}
           {(d.slug === "paediatrics" || d.slug === "gynaecology") && <Link to="/site/nursery" className={btn.glass}><Baby className="h-5 w-5" />Nursery & Newborn Care</Link>}
           {phone && <a href={tel(phone)} className={btn.glass}><Phone className="h-5 w-5" /><span dir="ltr">{phone}</span></a>}</div>
       </PageHero>

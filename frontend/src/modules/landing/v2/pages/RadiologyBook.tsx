@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   AlertCircle, ArrowLeft, ArrowRight, Bone, CalendarPlus, Check, CheckCircle2, ClipboardCheck, Clock3, CreditCard, FileUp, HeartPulse, Landmark,
-  Loader2, MapPin, MessageCircle, Search, ShieldCheck, Sparkles, Upload, Wallet, Waves, X, type LucideIcon,
+  Loader2, Magnet, MapPin, MessageCircle, ScanLine, Search, ShieldAlert, ShieldCheck, Sparkles, Upload, Wallet, Waves, X, type LucideIcon,
 } from "lucide-react";
 import { getCall, humanizeError, postCall } from "@/services/frappe";
 import { qrSvg } from "@/lib/print";
@@ -21,17 +21,20 @@ const MODS: { key: Modality; title: string; text: string; icon: LucideIcon; note
   { key: "X-Ray", title: "X-ray", text: "Digital X-ray of chest, bones, spine, abdomen and dental OPG; contrast studies.", icon: Bone, note: "Walk-in 24/7" },
   { key: "Ultrasound", title: "Ultrasound", text: "Abdomen, pelvis, KUB, thyroid, breast and pregnancy scans including 3D / 4D.", icon: Waves, note: "Mon-Sat 9 am - 9 pm" },
   { key: "Doppler", title: "Doppler", text: "Blood-flow studies: carotid, arterial, venous, renal and obstetric Doppler.", icon: HeartPulse, note: "Mon-Sat 10 am - 6 pm" },
+  { key: "MRI", title: "MRI", text: "Radiation-free brain, spine, joint and abdomen MRI, with or without contrast. Safety questions included.", icon: Magnet, note: "Daily 8 am - 10 pm" },
+  { key: "CT", title: "CT scan", text: "Brain, chest, abdomen, KUB, angiography and bones — fast, low-dose CT.", icon: ScanLine, note: "24/7" },
 ];
 
 interface Slot { time: string; free: number }
 interface Summary { name: string; booking_ref: string; procedure: string; modality: string; date: string; time: string | null; walk_in: number; duration: number; price: number;
-  preparation: string; payment_option: string; payment_status: string; patient_name: string; portal: string; location: string; pay?: { url: string } | null }
+  preparation: string; payment_option: string; payment_status: string; patient_name: string; portal: string; location: string; pay?: { url: string } | null;
+  safety_status?: string; machine?: string; amount?: number }
 
 const inp = "h-12 w-full rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 text-[15px] text-[var(--ink)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-ring)]";
 const store = { get: (k: string) => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k: string, v: string) => { try { sessionStorage.setItem(k, v); } catch { /* private mode */ } } };
 
 export default function RadiologyBook() {
-  useTitle("Book a scan — Radiology & Imaging", "Book an X-ray, ultrasound or Doppler scan online at Lyallpur Medical Complex, Faisalabad: live availability, preparation and instant confirmation.");
+  useTitle("Book a scan — Radiology & Imaging", "Book an X-ray, ultrasound, Doppler, MRI or CT scan online at Lyallpur Medical Complex, Faisalabad: live availability, preparation and instant confirmation.");
   const [cat] = useCatalogue();
   const [opts] = useDoctors();
   const [sp] = useSearchParams();
@@ -47,6 +50,9 @@ export default function RadiologyBook() {
   const [f, setF] = useState({ patient_name: "", age: "", gender: "", phone: "", cnic: "", mr: "", referring_doctor: "", external_referrer: "", pregnancy_status: "", lmp: "", clinical_notes: "", consent: true });
   const [file, setFile] = useState<{ name: string; data: string } | null>(null);
   const [pay, setPay] = useState("Pay at counter");
+  const [answers, setAnswers] = useState<Record<string, { answer: string; detail: string }>>({});
+  const [wantContrast, setWantContrast] = useState(false);
+  const [kid, setKid] = useState({ creatinine: "", egfr: "", creatinine_date: "", weight_kg: "" });
   const [panel, setPanel] = useState({ panel: "", policy_no: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -59,6 +65,7 @@ export default function RadiologyBook() {
     const want = sp.get("scan");
     const p = want ? cat.procedures.find((x) => x.name === want) : null;
     if (p) { setMod(p.modality); setScan(p); setStep(2); }
+    else if (sp.get("modality") && MODS.some((m) => m.key === sp.get("modality"))) { setMod(sp.get("modality") as Modality); setStep(1); }
   }, [cat]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (done) setStep(5); }, [done]);
   useEffect(() => { top.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [step]);
@@ -75,11 +82,22 @@ export default function RadiologyBook() {
 
   const scans = useMemo(() => (cat?.procedures ?? []).filter((p) => p.modality === mod && (!q.trim() || p.procedure_name.toLowerCase().includes(q.trim().toLowerCase()))), [cat, mod, q]);
   const female = f.gender === "Female";
+  const contrastOn = !!scan && (scan.contrast === "Yes" || (scan.contrast === "Optional" && wantContrast));
+  const questions = useMemo(() => {
+    if (!scan || !cat?.safety) return [];
+    const q = scan.modality === "MRI" ? [...cat.safety.mri] : [];
+    if (contrastOn) cat.safety.contrast.forEach((c) => { if (!q.some((x) => x.question === c.question)) q.push(c); });
+    return q;
+  }, [scan, cat, contrastOn]);
+  const safetyOk = questions.every((x) => answers[x.question]?.answer);
+  const blocked = questions.some((x) => x.blocking && ["Yes", "Not sure"].includes(answers[x.question]?.answer ?? ""));
+  const lowEgfr = contrastOn && !!kid.egfr && Number(kid.egfr) < (cat?.safety?.egfr_min ?? 30);
+  const totalPrice = (scan?.price ?? 0) + (contrastOn ? Number(scan?.contrast_surcharge || 0) : 0);
   const isOb = scan?.category === "Pregnancy" || /obstetric/i.test(scan?.procedure_name ?? "");
   const phoneOk = /^(\+92|0092|92|0)?3\d{9}$/.test(f.phone.replace(/[\s-]/g, ""));
   const canNext = [
     !!mod, !!scan, walkIn || !!time,
-    f.patient_name.trim().length >= 3 && !!f.gender && !!f.age && phoneOk && (!female || !!f.pregnancy_status) && !(scan?.female_only && f.gender === "Male"),
+    f.patient_name.trim().length >= 3 && !!f.gender && !!f.age && phoneOk && (!female || !!f.pregnancy_status) && !(scan?.female_only && f.gender === "Male") && safetyOk,
     pay !== "Insurance / Panel" || (!!panel.panel && !!panel.policy_no.trim()), true,
   ][step];
 
@@ -95,7 +113,9 @@ export default function RadiologyBook() {
     try {
       const out = await postCall<Summary>("hospital_vvs.api.radiology.book", { data: JSON.stringify({
         procedure: scan.name, date, time: walkIn ? null : time, walk_in: walkIn ? 1 : 0, ...f, age: Number(f.age) || null,
-        payment_option: pay, panel: panel.panel, policy_no: panel.policy_no, file_name: file?.name, file_data: file?.data, consent: f.consent ? 1 : 0 }) });
+        payment_option: pay, panel: panel.panel, policy_no: panel.policy_no, file_name: file?.name, file_data: file?.data, consent: f.consent ? 1 : 0,
+        contrast_requested: wantContrast ? 1 : 0, safety: questions.map((x) => ({ question: x.question, answer: answers[x.question]?.answer || "No", detail: answers[x.question]?.detail || "" })),
+        creatinine: Number(kid.creatinine) || null, egfr: Number(kid.egfr) || null, creatinine_date: kid.creatinine_date || null, weight_kg: Number(kid.weight_kg) || null }) });
       store.set("hv.rad.booked", JSON.stringify(out));
       setDone(out); setStep(5);
       if (out.pay?.url) window.location.href = out.pay.url;
@@ -136,7 +156,7 @@ export default function RadiologyBook() {
           <div className={`${card} min-w-0 p-5 hover:translate-y-0 sm:p-8`}>
             {step === 0 && <>
               <H t="What kind of scan do you need?" s="Not sure? Your doctor's slip usually says X-ray, ultrasound (USG) or Doppler." />
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
                 {MODS.map((m) => { const on = mod === m.key; const I = m.icon; return (
                   <button key={m.key} type="button" onClick={() => { setMod(m.key); setScan(null); setStep(1); }} aria-pressed={on}
                     className={`group rounded-[22px] border-2 p-5 text-start transition hover:-translate-y-1 ${on ? "border-[var(--primary)] bg-[var(--mint)]" : "border-[var(--line)] hover:border-[var(--primary)]"}`}>
@@ -227,6 +247,28 @@ export default function RadiologyBook() {
                   {scan.modality === "X-Ray" && f.pregnancy_status && f.pregnancy_status !== "Not pregnant" && <p className="mt-2 flex gap-2 rounded-xl bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />Thank you for telling us. The radiologist will review before any X-ray — an ultrasound may be offered instead.</p>}</L>}
                 {female && (isOb || f.pregnancy_status === "Pregnant") && <L l="First day of last period (LMP)"><input type="date" className={inp} value={f.lmp} onChange={(e) => setF({ ...f, lmp: e.target.value })} max={new Date().toISOString().slice(0, 10)} /></L>}
                 <L l="Symptoms / reason for the scan (optional)" className="sm:col-span-2"><textarea rows={3} className={`${inp} h-auto py-3`} value={f.clinical_notes} onChange={(e) => setF({ ...f, clinical_notes: e.target.value })} placeholder="e.g. right-side tummy pain for 2 weeks" /></L>
+                {scan.contrast === "Optional" && <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] p-4 text-sm sm:col-span-2">
+                  <input type="checkbox" checked={wantContrast} onChange={(e) => setWantContrast(e.target.checked)} className="mt-0.5 h-5 w-5 accent-[var(--primary)]" />
+                  <span><b>My doctor asked for contrast</b>{CONFIG.showPrices && scan.contrast_surcharge ? <span dir="ltr"> (+{rs(scan.contrast_surcharge)})</span> : null}<span className="block text-[var(--muted)]">If unsure, leave it — the radiologist decides on the day and you pay any difference at the counter.</span></span></label>}
+                {!!questions.length && <div className="rounded-2xl border-2 border-amber-400/60 bg-amber-500/5 p-4 sm:col-span-2">
+                  <div className="mb-1 flex items-center gap-2 font-bold"><ShieldAlert className="h-5 w-5 text-amber-600" />{scan.modality === "MRI" ? "MRI safety questions" : "Contrast safety questions"}</div>
+                  <p className="mb-3 text-sm text-[var(--muted)]">Please answer every question. A radiographer checks them again with you before the scan.</p>
+                  <div className="space-y-2">{questions.map((x) => { const a = answers[x.question]; return (
+                    <div key={x.question} className="rounded-xl bg-[var(--surface)] p-3">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center"><span className="flex-1 text-sm">{x.question}</span>
+                        <div className="flex gap-1">{["No", "Yes", "Not sure"].map((v) => <button key={v} type="button" aria-pressed={a?.answer === v} onClick={() => setAnswers({ ...answers, [x.question]: { answer: v, detail: a?.detail ?? "" } })}
+                          className={`rounded-full border-2 px-3 py-1 text-xs font-semibold ${a?.answer === v ? (v === "No" ? "border-emerald-600 bg-emerald-600 text-white" : "border-amber-600 bg-amber-600 text-white") : "border-[var(--line)]"}`}>{v}</button>)}</div></div>
+                      {a && a.answer !== "No" && <input className={`${inp} mt-2 h-10`} placeholder="Details (device, year, which implant…)" value={a.detail} onChange={(e) => setAnswers({ ...answers, [x.question]: { ...a, detail: e.target.value } })} />}
+                    </div>); })}</div>
+                  {blocked && <p role="status" className="mt-3 flex gap-2 rounded-xl bg-rose-500/10 p-3 text-sm text-rose-800 dark:text-rose-200"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    {scan.modality === "MRI" ? "Thank you. Your booking is accepted, but the scan cannot start until a radiologist has cleared you. Bring your device / implant card; we may call you first." : "Thank you. A radiologist will review this before contrast is given."}</p>}
+                  {contrastOn && <div className="mt-3 grid gap-3 sm:grid-cols-4">
+                    <L l="Creatinine (mg/dL)"><input className={inp} inputMode="decimal" value={kid.creatinine} onChange={(e) => setKid({ ...kid, creatinine: e.target.value.replace(/[^\d.]/g, "") })} /></L>
+                    <L l="eGFR" hint={lowEgfr ? "Low — radiologist review" : ""}><input className={inp} inputMode="numeric" value={kid.egfr} onChange={(e) => setKid({ ...kid, egfr: e.target.value.replace(/\D/g, "") })} /></L>
+                    <L l="Test date"><input type="date" className={inp} value={kid.creatinine_date} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setKid({ ...kid, creatinine_date: e.target.value })} /></L>
+                    <L l="Weight (kg)"><input className={inp} inputMode="numeric" value={kid.weight_kg} onChange={(e) => setKid({ ...kid, weight_kg: e.target.value.replace(/\D/g, "") })} /></L>
+                    <p className="text-xs text-[var(--muted)] sm:col-span-4">No recent report? Leave it blank — we test creatinine at the hospital before contrast.</p></div>}
+                </div>}
                 <div className="sm:col-span-2">
                   <span className="mb-2 block text-sm font-semibold">Doctor's prescription (optional)</span>
                   {file ? <div className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] p-3"><FileUp className="h-5 w-5 text-[var(--primary)]" /><span className="min-w-0 flex-1 truncate text-sm">{file.name}</span><button type="button" onClick={() => setFile(null)} aria-label="Remove file" className="rounded-full p-1 hover:bg-[var(--surface)]"><X className="h-4 w-4" /></button></div>
@@ -240,7 +282,7 @@ export default function RadiologyBook() {
             </>}
 
             {step === 4 && scan && <>
-              <H t="How would you like to pay?" s={`${scan.procedure_name}${CONFIG.showPrices && scan.price ? ` · ${rs(scan.price)}` : ""}`} />
+              <H t="How would you like to pay?" s={`${scan.procedure_name}${CONFIG.showPrices && scan.price ? ` · ${rs(totalPrice)}` : ""}`} />
               <div className="space-y-3">
                 {([["Pay at counter", Wallet, "Cash or card at radiology reception when you arrive."], ["Pay online", CreditCard, "Card payment now — skip the queue at the counter."],
                   ["Insurance / Panel", Landmark, "Corporate panel or health insurance, verified at reception."]] as [string, LucideIcon, string][]).map(([k, I, d]) => (
@@ -274,7 +316,7 @@ export default function RadiologyBook() {
               <div className="bg-[var(--primary)] px-5 py-4 text-white"><div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">Your booking</div><div className="s2-display text-xl">{scan?.procedure_name || "Choose a scan"}</div></div>
               <dl className="divide-y divide-[var(--line)] text-sm">
                 {([["Modality", mod ?? "—"], ["Date", date ? dmy(date) : "—"], ["Time", walkIn ? "Walk-in" : time ? hm12(time) : "—"], ["Duration", scan ? `${scan.duration_min} min` : "—"],
-                  ["Report", scan ? turnaround(scan) : "—"], ["Price", scan && CONFIG.showPrices && scan.price ? rs(scan.price) : "—"]] as [string, string][]).map(([k, v]) => (
+                  ["Report", scan ? turnaround(scan) : "—"], ["Price", scan && CONFIG.showPrices && scan.price ? rs(totalPrice) : "—"]] as [string, string][]).map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-3 px-5 py-3"><dt className="text-[var(--muted)]">{k}</dt><dd className="text-end font-semibold">{v}</dd></div>))}
               </dl>
               {scan && <div className="border-t border-[var(--line)] bg-[var(--soft)] p-5 text-[13px] leading-relaxed"><div className="mb-1 flex items-center gap-1.5 font-bold text-[var(--primary)]"><ClipboardCheck className="h-4 w-4" />Preparation</div>{scan.preparation}</div>}
@@ -321,7 +363,9 @@ function Confirmation({ s }: { s: Summary }) {
         <span className="rd-ok grid h-20 w-20 place-items-center rounded-full bg-emerald-500 text-white shadow-[0_18px_40px_-14px_rgba(16,185,129,0.8)]"><Check className="h-10 w-10" /></span>
         <Eyebrow>Booking confirmed</Eyebrow>
         <h2 className="s2-display text-[2rem] leading-tight">See you {s.walk_in ? "on " + dmy(s.date) : `${dmy(s.date)}, ${hm12(s.time)}`}</h2>
-        <p className="mt-1 text-[var(--muted)]">{s.patient_name} · {s.procedure}</p>
+        <p className="mt-1 text-[var(--muted)]">{s.patient_name} · {s.procedure}{s.machine ? ` · ${s.machine}` : ""}</p>
+        {s.safety_status && !["Not required", "Cleared"].includes(s.safety_status) && <p className="mt-4 flex max-w-lg gap-2 rounded-2xl bg-amber-500/10 p-3 text-start text-sm text-amber-900 dark:text-amber-100"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
+          {s.safety_status === "Clearance required" ? "A radiologist must clear your safety answers before the scan. Bring your device / implant card — we may call you before your visit." : s.safety_status === "Pending" ? "Please bring a recent creatinine report, or we will test it on arrival before contrast." : `Safety: ${s.safety_status}`}</p>}
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-[auto_1fr]">
         <div className="mx-auto flex flex-col items-center rounded-[22px] border border-[var(--line)] bg-white p-4 text-[#0f172a]">

@@ -14,7 +14,7 @@ interface A {
   revenue: { label: string; value: number }[]; workload: { label: string; value: number; critical: number }[]; top: { label: string; value: number }[]; sources: { label: string; value: number }[];
   totals: { scans: number; revenue: number; critical: number; open: number };
 }
-const MODS = ["X-Ray", "Ultrasound", "Doppler"] as const;
+const MODS = ["X-Ray", "Ultrasound", "Doppler", "MRI", "CT"] as const;
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 export default function AnalyticsPage() {

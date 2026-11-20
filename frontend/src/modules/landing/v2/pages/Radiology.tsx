@@ -102,6 +102,7 @@ export default function Radiology() {
             <Reveal delay={240} className="mt-9 flex flex-wrap gap-3">
               <Link to="/site/radiology/book" className={btn.primary}><CalendarCheck className="h-5 w-5" />Book a scan</Link>
               <Link to="/site/radiology/reports" className={btn.glass}><Download className="h-5 w-5" />Download my report</Link>
+              <Link to="/site/mri-ct" className={btn.glass}><ScanLine className="h-5 w-5" />MRI & CT</Link>
               {radPhone && <a href={tel(radPhone)} className={btn.glass}><Phone className="h-5 w-5" />Call radiology <span dir="ltr" className="hidden sm:inline">· {radPhone}</span></a>}
             </Reveal>
             <Reveal delay={300} className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/70">

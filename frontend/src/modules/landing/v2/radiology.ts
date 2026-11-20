@@ -2,15 +2,18 @@
 import { useEffect, useState } from "react";
 import { getCall } from "@/services/frappe";
 
-export type Modality = "X-Ray" | "Ultrasound" | "Doppler";
+export type Modality = "X-Ray" | "Ultrasound" | "Doppler" | "MRI" | "CT";
 export interface Procedure {
   name: string; procedure_name: string; code?: string; modality: Modality; category: string; body_region?: string; description?: string; prep_group?: string;
   preparation?: string; duration_min?: number; tat_hours?: number; price?: number; walk_in?: number; female_only?: number; needs_consent?: number;
+  contrast?: "No" | "Optional" | "Yes"; contrast_surcharge?: number; urgent_surcharge?: number;
 }
 export interface Radiologist { name: string; doctor_name: string; qualification?: string; specialization?: string; photo?: string; registration_no?: string | null;
   days: { day: string; from: string; to: string }[] }
 export interface Hours { open: string; close: string; slot: number; capacity: number; days: string; walk_in: number }
-export interface Catalogue { procedures: Procedure[]; radiologists: Radiologist[]; hours: Record<Modality, Hours>; prep: Record<string, string>; scans_year: number; panels: string[] }
+export interface Catalogue { procedures: Procedure[]; radiologists: Radiologist[]; hours: Record<Modality, Hours>; prep: Record<string, string>; scans_year: number; panels: string[];
+  safety?: { mri: SafetyQ[]; contrast: SafetyQ[]; egfr_min: number } }
+export interface SafetyQ { question: string; blocking: number }
 
 let catP: Promise<Catalogue> | null = null;
 export function useCatalogue(): [Catalogue | null, boolean] {
@@ -28,6 +31,7 @@ export function useCatalogue(): [Catalogue | null, boolean] {
 export const FILTERS = [
   { key: "all", label: "All scans" }, { key: "X-Ray", label: "X-ray" }, { key: "Ultrasound", label: "Ultrasound" }, { key: "Pregnancy", label: "Pregnancy" },
   { key: "Doppler", label: "Doppler" }, { key: "Contrast Study", label: "Contrast studies" }, { key: "Guided Procedure", label: "Guided procedures" },
+  { key: "MRI", label: "MRI" }, { key: "CT", label: "CT scan" },
 ] as const;
 
 export function matches(p: Procedure, f: string) {

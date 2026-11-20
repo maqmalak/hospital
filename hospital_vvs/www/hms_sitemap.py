@@ -14,7 +14,7 @@ from frappe.utils import get_url, nowdate
 no_cache = 1
 base_template_path = "www/hms_sitemap.xml"
 
-PAGES = ["", "about", "departments", "services", "doctors", "rooms", "pharmacy", "map", "directions", "patients", "careers", "news", "contact"]
+PAGES = ["", "about", "departments", "services", "doctors", "rooms", "pharmacy", "map", "directions", "patients", "careers", "news", "contact", "radiology", "mri-ct", "nursery"]
 
 
 def _slugs(block):
