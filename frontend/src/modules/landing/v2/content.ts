@@ -170,7 +170,7 @@ export const SERVICES: ServiceGroup[] = [
   { id: "critical", title: "Critical care (ICU / CCU)", icon: "activity", img: PHOTOS.icu, text: "Monitored beds and specialist nursing around the clock.", items: ["Intensive care", "Coronary care", "Ventilator support", "Family waiting area"] },
   { id: "nursery", title: "Nursery & Newborn Care", icon: "baby", img: "", text: "Rooming-in, a well-baby nursery and paediatricians for every newborn — from the very first breath.", items: ["Newborn examination", "Birth vaccinations", "Jaundice care & phototherapy", "Lactation support"], href: "/site/nursery" },
   { id: "nicu", title: "NICU", icon: "heart", img: PHOTOS.icu, text: "Neonatal intensive care for premature and sick babies, with parents welcome 24/7.", items: ["Incubators & CPAP", "Ventilator support", "Phototherapy", "Kangaroo mother care"], href: "/site/nursery#nicu" },
-  { id: "dialysis", title: "Dialysis", icon: "droplets", img: PHOTOS.room, text: "Scheduled haemodialysis with monitoring throughout.", items: ["Haemodialysis", "Kidney clinic", "Access follow-up"] },
+  { id: "dialysis", title: "Dialysis", icon: "droplets", img: PHOTOS.room, text: "Scheduled haemodialysis with monitoring throughout.", items: ["Haemodialysis", "Kidney clinic", "Access follow-up"], href: "/site/nephrology" },
   { id: "telemedicine", title: "Online consultation", icon: "video", img: PHOTOS.lounge, text: "See a consultant by video for follow-ups and advice.", items: ["Video follow-ups", "e-Prescription", "Report review"] },
   { id: "pharmacy", title: "Pharmacy", icon: "pill", img: PHOTOS.pharmacy, text: "In-house pharmacy for prescriptions and ward medicines.", items: ["Prescriptions", "Ward medicines", "Medicine counselling"] },
 ];

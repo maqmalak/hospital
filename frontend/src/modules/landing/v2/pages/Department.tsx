@@ -15,13 +15,14 @@ export default function Department() {
   const floor = FLOORS.find((f) => f.id === d.floor);
   useTitle(d.name, `${d.name} at Lyallpur Medical Complex, Faisalabad — ${d.summary}`);
   useJsonLd({ "@context": "https://schema.org", "@type": "MedicalClinic", name: `${d.name} — Lyallpur Medical Complex`, medicalSpecialty: d.name, availableService: d.services.map((s) => ({ "@type": "MedicalProcedure", name: s })) });
-  const isRad = d.slug === "radiology";  // D-91: radiology books scans, not consultations
+  const isRad = d.slug === "radiology";
+  const isNeph = d.slug === "nephrology";  // D-99: the department page links to the Nephrology & Dialysis module  // D-91: radiology books scans, not consultations
   const book = isRad ? "/hms/site/radiology/book" : docs[0] ? `/hms/book-appointment?doctor=${encodeURIComponent(docs[0].name)}` : "/hms/book-appointment";
   return (
     <>
       <PageHero eyebrow="Department" title={d.name} sub={d.summary} img={d.img}>
         <div className="flex flex-wrap gap-3"><a href={book} className={btn.primary}><CalendarCheck className="h-5 w-5" />{isRad ? "Book a scan" : "Book with this department"}</a>
-          {isRad && <Link to="/site/radiology" className={btn.glass}>Services, prices & reports</Link>}{isRad && <Link to="/site/mri-ct" className={btn.glass}>MRI & CT</Link>}
+          {isRad && <Link to="/site/radiology" className={btn.glass}>Services, prices & reports</Link>}{isRad && <Link to="/site/mri-ct" className={btn.glass}>MRI & CT</Link>}{isNeph && <Link to="/site/nephrology" className={btn.glass}>Dialysis unit, packages &amp; booking</Link>}{isNeph && <Link to="/site/nephrology/reserve" className={btn.glass}>Reserve a dialysis slot</Link>}
           {(d.slug === "paediatrics" || d.slug === "gynaecology") && <Link to="/site/nursery" className={btn.glass}><Baby className="h-5 w-5" />Nursery & Newborn Care</Link>}
           {phone && <a href={tel(phone)} className={btn.glass}><Phone className="h-5 w-5" /><span dir="ltr">{phone}</span></a>}</div>
       </PageHero>
