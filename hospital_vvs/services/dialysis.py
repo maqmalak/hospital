@@ -563,7 +563,7 @@ def slip_info(session):
 	return {"department": "Dialysis", "token": s.token_no, "where": f"Dialysis unit · station {s.station or '—'}", "report_at": None,
 		"prep": f"{frappe.utils.formatdate(s.session_date, 'dd MMM')} · {s.shift} shift ({SHIFTS[s.shift][0]})"
 			+ (f" · Sessions remaining: {bal['remaining']} of {bal['total']}" if bal["total"] else "")
-			+ (f" · Next: {frappe.utils.formatdate(nxt.session_date, 'ddd dd MMM')} {nxt.shift}" if nxt else "")}
+			+ (f" · Next: {frappe.utils.formatdate(nxt.session_date, 'EEE dd MMM')} {nxt.shift}" if nxt else "")}
 
 
 # ------------------------------------------------------------------ session workflow + charting
@@ -915,7 +915,7 @@ def approve_request(name, data):
 	nxt = next_session(dp.name, add_days(today(), -1))
 	if dp.phone and nxt:
 		messaging.send("dialysis_confirmed", phone=dp.phone, patient=dp.patient, consent=bool(dp.whatsapp_opt_in), reference_doctype="Dialysis Patient", reference_name=dp.name,
-			context={"first_name": (dp.patient_name or "").split()[0], "days": dp.sched_days or frappe.utils.formatdate(nxt.session_date, "ddd dd MMM"), "shift": nxt.shift,
+			context={"first_name": (dp.patient_name or "").split()[0], "days": dp.sched_days or frappe.utils.formatdate(nxt.session_date, "EEE dd MMM"), "shift": nxt.shift,
 				"time": SHIFTS[nxt.shift][0], "station": nxt.station or "—", "link": frappe.utils.get_url(PORTAL_PATH)})
 	return out
 

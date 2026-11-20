@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
-  AlertTriangle, Banknote, ClipboardPlus, BedDouble, CheckCircle2, CloudOff, CreditCard, Delete, FlaskConical, Globe, HandCoins, History, Keyboard, Landmark, Lock,
+  AlertTriangle, Banknote, ClipboardPlus, Droplets, BedDouble, CheckCircle2, CloudOff, CreditCard, Delete, FlaskConical, Globe, HandCoins, History, Keyboard, Landmark, Lock,
   MonitorSmartphone, PauseCircle, Percent, Plus, Printer, ReceiptText, RefreshCw, ScanLine, Search, ShieldCheck, Smartphone, Stethoscope, Trash2, Undo2, User, UserPlus, Wallet, Wifi, X,
 } from "lucide-react";
 import { call, humanizeError, useApi } from "@/lib/api";
@@ -17,12 +17,16 @@ import { type Bundle, type Doctor, isNetworkError, kvGet, kvSet, type LabT, load
 import { type Receipt } from "./receipt";
 import { type SlipReceipt, slipHtml } from "./slip";
 
-type Kind = "Consultation" | "Service" | "Lab" | "Lab Order" | "Imaging" | "Imaging Order" | "IPD Advance" | "IPD Settlement" | "Online Fee" | "Dues";
+type Kind = "Consultation" | "Service" | "Lab" | "Lab Order" | "Imaging" | "Imaging Order" | "Dialysis" | "Dialysis Package" | "IPD Advance" | "IPD Settlement" | "Online Fee" | "Dues";
+/** Dialysis unit (D-99): unpaid sessions + package balance for the patient. */
+interface DiaPending { dialysis_patient: string; patient_name: string; payer: string; panel_ref?: string; zone: string;
+  sessions: { name: string; session_date: string; shift: string; station?: string; status: string; session_type: string; amount: number }[];
+  package: { remaining: number; total: number }; packages: { item_code: string; item_name: string; sessions: number; rate: number }[] }
 /** Imaging catalogue (X-ray / ultrasound / Doppler / MRI / CT) from the radiology module (D-98). */
 interface ImgProc { name: string; procedure_name: string; code?: string; modality: string; category: string; price: number; contrast?: string; contrast_surcharge?: number; urgent_surcharge?: number; walk_in?: number; tat_hours?: number }
 interface ImgOrder { name: string; booking_ref: string; procedure: string; procedure_name: string; modality: string; scheduled_date: string; slot_time?: string; amount: number; safety_status?: string }
 interface Line { key: string; kind: Kind; label: string; doctor?: string; item_code?: string; template?: string; target?: string; qty: number; rate: number; discount: number;
-  amount: number; priority?: string; free?: number; payer_share?: number; procedure?: string; contrast?: number; urgent?: number; modality?: string }
+  amount: number; priority?: string; free?: number; payer_share?: number; procedure?: string; contrast?: number; urgent?: number; modality?: string; use_package?: number; credit?: number }
 interface Ctx { branch: string; shift: { name: string; opened_at: string; counter: string; expected: number; stale: boolean; closing: boolean } | null; counter?: string;
   modes?: string[]; doctors: Doctor[]; services: Service[]; labs: LabT[]; imaging?: ImgProc[]; counters?: { name: string; current_user?: string }[] }
 interface Panel { patient: { name: string; patient_name: string; gender: string; age?: number; phone?: string; category?: string; temporary_record?: number };
@@ -32,7 +36,7 @@ interface Panel { patient: { name: string; patient_name: string; gender: string;
 /** A lab order made in the lab, waiting for payment here (D-60). */
 interface LabOrder { name: string; patient: string; patient_name: string; gross_total: number; patient_share: number; priority: string; creation: string; tests: string[]; ordered_by?: string }
 type Limits = Record<string, { percent: number; amount: number | null }>;
-const LIMIT_BT: Partial<Record<Kind, string>> = { Consultation: "OPD Slip", Lab: "Lab", "Lab Order": "Lab", Service: "General", Imaging: "General", "Imaging Order": "General" };
+const LIMIT_BT: Partial<Record<Kind, string>> = { Consultation: "OPD Slip", Lab: "Lab", "Lab Order": "Lab", Service: "General", Imaging: "General", "Imaging Order": "General", Dialysis: "General", "Dialysis Package": "General" };
 interface Tender { mode_of_payment: string; amount: number; reference_no?: string }
 interface Held { id: string; at: string; patient?: PatientHit | null; newPatient?: NewP | null; lines: Line[] }
 interface NewP { patient_name: string; gender: string; age: string; phone: string }
@@ -44,11 +48,12 @@ const KIND_STYLE: Record<Kind, { icon: typeof Stethoscope; tone: string }> = {
   "IPD Settlement": { icon: BedDouble, tone: "from-orange-500 to-red-600" }, "Online Fee": { icon: Globe, tone: "from-fuchsia-500 to-purple-600" },
   Dues: { icon: ReceiptText, tone: "from-rose-500 to-pink-600" },
   Imaging: { icon: ScanLine, tone: "from-cyan-600 to-teal-700" }, "Imaging Order": { icon: ScanLine, tone: "from-lime-600 to-emerald-700" },
+  Dialysis: { icon: Droplets, tone: "from-sky-500 to-violet-600" }, "Dialysis Package": { icon: Droplets, tone: "from-violet-500 to-sky-600" },
 };
 const MODE_ICON: Record<string, typeof Banknote> = { Cash: Banknote, Card: CreditCard, "Bank Transfer": Landmark, JazzCash: Smartphone, Easypaisa: Wallet };
 const PRIORITIES = ["Normal", "Elderly", "Disabled", "Urgent"];
 const PRIO_TONE: Record<string, string> = { Normal: "border-slate-300", Elderly: "border-amber-500 bg-amber-500 text-white", Disabled: "border-sky-600 bg-sky-600 text-white", Urgent: "border-rose-600 bg-rose-600 text-white" };
-const lineTotal = (l: Line) => Math.max(l.rate * l.qty - l.discount, 0);
+const lineTotal = (l: Line) => (l.kind === "Dialysis" && (l.use_package || l.credit) ? 0 : Math.max(l.rate * l.qty - l.discount, 0));
 
 export default function CounterPage() {
   const { branch, boot } = useAuth();
@@ -64,7 +69,8 @@ export default function CounterPage() {
   const pullBundle = useCallback(async () => { try { setBundle(await refreshBundle(branch)); } catch (e) { if (isNetworkError(e)) sync.markOffline(); } }, [branch]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (live.data?.shift && sync.online) void pullBundle(); }, [live.data?.shift?.name, sync.online]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [tab, setTab] = useState<"doctors" | "services" | "lab" | "imaging" | "bills" | "fromlab">("doctors");
+  const [tab, setTab] = useState<"doctors" | "services" | "lab" | "imaging" | "dialysis" | "bills" | "fromlab">("doctors");
+  const [dia, setDia] = useState<DiaPending | null>(null);
   const [imgMod, setImgMod] = useState("");
   const [refDoc, setRefDoc] = useState("");
   const [imgOrders, setImgOrders] = useState<ImgOrder[]>([]);
@@ -94,6 +100,7 @@ export default function CounterPage() {
     setPanel(null);
     if (!patient || offline) return;
     void call<Panel>("counter.patient", { name: patient.name }).then((p) => { setPanel(p); if (p.lab_orders?.length) toast(`${p.lab_orders.length} lab order(s) waiting for payment — see Patient bills`, { icon: "🧪" }); }).catch(() => undefined);
+    void call<DiaPending | null>("counter.pending_dialysis", { patient: patient.name }).then((d) => { setDia(d); if (d?.sessions.length) toast(`${d.sessions.length} dialysis session(s) unpaid — see Dialysis`, { icon: "💧" }); }).catch(() => setDia(null));
     void call<ImgOrder[]>("counter.pending_imaging", { patient: patient.name }).then((o) => { setImgOrders(o); if (o.length) toast(`${o.length} imaging booking(s) waiting for payment — see Imaging`, { icon: "🩻" }); }).catch(() => setImgOrders([]));
   }, [patient?.name, offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -120,11 +127,13 @@ export default function CounterPage() {
     if (l.kind === "Lab" && lines.some((x) => x.kind === "Lab" && x.template === l.template)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
     if (l.kind === "Lab Order" && lines.some((x) => x.kind === "Lab Order" && x.target === l.target)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
     if (l.kind === "Imaging Order" && lines.some((x) => x.kind === "Imaging Order" && x.target === l.target)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
+    if (l.kind === "Dialysis" && lines.some((x) => x.kind === "Dialysis" && x.target === l.target)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
+    if (l.kind === "Dialysis Package" && lines.some((x) => x.kind === "Dialysis Package")) { toast("One package per sale", { icon: "ℹ️" }); return; }
     if (l.kind === "Service") { const ex = lines.find((x) => x.kind === "Service" && x.item_code === l.item_code); if (ex) { upd(ex.key, { qty: ex.qty + 1 }); return; } }
     setLines((ls) => [...ls, { qty: 1, discount: 0, ...l, key: uuid(), amount: 0 } as Line]);
   };
   const upd = (key: string, patch: Partial<Line>) => setLines((ls) => ls.map((x) => (x.key === key ? { ...x, ...patch } : x)));
-  const clear = () => { setLines([]); setPatient(null); setNewP(null); setPriced(null); setRefDoc(""); setImgOrders([]); };
+  const clear = () => { setLines([]); setPatient(null); setNewP(null); setPriced(null); setRefDoc(""); setImgOrders([]); setDia(null); };
   const hold = async () => {
     if (!lines.length) return;
     const h = [{ id: uuid(), at: new Date().toISOString(), patient, newPatient: newP, lines }, ...held].slice(0, 30);
@@ -185,11 +194,11 @@ export default function CounterPage() {
         <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
             <div className="relative min-w-48 flex-1"><Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" /><input ref={searchRef} className={inputCls + " ps-9"} placeholder="Search doctor, service or test (F3)" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-            <div className="flex gap-1 rounded-xl bg-muted p-1">{([["doctors", "Doctors", Stethoscope], ["imaging", "Imaging", ScanLine], ["services", "Services", HandCoins], ["lab", "Lab tests", FlaskConical], ["fromlab", "From the lab", ClipboardPlus], ["bills", "Patient bills", BedDouble]] as const).map(([k, l, I]) => {
+            <div className="flex gap-1 rounded-xl bg-muted p-1">{([["doctors", "Doctors", Stethoscope], ["imaging", "Imaging", ScanLine], ["dialysis", "Dialysis", Droplets], ["services", "Services", HandCoins], ["lab", "Lab tests", FlaskConical], ["fromlab", "From the lab", ClipboardPlus], ["bills", "Patient bills", BedDouble]] as const).map(([k, l, I]) => {
               const billsN = panel ? panel.dues.length + panel.online.length + (panel.admission ? 1 : 0) + (panel.lab_orders?.length ?? 0) : 0;
               const n = k === "bills" ? billsN : k === "fromlab" ? (fromLab.data?.length ?? 0) : 0;
               return (
-              <button key={k} onClick={() => setTab(k)} disabled={(k === "bills" && (!patient || offline)) || ((k === "fromlab" || k === "imaging") && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "tab-gold" : "text-muted-foreground")}>
+              <button key={k} onClick={() => setTab(k)} disabled={((k === "bills" || k === "dialysis") && (!patient || offline)) || ((k === "fromlab" || k === "imaging") && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "tab-gold" : "text-muted-foreground")}>
                 <I className="h-4 w-4" />{l}{n ? <span className={cn("rounded-full px-1.5 text-[10px] text-white", k === "fromlab" ? "bg-fuchsia-600" : "bg-rose-600")}>{n}</span> : null}</button>); })}</div>
           </div>
           {tab === "imaging" && <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">{["", "X-Ray", "Ultrasound", "Doppler", "MRI", "CT"].map((m) => <button key={m} onClick={() => setImgMod(m)}
@@ -222,6 +231,7 @@ export default function CounterPage() {
                   className={cn("rounded-xl border p-3 text-start shadow-sm", on ? "border-cyan-600 bg-cyan-50 dark:bg-cyan-500/10" : "border-border bg-card hover:border-cyan-500")}>
                   <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-cyan-700 dark:text-cyan-300">{p.modality}{p.contrast && p.contrast !== "No" ? <span className="rounded bg-amber-100 px-1 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">{p.contrast === "Yes" ? "contrast" : "± contrast"}</span> : null}</div>
                   <div className="line-clamp-2 text-sm font-semibold">{p.procedure_name}</div><div className="mt-1 font-black tabular-nums text-cyan-800 dark:text-cyan-200">{rs(p.price)}</div></button>); })}</div></div>}
+            {tab === "dialysis" && <DialysisTab dia={dia} lines={lines} onAdd={add} />}
             {tab === "bills" && panel && <Bills panel={panel} onAdd={add} inCart={lines} />}
             {tab === "fromlab" && <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Orders the lab made for walk-in patients. Collect here, give the receipt, then the lab takes the sample.</p>
@@ -290,7 +300,7 @@ export default function CounterPage() {
 }
 
 const strip = (l: Line) => ({ kind: l.kind, label: l.label, doctor: l.doctor, item_code: l.item_code, template: l.template, target: l.target, qty: l.qty, discount: l.discount,
-  procedure: l.procedure, contrast: l.contrast ? 1 : undefined, urgent: l.urgent ? 1 : undefined,
+  procedure: l.procedure, contrast: l.contrast ? 1 : undefined, urgent: l.urgent ? 1 : undefined, use_package: l.use_package ? 1 : undefined, credit: l.credit ? 1 : undefined,
   amount: l.kind === "IPD Advance" || l.kind === "IPD Settlement" || l.kind === "Dues" ? l.rate : undefined, priority: l.priority !== "Normal" ? l.priority : undefined });
 
 function TopBtn({ icon: I, label, onClick, k }: { icon: typeof Lock; label: string; onClick: () => void; k?: string }) {
@@ -319,7 +329,7 @@ function CartLine({ l, amount, free, offline, limit, onChange, onRemove }: { l: 
   const st = KIND_STYLE[l.kind];
   const [open, setOpen] = useState(l.kind === "IPD Advance");
   const [unit, setUnit] = useState<"Rs" | "%">("Rs");
-  const isCharge = ["Consultation", "Service", "Lab", "Lab Order", "Imaging", "Imaging Order"].includes(l.kind);
+  const isCharge = ["Consultation", "Service", "Lab", "Lab Order", "Imaging", "Imaging Order", "Dialysis Package"].includes(l.kind) || (l.kind === "Dialysis" && !l.use_package && !l.credit);
   const gross = l.rate * l.qty;
   const pct = gross ? Math.round((l.discount / gross) * 1000) / 10 : 0;
   const over = !!limit && limit.percent < 100 && (pct > limit.percent || (limit.amount != null && limit.amount > 0 && l.discount > limit.amount));
@@ -589,6 +599,44 @@ function RefundApproval({ count, onCancel, onConfirm }: { count: number; onCance
       <div className="mt-2 flex justify-end gap-2"><Button variant="neutral" onClick={onCancel}>Cancel</Button>
         <Button variant="danger" disabled={reason.trim().length < 3 || (!sup && (!user || !pwd))} onClick={() => onConfirm(reason.trim(), sup ? undefined : user.trim(), sup ? undefined : pwd)}><Undo2 className="h-4 w-4" />Approve & refund</Button></div>
       {!sup && <p className="mt-1 text-[11px] text-muted-foreground">The supervisor types their own login; it is checked once and never stored.</p>}
+    </div>
+  );
+}
+
+
+/** Dialysis at the counter (D-99): pay a session in cash, from the patient's package, or as Panel / Sehat Card credit; sell a package. */
+function DialysisTab({ dia, lines, onAdd }: { dia: DiaPending | null; lines: Line[]; onAdd: (l: Omit<Line, "key" | "amount" | "qty" | "discount">) => void }) {
+  if (!dia) return <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">This patient is not registered in the dialysis unit. The dialysis in-charge registers patients (Dialysis → Patients).</p>;
+  const pkgInCart = lines.find((x) => x.kind === "Dialysis Package");
+  const usedInCart = lines.filter((x) => x.kind === "Dialysis" && x.use_package).length;
+  const left = dia.package.remaining + (pkgInCart ? dia.packages.find((p) => p.item_code === pkgInCart.item_code)?.sessions ?? 0 : 0) - usedInCart;
+  const credit = ["Panel", "Sehat Card"].includes(dia.payer) && !!dia.panel_ref;
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-sky-300 bg-sky-50 p-3 text-sm dark:border-sky-500/40 dark:bg-sky-500/10">
+        <Droplets className="h-5 w-5 text-sky-700 dark:text-sky-300" /><b>{dia.patient_name}</b><span className="font-mono text-xs text-muted-foreground">{dia.dialysis_patient}</span>
+        {dia.zone !== "Negative" && <span className="rounded-full bg-violet-600 px-2 py-0.5 text-[11px] font-bold text-white">{dia.zone} zone</span>}
+        <span className="ms-auto rounded-full bg-card px-3 py-1 text-xs font-semibold">Package: <b className="tabular-nums">{dia.package.remaining}</b> of {dia.package.total || 0} left</span>
+        {dia.payer !== "Self" && <span className="rounded-full bg-card px-3 py-1 text-xs font-semibold">{dia.payer}{dia.panel_ref ? ` · ${dia.panel_ref}` : " · no approval ref."}</span>}
+      </div>
+      <div>
+        <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Sessions to pay</div>
+        {dia.sessions.length ? <div className="space-y-1.5">{dia.sessions.map((s) => { const inCart = lines.find((x) => x.kind === "Dialysis" && x.target === s.name); const label = `Haemodialysis · ${s.session_date.slice(5)} ${s.shift}${s.station ? ` · ${s.station}` : ""}`; return (
+          <div key={s.name} className={cn("flex flex-wrap items-center gap-2 rounded-xl border bg-card p-2.5 text-sm", inCart ? "border-sky-500" : "border-border")}>
+            <span className="min-w-0 flex-1"><b>{new Date(s.session_date + "T00:00").toLocaleDateString("en-PK", { weekday: "short", day: "numeric", month: "short" })}</b> · {s.shift} · {s.station ?? "no station"}
+              <span className="block text-xs text-muted-foreground">{s.session_type} · {s.status}</span></span>
+            {inCart ? <span className="text-xs font-semibold text-sky-700 dark:text-sky-300">In cart · {inCart.use_package ? "package" : inCart.credit ? "credit" : rs(s.amount)}</span> : <>
+              <Button size="sm" variant="neutral" onClick={() => onAdd({ kind: "Dialysis", label, target: s.name, rate: s.amount })}>{rs(s.amount)}</Button>
+              <Button size="sm" variant="neutral" disabled={left <= 0} onClick={() => onAdd({ kind: "Dialysis", label: `${label} · package`, target: s.name, rate: s.amount, use_package: 1 })}>Package ({Math.max(left, 0)})</Button>
+              {credit && <Button size="sm" variant="neutral" onClick={() => onAdd({ kind: "Dialysis", label: `${label} · ${dia.payer} credit`, target: s.name, rate: s.amount, credit: 1 })}>{dia.payer}</Button>}</>}
+          </div>); })}</div> : <p className="text-sm text-muted-foreground">No unpaid sessions in the next two weeks.</p>}
+      </div>
+      <div>
+        <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Sell a package</div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">{dia.packages.map((p) => <button key={p.item_code} disabled={!!pkgInCart} onClick={() => onAdd({ kind: "Dialysis Package", label: p.item_name, item_code: p.item_code, rate: p.rate })}
+          className="rounded-xl border border-border bg-card p-3 text-start shadow-sm hover:border-violet-500 disabled:opacity-50"><div className="text-2xl font-black text-violet-700 dark:text-violet-300">{p.sessions}</div>
+          <div className="text-xs text-muted-foreground">sessions</div><div className="mt-1 font-bold tabular-nums">{rs(p.rate)}</div><div className="text-[11px] text-muted-foreground">{rs(p.rate / p.sessions)} / session</div></button>)}</div>
+      </div>
     </div>
   );
 }

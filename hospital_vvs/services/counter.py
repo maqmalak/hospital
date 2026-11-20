@@ -24,8 +24,41 @@ CHARGE_KINDS = ("Consultation", "Lab", "Service")
 IMAGING = ("Imaging", "Imaging Order")  # D-98: X-ray / ultrasound / Doppler / MRI / CT — billed with the services, creates / pays the Imaging Study
 
 
+DIALYSIS = ("Dialysis", "Dialysis Package")  # D-99: dialysis session (paid / package / panel credit) and package sale — billed with the services
+
+
 def _group(kind):
-	return "Service" if kind in IMAGING else kind
+	return "Service" if kind in IMAGING or kind in DIALYSIS else kind
+
+
+def _dialysis_rate(ln):
+	"""Server price of a dialysis line: the session's own charge, or the package item price. Package / panel-credit sessions cost 0 at the counter."""
+	from hospital_vvs.services import dialysis as dz
+
+	if ln.get("kind") == "Dialysis Package":
+		return dz.session_rate_item(ln["item_code"])
+	return flt(frappe.db.get_value("Dialysis Session", ln["target"], "amount"))
+
+
+def _dialysis_paid_by(ln):
+	return "Package" if cint(ln.get("use_package")) else ("Panel credit" if cint(ln.get("credit")) else "Paid")
+
+
+def pending_dialysis(patient):
+	"""Unpaid dialysis sessions (today + 14 days) and the package balance — one click into the cart."""
+	from hospital_vvs.services import dialysis as dz
+
+	dp = frappe.db.get_value("Dialysis Patient", {"patient": patient, "status": ["in", ["Active", "Paused"]]}, "name") if patient else None
+	if not dp:
+		return None
+	doc = frappe.get_doc("Dialysis Patient", dp)
+	rows = frappe.get_all("Dialysis Session", filters={"dialysis_patient": dp, "payment_status": "Unpaid", "status": ["in", ["Scheduled", "Checked-in", "In Session", "Completed"]],
+		"session_date": ["between", [frappe.utils.add_days(today(), -30), frappe.utils.add_days(today(), 14)]]},
+		fields=["name", "session_date", "shift", "station", "status", "session_type", "amount"], order_by="session_date", limit=12)
+	for r in rows:
+		r["session_date"] = str(r.session_date)
+	return {"dialysis_patient": dp, "patient_name": doc.patient_name, "payer": doc.payer, "panel_ref": doc.panel_ref, "zone": doc.zone, "sessions": rows,
+		"package": dz.package_balance(doc), "packages": [{"item_code": c, "item_name": n, "sessions": dz.PACKAGES[c], "rate": dz.session_rate_item(c)} for c, n, _r in dz.ITEMS if c in dz.PACKAGES]}
 
 
 def _imaging_rate(ln):
@@ -51,7 +84,7 @@ MONEY_KINDS = ("IPD Advance", "IPD Settlement", "Online Fee", "Dues")
 # D-60: a lab order made in the lab (unpaid) is collected here; its receipt lines are ordinary Lab lines (refunds work the same)
 LAB_ORDER = "Lab Order"
 GROUP_BT = {"Consultation": "OPD Slip", "Lab": "Lab", "Service": "General"}
-EXCLUDED_ITEMS = ("IPD-", "ER-FEE", "OV-CONSULT", "PKG-", "REG-FEE")
+EXCLUDED_ITEMS = ("IPD-", "ER-FEE", "OV-CONSULT", "PKG-", "REG-FEE", "DIA-PKG-", "DIA-HD-")  # dialysis sessions / packages have their own lines
 
 
 def hospital_company():
@@ -77,6 +110,7 @@ def catalogue(branch):
 		if it.item_code in cons or it.item_code.startswith(EXCLUDED_ITEMS):
 			continue
 		it["rate"] = flt(frappe.db.get_value("Item Price", {"item_code": it.item_code, "selling": 1}, "price_list_rate")) or flt(it.standard_rate)
+		it["category"] = "Dialysis / Nephrology" if it.item_code.startswith("DIA-") else None
 		services.append(it)
 	labs = frappe.get_all("Lab Test Template", filters={"is_active": 1}, fields=["name", "test_code", "department", "price", "sample_type", "tat_hours"],
 		order_by="department, name")
@@ -193,6 +227,10 @@ def price(data):
 		elif kind in IMAGING:
 			r = _imaging_rate(ln)
 			row.update(rate=r, amount=max(r - disc, 0))
+		elif kind in DIALYSIS:
+			r = _dialysis_rate(ln)
+			free = kind == "Dialysis" and _dialysis_paid_by(ln) != "Paid"
+			row.update(rate=r, amount=0 if free else max(r - disc, 0))
 		elif kind == "Online Fee":
 			row.update(amount=flt(frappe.db.get_value("Online Visit Request", ln["target"], "fee")))
 		else:
@@ -364,7 +402,33 @@ def checkout(data, counter=None):
 		img.append((x, st, {"item_code": rad.ensure_item(pr), "qty": 1, "rate": _imaging_rate(x if x["kind"] == "Imaging" else dict(x, target=st.name)),
 			"description": pr.procedure_name}))
 	svc_rows += [r for _x, _s, r in img]
-	svc_disc = sum(flt(x.get("discount")) for x in svc_lines) + sum(flt(x.get("discount")) for x, _s, _r in img)
+	# dialysis (D-99): sessions paid in cash join the services invoice; package / panel-credit sessions are recorded at 0; packages are sold as items
+	from hospital_vvs.services import dialysis as dz
+
+	dia = []
+	for x in [y for y in lines if y.get("kind") in DIALYSIS]:
+		if x["kind"] == "Dialysis":
+			ses = frappe.get_doc("Dialysis Session", x["target"])
+			if ses.payment_status != "Unpaid" or ses.status in ("Cancelled", "Missed"):
+				frappe.throw(_("Dialysis session {0} is already {1}.").format(ses.name, ses.payment_status if ses.payment_status != "Unpaid" else ses.status))
+			if frappe.db.get_value("Dialysis Patient", ses.dialysis_patient, "patient") != patient:
+				frappe.throw(_("Session {0} belongs to another patient.").format(ses.name))
+			via = _dialysis_paid_by(x)
+			if via == "Package" and not any(y.get("kind") == "Dialysis Package" for y in lines) and dz.package_balance(frappe.get_doc("Dialysis Patient", ses.dialysis_patient))["remaining"] <= 0:
+				frappe.throw(_("No package sessions left — sell a package or collect the session fee."))
+			if via == "Panel credit" and not frappe.db.get_value("Dialysis Patient", ses.dialysis_patient, "panel_ref"):
+				frappe.throw(_("Panel / Sehat Card credit needs the approval reference on the dialysis profile."))
+			code = dz.SESSION_ITEM.get(ses.session_type, "DIA-HD-SESSION")
+			dia.append((x, ses, via, {"item_code": code, "qty": 1, "rate": flt(ses.amount), "description": f"{frappe.db.get_value('Item', code, 'item_name')} · {ses.session_date} {ses.shift}"} if via == "Paid" else None))
+		else:
+			if x.get("item_code") not in dz.PACKAGES:
+				frappe.throw(_("Choose a dialysis package."))
+			dpn = frappe.db.get_value("Dialysis Patient", {"patient": patient, "status": ["in", ["Active", "Paused"]]}, "name")
+			if not dpn:
+				frappe.throw(_("Register the patient in the dialysis unit before selling a package."))
+			dia.append((x, dpn, "Package sale", {"item_code": x["item_code"], "qty": 1, "rate": dz.session_rate_item(x["item_code"])}))
+	svc_rows += [r for _x, _s, _v, r in dia if r]
+	svc_disc = sum(flt(x.get("discount")) for x in svc_lines) + sum(flt(x.get("discount")) for x, _s, _r in img) + sum(flt(x.get("discount")) for x, _s, _v, r in dia if r)
 	svc_total = max(sum(r["qty"] * r["rate"] for r in svc_rows) - svc_disc, 0)
 	money = []
 	for ln in [x for x in lines if x.get("kind") in MONEY_KINDS]:
@@ -456,6 +520,28 @@ def checkout(data, counter=None):
 			rcpt.append("lines", {"kind": x["kind"], "label": st.procedure_name + (" · contrast" if flt(st.contrast_charge) else "") + (" · urgent" if flt(st.urgent_charge) else ""),
 				"item_code": r["item_code"], "procedure": st.procedure, "target": st.name, "qty": 1, "rate": r["rate"], "discount": flt(x.get("discount")),
 				"amount": r["rate"] - flt(x.get("discount")), "reference_doctype": "Sales Invoice", "reference_name": si, "department": st.modality})
+	si_ = locals().get("si") if svc_rows else None
+	pkg_first = sorted(dia, key=lambda t: 0 if t[0]["kind"] == "Dialysis Package" else 1)  # sell the package before using it
+	if dia and rcpt.is_new():
+		rcpt.insert(ignore_permissions=True)
+	for x, obj, via, r in pkg_first:
+		disc_ = flt(x.get("discount")) if r else 0
+		if x["kind"] == "Dialysis Package":
+			bal = dz.sell_package(obj, x["item_code"], rcpt.name, r["rate"] - disc_)
+			rcpt.append("lines", {"kind": "Dialysis Package", "label": f"{frappe.db.get_value('Item', x['item_code'], 'item_name')} · balance {bal['remaining']} of {bal['total']}",
+				"item_code": x["item_code"], "target": obj, "qty": 1, "rate": r["rate"], "discount": disc_, "amount": r["rate"] - disc_,
+				"reference_doctype": "Sales Invoice", "reference_name": si_, "department": "Dialysis"})
+		else:
+			ses = dz.mark_paid(obj.name, rcpt.name, via)
+			label = f"Haemodialysis · {frappe.utils.formatdate(ses.session_date, 'dd MMM')} {ses.shift} · station {ses.station or ses.ward_location or '—'}"
+			if via == "Package":
+				bal = dz.package_balance(frappe.get_doc("Dialysis Patient", ses.dialysis_patient))
+				label += f" · package (sessions remaining {bal['remaining']} of {bal['total']})"
+			elif via == "Panel credit":
+				label += f" · {frappe.db.get_value('Dialysis Patient', ses.dialysis_patient, 'payer')} credit"
+			rcpt.append("lines", {"kind": "Dialysis", "label": label, "item_code": r["item_code"] if r else dz.SESSION_ITEM.get(ses.session_type), "target": ses.name, "qty": 1,
+				"rate": flt(ses.amount), "discount": disc_, "amount": (flt(ses.amount) - disc_) if r else 0, "reference_doctype": "Sales Invoice" if r else "Dialysis Session",
+				"reference_name": si_ if r else ses.name, "department": "Dialysis"})
 	for ln, amt in money:
 		kind, slices = ln["kind"], pool.take(amt)
 		posted = []  # (reference doctype, name, amount) — one receipt line per payment so each can be refunded
@@ -523,6 +609,12 @@ def receipt_data(name):
 				due = st.expected_at or frappe.utils.add_to_date(r.posted_at, hours=flt(pr.tat_hours) or 4)
 				dept.append({"line": ln.idx, "department": st.modality, "token": st.token_no, "where": rad.WHERE.get(st.modality), "prep": rad.prep_text(pr),
 					"report_at": frappe.utils.format_datetime(due, "dd MMM, hh:mm a"), "booking_ref": st.booking_ref, "safety": st.safety_status})
+		elif ln.kind == "Dialysis" and ln.target:
+			from hospital_vvs.services import dialysis as dz
+
+			info = dz.slip_info(ln.target)
+			if info:
+				dept.append({"line": ln.idx, **info})
 		elif ln.kind == "Lab" and ln.reference_name and not any(x.get("ref") == ln.reference_name for x in dept):
 			ti = frappe.db.get_value("Test Invoice", ln.reference_name, ["name", "expected_at"], as_dict=True)
 			if ti:
@@ -576,6 +668,13 @@ def refund(name, rows=None, reason=None, approver=None, password=None):
 		if ln.idx in idx and not ln.refunded and ln.kind in IMAGING and ln.target and \
 			frappe.db.get_value("Imaging Study", ln.target, "status") not in ("Booked", "Registered", "Cancelled", "No Show"):
 			frappe.throw(_("{0}: the scan has already been performed — it cannot be refunded here.").format(ln.label))
+	for ln in r.lines:  # dialysis: only sessions not started; packages only while no session has been used
+		if ln.idx in idx and not ln.refunded and ln.kind == "Dialysis" and ln.target and \
+			frappe.db.get_value("Dialysis Session", ln.target, "status") not in ("Scheduled", "Cancelled", "Missed"):
+			frappe.throw(_("{0}: the dialysis session has started — it cannot be refunded here.").format(ln.label))
+		if ln.idx in idx and not ln.refunded and ln.kind == "Dialysis Package" and ln.target and frappe.db.get_value("Dialysis Package Purchase",
+			{"parent": ln.target, "counter_receipt": r.name}, "used"):
+			frappe.throw(_("{0}: package sessions are already used — refund the unused balance from accounts.").format(ln.label))
 	done = set()
 	for ln in r.lines:
 		if ln.idx not in idx or ln.refunded:
@@ -608,6 +707,23 @@ def refund(name, rows=None, reason=None, approver=None, password=None):
 				st.status, st.payment_status = "Cancelled", "Unpaid"
 				rad.event(st, "Cancelled", f"Refunded on counter slip {r.name}: {reason}")
 				st.save(ignore_permissions=True)
+		elif ln.kind in DIALYSIS:
+			if ln.reference_doctype == "Sales Invoice" and ln.reference_name:
+				doc_ref = billing.refund_invoice(ln.reference_name, reason, items={ln.item_code: 1})
+			from hospital_vvs.services import dialysis as dz
+
+			if ln.kind == "Dialysis" and ln.target:
+				ses = frappe.get_doc("Dialysis Session", ln.target)
+				if ses.payment_status == "Package":
+					dz._return_package_session(ses)
+				ses.payment_status, ses.counter_receipt, ses.token_no = "Unpaid", None, None
+				ses.save(ignore_permissions=True)
+			elif ln.target:
+				dp = frappe.get_doc("Dialysis Patient", ln.target)
+				for p_ in dp.packages:
+					if p_.counter_receipt == r.name:
+						p_.status = "Refunded"
+				dp.save(ignore_permissions=True)
 		elif ln.reference_doctype == "Payment Entry" and ln.reference_name:
 			pe = frappe.get_doc("Payment Entry", ln.reference_name)
 			if str(pe.posting_date) != today():
@@ -644,6 +760,8 @@ CATEGORY = {"X-Ray": "Radiology (X-ray)", "Ultrasound": "Ultrasound / Doppler", 
 def line_category(ln):
 	if ln.kind in IMAGING:
 		return CATEGORY.get(ln.department or frappe.db.get_value("Imaging Procedure", ln.procedure, "modality"), "Radiology (X-ray)")
+	if ln.kind in DIALYSIS or (ln.kind == "Service" and str(ln.get("item_code") or "").startswith("DIA-")):
+		return "Dialysis / Nephrology"
 	return {"Consultation": "OPD consultation", "Lab": "Laboratory", "Lab Order": "Laboratory", "Service": "Other procedures"}.get(ln.kind, "IPD / dues / online fees")
 
 
@@ -660,7 +778,7 @@ def collection_report(from_date=None, to_date=None, branch=None, counter=None, c
 	rcpts = frappe.get_all("Counter Receipt", filters=flt_, fields=["name", "posted_at", "cashier", "counter", "referring_doctor", "external_referrer", "patient_name",
 		"gross_total", "discount_total", "patient_total", "payer_share", "status", "refund_reason"], order_by="posted_at")
 	names = [r.name for r in rcpts] or [""]
-	lines = frappe.get_all("Counter Receipt Line", filters={"parent": ["in", names], "parenttype": "Counter Receipt"}, fields=["parent", "kind", "label", "procedure",
+	lines = frappe.get_all("Counter Receipt Line", filters={"parent": ["in", names], "parenttype": "Counter Receipt"}, fields=["parent", "kind", "label", "procedure", "item_code",
 		"department", "qty", "rate", "discount", "amount", "refunded"])
 	tenders = frappe.get_all("Counter Receipt Tender", filters={"parent": ["in", names], "parenttype": "Counter Receipt"}, fields=["parent", "mode_of_payment", "amount"])
 	by_r = {r.name: r for r in rcpts}
@@ -697,7 +815,7 @@ def collection_report(from_date=None, to_date=None, branch=None, counter=None, c
 	for r in rcpts:
 		k = str(r.posted_at)[:10]
 		daily[k] = daily.get(k, 0.0) + flt(r.patient_total)
-	order = ["Radiology (X-ray)", "Ultrasound / Doppler", "MRI", "CT Scan", "Laboratory", "Other procedures", "OPD consultation", "IPD / dues / online fees"]
+	order = ["Dialysis / Nephrology", "Radiology (X-ray)", "Ultrasound / Doppler", "MRI", "CT Scan", "Laboratory", "Other procedures", "OPD consultation", "IPD / dues / online fees"]
 	return {"from": str(f), "to": str(t), "categories": sorted(cat.values(), key=lambda x: order.index(x["label"]) if x["label"] in order else 99),
 		"modes": [{"label": k, "value": v} for k, v in sorted(modes.items(), key=lambda x: -x[1])], "cashiers": list(cashiers.values()),
 		"doctors": sorted(docs.values(), key=lambda x: -x["net"])[:15], "discounts": disc[:200], "refunds": refunds[:200],

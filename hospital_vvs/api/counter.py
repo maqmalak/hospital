@@ -116,6 +116,13 @@ def pending_imaging(patient):
 	return svc.unpaid_imaging(patient)
 
 
+@frappe.whitelist()
+def pending_dialysis(patient):
+	"""Unpaid dialysis sessions + package balance for this patient (D-99)."""
+	require_roles(*ROLES)
+	return svc.pending_dialysis(patient)
+
+
 @frappe.whitelist(methods=["POST"])
 def mark_printed(name):
 	"""Reprint counter: every print after the first is a DUPLICATE COPY."""

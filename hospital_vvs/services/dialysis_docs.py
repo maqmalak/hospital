@@ -182,7 +182,7 @@ def card_html(name):
 	body = _ident(dp) + f"""<div class='box' style='text-align:center;font-size:14px'><b>{esc(dp.sched_days or '—')}</b> · {esc(dp.sched_shift or '')} shift <b>{t[0]}–{t[1]}</b> · Station <b>{esc(dp.station or '—')}</b>
 	<div style='font-size:10px;margin-top:1mm'>Dialysis unit phone · ڈائیلاسز یونٹ فون: <b>{esc(s.phone or '')}</b></div></div>"""
 	body += "<h3>Next sessions · اگلے سیشن</h3><table class='t'><tr><th>Date</th><th>Shift</th><th>Station</th></tr>" + "".join(
-		f"<tr><td>{formatdate(x.session_date, 'ddd dd MMM yyyy')}</td><td>{x.shift}</td><td>{x.station or '—'}</td></tr>" for x in up) + "</table>"
+		f"<tr><td>{formatdate(x.session_date, 'EEE dd MMM yyyy')}</td><td>{x.shift}</td><td>{x.station or '—'}</td></tr>" for x in up) + "</table>"
 	body += """<h3>Remember · یاد رکھیں</h3><ul style='margin:0;padding-left:5mm'><li>Arrive 20 minutes early; pay at the Charges Counter first. · 20 منٹ پہلے آئیں؛ پہلے چارجز کاؤنٹر پر ادائیگی کریں۔</li>
 	<li>Keep weight gain between sessions under 2–2.5 kg; limit fluids and salt. · سیشنوں کے درمیان وزن 2 سے 2.5 کلو سے زیادہ نہ بڑھنے دیں۔</li>
 	<li>Do not let anyone take BP or blood from the fistula arm. · فسٹولا والے بازو سے بلڈ پریشر یا خون نہ لیں۔</li>

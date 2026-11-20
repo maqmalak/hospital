@@ -15,12 +15,13 @@ export type SlipReceipt = Receipt & { departments?: SlipDept[]; referring?: stri
 const CAT: Record<string, [string, string]> = {
   "X-Ray": ["Radiology (X-ray)", "ریڈیالوجی (ایکسرے)"], Ultrasound: ["Ultrasound / Doppler", "الٹراساؤنڈ / ڈوپلر"], Doppler: ["Ultrasound / Doppler", "الٹراساؤنڈ / ڈوپلر"],
   MRI: ["MRI", "ایم آر آئی"], CT: ["CT Scan", "سی ٹی اسکین"], Lab: ["Laboratory", "لیبارٹری"], Consultation: ["OPD consultation", "او پی ڈی معائنہ"],
-  Service: ["Other procedures", "دیگر پروسیجرز"], Other: ["Payments", "ادائیگیاں"],
+  Service: ["Other procedures", "دیگر پروسیجرز"], Dialysis: ["Dialysis", "ڈائیلاسز"], Other: ["Payments", "ادائیگیاں"],
 };
-const ORDER = ["Radiology (X-ray)", "Ultrasound / Doppler", "MRI", "CT Scan", "Laboratory", "Other procedures", "OPD consultation", "Payments"];
+const ORDER = ["Dialysis", "Radiology (X-ray)", "Ultrasound / Doppler", "MRI", "CT Scan", "Laboratory", "Other procedures", "OPD consultation", "Payments"];
 function catOf(l: SlipReceipt["lines"][number]): [string, string] {
   if (l.kind === "Imaging" || l.kind === "Imaging Order") return CAT[l.department ?? ""] ?? CAT["X-Ray"];
   if (l.kind === "Lab" || l.kind === "Lab Order") return CAT.Lab;
+  if (l.kind === "Dialysis" || l.kind === "Dialysis Package" || (l.kind === "Service" && (l as { item_code?: string }).item_code?.startsWith("DIA-"))) return CAT.Dialysis;
   return CAT[l.kind] ?? CAT.Other;
 }
 
