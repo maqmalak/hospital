@@ -48,7 +48,7 @@ export default function Nephrology() {
           <div className="flex flex-col items-start gap-[26px]">
             <span className="rn-rise inline-flex items-center gap-2.5 rounded-full border border-[#bef264]/25 bg-[#bef264]/[0.07] px-3.5 py-2 text-xs font-semibold tracking-[0.16em] text-[#d9f99d]">
               <span className="rn-live h-[7px] w-[7px] rounded-full bg-[#bef264]" />{T.pill.toUpperCase()}</span>
-            <h1 className="rn-rise s2-display m-0 text-[clamp(46px,5.8vw,80px)] leading-[1.02] tracking-[-0.025em] rtl:text-[clamp(34px,4.4vw,58px)] rtl:leading-[1.6]" style={{ animationDelay: ".08s" }}>{T.h1a}<br /><span className="rn-grad-text italic" style={{ fontWeight: 400 }}>{T.h1b}</span></h1>
+            <h1 className="rn-rise s2-display m-0 text-[clamp(46px,5.8vw,80px)] leading-[1.02] tracking-[-0.025em] rtl:text-[clamp(32px,4vw,54px)] rtl:leading-[1.9]" style={{ animationDelay: ".08s" }}>{T.h1a}<br /><span className="rn-grad-text italic" style={{ fontWeight: 400 }}>{T.h1b}</span></h1>
             <p className="rn-rise m-0 max-w-[540px] text-lg leading-[1.65] text-[rgba(232,240,226,.8)]" style={{ animationDelay: ".18s" }}>{T.lead}</p>
             <div className="rn-rise flex flex-wrap gap-3" style={{ animationDelay: ".28s" }}>
               <a href={book} className="rn-b rn-btn-primary inline-flex min-h-[52px] items-center gap-2.5 rounded-full px-[26px] text-base font-semibold"><Stethoscope className="h-[18px] w-[18px]" />{T.book}</a>
@@ -372,6 +372,9 @@ function L({ l, req, hint, className = "", children }: { l: string; req?: boolea
  *  #BEF264 on the dark surface #0D2730 11.9:1, #F2CF6B on #0D2730 10.3:1, #D9F99D on the hero #0B1A12 15.4:1; button text #14260A on the
  *  gradient 12.3:1 (#BEF264 end) and 5.2:1 (#65A30D end); white on the CTA band #3F6212 7.1:1. */
 const RN_CSS = `
+[dir=rtl] .rn-grad-text{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#f2cf6b;font-style:normal!important;font-weight:inherit!important}
+[dir=rtl] .rn-hero h1{text-wrap:balance;padding-block:.15em}
+[dir=rtl] .rn-hero p{text-wrap:pretty;line-height:2}
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=JetBrains+Mono:wght@400&display=swap');
 .rn-hero{background:radial-gradient(1100px 620px at 78% 30%,rgba(163,230,53,.16) 0%,rgba(163,230,53,0) 70%),radial-gradient(800px 500px at 10% 0%,rgba(212,167,44,.10) 0%,rgba(212,167,44,0) 70%),#0B1A12;--flow:1}
 .rn-dots{background-image:linear-gradient(rgba(163,230,53,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(163,230,53,.07) 1px,transparent 1px);background-size:36px 36px}
