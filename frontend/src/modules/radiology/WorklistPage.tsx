@@ -20,7 +20,7 @@ import { age, hm, Modal, openPdf, PRIORITY_BAR, PriorityTag, rs, SAFETY_TONE, St
 const MODALITIES = ["X-Ray", "Ultrasound", "Doppler", "MRI", "CT"] as const;
 const SAFETY_MODS = ["MRI", "CT"];
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => new Date(Date.now() + 5 * 3600_000).toISOString().slice(0, 10); // Asia/Karachi (UTC+5, no DST)
 
 export default function WorklistPage() {
   const { branch, hasRole } = useAuth();

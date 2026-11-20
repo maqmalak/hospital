@@ -69,8 +69,11 @@ body{font:${a5 ? "10.5px" : "11.5px"}/1.35 Inter,Arial,sans-serif;${a5 ? "" : "w
 .refund{border:2px solid #b91c1c;color:#b91c1c;text-align:center;font-weight:900;letter-spacing:.15em;margin:1mm 0;padding:.6mm}
 table{width:100%;border-collapse:collapse}th{font-size:9px;text-align:left;border-bottom:1px solid #000;padding:.6mm .8mm}td{padding:.6mm .8mm;vertical-align:top}
 .cat td{font-weight:800;border-top:1px solid #999;padding-top:1.2mm;background:#f1f5f4}.num{text-align:right;white-space:nowrap}
-.tk{border:2px solid #000;border-radius:5px;padding:1.2mm;margin:1mm 0;display:flex;gap:2mm;align-items:center}.tk .n{font-size:${a5 ? "22px" : "26px"};font-weight:900;line-height:1;min-width:18mm;text-align:center}
+.tk{border:2px solid #000;border-radius:5px;padding:1.2mm;margin:1mm 0;display:flex;gap:2mm;align-items:center}.tk .n{font-size:${a5 ? "18px" : "26px"};font-weight:900;line-height:1;white-space:nowrap;min-width:${a5 ? "15mm" : "18mm"};text-align:center}.tt td{border-bottom:1px solid #ddd}.tt .tn{font-size:16px;font-weight:900;white-space:nowrap;border:2px solid #000;border-radius:4px;text-align:center}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:.6mm 4mm}.box{border:1.5px solid #0e5e6f;border-radius:4px;padding:1.5mm 2mm}`;
+
+/** Busy A5 slips (many services + departments) tighten so they still print on one sheet. */
+const DENSE = `body{font-size:9.5px;line-height:1.15}td,th{padding:.35mm .8mm}.cat td{padding-top:.6mm}.hr{margin:1mm 0}.tk{padding:.7mm 1mm;border-width:1.5px}.tk .n{font-size:14px;min-width:14mm;white-space:nowrap}.tt .tn{font-size:12px;padding:0 1mm}.tt td{font-size:8.5px;white-space:nowrap}.tt td:last-child{white-space:normal}.tt td,.tt th{padding:.2mm .8mm}table.lh-page>thead>tr>td{padding-top:4mm}.lh-rule{margin:1.5mm 0 2mm}.lh-title{margin:0 0 1.5mm}.title{margin:.3mm 0}.dup{margin:.5mm 0;padding:.2mm}.hr{margin:.8mm 0}.lh-logo{height:10mm}.sig{margin-top:1.5mm!important}`;
 
 /** One slip, 80 mm or A5. `copy`: print number (0 = original). `refund`: refund slip. */
 export function slipHtml(r: SlipReceipt, { a5 = false, copy = 0, refund = false }: { a5?: boolean; copy?: number; refund?: boolean } = {}) {
@@ -87,8 +90,20 @@ export function slipHtml(r: SlipReceipt, { a5 = false, copy = 0, refund = false 
       + (l.discount ? `<div class="r xs"><span>&nbsp; discount</span><span>−${money(l.discount)}</span></div>` : "")).join("")).join("");
   const depts = (r.departments ?? []).map((d) => `<div class="tk"><div class="n">${esc(d.token ?? "—")}</div><div class="xs"><b>${esc(d.department)}</b>${d.where ? ` — ${esc(d.where)}` : ""}
     ${d.report_at ? `<br>Report: ${esc(d.report_at)}` : ""}${d.prep ? `<br><i>${esc(d.prep.slice(0, a5 ? 220 : 140))}</i>` : ""}${d.safety && !["Not required", "Cleared"].includes(d.safety) ? `<br><b>Safety screening: ${esc(d.safety)}</b>` : ""}</div></div>`).join("");
+  const tokRows = [...(r.tokens ?? []).map((t) => [String(t.token), esc(t.doctor), t.room ? `Room ${esc(t.room)}` : "", "", ""]),
+    ...(r.departments ?? []).map((d) => [d.token ?? "—", esc(d.department), esc(d.where ?? ""), esc(d.report_at ?? ""),
+      `${d.prep ? esc(d.prep.slice(0, 160)) : ""}${d.safety && !["Not required", "Cleared"].includes(d.safety) ? ` <b>Safety screening: ${esc(d.safety)}</b>` : ""}`])];
+  const tokTable = `<table class="tt"><thead><tr><th>Token</th><th>Department</th><th>Where</th><th>Report</th><th>Preparation</th></tr></thead><tbody>${tokRows.map((x) => `<tr><td class="tn">${esc(x[0])}</td><td class="b">${x[1]}</td><td class="xs">${x[2]}</td><td class="xs">${x[3]}</td><td class="xs"><i>${x[4]}</i></td></tr>`).join("")}</tbody></table>`;
   const tokens = (r.tokens ?? []).map((t) => `<div class="tk"><div class="n">${esc(t.token)}</div><div class="xs"><b>${esc(t.doctor)}</b>${t.room ? ` — Room ${esc(t.room)}` : ""}</div></div>`).join("");
   const net = refund ? refundedTotal : r.patient_total;
+  const money_block = `${kv("Gross", "کل", money(r.gross_total))}${r.discount_total ? kv("Discount", "رعایت", `−${money(r.discount_total)}`) : ""}
+  ${r.payer_share ? kv(`Credit — ${esc(P.panel ?? "panel")}`, "پینل", money(r.payer_share)) : ""}
+  ${kv(refund ? "Refunded" : "Net received", refund ? "واپس" : "وصول", money(net))}
+  ${r.tenders.map((t) => `<div class="r xs"><span>${esc(t.mode_of_payment)}${t.reference_no ? ` · ref ${esc(t.reference_no)}` : ""}</span><span>${money(t.amount)}</span></div>`).join("")}
+  ${r.change_amount ? kv("Change", "بقایا", money(r.change_amount)) : ""}
+  <div class="xs" style="margin-top:1mm"><b>${amountInWords(net)}</b></div>
+  ${refund && r.refund_reason ? `<div class="xs" style="margin-top:1mm">Reason: ${esc(r.refund_reason)}</div>` : ""}`;
+  const qr = qrSvg(`${location.origin}/hms/site/radiology/reports?slip=${r.name}`, a5 ? 0.5 : 0.6);
   const body = `${head}
   <div class="title">${refund ? "REFUND SLIP" : "CHARGES RECEIVED — COUNTER SLIP"}<div class="ur" style="text-align:center">${refund ? "واپسی کی رسید" : "وصولی رسید"}</div></div>
   ${copy > 0 ? `<div class="dup">DUPLICATE COPY · ${copy}</div>` : ""}${refund ? `<div class="refund">REFUNDED ${money(refundedTotal)}</div>` : ""}
@@ -100,19 +115,13 @@ export function slipHtml(r: SlipReceipt, { a5 = false, copy = 0, refund = false 
     ${kv("Counter", "کاؤنٹر", esc(r.counter ?? ""))}${kv("Cashier", "کیشیئر", esc(r.cashier ?? ""))}
   </div>
   <div class="hr"></div>${table}<div class="hr"></div>
-  ${kv("Gross", "کل", money(r.gross_total))}${r.discount_total ? kv("Discount", "رعایت", `−${money(r.discount_total)}`) : ""}
-  ${r.payer_share ? kv(`Credit — ${esc(P.panel ?? "panel")}`, "پینل", money(r.payer_share)) : ""}
-  ${kv(refund ? "Refunded" : "Net received", refund ? "واپس" : "وصول", money(net))}
-  ${r.tenders.map((t) => `<div class="r xs"><span>${esc(t.mode_of_payment)}${t.reference_no ? ` · ref ${esc(t.reference_no)}` : ""}</span><span>${money(t.amount)}</span></div>`).join("")}
-  ${r.change_amount ? kv("Change", "بقایا", money(r.change_amount)) : ""}
-  <div class="xs" style="margin-top:1mm"><b>${amountInWords(net)}</b></div>
-  ${refund && r.refund_reason ? `<div class="xs" style="margin-top:1mm">Reason: ${esc(r.refund_reason)}</div>` : ""}
-  ${!refund && (depts || tokens) ? `<div class="hr"></div><div class="b">Where to go · <span class="ur">کہاں جائیں</span></div>${tokens}${depts}` : ""}
+  ${a5 ? `<div style="display:flex;gap:5mm;align-items:flex-start"><div style="flex:1">${money_block}</div><div style="width:46mm;text-align:center">${qr}${barcode(r.name)}<div class="c xs">${esc(r.name)}</div></div></div>` : money_block}
+  ${!refund && (depts || tokens) ? `<div class="hr"></div><div class="b">Where to go · <span class="ur">کہاں جائیں</span></div>${a5 ? tokTable : `${tokens}${depts}`}` : ""}
   <div class="hr"></div>
-  <div style="display:flex;gap:3mm;align-items:center"><div>${qrSvg(`${location.origin}/hms/site/radiology/reports?slip=${r.name}`, a5 ? 0.55 : 0.6)}</div><div style="flex:1">${barcode(r.name)}<div class="c xs">${esc(r.name)}</div></div></div>
+  ${a5 ? "" : `<div style="display:flex;gap:3mm;align-items:center"><div>${qr}</div><div style="flex:1">${barcode(r.name)}<div class="c xs">${esc(r.name)}</div></div></div>`}
   <div class="xs c" style="margin-top:1mm">Please keep this slip for report collection. · <span class="ur">رپورٹ لینے کے لیے یہ رسید سنبھال کر رکھیں۔</span></div>
   <div class="xs c">Refunds only before the service is performed, with supervisor approval. Computer-generated slip.</div>
-  ${a5 ? `<div class="r xs" style="margin-top:6mm"><span>Cashier signature: ____________________</span><span>${r.offline ? "Synced from offline" : ""}</span></div>` : ""}`;
+  ${a5 ? `<div class="r xs sig" style="margin-top:6mm"><span>Cashier signature: ____________________</span><span>${r.offline ? "Synced from offline" : ""}</span></div>` : ""}`;
   return `<!doctype html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Gulzar&display=swap" rel="stylesheet">
-  <style>${a5 ? lhCss("A5") : ""}${css(a5)}</style></head><body>${a5 ? lhPage(body, r.clinic, { title: refund ? "Refund slip" : "Counter slip", note: esc(r.name), footRight: "Charges Received" }) : body}</body></html>`;
+  <style>${a5 ? lhCss("A5") : ""}${css(a5)}${a5 && r.lines.length + rows.length + (r.departments?.length ?? 0) > 9 ? DENSE : ""}</style></head><body>${a5 ? lhPage(body, r.clinic, { title: refund ? "Refund slip" : "Counter slip", note: esc(r.name), footRight: "Charges Received" }) : body}</body></html>`;
 }

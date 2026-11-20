@@ -43,6 +43,8 @@ def staff():
 		out.append(doc)
 	_user("radiographer", "Waqas Radiographer", [R.RADIOGRAPHER])
 	_user("sonographer", "Mehwish Sonographer", [R.SONOGRAPHER])
+	_user("mritech", "Usman MRI Technologist", [R.MRI_TECH])
+	_user("cttech", "Rabia CT Technologist", [R.CT_TECH])
 	return out
 
 
@@ -53,7 +55,25 @@ def _png(kind, seed):
 
 	r = np.random.default_rng(seed)
 	w, h = 640, 480
-	if kind == "xray":
+	if kind in ("mri", "ct"):
+		img = Image.new("L", (w, h), 6)
+		d = ImageDraw.Draw(img)
+		if kind == "mri":  # sagittal lumbar spine look: vertebral bodies + discs
+			for i in range(5):
+				y = 60 + i * 78
+				d.rounded_rectangle((250, y, 350, y + 58), 10, fill=120)
+				d.ellipse((255, y + 58, 345, y + 78), fill=200 if i != 3 else 150)
+			d.rectangle((365, 40, 395, 450), fill=210)  # CSF
+			d.ellipse((345, 330, 372, 352), fill=170)  # L4-5 protrusion
+		else:  # axial CT abdomen / KUB look
+			d.ellipse((90, 70, 550, 420), fill=95)
+			d.ellipse((140, 140, 250, 300), fill=125)
+			d.ellipse((390, 140, 500, 300), fill=125)
+			d.ellipse((300, 260, 340, 300), fill=235)  # vertebra
+			d.ellipse((205, 320, 217, 332), fill=255)  # calculus
+		img = img.filter(ImageFilter.GaussianBlur(3))
+		arr = np.clip(np.asarray(img, dtype=float) + r.normal(0, 5, (h, w)), 0, 255).astype("uint8")
+	elif kind == "xray":
 		img = Image.new("L", (w, h), 18)
 		d = ImageDraw.Draw(img)
 		d.ellipse((150, 70, 300, 420), fill=70)
@@ -175,7 +195,7 @@ def _progress(doc, pr, target, rnd, report=None, signer=None):
 		ev.append(("Registered", t0, f"Token {doc.token_no}"))
 	if reach >= 2:
 		doc.scan_started_at = _ts(doc.scheduled_date, doc.slot_time, rnd.randint(5, 25))
-		doc.technologist = "radiographer@vvs.demo" if pr.modality == "X-Ray" else "sonographer@vvs.demo"
+		doc.technologist = {"X-Ray": "radiographer@vvs.demo", "MRI": "mritech@vvs.demo", "CT": "cttech@vvs.demo"}.get(pr.modality, "sonographer@vvs.demo")
 		ev.append(("In Progress", doc.scan_started_at, None))
 	if reach >= 3:
 		doc.scanned_at = add_to_date(doc.scan_started_at, minutes=max(5, (pr.duration_min or 15) + rnd.randint(-3, 8)))
@@ -258,8 +278,8 @@ def samples(rads, rnd):
 
 def history(rads, rnd, days=30):
 	procs = frappe.get_all("Imaging Procedure", filters={"is_active": 1}, fields=["name", "modality", "female_only", "category", "report_kind"])
-	weights = {"X-Ray": 6, "Ultrasound": 4, "Doppler": 1}
-	pool = [p for p in procs for _ in range(weights[p.modality] * (3 if p.category in ("X-Ray", "Ultrasound") else 1))]
+	weights = {"X-Ray": 6, "Ultrasound": 4, "Doppler": 1, "MRI": 1, "CT": 1}
+	pool = [p for p in procs if p.category != "Guided Procedure" or p.modality != "CT" for _ in range(weights.get(p.modality, 0) * (3 if p.category in ("X-Ray", "Ultrasound") else 1))]
 	if frappe.db.count("Imaging Study", {"scheduled_date": ["<", today()]}) > 80:
 		return 0
 	n = 0
@@ -322,6 +342,105 @@ def today_list(rads, rnd):
 	return n
 
 
+# ------------------------------------------------------------------ MRI & CT (D-98)
+MRCT_SAMPLES = [
+	{"procedure": "MRI Lumbar Spine", "template": "MRI Lumbar Spine - disc bulge", "gender": "Male", "age": 42, "history": "Low back pain radiating to the right leg for 6 weeks; numbness over the right foot.",
+	 "title": "MRI LUMBAR SPINE", "machine": "MRI-1", "protocol": "Sag T1, T2, STIR; Ax T2 L1-S1", "images": [("mri", "Sagittal T2 — L4-L5 disc")]},
+	{"procedure": "CT Brain (plain)", "template": "Normal CT Brain (plain)", "gender": "Female", "age": 58, "history": "Headache and dizziness for 3 days. No trauma. BP 150/95.",
+	 "title": "CT BRAIN (PLAIN)", "machine": "CT-1", "protocol": "Non-contrast axial 5 mm, bone and brain windows", "ctdi": 48.2, "dlp": 812, "images": [("ct", "Axial — brain window")]},
+	{"procedure": "CT KUB (stone protocol)", "template": "CT KUB - ureteric calculus", "gender": "Male", "age": 36, "history": "Acute right loin-to-groin pain since last night; haematuria. Creatinine 1.0.",
+	 "title": "CT KUB (STONE PROTOCOL)", "machine": "CT-1", "protocol": "Low-dose non-contrast KUB, 3 mm axial + coronal MPR", "ctdi": 6.1, "dlp": 285, "priority": "Urgent", "images": [("ct", "Axial — right lower ureteric calculus")]},
+]
+
+
+def _safety_ok(doc, pr):
+	for q, _b in rad.questions_for(pr):
+		doc.append("safety_answers", {"question": q, "answer": "No"})
+	if (pr.contrast or "No") != "No":
+		doc.creatinine, doc.egfr, doc.creatinine_date = 0.9, 92, today()
+	doc.consent_signer, doc.consent_taken = doc.patient_name, 1
+	doc.safety_status = rad.evaluate_safety(doc, pr)
+
+
+def mrct_samples(rads, rnd):
+	made = []
+	signer = frappe.db.get_value("Doctor", rads[1], "user")
+	for i, s in enumerate(MRCT_SAMPLES):
+		if frappe.db.exists("Imaging Study", {"report_title": s["title"], "clinical_history": s["history"]}):
+			continue
+		p = _patients(s["gender"], 1, rnd)[0]
+		date = add_to_date(getdate(today()), days=-(1 + i))
+		doc, pr = _base(p, s["procedure"], date, "11:30", rnd, priority=s.get("priority", "Routine"), source="OPD", rad_doctor=rads[1])
+		doc.age, doc.walk_in = s["age"], 0
+		doc.pregnancy_status = "Not pregnant" if s["gender"] == "Female" else "Not applicable"
+		doc.machine, doc.protocol, doc.ctdi, doc.dlp, doc.image_count = s["machine"], s["protocol"], s.get("ctdi"), s.get("dlp"), rnd.randint(180, 420)
+		_safety_ok(doc, pr)
+		report = {**_tpl(s["template"]), "report_title": s["title"], "clinical_history": s["history"]}
+		doc = _progress(doc, pr, "Delivered", rnd, report=report, signer=signer)
+		doc.reload()
+		for j, (kind, cap) in enumerate(s["images"]):
+			doc.append("key_images", _attach(doc.name, kind, 300 + i * 10 + j, cap))
+		doc.save(ignore_permissions=True)
+		doc.content_hash = rad.content_of(doc)
+		doc.signature_hash = rad.sig_of(doc.name, doc.report_version, doc.content_hash)
+		doc.db_set({"content_hash": doc.content_hash, "signature_hash": doc.signature_hash}, update_modified=False)
+		made.append(doc.name)
+	return made
+
+
+def mrct_today(rads, rnd):
+	"""Today's MRI-1 / CT-1 worklist: a pacemaker patient blocked for clearance, contrast awaiting creatinine, cleared and in-progress scans."""
+	if frappe.db.count("Imaging Study", {"scheduled_date": today(), "modality": ["in", ["MRI", "CT"]]}) >= 6:
+		return 0
+	now = now_datetime()
+	plan = [("MRI Brain", "Booked", "pacemaker"), ("MRI Knee", "Registered", "ok"), ("MRI Cervical Spine", "In Progress", "ok"), ("MRI Abdomen", "Booked", "pending"),
+		("CT Brain (plain)", "Scanned", "ok"), ("CT Abdomen & Pelvis (triphasic)", "Registered", "pending"), ("CT Chest", "Reporting", "ok"), ("CT KUB (stone protocol)", "Booked", "ok"),
+		("CT Pulmonary Angiography", "Registered", "low_egfr")]
+	n = 0
+	for i, (procedure, status, safety) in enumerate(plan):
+		pr = rad.proc(procedure)
+		p = _patients("Female" if i % 2 else "Male", 1, rnd)[0]
+		at = add_to_date(now, minutes=(-200 + i * 30) if status != "Booked" else 40 + i * 25)
+		slot = f"{at.hour:02d}:{(at.minute // 5) * 5:02d}"
+		doc, prd = _base(p, procedure, getdate(today()) if at.date() == now.date() else at.date(), slot, rnd, priority="Urgent" if "Pulmonary" in procedure else "Routine",
+			rad_doctor=rads[1] if status == "Reporting" else None)
+		doc.walk_in, doc.machine = 0, rad.HOURS[pr.modality]["machines"][0]
+		doc.pregnancy_status = "Not pregnant" if p.gender == "Female" else "Not applicable"
+		if safety != "pending":
+			_safety_ok(doc, prd)
+		if safety == "pacemaker":
+			for a in doc.safety_answers:
+				if a.question.startswith("Cardiac pacemaker"):
+					a.answer, a.detail = "Yes", "Dual-chamber pacemaker 2019 — card not brought"
+		if safety == "low_egfr":
+			doc.creatinine, doc.egfr = 2.4, 26
+		if safety == "pending":
+			doc.safety_status = "Pending"
+		else:
+			doc.safety_status = rad.evaluate_safety(doc, prd)
+		if (prd.contrast or "No") == "Yes":
+			doc.contrast_charge, doc.amount = prd.contrast_surcharge, (prd.price or 0) + (prd.contrast_surcharge or 0)
+		if status == "Booked":
+			doc.booking_source = "Online"
+			doc.insert(ignore_permissions=True)
+		else:
+			_progress(doc, prd, status, rnd, signer=frappe.db.get_value("Doctor", rads[1], "user"))
+		n += 1
+	return n
+
+
+def run_mrct(seed=11):
+	frappe.flags.hv_sync_messages = True
+	rnd = random.Random(seed)
+	frappe.set_user("Administrator")
+	rads = staff()
+	made = mrct_samples(rads, rnd)
+	t = mrct_today(rads, rnd)
+	frappe.db.commit()
+	print(f"MRI/CT samples {made} · today {t}")
+	return made
+
+
 def run(seed=7):
 	frappe.flags.hv_sync_messages = True
 	rnd = random.Random(seed)
@@ -330,6 +449,7 @@ def run(seed=7):
 	made = samples(rads, rnd)
 	h = history(rads, rnd)
 	t = today_list(rads, rnd)
+	run_mrct()
 	frappe.db.commit()
 	print(f"radiologists {rads} · samples {made} · history {h} · today {t}")
 	return made

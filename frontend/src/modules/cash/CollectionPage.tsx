@@ -17,7 +17,7 @@ interface Rep {
   refunds: { slip: string; service: string; amount: number; reason?: string }[]; daily: { d: string; value: number }[];
   totals: { slips: number; gross: number; discount: number; net: number; refunded: number; tendered: number; panel_credit: number };
 }
-const iso = (d: Date) => d.toISOString().slice(0, 10);
+const iso = (d: Date) => new Date(d.getTime() + 5 * 3600_000).toISOString().slice(0, 10); // Asia/Karachi date
 const rs = (n?: number) => `Rs ${Math.round(n ?? 0).toLocaleString()}`;
 
 export default function CollectionPage() {

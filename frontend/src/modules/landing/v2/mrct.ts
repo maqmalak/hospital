@@ -13,7 +13,7 @@ export const EQUIPMENT = {
 
 const en = {
   title: "MRI & CT Scan", metaDesc: "MRI and CT scans at Lyallpur Medical Complex, Faisalabad: brain, spine, joints, CT angiography, KUB and more — consultant radiologist reports, online booking and safety screening.",
-  eyebrow: "MRI & CT · Radiology, 2nd floor", h1a: "See inside, clearly.", h1b: "MRI & CT, reported by consultants.",
+  eyebrow: "MRI & CT · ground floor, radiology wing", h1a: "See inside, clearly.", h1b: "MRI & CT, reported by consultants.",
   lead: "Radiation-free MRI for the brain, spine and joints, and fast low-dose CT around the clock — with careful safety screening, clear preparation and digitally signed reports on your phone.",
   book: "Book MRI / CT", reports: "Download my report", call: "Call radiology",
   ctaEmergency: "CT for emergencies 24/7", ctaWalkIn: "Same-day CT slots most days",
@@ -62,7 +62,7 @@ const en = {
     ["Can I get a refund if I cancel?", "Yes, before the scan is performed. Refunds are approved by the cash supervisor and a refund slip is printed for you."],
     ["Will I get the images?", "Yes — a CD or online link on request, and your doctor sees the report in the hospital record."],
   ] as [string, string][],
-  locTitle: "Where to find us", locText: "Radiology & Imaging, 2nd floor — lift from the main lobby. Pay at the reception counter; your slip shows the room (MRI-1 / CT-1) and token.",
+  locTitle: "Where to find us", locText: "MRI and CT suites, ground floor, radiology wing [confirm] — follow the Radiology signs from the main lobby. Pay at the reception counter; your slip shows the room (MRI-1 / CT-1) and token.",
   ctaTitle: "Need an MRI or CT?", ctaText: "Book online in two minutes, or bring your doctor's slip to the reception counter.",
   safety: "Safety", report24: "Report within 24 hrs", hours: "Hours",
 };
@@ -70,7 +70,7 @@ type Copy = typeof en;
 
 const ur: Copy = {
   ...en,
-  title: "ایم آر آئی اور سی ٹی اسکین", eyebrow: "ایم آر آئی اور سی ٹی · ریڈیالوجی، دوسری منزل", h1a: "اندر کی واضح تصویر۔", h1b: "ایم آر آئی اور سی ٹی، کنسلٹنٹ رپورٹ کے ساتھ۔",
+  title: "ایم آر آئی اور سی ٹی اسکین", eyebrow: "ایم آر آئی اور سی ٹی · گراؤنڈ فلور، ریڈیالوجی ونگ", h1a: "اندر کی واضح تصویر۔", h1b: "ایم آر آئی اور سی ٹی، کنسلٹنٹ رپورٹ کے ساتھ۔",
   lead: "دماغ، ریڑھ کی ہڈی اور جوڑوں کے لیے بغیر شعاعوں کے ایم آر آئی، اور چوبیس گھنٹے تیز، کم شعاعوں والا سی ٹی — حفاظتی جانچ، واضح تیاری اور ڈیجیٹل دستخط شدہ رپورٹ آپ کے فون پر۔",
   book: "ایم آر آئی / سی ٹی بک کریں", reports: "اپنی رپورٹ ڈاؤن لوڈ کریں", call: "ریڈیالوجی کو کال کریں",
   ctaEmergency: "ایمرجنسی سی ٹی 24/7", ctaWalkIn: "زیادہ تر دنوں میں اسی دن سی ٹی",
@@ -119,7 +119,7 @@ const ur: Copy = {
     ["منسوخی پر رقم واپس ملتی ہے؟", "جی ہاں، اسکین ہونے سے پہلے۔ واپسی کیش سپروائزر منظور کرتا ہے اور آپ کو ریفنڈ سلپ دی جاتی ہے۔"],
     ["کیا تصاویر ملیں گی؟", "جی ہاں — درخواست پر سی ڈی یا آن لائن لنک، اور ڈاکٹر ہسپتال کے ریکارڈ میں رپورٹ دیکھتا ہے۔"],
   ],
-  locTitle: "ہم کہاں ہیں", locText: "ریڈیالوجی اور امیجنگ، دوسری منزل — مرکزی لابی سے لفٹ۔ ریسیپشن کاؤنٹر پر ادائیگی کریں؛ سلپ پر کمرہ (MRI-1 / CT-1) اور ٹوکن درج ہوتا ہے۔",
+  locTitle: "ہم کہاں ہیں", locText: "ایم آر آئی اور سی ٹی، گراؤنڈ فلور، ریڈیالوجی ونگ — مرکزی لابی سے ریڈیالوجی کے نشانات دیکھیں۔ ریسیپشن کاؤنٹر پر ادائیگی کریں؛ سلپ پر کمرہ (MRI-1 / CT-1) اور ٹوکن درج ہوتا ہے۔",
   ctaTitle: "ایم آر آئی یا سی ٹی کی ضرورت ہے؟", ctaText: "دو منٹ میں آن لائن بک کریں، یا ڈاکٹر کی پرچی ریسیپشن کاؤنٹر پر لائیں۔",
   safety: "حفاظت", report24: "رپورٹ 24 گھنٹے میں", hours: "اوقات",
 };

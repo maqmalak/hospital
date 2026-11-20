@@ -672,6 +672,7 @@ def report_data(name, staff=False):
 		"referring": ref, "scan_at": _fmt_dt(doc.scanned_at or doc.scan_started_at), "report_at": _fmt_dt(doc.verified_at or doc.modified),
 		"clinical_history": doc.clinical_history or doc.clinical_notes, "technique": doc.technique, "findings": doc.findings, "impression": doc.impression,
 		"recommendations": doc.recommendations, "measurements": [m.as_dict() for m in doc.measurements], "ob": ob,
+		"tech_line": _tech_line(doc),
 		"key_images": [{"image": k.image, "caption": k.caption} for k in doc.key_images],
 		"addenda": [{"text": a.text, "by": frappe.db.get_value("User", a.added_by, "full_name"), "at": _fmt_dt(a.added_at)} for a in doc.addenda],
 		"critical": cint(doc.critical_finding), "radiologist": {"name": rad.doctor_name if rad else "", "qualification": rad.qualification if rad else "",
@@ -684,6 +685,20 @@ def _img_data(url):
 	from hospital_vvs.services.lab import _image_uri
 
 	return _image_uri(url) if url else None
+
+
+def _tech_line(doc):
+	"""MRI / CT technologist record printed under Technique: machine, contrast given, CT dose (D-98)."""
+	if doc.modality not in ("MRI", "CT"):
+		return ""
+	bits = [doc.machine] if doc.get("machine") else []
+	if cint(doc.get("contrast_used")):
+		bits.append(_("Contrast: {0}{1}").format(doc.contrast_agent or "", f" {flt(doc.contrast_volume):g} mL" if flt(doc.get("contrast_volume")) else ""))
+	elif doc.modality == "CT" or doc.get("protocol"):
+		bits.append(_("No contrast"))
+	if flt(doc.get("ctdi")) or flt(doc.get("dlp")):
+		bits.append(_("Dose: CTDIvol {0} mGy · DLP {1} mGy·cm").format(f"{flt(doc.ctdi):g}", f"{flt(doc.dlp):g}"))
+	return " · ".join(b for b in bits if b)
 
 
 def _para(t):
@@ -750,8 +765,8 @@ def report_html(d, for_pdf=True, compact=False):
 	sec = []
 	if d.get("clinical_history"):
 		sec.append(f"<h3>Clinical history / indication</h3>{_para(d['clinical_history'])}")
-	if d.get("technique"):
-		sec.append(f"<h3>Technique</h3>{_para(d['technique'])}")
+	if d.get("technique") or d.get("tech_line"):
+		sec.append(f"<h3>Technique</h3>{_para(d.get('technique'))}" + (f'<p style="font-size:90%;color:#555">{esc(d["tech_line"])}</p>' if d.get("tech_line") else ""))
 	if d.get("ob"):
 		ob = d["ob"]
 		pairs = [(lbl, str(ob[k])) for k, lbl in OB_LABELS if ob.get(k)]

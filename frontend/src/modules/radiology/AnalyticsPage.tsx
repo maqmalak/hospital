@@ -15,7 +15,7 @@ interface A {
   totals: { scans: number; revenue: number; critical: number; open: number };
 }
 const MODS = ["X-Ray", "Ultrasound", "Doppler", "MRI", "CT"] as const;
-const iso = (d: Date) => d.toISOString().slice(0, 10);
+const iso = (d: Date) => new Date(d.getTime() + 5 * 3600_000).toISOString().slice(0, 10); // Asia/Karachi date
 
 export default function AnalyticsPage() {
   const { branch } = useAuth();
