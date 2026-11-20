@@ -24,10 +24,12 @@ NICU_NURSE = "PW NICU Nurse"
 NEONATOLOGIST = "PW Neonatologist"
 WARD_ADMIN = "PW Ward Admin"
 SECURITY = "PW Security"
+MRI_TECH = "PW MRI Technologist"
+CT_TECH = "PW CT Technologist"
 
 ALL = [ADMIN, DOCTOR, RECEPTIONIST, LAB_USER, PATHOLOGIST, PHARMACY_CASHIER, FINDER, REVIEWER, DISPENSER,
 	STORE_KEEPER, CASH_SUPERVISOR, ACCOUNTANT, NURSE, DEO, OV_STAFF, OV_DOCTOR,
-	RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, WARD_ADMIN, SECURITY]
+	RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, WARD_ADMIN, SECURITY, MRI_TECH, CT_TECH]
 
 # Desk access: staff may open ERPNext Desk screens (POS for the pharmacy, stock screens for the store keeper).
 DESK = ALL
@@ -36,7 +38,7 @@ DESK = ALL
 TWO_FACTOR = [ADMIN, ACCOUNTANT, CASH_SUPERVISOR, PATHOLOGIST, RADIOLOGIST]
 
 # Clinical roles see diagnoses, notes, vitals, allergies and results (permlevel 1). Money roles do not.
-CLINICAL = [ADMIN, DOCTOR, NURSE, PATHOLOGIST, REVIEWER, DEO, OV_DOCTOR, RADIOLOGIST, RADIOGRAPHER, SONOGRAPHER, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST]
+CLINICAL = [ADMIN, DOCTOR, NURSE, PATHOLOGIST, REVIEWER, DEO, OV_DOCTOR, RADIOLOGIST, RADIOGRAPHER, SONOGRAPHER, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, MRI_TECH, CT_TECH]
 FRONT_DESK = [ADMIN, RECEPTIONIST]
 MONEY = [RECEPTIONIST, LAB_USER, PHARMACY_CASHIER, DISPENSER, ACCOUNTANT, CASH_SUPERVISOR]
 CNIC_REVEAL = [ADMIN, RECEPTIONIST]
@@ -66,6 +68,8 @@ DESCRIPTIONS = {
 	NEONATOLOGIST: "Paediatrician / neonatologist: baby notes, orders, discharge checklist and signed papers",
 	WARD_ADMIN: "Maternity & newborn ward admin: registration, cots, papers, reports (no clinical charting)",
 	SECURITY: "Infant security: tag events, in/out log, alarms (no clinical data)",
+	MRI_TECH: "MRI suite: safety screening, scanning, technologist record (protocol, contrast, sedation)",
+	CT_TECH: "CT suite: contrast checks, scanning, dose record (CTDI / DLP)",
 }
 
 

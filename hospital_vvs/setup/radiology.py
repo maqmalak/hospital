@@ -136,3 +136,84 @@ def ensure_catalogue():
 		frappe.db.set_value("Imaging Procedure", p, "default_template", generic[XR], update_modified=False)
 	for p in frappe.get_all("Imaging Procedure", filters={"default_template": ["is", "not set"], "report_kind": "Obstetric"}, pluck="name"):
 		frappe.db.set_value("Imaging Procedure", p, "default_template", "Obstetric US - 2nd trimester", update_modified=False)
+
+
+# ------------------------------------------------------------------ MRI / CT (D-98) — same Imaging Procedure master [confirm prices / protocols]
+MRI_PREP = "Remove all metal (jewellery, hairpins, belts). Tell us BEFORE booking about a pacemaker, cochlear implant, aneurysm clip, metal fragments or insulin pump. Wear comfortable clothes; arrive 30 minutes early; bring earlier films / CDs."
+MRI_C_PREP = MRI_PREP + " Contrast study: do not eat for 4-6 hours and bring a creatinine report from the last 30 days."
+CT_PREP = "Remove metal over the area scanned. Tell us if you are or might be pregnant. Arrive 30 minutes early with earlier films / CDs."
+CT_C_PREP = "Do not eat for 4-6 hours (water is fine). Bring a creatinine report from the last 30 days; tell us about contrast allergy, asthma, diabetes (metformin) or kidney disease. Arrive 30 minutes early for the cannula."
+# name, code, modality, category, region, price, minutes, tat_h, contrast, walk_in, consent, prep, description
+MRCT = [
+	("MRI Brain", "MR-BRAIN", "MRI", "MRI", "Brain", 12000, 30, 24, "Optional", 0, 0, MRI_PREP, "Headache, seizures, stroke, tumours and MS."),
+	("MRI Brain with MRA / MRV", "MR-BRAIN-ANG", "MRI", "MRI", "Brain", 18000, 45, 24, "No", 0, 0, MRI_PREP, "Brain plus arteries (MRA) and veins (MRV) without injected contrast."),
+	("MRI Cervical Spine", "MR-CSPINE", "MRI", "MRI", "Spine", 12000, 30, 24, "Optional", 0, 0, MRI_PREP, "Neck pain, arm pain or numbness, disc problems."),
+	("MRI Dorsal Spine", "MR-DSPINE", "MRI", "MRI", "Spine", 12000, 30, 24, "Optional", 0, 0, MRI_PREP, "Upper and mid back."),
+	("MRI Lumbar Spine", "MR-LSPINE", "MRI", "MRI", "Spine", 12000, 30, 24, "Optional", 0, 0, MRI_PREP, "Low back pain, sciatica, disc bulge or prolapse."),
+	("MRI Whole Spine Screening", "MR-WSPINE", "MRI", "MRI", "Spine", 20000, 45, 24, "No", 0, 0, MRI_PREP, "Screening sagittal views of the whole spine."),
+	("MRI Knee", "MR-KNEE", "MRI", "MRI", "Joints", 12000, 30, 24, "No", 0, 0, MRI_PREP, "Ligament, meniscus and cartilage injuries."),
+	("MRI Shoulder", "MR-SHOULDER", "MRI", "MRI", "Joints", 13000, 30, 24, "No", 0, 0, MRI_PREP, "Rotator cuff tears, dislocation, frozen shoulder."),
+	("MRI Hip", "MR-HIP", "MRI", "MRI", "Joints", 13000, 30, 24, "No", 0, 0, MRI_PREP, "Avascular necrosis, labral tears, hip pain."),
+	("MRI Ankle", "MR-ANKLE", "MRI", "MRI", "Joints", 12000, 30, 24, "No", 0, 0, MRI_PREP, "Tendon and ligament injuries."),
+	("MRI Wrist", "MR-WRIST", "MRI", "MRI", "Joints", 12000, 30, 24, "No", 0, 0, MRI_PREP, "Scaphoid, ligament and TFCC problems."),
+	("MRI Abdomen", "MR-ABD", "MRI", "MRI", "Abdomen", 16000, 40, 24, "Optional", 0, 0, MRI_C_PREP, "Liver, pancreas, kidneys and adrenal lesions."),
+	("MRI Pelvis", "MR-PELVIS", "MRI", "MRI", "Pelvis", 15000, 40, 24, "Optional", 0, 0, MRI_PREP, "Uterus, ovaries, rectum and pelvic masses."),
+	("MRCP", "MR-MRCP", "MRI", "MRI", "Abdomen", 15000, 30, 24, "No", 0, 0, MRI_PREP + " Fast 4 hours before.", "Bile ducts and pancreatic duct (stones, strictures)."),
+	("MRI Prostate", "MR-PROSTATE", "MRI", "MRI", "Pelvis", 18000, 40, 24, "Yes", 0, 0, MRI_C_PREP, "Multiparametric prostate MRI."),
+	("MRI Breast", "MR-BREAST", "MRI", "MRI", "Breast", 20000, 40, 24, "Yes", 0, 0, MRI_C_PREP, "Both breasts with contrast; female technologist on request."),
+	("Cardiac MRI", "MR-CARDIAC", "MRI", "MRI", "Heart", 30000, 60, 48, "Yes", 0, 1, MRI_C_PREP, "Heart muscle, function and scarring."),
+	("MRI Orbits", "MR-ORBITS", "MRI", "MRI", "Head", 13000, 30, 24, "Optional", 0, 0, MRI_PREP + " Remove eye make-up.", "Eyes, optic nerves and orbit."),
+	("MRI Pituitary", "MR-PITUITARY", "MRI", "MRI", "Brain", 14000, 30, 24, "Yes", 0, 0, MRI_C_PREP, "Dynamic contrast pituitary study."),
+	("MRI IAM (Internal Auditory Meatus)", "MR-IAM", "MRI", "MRI", "Head", 13000, 30, 24, "Optional", 0, 0, MRI_PREP, "Hearing loss, vertigo, acoustic neuroma."),
+	("MRI Whole-Body Screening", "MR-WHOLEBODY", "MRI", "MRI", "Whole body", 45000, 60, 48, "No", 0, 0, MRI_PREP, "Head-to-toe screening sequences."),
+	("CT Brain (plain)", "CT-BRAIN", "CT", "CT", "Brain", 5000, 10, 4, "No", 1, 0, CT_PREP, "Stroke, head injury and bleeding — 24/7."),
+	("CT Brain with contrast", "CT-BRAIN-C", "CT", "CT", "Brain", 7500, 15, 6, "Yes", 0, 0, CT_C_PREP, "Tumours, infection and abscess."),
+	("CT Angiography Brain", "CTA-BRAIN", "CT", "CT Angiography", "Brain", 15000, 20, 12, "Yes", 1, 0, CT_C_PREP, "Aneurysm, AVM, acute stroke vessels."),
+	("CT Angiography Neck (Carotid)", "CTA-NECK", "CT", "CT Angiography", "Neck", 15000, 20, 12, "Yes", 0, 0, CT_C_PREP, "Carotid and vertebral arteries."),
+	("CT Coronary Angiography", "CTA-CORONARY", "CT", "CT Angiography", "Heart", 25000, 30, 24, "Yes", 0, 1, CT_C_PREP + " Avoid tea / coffee for 12 hours; heart-rate control may be given.", "Coronary artery narrowing without a catheter."),
+	("CT Angiography Peripheral (lower limbs)", "CTA-PERIPH", "CT", "CT Angiography", "Legs", 20000, 25, 24, "Yes", 0, 0, CT_C_PREP, "Leg arteries — claudication, diabetic foot."),
+	("CT Pulmonary Angiography", "CTA-PULM", "CT", "CT Angiography", "Chest", 16000, 20, 4, "Yes", 1, 0, CT_C_PREP, "Pulmonary embolism — urgent."),
+	("CT Chest", "CT-CHEST", "CT", "CT", "Chest", 8000, 15, 6, "Optional", 0, 0, CT_PREP, "Lung nodules, masses and infection."),
+	("HRCT Chest", "CT-HRCT", "CT", "CT", "Chest", 9000, 15, 6, "No", 0, 0, CT_PREP, "Interstitial lung disease and bronchiectasis."),
+	("CT Abdomen & Pelvis (triphasic)", "CT-ABD-TRI", "CT", "CT", "Abdomen", 16000, 30, 12, "Yes", 0, 0, CT_C_PREP + " You may be asked to drink oral contrast over an hour.", "Liver lesions, tumours, abdominal pain."),
+	("CT KUB (stone protocol)", "CT-KUB", "CT", "CT", "Kidneys", 7000, 10, 4, "No", 1, 0, "No preparation; drink 3-4 glasses of water an hour before. No contrast.", "Kidney and ureteric stones, low dose."),
+	("CT PNS (Paranasal Sinuses)", "CT-PNS", "CT", "CT", "Head", 6000, 10, 6, "No", 0, 0, CT_PREP, "Chronic sinusitis, pre-operative mapping."),
+	("CT Temporal Bone", "CT-TEMPORAL", "CT", "CT", "Head", 8000, 15, 12, "No", 0, 0, CT_PREP, "Middle and inner ear."),
+	("CT Spine", "CT-SPINE", "CT", "CT", "Spine", 8000, 15, 6, "No", 1, 0, CT_PREP, "Fractures and bony spine detail."),
+	("CT-guided Biopsy", "CT-BIOPSY", "CT", "Guided Procedure", "Any", 20000, 60, 96, "No", 0, 1, "Fast 6 hours. Bring PT/INR, CBC and earlier scans; stop blood thinners only as your doctor advises. Written consent; plan to stay 4 hours.", "Tissue sample of a lung, liver or bone lesion."),
+	("CT Urography", "CT-URO", "CT", "CT", "Kidneys", 14000, 30, 12, "Yes", 0, 0, CT_C_PREP, "Blood in urine, urinary tract tumours."),
+	("Cardiac Calcium Score", "CT-CALCIUM", "CT", "CT", "Heart", 9000, 10, 12, "No", 0, 0, "No preparation; avoid caffeine on the day.", "Coronary calcium — heart-risk screening."),
+	("Emergency Trauma CT (whole body)", "CT-TRAUMA", "CT", "CT", "Whole body", 18000, 20, 1, "Optional", 1, 0, "Emergency — no preparation.", "Head, spine, chest, abdomen and pelvis after major trauma — 24/7."),
+]
+MRCT_TEMPLATES = [
+	("Normal MRI Brain", "MRI", "MRI Brain", "MRI BRAIN", "Multiplanar multisequence MRI of the brain: T1, T2, FLAIR, DWI/ADC and SWI.",
+		"Brain parenchyma: normal grey-white matter differentiation. No focal signal abnormality.\nDiffusion: no restricted diffusion.\nVentricles: normal size and configuration.\nExtra-axial spaces: no collection.\nPosterior fossa: normal.\nSella: normal.\nVisualised sinuses and orbits: normal.",
+		"Normal MRI brain.", ""),
+	("MRI Lumbar Spine - disc bulge", "MRI", "MRI Lumbar Spine", "MRI LUMBAR SPINE", "Sagittal T1, T2 and STIR; axial T2 at disc levels L1-S1.",
+		"Alignment: normal lumbar lordosis.\nVertebrae: normal heights and marrow signal.\nConus: terminates at L1, normal signal.\nL1-L2 to L3-L4: no significant disc bulge or stenosis.\nL4-L5: diffuse disc bulge with a right paracentral protrusion indenting the thecal sac and compressing the traversing right L5 nerve root; mild bilateral neural foraminal narrowing.\nL5-S1: mild disc desiccation without nerve compression.\nFacet joints: mild degenerative change at L4-L5.",
+		"L4-L5 disc bulge with right paracentral protrusion compressing the right L5 nerve root.", "Clinical correlation and orthopaedic / neurosurgical opinion."),
+	("Normal CT Brain (plain)", "CT", "CT Brain (plain)", "CT BRAIN (PLAIN)", "Non-contrast axial CT of the brain with bone and soft-tissue windows.",
+		"Brain parenchyma: normal attenuation; normal grey-white differentiation.\nHaemorrhage: no intra- or extra-axial bleed.\nVentricles: normal size; midline structures central.\nCisterns: patent.\nCalvarium: no fracture.\nVisualised sinuses and mastoids: clear.",
+		"Normal non-contrast CT brain.", ""),
+	("CT KUB - ureteric calculus", "CT", "CT KUB (stone protocol)", "CT KUB (STONE PROTOCOL)", "Low-dose non-contrast CT from the kidneys to the bladder base.",
+		"Right kidney: normal size; mild hydronephrosis with mild perinephric fat stranding. No renal calculus.\nRight ureter: mildly dilated down to a 6 mm calculus in the lower ureter, about 2 cm above the vesicoureteric junction.\nLeft kidney and ureter: normal; no calculus or hydronephrosis.\nUrinary bladder: normal.\nOther: no free fluid.",
+		"6 mm right lower ureteric calculus with mild right hydronephrosis.", "Urology opinion; analgesia and hydration. Follow-up KUB X-ray / ultrasound."),
+	("Normal CT Chest", "CT", "CT Chest", "CT CHEST", "Axial CT of the chest with lung and mediastinal windows.",
+		"Lungs: clear; no nodule, mass or consolidation.\nPleura: no effusion or pneumothorax.\nMediastinum: no lymphadenopathy.\nHeart and great vessels: normal.\nBones: no destructive lesion.", "Normal CT chest.", ""),
+]
+
+
+def ensure_mrct():
+	for name, code, mod, cat, region, price, mins, tat, contrast, walk, consent, prep, desc in MRCT:
+		if frappe.db.exists("Imaging Procedure", name):
+			continue
+		frappe.get_doc({"doctype": "Imaging Procedure", "procedure_name": name, "code": code, "modality": mod, "category": cat, "body_region": region, "price": price,
+			"duration_min": mins, "tat_hours": tat, "contrast": contrast, "contrast_surcharge": (6000 if mod == "MRI" else 4000) if contrast == "Optional" else 0,
+			"urgent_surcharge": 2000 if mod == "MRI" else 1500, "walk_in": walk, "needs_consent": consent or (1 if contrast == "Yes" else 0), "prep_group": "Contrast" if contrast == "Yes" else "None",
+			"preparation": prep, "description": desc, "report_kind": "General", "sort_order": 1000 + len(name), "is_active": 1, "show_on_website": 1}).insert(ignore_permissions=True)
+	for name, mod, procn, title, tech, findings, imp, rec in MRCT_TEMPLATES:
+		if not frappe.db.exists("Imaging Report Template", name):
+			frappe.get_doc({"doctype": "Imaging Report Template", "template_name": name, "modality": mod, "procedure": procn if frappe.db.exists("Imaging Procedure", procn) else None,
+				"report_title": title, "technique": tech, "findings": findings, "impression": imp, "recommendations": rec, "is_active": 1}).insert(ignore_permissions=True)
+		if frappe.db.exists("Imaging Procedure", procn) and not frappe.db.get_value("Imaging Procedure", procn, "default_template"):
+			frappe.db.set_value("Imaging Procedure", procn, "default_template", name, update_modified=False)

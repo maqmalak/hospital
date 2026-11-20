@@ -21,6 +21,32 @@ from hospital_vvs.services import billing, discounts
 from hospital_vvs.utils import branch_company, check_branch, default_branch, publish, setting, settings
 
 CHARGE_KINDS = ("Consultation", "Lab", "Service")
+IMAGING = ("Imaging", "Imaging Order")  # D-98: X-ray / ultrasound / Doppler / MRI / CT — billed with the services, creates / pays the Imaging Study
+
+
+def _group(kind):
+	return "Service" if kind in IMAGING else kind
+
+
+def _imaging_rate(ln):
+	"""Imaging line price from the catalogue (+ contrast / urgent surcharge) or the booked study's amount."""
+	if ln.get("kind") == "Imaging Order":
+		return flt(frappe.db.get_value("Imaging Study", ln["target"], "amount"))
+	p = frappe.get_cached_doc("Imaging Procedure", ln["procedure"])
+	return flt(p.price) + (flt(p.contrast_surcharge) if (p.contrast == "Yes" or (p.contrast == "Optional" and cint(ln.get("contrast")))) else 0) \
+		+ (flt(p.urgent_surcharge) if cint(ln.get("urgent")) else 0)
+
+
+def unpaid_imaging(patient):
+	"""Booked / ordered imaging not paid yet — pulled into the cart with one click."""
+	if not patient:
+		return []
+	rows = frappe.get_all("Imaging Study", filters={"patient": patient, "payment_status": ["in", ["Unpaid"]], "status": ["in", ["Booked", "Registered"]]},
+		fields=["name", "booking_ref", "procedure", "procedure_name", "modality", "scheduled_date", "slot_time", "amount", "safety_status"], order_by="scheduled_date")
+	for r in rows:
+		r["scheduled_date"] = str(r.scheduled_date)
+		r["slot_time"] = str(r.slot_time or "")[:5]
+	return rows
 MONEY_KINDS = ("IPD Advance", "IPD Settlement", "Online Fee", "Dues")
 # D-60: a lab order made in the lab (unpaid) is collected here; its receipt lines are ordinary Lab lines (refunds work the same)
 LAB_ORDER = "Lab Order"
@@ -54,7 +80,9 @@ def catalogue(branch):
 		services.append(it)
 	labs = frappe.get_all("Lab Test Template", filters={"is_active": 1}, fields=["name", "test_code", "department", "price", "sample_type", "tat_hours"],
 		order_by="department, name")
-	return {"doctors": doctors, "services": services, "labs": labs}
+	imaging = frappe.get_all("Imaging Procedure", filters={"is_active": 1}, fields=["name", "procedure_name", "code", "modality", "category", "price", "contrast",
+		"contrast_surcharge", "urgent_surcharge", "walk_in", "duration_min", "tat_hours"], order_by="modality, sort_order, procedure_name")
+	return {"doctors": doctors, "services": services, "labs": labs, "imaging": imaging}
 
 
 def modes_for(counter):
@@ -162,6 +190,9 @@ def price(data):
 		elif kind == "Service":
 			r = _service_rate(ln["item_code"])
 			row.update(rate=r, amount=max(r * (flt(ln.get("qty")) or 1) - disc, 0))
+		elif kind in IMAGING:
+			r = _imaging_rate(ln)
+			row.update(rate=r, amount=max(r - disc, 0))
 		elif kind == "Online Fee":
 			row.update(amount=flt(frappe.db.get_value("Online Visit Request", ln["target"], "fee")))
 		else:
@@ -181,11 +212,11 @@ def request_discounts(data):
 			branch=d.get("branch"), patient=d.get("patient"), reference_doctype="Test Invoice", reference_name=r["target"])
 		out[f"LabOrder:{r['target']}"] = {"name": a.name, "status": a.status, "percent": a.discount_percent}
 	for kind in CHARGE_KINDS:
-		rows = [r for r in priced if r.get("kind") == kind and flt(r.get("discount"))]
+		rows = [r for r in priced if _group(r.get("kind")) == kind and flt(r.get("discount"))]
 		if not rows:
 			continue
 		disc = sum(flt(r["discount"]) for r in rows)
-		gross = sum(flt(r.get("rate")) * (flt(r.get("qty")) or 1) for r in priced if r.get("kind") == kind)
+		gross = sum(flt(r.get("rate")) * (flt(r.get("qty")) or 1) for r in priced if _group(r.get("kind")) == kind)
 		if kind == "Consultation":  # one slip per doctor: one authorization per doctor line
 			for r in rows:
 				a = discounts.request(billing_type="OPD Slip", gross=flt(r["rate"]), discount_amount=flt(r["discount"]),
@@ -312,7 +343,28 @@ def checkout(data, counter=None):
 	lab_orders = [(x, _lab_order(x["target"], flt(x.get("discount")))) for x in lines if x.get("kind") == LAB_ORDER]
 	svc_lines = [x for x in lines if x.get("kind") == "Service"]
 	svc_rows = [{"item_code": x["item_code"], "qty": flt(x.get("qty")) or 1, "rate": _service_rate(x["item_code"])} for x in svc_lines]
-	svc_disc = sum(flt(x.get("discount")) for x in svc_lines)
+	# imaging: a walk-in study is created now (or the booked one is used); its item joins the services invoice (D-98)
+	from hospital_vvs.services import radiology as rad
+
+	img = []
+	for x in [y for y in lines if y.get("kind") in IMAGING]:
+		if x["kind"] == "Imaging Order":
+			st = frappe.get_doc("Imaging Study", x["target"])
+			if st.payment_status != "Unpaid" or st.status not in ("Booked", "Registered"):
+				frappe.throw(_("{0} is already {1}.").format(st.booking_ref, st.payment_status if st.payment_status != "Unpaid" else st.status))
+		else:
+			pa = frappe.db.get_value("Patient", patient, ["patient_name", "gender", "phone", "dob"], as_dict=True)
+			from hospital_vvs.api.patients import age_of
+
+			st = rad.book({"procedure": x["procedure"], "patient": patient, "patient_name": pa.patient_name, "gender": pa.gender, "phone": pa.phone, "age": age_of(pa.dob),
+				"date": today(), "walk_in": 1, "priority": "Urgent" if cint(x.get("urgent")) else "Routine", "contrast_requested": cint(x.get("contrast")),
+				"urgent": cint(x.get("urgent")), "referring_doctor": d.get("referring_doctor"), "external_referrer": d.get("external_referrer"),
+				"payment_option": "Pay at counter"}, source="Walk-in", staff=True)
+		pr = rad.proc(st.procedure)
+		img.append((x, st, {"item_code": rad.ensure_item(pr), "qty": 1, "rate": _imaging_rate(x if x["kind"] == "Imaging" else dict(x, target=st.name)),
+			"description": pr.procedure_name}))
+	svc_rows += [r for _x, _s, r in img]
+	svc_disc = sum(flt(x.get("discount")) for x in svc_lines) + sum(flt(x.get("discount")) for x, _s, _r in img)
 	svc_total = max(sum(r["qty"] * r["rate"] for r in svc_rows) - svc_disc, 0)
 	money = []
 	for ln in [x for x in lines if x.get("kind") in MONEY_KINDS]:
@@ -337,6 +389,8 @@ def checkout(data, counter=None):
 	# 2. post each document with its share of the tenders
 	rcpt = frappe.new_doc("Counter Receipt")
 	rcpt.update({"patient": patient, "branch": branch, "counter": counter, "shift": shift.name if shift else None, "cashier": frappe.session.user,
+		"referring_doctor": d.get("referring_doctor") if d.get("referring_doctor") and frappe.db.exists("Doctor", d.get("referring_doctor")) else None,
+		"external_referrer": (d.get("external_referrer") or "")[:140] or None,
 		"posted_at": now_datetime(), "status": "Paid", "client_ref": d.get("client_ref"), "offline": cint(d.get("offline")),
 		"offline_created": d.get("offline_created")})
 	gross = disc_total = payer_total = 0.0
@@ -391,7 +445,17 @@ def checkout(data, counter=None):
 		for x, r in zip(svc_lines, svc_rows):
 			rcpt.append("lines", {"kind": "Service", "label": frappe.db.get_value("Item", r["item_code"], "item_name"), "item_code": r["item_code"], "qty": r["qty"],
 				"rate": r["rate"], "discount": flt(x.get("discount")), "amount": r["qty"] * r["rate"] - flt(x.get("discount")), "reference_doctype": "Sales Invoice",
-				"reference_name": si})
+				"reference_name": si, "department": frappe.db.get_value("Item", r["item_code"], "item_group")})
+		for x, st, r in img:
+			st.reload()
+			st.payment_status, st.sales_invoice, st.counter_receipt = "Paid", si, rcpt.name
+			rad.event(st, "Billed", f"Counter slip {rcpt.name}")
+			st.save(ignore_permissions=True)
+			if st.status == "Booked":
+				st = rad.register(st.name)
+			rcpt.append("lines", {"kind": x["kind"], "label": st.procedure_name + (" · contrast" if flt(st.contrast_charge) else "") + (" · urgent" if flt(st.urgent_charge) else ""),
+				"item_code": r["item_code"], "procedure": st.procedure, "target": st.name, "qty": 1, "rate": r["rate"], "discount": flt(x.get("discount")),
+				"amount": r["rate"] - flt(x.get("discount")), "reference_doctype": "Sales Invoice", "reference_name": si, "department": st.modality})
 	for ln, amt in money:
 		kind, slices = ln["kind"], pool.take(amt)
 		posted = []  # (reference doctype, name, amount) — one receipt line per payment so each can be refunded
@@ -448,21 +512,70 @@ def receipt_data(name):
 		if ln.kind == "Consultation" and ln.reference_name:
 			doc = frappe.db.get_value("OPD Slip", ln.reference_name, ["doctor_name", "token_no", "doctor"], as_dict=True)
 			tokens.append({"doctor": doc.doctor_name, "token": doc.token_no, "room": frappe.db.get_value("Doctor", doc.doctor, "consultation_room")})
-	return {"name": r.name, "posted_at": str(r.posted_at), "patient": r.patient, "patient_name": r.patient_name, "status": r.status,
+	from hospital_vvs.services import radiology as rad
+
+	dept = []
+	for ln in r.lines:
+		if ln.kind in IMAGING and ln.target:
+			st = frappe.db.get_value("Imaging Study", ln.target, ["token_no", "modality", "procedure", "expected_at", "booking_ref", "status", "safety_status"], as_dict=True)
+			if st:
+				pr = rad.proc(st.procedure)
+				due = st.expected_at or frappe.utils.add_to_date(r.posted_at, hours=flt(pr.tat_hours) or 4)
+				dept.append({"line": ln.idx, "department": st.modality, "token": st.token_no, "where": rad.WHERE.get(st.modality), "prep": rad.prep_text(pr),
+					"report_at": frappe.utils.format_datetime(due, "dd MMM, hh:mm a"), "booking_ref": st.booking_ref, "safety": st.safety_status})
+		elif ln.kind == "Lab" and ln.reference_name and not any(x.get("ref") == ln.reference_name for x in dept):
+			ti = frappe.db.get_value("Test Invoice", ln.reference_name, ["name", "expected_at"], as_dict=True)
+			if ti:
+				dept.append({"ref": ti.name, "department": "Laboratory", "token": ti.name, "where": "Sample collection, ground floor", "prep": "",
+					"report_at": frappe.utils.format_datetime(ti.expected_at, "dd MMM, hh:mm a") if ti.expected_at else ""})
+	ref = frappe.db.get_value("Doctor", r.referring_doctor, "doctor_name") if r.get("referring_doctor") else r.get("external_referrer")
+	pat = frappe.db.get_value("Patient", r.patient, ["gender", "dob", "phone", "panel"], as_dict=True) if r.patient else None
+	from hospital_vvs.api.patients import age_of
+
+	return {"name": r.name, "posted_at": str(r.posted_at), "patient": r.patient, "patient_name": r.patient_name, "status": r.status, "departments": dept,
+		"referring": ref, "print_count": cint(r.get("print_count")), "refund_reason": r.refund_reason,
+		"patient_info": {"gender": pat.gender, "age": age_of(pat.dob), "phone": pat.phone, "panel": pat.panel} if pat else None,
 		"lines": [ln.as_dict() for ln in r.lines], "tenders": [t.as_dict() for t in r.tenders], "gross_total": r.gross_total, "discount_total": r.discount_total,
 		"payer_share": r.payer_share, "patient_total": r.patient_total, "tendered": r.tendered, "change_amount": r.change_amount, "tokens": tokens,
 		"cashier": frappe.db.get_value("User", r.cashier, "full_name"), "counter": r.counter, "offline": r.offline,
 		"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "address": branch.get("hv_address") or s.address, "phone": branch.get("hv_phone") or s.phone}}
 
 
-def refund(name, rows=None, reason=None):
+def _approve_refund(approver=None, password=None):
+	"""Cashiers need a cash supervisor / admin to approve a refund on the spot (their own login); supervisors approve their own."""
+	from hospital_vvs import roles as RR
+	from hospital_vvs.utils import has_any_role
+
+	if has_any_role(RR.CASH_SUPERVISOR):
+		return frappe.session.user
+	if not approver or not password:
+		frappe.throw(_("A refund needs the cash supervisor's approval — ask them to enter their login."), title=_("Supervisor approval"))
+	if approver == frappe.session.user:
+		frappe.throw(_("You cannot approve your own refund."))
+	from frappe.utils.password import check_password
+
+	try:
+		check_password(approver, password)
+	except frappe.AuthenticationError:
+		frappe.throw(_("The supervisor's login is not correct."))
+	if not has_any_role(RR.CASH_SUPERVISOR, user=approver):
+		frappe.throw(_("{0} is not a cash supervisor.").format(approver))
+	return approver
+
+
+def refund(name, rows=None, reason=None, approver=None, password=None):
 	"""Refund some or all lines from the current shift. Consultation / lab / service → credit note; advances, settlements and dues →
 	the Payment Entry is cancelled (same day, nothing allocated yet). Online fees are refunded from the online visit."""
 	if not (reason or "").strip():
 		frappe.throw(_("Enter the refund reason."))
 	r = frappe.get_doc("Counter Receipt", name)
 	check_branch(r.branch)
+	ok_by = _approve_refund(approver, password)
 	idx = {cint(i) for i in (frappe.parse_json(rows) if isinstance(rows, str) else rows or [])} or {ln.idx for ln in r.lines}
+	for ln in r.lines:  # imaging can be refunded only before the scan is started
+		if ln.idx in idx and not ln.refunded and ln.kind in IMAGING and ln.target and \
+			frappe.db.get_value("Imaging Study", ln.target, "status") not in ("Booked", "Registered", "Cancelled", "No Show"):
+			frappe.throw(_("{0}: the scan has already been performed — it cannot be refunded here.").format(ln.label))
 	done = set()
 	for ln in r.lines:
 		if ln.idx not in idx or ln.refunded:
@@ -486,6 +599,15 @@ def refund(name, rows=None, reason=None):
 			done.add(ln.reference_name)
 		elif ln.kind == "Service":
 			doc_ref = billing.refund_invoice(ln.reference_name, reason, items={ln.item_code: ln.qty})
+		elif ln.kind in IMAGING:
+			doc_ref = billing.refund_invoice(ln.reference_name, reason, items={ln.item_code: 1})
+			if ln.target:
+				from hospital_vvs.services import radiology as rad
+
+				st = frappe.get_doc("Imaging Study", ln.target)
+				st.status, st.payment_status = "Cancelled", "Unpaid"
+				rad.event(st, "Cancelled", f"Refunded on counter slip {r.name}: {reason}")
+				st.save(ignore_permissions=True)
 		elif ln.reference_doctype == "Payment Entry" and ln.reference_name:
 			pe = frappe.get_doc("Payment Entry", ln.reference_name)
 			if str(pe.posting_date) != today():
@@ -495,7 +617,7 @@ def refund(name, rows=None, reason=None):
 			doc_ref = pe.name
 		ln.refunded, ln.refund_document = 1, doc_ref or (ln.reference_name if ln.kind == "Lab" else None)
 	r.status = "Refunded" if all(x.refunded for x in r.lines) else "Partly Refunded"
-	r.refund_reason = ((r.refund_reason or "") + "\n" + reason).strip()
+	r.refund_reason = ((r.refund_reason or "") + "\n" + f"{reason} — approved by {ok_by} {now_datetime():%Y-%m-%d %H:%M}").strip()
 	r.save(ignore_permissions=True)
 	publish("counter", {"action": "refund", "receipt": r.name}, r.branch)
 	return receipt_data(r.name)
@@ -513,3 +635,73 @@ def offline_bundle(branch, counter):
 		p["age"] = age_of(p.pop("dob"))
 	return {**cat, "patients": pats, "modes": modes_for(counter) if counter else ["Cash"], "generated_at": str(now_datetime()), "branch": branch,
 		"clinic": {"name": s.clinic_name, "name_ur": s.clinic_name_ur, "phone": s.phone, "address": s.address}, "follow_up_free_days": cint(s.follow_up_free_days)}
+
+
+# ------------------------------------------------------------------ collection report (D-98)
+CATEGORY = {"X-Ray": "Radiology (X-ray)", "Ultrasound": "Ultrasound / Doppler", "Doppler": "Ultrasound / Doppler", "MRI": "MRI", "CT": "CT Scan"}
+
+
+def line_category(ln):
+	if ln.kind in IMAGING:
+		return CATEGORY.get(ln.department or frappe.db.get_value("Imaging Procedure", ln.procedure, "modality"), "Radiology (X-ray)")
+	return {"Consultation": "OPD consultation", "Lab": "Laboratory", "Lab Order": "Laboratory", "Service": "Other procedures"}.get(ln.kind, "IPD / dues / online fees")
+
+
+def collection_report(from_date=None, to_date=None, branch=None, counter=None, cashier=None):
+	"""Totals from the counter slips themselves (refunded lines shown separately), so the report always matches the slips."""
+	from frappe.utils import add_days, getdate
+
+	f, t = getdate(from_date or today()), getdate(to_date or today())
+	flt_ = {"posted_at": ["between", [f"{f} 00:00:00", f"{t} 23:59:59"]], "branch": branch}
+	if counter:
+		flt_["counter"] = counter
+	if cashier:
+		flt_["cashier"] = cashier
+	rcpts = frappe.get_all("Counter Receipt", filters=flt_, fields=["name", "posted_at", "cashier", "counter", "referring_doctor", "external_referrer", "patient_name",
+		"gross_total", "discount_total", "patient_total", "payer_share", "status", "refund_reason"], order_by="posted_at")
+	names = [r.name for r in rcpts] or [""]
+	lines = frappe.get_all("Counter Receipt Line", filters={"parent": ["in", names], "parenttype": "Counter Receipt"}, fields=["parent", "kind", "label", "procedure",
+		"department", "qty", "rate", "discount", "amount", "refunded"])
+	tenders = frappe.get_all("Counter Receipt Tender", filters={"parent": ["in", names], "parenttype": "Counter Receipt"}, fields=["parent", "mode_of_payment", "amount"])
+	by_r = {r.name: r for r in rcpts}
+	cat, disc, refunds, docs = {}, [], [], {}
+	for ln in lines:
+		c = line_category(frappe._dict(ln))
+		row = cat.setdefault(c, {"label": c, "count": 0, "gross": 0.0, "discount": 0.0, "net": 0.0, "refunded": 0.0})
+		gross = flt(ln.rate) * (flt(ln.qty) or 1)
+		if ln.refunded:
+			row["refunded"] += flt(ln.amount)
+			refunds.append({"slip": ln.parent, "service": ln.label, "amount": flt(ln.amount), "reason": by_r[ln.parent].refund_reason})
+			continue
+		row["count"] += 1
+		row["gross"] += gross
+		row["discount"] += flt(ln.discount)
+		row["net"] += flt(ln.amount)
+		if flt(ln.discount):
+			disc.append({"slip": ln.parent, "service": ln.label, "discount": flt(ln.discount), "cashier": by_r[ln.parent].cashier})
+		r = by_r[ln.parent]
+		dk = (frappe.db.get_value("Doctor", r.referring_doctor, "doctor_name") if r.referring_doctor else r.external_referrer) or "Self / not given"
+		docs.setdefault(dk, {"label": dk, "count": 0, "net": 0.0})
+		docs[dk]["count"] += 1
+		docs[dk]["net"] += flt(ln.amount)
+	modes = {}
+	for tn in tenders:
+		modes[tn.mode_of_payment] = modes.get(tn.mode_of_payment, 0.0) + flt(tn.amount)
+	cashiers = {}
+	for r in rcpts:
+		k = frappe.db.get_value("User", r.cashier, "full_name") or r.cashier
+		c = cashiers.setdefault(k, {"label": k, "slips": 0, "collected": 0.0})
+		c["slips"] += 1
+		c["collected"] += flt(r.patient_total)
+	daily = {}
+	for r in rcpts:
+		k = str(r.posted_at)[:10]
+		daily[k] = daily.get(k, 0.0) + flt(r.patient_total)
+	order = ["Radiology (X-ray)", "Ultrasound / Doppler", "MRI", "CT Scan", "Laboratory", "Other procedures", "OPD consultation", "IPD / dues / online fees"]
+	return {"from": str(f), "to": str(t), "categories": sorted(cat.values(), key=lambda x: order.index(x["label"]) if x["label"] in order else 99),
+		"modes": [{"label": k, "value": v} for k, v in sorted(modes.items(), key=lambda x: -x[1])], "cashiers": list(cashiers.values()),
+		"doctors": sorted(docs.values(), key=lambda x: -x["net"])[:15], "discounts": disc[:200], "refunds": refunds[:200],
+		"daily": [{"d": k, "value": v} for k, v in sorted(daily.items())],
+		"totals": {"slips": len(rcpts), "gross": sum(x["gross"] for x in cat.values()), "discount": sum(x["discount"] for x in cat.values()),
+			"net": sum(x["net"] for x in cat.values()), "refunded": sum(x["refunded"] for x in cat.values()), "tendered": sum(modes.values()),
+			"panel_credit": sum(flt(r.payer_share) for r in rcpts)}}

@@ -24,6 +24,8 @@
   "s2",
   "token_no",
   "ward_location",
+  "machine",
+  "counter_receipt",
   "booking_ref",
   "pt",
   "patient",
@@ -46,6 +48,36 @@
   "prescription_file",
   "consent_taken",
   "safety_checked",
+  "sf_sec",
+  "safety_status",
+  "safety_answers",
+  "sf_c1",
+  "creatinine",
+  "egfr",
+  "creatinine_date",
+  "weight_kg",
+  "sf_c2",
+  "cleared_by",
+  "cleared_at",
+  "clearance_note",
+  "consent_signature",
+  "consent_signer",
+  "sedation_consent",
+  "tk_sec",
+  "protocol",
+  "contrast_used",
+  "contrast_agent",
+  "contrast_volume",
+  "tk_c1",
+  "contrast_batch",
+  "sedation_given",
+  "ctdi",
+  "dlp",
+  "tk_c2",
+  "image_count",
+  "pacs_url",
+  "contrast_charge",
+  "urgent_charge",
   "py",
   "payment_option",
   "payment_status",
@@ -156,7 +188,7 @@
    "fieldname": "modality",
    "fieldtype": "Select",
    "label": "Modality",
-   "options": "X-Ray\nUltrasound\nDoppler",
+   "options": "X-Ray\nUltrasound\nDoppler\nMRI\nCT",
    "fetch_from": "procedure.modality",
    "read_only": 1,
    "in_standard_filter": 1
@@ -208,6 +240,18 @@
    "fieldname": "ward_location",
    "fieldtype": "Data",
    "label": "Ward / Bed (portable)"
+  },
+  {
+   "fieldname": "machine",
+   "fieldtype": "Data",
+   "label": "Machine / Room"
+  },
+  {
+   "fieldname": "counter_receipt",
+   "fieldtype": "Link",
+   "label": "Counter Slip",
+   "options": "Counter Receipt",
+   "read_only": 1
   },
   {
    "fieldname": "booking_ref",
@@ -327,6 +371,161 @@
    "fieldname": "safety_checked",
    "fieldtype": "Check",
    "label": "Safety Screening Done"
+  },
+  {
+   "fieldname": "sf_sec",
+   "fieldtype": "Section Break",
+   "label": "Safety screening (MRI / CT / contrast)"
+  },
+  {
+   "fieldname": "safety_status",
+   "fieldtype": "Select",
+   "label": "Safety Status",
+   "options": "Not required\nPending\nClearance required\nCleared",
+   "default": "Not required",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "safety_answers",
+   "fieldtype": "Table",
+   "label": "Safety Answers",
+   "options": "Imaging Safety Answer"
+  },
+  {
+   "fieldname": "sf_c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "creatinine",
+   "fieldtype": "Float",
+   "label": "Creatinine (mg/dL)"
+  },
+  {
+   "fieldname": "egfr",
+   "fieldtype": "Float",
+   "label": "eGFR"
+  },
+  {
+   "fieldname": "creatinine_date",
+   "fieldtype": "Date",
+   "label": "Creatinine Date"
+  },
+  {
+   "fieldname": "weight_kg",
+   "fieldtype": "Float",
+   "label": "Weight (kg)"
+  },
+  {
+   "fieldname": "sf_c2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cleared_by",
+   "fieldtype": "Link",
+   "label": "Cleared By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cleared_at",
+   "fieldtype": "Datetime",
+   "label": "Cleared At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "clearance_note",
+   "fieldtype": "Small Text",
+   "label": "Clearance Note"
+  },
+  {
+   "fieldname": "consent_signature",
+   "fieldtype": "Attach Image",
+   "label": "Consent Signature"
+  },
+  {
+   "fieldname": "consent_signer",
+   "fieldtype": "Data",
+   "label": "Signed By (patient / guardian)"
+  },
+  {
+   "fieldname": "sedation_consent",
+   "fieldtype": "Check",
+   "label": "Sedation Consent"
+  },
+  {
+   "fieldname": "tk_sec",
+   "fieldtype": "Section Break",
+   "label": "Technologist record"
+  },
+  {
+   "fieldname": "protocol",
+   "fieldtype": "Small Text",
+   "label": "Protocol / Sequences"
+  },
+  {
+   "fieldname": "contrast_used",
+   "fieldtype": "Check",
+   "label": "Contrast Used"
+  },
+  {
+   "fieldname": "contrast_agent",
+   "fieldtype": "Data",
+   "label": "Contrast Agent"
+  },
+  {
+   "fieldname": "contrast_volume",
+   "fieldtype": "Data",
+   "label": "Contrast Volume (ml)"
+  },
+  {
+   "fieldname": "tk_c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contrast_batch",
+   "fieldtype": "Data",
+   "label": "Contrast Batch"
+  },
+  {
+   "fieldname": "sedation_given",
+   "fieldtype": "Data",
+   "label": "Sedation Given"
+  },
+  {
+   "fieldname": "ctdi",
+   "fieldtype": "Float",
+   "label": "CTDIvol (mGy)"
+  },
+  {
+   "fieldname": "dlp",
+   "fieldtype": "Float",
+   "label": "DLP (mGy·cm)"
+  },
+  {
+   "fieldname": "tk_c2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "image_count",
+   "fieldtype": "Int",
+   "label": "Image Count"
+  },
+  {
+   "fieldname": "pacs_url",
+   "fieldtype": "Data",
+   "label": "PACS Link"
+  },
+  {
+   "fieldname": "contrast_charge",
+   "fieldtype": "Currency",
+   "label": "Contrast Charge",
+   "read_only": 1
+  },
+  {
+   "fieldname": "urgent_charge",
+   "fieldtype": "Currency",
+   "label": "Urgent Charge",
+   "read_only": 1
   },
   {
    "fieldname": "py",

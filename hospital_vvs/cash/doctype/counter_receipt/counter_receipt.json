@@ -12,6 +12,9 @@
   "r1",
   "shift",
   "cashier",
+  "referring_doctor",
+  "external_referrer",
+  "print_count",
   "posted_at",
   "status",
   "r2",
@@ -85,6 +88,24 @@
    "label": "Cashier",
    "options": "User",
    "read_only": 1
+  },
+  {
+   "fieldname": "referring_doctor",
+   "fieldtype": "Link",
+   "label": "Referring Doctor",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "external_referrer",
+   "fieldtype": "Data",
+   "label": "Outside Referring Doctor"
+  },
+  {
+   "fieldname": "print_count",
+   "fieldtype": "Int",
+   "label": "Prints",
+   "read_only": 1,
+   "default": "0"
   },
   {
    "fieldname": "posted_at",

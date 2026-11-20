@@ -10,6 +10,8 @@
   "doctor",
   "item_code",
   "template",
+  "procedure",
+  "department",
   "target",
   "qty",
   "rate",
@@ -28,7 +30,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Kind",
-   "options": "Consultation\nService\nLab\nIPD Advance\nIPD Settlement\nOnline Fee\nDues",
+   "options": "Consultation\nService\nLab\nIPD Advance\nIPD Settlement\nOnline Fee\nDues\nImaging\nImaging Order",
    "reqd": 1
   },
   {
@@ -55,6 +57,17 @@
    "fieldtype": "Link",
    "label": "Template",
    "options": "Lab Test Template"
+  },
+  {
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "label": "Imaging Procedure",
+   "options": "Imaging Procedure"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
   },
   {
    "description": "Admission / online visit / invoice",

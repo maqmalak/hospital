@@ -35,8 +35,109 @@ HOURS = {
 	"X-Ray": {"open": "00:00", "close": "24:00", "slot": 15, "capacity": 3, "days": "Mon Tue Wed Thu Fri Sat Sun", "walk_in": 1},
 	"Ultrasound": {"open": "09:00", "close": "21:00", "slot": 20, "capacity": 2, "days": "Mon Tue Wed Thu Fri Sat", "walk_in": 0},
 	"Doppler": {"open": "10:00", "close": "18:00", "slot": 30, "capacity": 1, "days": "Mon Tue Wed Thu Fri Sat", "walk_in": 0},
+	# D-98 MRI / CT [confirm]: one machine each; CT takes emergency walk-ins around the clock
+	"MRI": {"open": "08:00", "close": "22:00", "slot": 30, "capacity": 1, "days": "Mon Tue Wed Thu Fri Sat Sun", "walk_in": 0, "machines": ["MRI-1"]},
+	"CT": {"open": "00:00", "close": "24:00", "slot": 15, "capacity": 1, "days": "Mon Tue Wed Thu Fri Sat Sun", "walk_in": 1, "machines": ["CT-1"]},
 }
-TOKEN_PREFIX = {"X-Ray": "X", "Ultrasound": "U", "Doppler": "D"}
+TOKEN_PREFIX = {"X-Ray": "X", "Ultrasound": "U", "Doppler": "D", "MRI": "M", "CT": "C"}
+WHERE = {"X-Ray": "Radiology, 2nd floor", "Ultrasound": "Radiology, 2nd floor", "Doppler": "Radiology, 2nd floor", "MRI": "MRI suite, ground floor, radiology wing",
+	"CT": "CT suite, ground floor, radiology wing"}  # [confirm]
+
+# ------------------------------------------------------------------ safety screening (D-98) — blocking "yes" → radiologist clearance
+MRI_QUESTIONS = [("Cardiac pacemaker or ICD", 1), ("Cochlear implant", 1), ("Aneurysm clip in the brain", 1), ("Metal fragments or shrapnel (eyes or body)", 1),
+	("Insulin pump or neurostimulator", 1), ("Joint replacement, plates, screws or other implants", 0), ("Heart valve or stent", 0), ("Tattoos or permanent make-up", 0),
+	("Pregnant or possibly pregnant", 1), ("Claustrophobia (fear of closed spaces)", 0), ("Surgery in the last 6 weeks", 0)]
+CONTRAST_QUESTIONS = [("Previous reaction to contrast or iodine", 1), ("Asthma", 0), ("Diabetes taking metformin", 0), ("Kidney disease or dialysis", 1),
+	("Pregnant or possibly pregnant", 1)]
+EGFR_MIN = 30  # [confirm] below this the radiologist decides on contrast
+
+
+def needs_safety(p):
+	return p.modality == "MRI" or (p.modality == "CT" and (p.contrast or "No") != "No")
+
+
+def questions_for(p):
+	q = list(MRI_QUESTIONS) if p.modality == "MRI" else []
+	if (p.contrast or "No") != "No":
+		q += [x for x in CONTRAST_QUESTIONS if x[0] not in {a for a, _b in q}]
+	return q
+
+
+def evaluate_safety(doc, p=None):
+	"""Safety status from the answers: any blocking Yes / Not sure → Clearance required; contrast without creatinine → Pending; low eGFR →
+	Clearance required. A radiologist clearance (cleared_by) stands unless a new blocking answer is added afterwards."""
+	p = p or proc(doc.procedure)
+	if not needs_safety(p):
+		return "Not required"
+	if not doc.safety_answers:
+		return "Pending"
+	block = {q for q, b in questions_for(p) if b}
+	flagged = False
+	for a in doc.safety_answers:
+		a.blocking = 1 if (a.question in block and a.answer in ("Yes", "Not sure")) else 0
+		flagged = flagged or bool(a.blocking)
+	contrast = (p.contrast or "No") == "Yes"
+	low_egfr = contrast and doc.egfr and flt(doc.egfr) < EGFR_MIN
+	if doc.cleared_by:
+		return "Cleared"
+	if flagged or low_egfr:
+		return "Clearance required"
+	if contrast and not (doc.creatinine or doc.egfr):
+		return "Pending"
+	return "Cleared"
+
+
+def save_safety(name, answers, creatinine=None, egfr=None, creatinine_date=None, weight_kg=None, signature=None, signer=None, sedation_consent=0):
+	doc = frappe.get_doc("Imaging Study", name)
+	p = proc(doc.procedure)
+	prev_block = {a.question for a in doc.safety_answers if a.blocking}
+	doc.set("safety_answers", [{"question": a.get("question"), "answer": a.get("answer") or "No", "detail": (a.get("detail") or "")[:140]} for a in (answers or []) if a.get("question")])
+	for k, v in (("creatinine", creatinine), ("egfr", egfr), ("creatinine_date", creatinine_date), ("weight_kg", weight_kg), ("consent_signer", signer)):
+		if v not in (None, ""):
+			doc.set(k, v)
+	doc.sedation_consent = cint(sedation_consent)
+	if signature and str(signature).startswith("data:image"):
+		import base64
+
+		from frappe.utils.file_manager import save_file
+
+		f = save_file(f"consent-{doc.name}.png", base64.b64decode(signature.split(",", 1)[1]), "Imaging Study", doc.name, is_private=1)
+		doc.consent_signature, doc.consent_taken = f.file_url, 1
+	evaluate_safety(doc, p)
+	if doc.cleared_by and {a.question for a in doc.safety_answers if a.blocking} - prev_block:
+		doc.cleared_by = doc.cleared_at = None  # a new risk after clearance needs a new clearance
+	doc.safety_status = evaluate_safety(doc, p)
+	event(doc, "Safety screening", doc.safety_status)
+	doc.save(ignore_permissions=True)
+	publish("radiology", {"action": "safety", "name": doc.name}, doc.branch)
+	return doc
+
+
+def clear_safety(name, note):
+	if not has_any_role(R.RADIOLOGIST):
+		frappe.throw(_("Only a radiologist can clear a safety flag."), frappe.PermissionError)
+	if len((note or "").strip()) < 5:
+		frappe.throw(_("Write the clearance decision (what was checked and why it is safe)."))
+	doc = frappe.get_doc("Imaging Study", name)
+	doc.cleared_by, doc.cleared_at, doc.clearance_note, doc.safety_status = frappe.session.user, _now(), note.strip(), "Cleared"
+	event(doc, "Radiologist clearance", note.strip())
+	doc.save(ignore_permissions=True)
+	return doc
+
+
+TECH_FIELDS = ("protocol", "contrast_used", "contrast_agent", "contrast_volume", "contrast_batch", "sedation_given", "ctdi", "dlp", "image_count", "pacs_url", "machine")
+
+
+def tech_record(name, data):
+	doc = frappe.get_doc("Imaging Study", name)
+	for k in TECH_FIELDS:
+		if k in data:
+			doc.set(k, data[k])
+	if cint(doc.contrast_used) and not (doc.contrast_agent and doc.contrast_batch):
+		frappe.throw(_("Enter the contrast agent and batch number."))
+	event(doc, "Technologist record")
+	doc.save(ignore_permissions=True)
+	return doc
 PREP = {
 	"None": "No special preparation. Bring your CNIC, the doctor's slip and any earlier reports.",
 	"Fasting": "Do not eat for 6-8 hours before the scan. Plain water and your usual medicines are fine.",
@@ -126,7 +227,7 @@ def slots(procedure, date):
 		t = f"{m // 60:02d}:{m % 60:02d}"
 		if d == now.date() and m <= now.hour * 60 + now.minute + 30:
 			continue
-		out.append({"time": t, "free": max(0, h["capacity"] - booked.get(t, 0))})
+		out.append({"time": t, "free": max(0, (len(h.get("machines") or []) or h["capacity"]) - booked.get(t, 0))})
 	return {"slots": out, "walk_in": h["walk_in"], "closed": False, "hours": f"{h['open']}-{h['close']}"}
 
 
@@ -204,6 +305,22 @@ def book(d, source="Online", staff=False):
 	})
 	if pay == "Insurance / Panel" and d.get("panel") and frappe.db.exists("Customer", d.get("panel")):
 		doc.panel = d.get("panel")
+	doc.machine = (HOURS[p.modality].get("machines") or [None])[0]
+	if d.get("contrast_requested") and (p.contrast or "No") == "Optional":
+		doc.contrast_used = 1
+	if cint(d.get("urgent")) and flt(p.urgent_surcharge):
+		doc.urgent_charge = flt(p.urgent_surcharge)
+	if (p.contrast or "No") == "Yes" or doc.contrast_used:
+		doc.contrast_charge = flt(p.contrast_surcharge)
+	doc.amount = flt(p.price) + flt(doc.contrast_charge) + flt(doc.urgent_charge)
+	if needs_safety(p):
+		for a in d.get("safety") or []:
+			if a.get("question"):
+				doc.append("safety_answers", {"question": a["question"], "answer": a.get("answer") or "No", "detail": (a.get("detail") or "")[:140]})
+		for k in ("creatinine", "egfr", "creatinine_date", "weight_kg"):
+			if d.get(k):
+				doc.set(k, d[k])
+		doc.safety_status = evaluate_safety(doc, p)
 	event(doc, "Booked", _("{0} booking").format(source))
 	doc.insert(ignore_permissions=True)
 	if d.get("file_data"):
@@ -221,7 +338,8 @@ def booking_summary(doc):
 	return {"name": doc.name, "booking_ref": doc.booking_ref, "procedure": p.procedure_name, "modality": p.modality, "date": str(doc.scheduled_date),
 		"time": _hhmm(doc.slot_time) if doc.slot_time else None, "walk_in": cint(doc.walk_in), "duration": cint(p.duration_min), "price": flt(p.price),
 		"preparation": prep_text(p), "payment_option": doc.payment_option, "payment_status": doc.payment_status, "patient_name": doc.patient_name,
-		"portal": frappe.utils.get_url(PORTAL_PATH), "location": "Radiology & Imaging, 2nd floor — follow the blue Radiology signs"}
+		"portal": frappe.utils.get_url(PORTAL_PATH), "location": WHERE.get(p.modality, "Radiology & Imaging, 2nd floor") + " — follow the blue Radiology signs",
+		"safety_status": doc.safety_status, "machine": doc.machine, "amount": flt(doc.amount)}
 
 
 # ------------------------------------------------------------------ patient record + billing
@@ -319,6 +437,13 @@ def start(name, consent=0, safety=0, pregnancy_status=None, override=None):
 			frappe.throw(_("Ask about pregnancy before an X-ray (female, 12-50 years)."))
 		if doc.pregnancy_status in ("Pregnant", "Possibly pregnant") and not (override or "").strip():
 			frappe.throw(_("The patient is or may be pregnant: give the radiologist's go-ahead in the note, or cancel and offer ultrasound."))
+	if needs_safety(p):
+		doc.safety_status = evaluate_safety(doc, p)
+		if doc.safety_status == "Clearance required":
+			frappe.throw(_("Radiologist clearance required — a safety answer is flagged (e.g. pacemaker, implant, pregnancy, low eGFR). The scan is blocked until a radiologist clears it."),
+				title=_("Safety block"))
+		if doc.safety_status == "Pending":
+			frappe.throw(_("Complete the safety screening first{0}.").format(_(" and enter the creatinine / eGFR") if (p.contrast or "No") == "Yes" else ""), title=_("Safety screening"))
 	if cint(p.needs_consent) and not cint(consent or doc.consent_taken):
 		frappe.throw(_("Take the patient's written consent first ({0}).").format(p.procedure_name))
 	doc.consent_taken = 1 if cint(consent) else doc.consent_taken
@@ -924,7 +1049,7 @@ def tat_state(r):
 	return "amber" if (due - end).total_seconds() < span * 0.25 else "green"
 
 
-def worklist(date=None, to_date=None, modality=None, status=None, radiologist=None, q=None, branch=None, limit=300):
+def worklist(date=None, to_date=None, modality=None, status=None, radiologist=None, q=None, branch=None, limit=300, machine=None):
 	cond, args = ["1=1"], {}
 	if date:
 		cond.append("s.scheduled_date >= %(d)s")
@@ -942,6 +1067,9 @@ def worklist(date=None, to_date=None, modality=None, status=None, radiologist=No
 	elif status:
 		cond.append("s.status = %(s)s")
 		args["s"] = status
+	if machine:
+		cond.append("s.machine = %(mc)s")
+		args["mc"] = machine
 	if radiologist:
 		cond.append("s.radiologist = %(r)s")
 		args["r"] = radiologist
@@ -951,7 +1079,8 @@ def worklist(date=None, to_date=None, modality=None, status=None, radiologist=No
 	rows = frappe.db.sql(f"""select s.name, s.booking_ref, s.patient, s.patient_name, s.gender, s.age, s.procedure, s.procedure_name, s.modality, s.priority,
 		s.status, s.report_status, s.scheduled_date, s.slot_time, s.walk_in, s.token_no, s.booking_source, s.payment_status, s.payment_option, s.amount,
 		s.expected_at, s.scanned_at, s.verified_at, s.radiologist, d.doctor_name radiologist_name, s.critical_finding, s.copy_requested, s.ward_location,
-		s.referring_doctor, rd.doctor_name referring_name, s.external_referrer, s.qc_passed, s.registered_at
+		s.referring_doctor, rd.doctor_name referring_name, s.external_referrer, s.qc_passed, s.registered_at, s.machine, s.safety_status, s.counter_receipt,
+		s.contrast_used
 		from `tabImaging Study` s left join `tabDoctor` d on d.name=s.radiologist left join `tabDoctor` rd on rd.name=s.referring_doctor
 		where {' and '.join(cond)}
 		order by field(s.priority,'Emergency','Urgent','Routine'), s.scheduled_date desc, s.slot_time, s.creation limit {cint(limit)}""", args, as_dict=True)
@@ -971,6 +1100,8 @@ def study(name):
 	out["slot_time"] = _hhmm(doc.slot_time) if doc.slot_time else None
 	out["procedure_info"] = {"name": p.name, "modality": p.modality, "category": p.category, "report_kind": p.report_kind, "needs_consent": p.needs_consent,
 		"preparation": prep_text(p), "duration_min": p.duration_min, "tat_hours": p.tat_hours}
+	out["safety_questions"] = [{"question": q, "blocking": b} for q, b in questions_for(p)] if needs_safety(p) else []
+	out["procedure_info"]["contrast"] = p.contrast or "No"
 	out["templates"] = frappe.get_all("Imaging Report Template", filters={"is_active": 1, "modality": p.modality}, fields=["name", "procedure"], order_by="name")
 	out["radiologist_name"] = frappe.db.get_value("Doctor", doc.radiologist, "doctor_name") if doc.radiologist else None
 	out["referring_name"] = frappe.db.get_value("Doctor", doc.referring_doctor, "doctor_name") if doc.referring_doctor else doc.external_referrer
@@ -1013,7 +1144,7 @@ def analytics(from_date, to_date, branch=None):
 def public_catalogue():
 	rows = frappe.get_all("Imaging Procedure", filters={"is_active": 1, "show_on_website": 1},
 		fields=["name", "procedure_name", "code", "modality", "category", "body_region", "description", "prep_group", "preparation", "duration_min", "tat_hours",
-			"price", "walk_in", "female_only", "needs_consent", "sort_order"], order_by="sort_order, procedure_name")
+			"price", "walk_in", "female_only", "needs_consent", "sort_order", "contrast", "contrast_surcharge", "urgent_surcharge"], order_by="sort_order, procedure_name")
 	for r in rows:
 		r["preparation"] = (r.preparation or PREP.get(r.prep_group or "None") or "").strip()
 	rads = frappe.get_all("Doctor", filters={"is_active": 1, "department": "Radiology"}, fields=["name", "doctor_name", "qualification", "specialization", "photo",
@@ -1025,4 +1156,5 @@ def public_catalogue():
 			d["registration_no"] = None
 	year = frappe.db.count("Imaging Study", {"status": ["in", list(DONE_STATUSES)], "scheduled_date": [">=", add_to_date(getdate(today()), days=-365)]})
 	return {"procedures": rows, "radiologists": rads, "hours": HOURS, "prep": PREP, "scans_year": year,
+		"safety": {"mri": [{"question": q, "blocking": b} for q, b in MRI_QUESTIONS], "contrast": [{"question": q, "blocking": b} for q, b in CONTRAST_QUESTIONS], "egfr_min": EGFR_MIN},
 		"panels": frappe.get_all("Customer", filters={"customer_group": ["in", ["Insurance Providers", "Panels"]], "disabled": 0}, pluck="name")}

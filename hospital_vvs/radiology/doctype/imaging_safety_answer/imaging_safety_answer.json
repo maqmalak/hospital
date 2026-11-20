@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "creation": "2026-11-21 10:00:00.000000",
+ "modified": "2026-11-21 10:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Imaging Safety Answer",
+ "module": "Radiology",
+ "owner": "Administrator",
+ "istable": 1,
+ "editable_grid": 1,
+ "fields": [
+  {
+   "fieldname": "question",
+   "fieldtype": "Data",
+   "label": "Question",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 5
+  },
+  {
+   "fieldname": "answer",
+   "fieldtype": "Select",
+   "label": "Answer",
+   "options": "No\nYes\nNot sure",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Data",
+   "label": "Detail",
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "fieldname": "blocking",
+   "fieldtype": "Check",
+   "label": "Blocking",
+   "read_only": 1
+  }
+ ],
+ "field_order": [
+  "question",
+  "answer",
+  "detail",
+  "blocking"
+ ],
+ "permissions": [],
+ "links": [],
+ "states": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "row_format": "Dynamic"
+}

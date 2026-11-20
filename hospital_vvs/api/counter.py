@@ -104,9 +104,33 @@ def receipt(name):
 
 
 @frappe.whitelist(methods=["POST"])
-def refund(name, rows=None, reason=None):
+def refund(name, rows=None, reason=None, approver=None, password=None):
 	require_roles(*ROLES)
-	return svc.refund(name, rows, reason)
+	return svc.refund(name, rows, reason, approver, password)
+
+
+@frappe.whitelist()
+def pending_imaging(patient):
+	"""Booked / ordered imaging for this patient not paid yet (D-98)."""
+	require_roles(*ROLES)
+	return svc.unpaid_imaging(patient)
+
+
+@frappe.whitelist(methods=["POST"])
+def mark_printed(name):
+	"""Reprint counter: every print after the first is a DUPLICATE COPY."""
+	require_roles(*ROLES)
+	n = (frappe.db.get_value("Counter Receipt", name, "print_count") or 0) + 1
+	frappe.db.set_value("Counter Receipt", name, "print_count", n, update_modified=False)
+	return {"print_count": n}
+
+
+@frappe.whitelist()
+def report(from_date=None, to_date=None, branch=None, counter=None, cashier=None):
+	"""Counter collection by category / department / doctor / payment method (D-98)."""
+	require_roles(R.CASH_SUPERVISOR, R.ACCOUNTANT)
+	branch = scope_branch(branch, required=False) or default_branch()
+	return svc.collection_report(from_date, to_date, branch, counter, cashier)
 
 
 @frappe.whitelist()

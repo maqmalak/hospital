@@ -6,7 +6,7 @@ not listed because they need no session.
 
 from hospital_vvs.roles import (
 	ACCOUNTANT, ADMIN, CASH_SUPERVISOR, DEO, DISPENSER, DOCTOR, FINDER, LAB_USER, NURSE, OV_DOCTOR, OV_STAFF,
-	PATHOLOGIST, PHARMACY_CASHIER, RECEPTIONIST, REVIEWER, STORE_KEEPER, ALL, RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, WARD_ADMIN, SECURITY,
+	PATHOLOGIST, PHARMACY_CASHIER, RECEPTIONIST, REVIEWER, STORE_KEEPER, ALL, RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, WARD_ADMIN, SECURITY, MRI_TECH, CT_TECH,
 )
 
 CASH_ROLES = [RECEPTIONIST, LAB_USER, PHARMACY_CASHIER, DISPENSER, CASH_SUPERVISOR]
@@ -96,8 +96,8 @@ DEFAULT_ROUTES = [
 	("/users", "Users & roles", [ADMIN], ""),
 	("/settings", "Clinic settings", [ADMIN], ""),
 	("/masters", "Clinical masters", [DOCTOR, REVIEWER], ""),
-	("/radiology", "Radiology worklist", [RECEPTIONIST, RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, DOCTOR], ""),
-	("/radiology/report", "Radiology report editor", [RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, DOCTOR], ""),
+	("/radiology", "Radiology worklist", [RECEPTIONIST, RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, DOCTOR, MRI_TECH, CT_TECH], ""),
+	("/radiology/report", "Radiology report editor", [RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, DOCTOR, MRI_TECH, CT_TECH], ""),
 	("/radiology/analytics", "Radiology analytics", [RADIOLOGIST], ""),
 	("/radiology/catalogue", "Imaging catalogue & templates", [RADIOLOGIST], ""),
 	("/nursery", "Nursery & NICU board", [NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, WARD_ADMIN, SECURITY], ""),

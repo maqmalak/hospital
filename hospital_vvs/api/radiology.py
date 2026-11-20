@@ -10,8 +10,8 @@ from hospital_vvs import roles as R
 from hospital_vvs.services import radiology as rad
 from hospital_vvs.utils import log_access, require_roles, scope_branch
 
-FRONT = (R.RECEPTIONIST, R.RADIOGRAPHER, R.SONOGRAPHER, R.RADIOLOGIST)
-ROOM = (R.RADIOGRAPHER, R.SONOGRAPHER, R.RADIOLOGIST)
+FRONT = (R.RECEPTIONIST, R.RADIOGRAPHER, R.SONOGRAPHER, R.RADIOLOGIST, R.MRI_TECH, R.CT_TECH)
+ROOM = (R.RADIOGRAPHER, R.SONOGRAPHER, R.RADIOLOGIST, R.MRI_TECH, R.CT_TECH)
 VIEW = (*FRONT, R.DOCTOR, R.NURSE)
 
 
@@ -126,19 +126,38 @@ def context():
 	require_roles(*VIEW)
 	return {
 		"procedures": frappe.get_all("Imaging Procedure", filters={"is_active": 1}, fields=["name", "procedure_name", "modality", "category", "price", "walk_in",
-			"needs_consent", "female_only", "duration_min", "tat_hours"], order_by="modality, sort_order, procedure_name"),
+			"needs_consent", "female_only", "duration_min", "tat_hours", "contrast", "contrast_surcharge", "urgent_surcharge"], order_by="modality, sort_order, procedure_name"),
 		"radiologists": frappe.get_all("Doctor", filters={"is_active": 1, "department": "Radiology"}, fields=["name", "doctor_name"], order_by="doctor_name"),
 		"doctors": frappe.get_all("Doctor", filters={"is_active": 1}, fields=["name", "doctor_name", "specialization"], order_by="doctor_name"),
 		"panels": frappe.get_all("Customer", filters={"customer_group": ["in", ["Insurance Providers", "Panels"]], "disabled": 0}, pluck="name"),
-		"me": rad.doctor_of(), "hours": rad.HOURS,
+		"me": rad.doctor_of(), "hours": rad.HOURS, "machines": [m for h in rad.HOURS.values() for m in (h.get("machines") or [])],
 	}
 
 
 @frappe.whitelist()
-def worklist(date=None, to_date=None, modality=None, status=None, radiologist=None, q=None, branch=None):
+def worklist(date=None, to_date=None, modality=None, status=None, radiologist=None, q=None, branch=None, machine=None):
 	branch = scope_branch(branch, required=False)
 	require_roles(*VIEW)
-	return rad.worklist(date, to_date, modality, status, radiologist, q, branch)
+	return rad.worklist(date, to_date, modality, status, radiologist, q, branch, machine=machine)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_safety(name, answers, creatinine=None, egfr=None, creatinine_date=None, weight_kg=None, signature=None, signer=None, sedation_consent=0):
+	"""MRI / CT / contrast safety questionnaire + consent signature (reception or the technologist)."""
+	require_roles(*FRONT)
+	return rad.save_safety(name, frappe.parse_json(answers), creatinine, egfr, creatinine_date, weight_kg, signature, signer, sedation_consent).as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
+def clear_safety(name, note):
+	require_roles(R.RADIOLOGIST)
+	return rad.clear_safety(name, note).as_dict()
+
+
+@frappe.whitelist(methods=["POST"])
+def tech_record(name, data):
+	require_roles(*ROOM)
+	return rad.tech_record(name, frappe.parse_json(data)).as_dict()
 
 
 @frappe.whitelist()
@@ -289,7 +308,7 @@ def catalogue_admin():
 			"impression", "recommendations"], order_by="modality, name")}
 
 
-PROC_EDIT = ("price", "duration_min", "tat_hours", "is_active", "show_on_website", "walk_in", "needs_consent", "description", "preparation", "prep_group",
+PROC_EDIT = ("contrast", "contrast_surcharge", "urgent_surcharge", "price", "duration_min", "tat_hours", "is_active", "show_on_website", "walk_in", "needs_consent", "description", "preparation", "prep_group",
 	"default_template", "sort_order")
 TPL_EDIT = ("report_title", "technique", "findings", "impression", "recommendations", "is_active", "procedure")
 
