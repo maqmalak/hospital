@@ -612,7 +612,7 @@ def _watermark():
 	return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
-def report_html(d, for_pdf=True):
+def report_html(d, for_pdf=True, compact=False):
 	"""A4 report: letterhead, patient grid, title, sections, measurements, impression box, key images, signature block with QR."""
 	from hospital_vvs.letterhead import RED, TEAL, footer_html, header_html
 	from hospital_vvs.services.lab import qr_data_uri
@@ -629,12 +629,16 @@ def report_html(d, for_pdf=True):
 		sec.append(f"<h3>Technique</h3>{_para(d['technique'])}")
 	if d.get("ob"):
 		ob = d["ob"]
-		rows = "".join(f"<tr><th>{esc(lbl)}</th><td>{esc(str(ob[k]))}</td></tr>" for k, lbl in OB_LABELS if ob.get(k))
-		sec.append(f"<h3>Obstetric summary</h3><table class='org'>{rows}</table>")
+		pairs = [(lbl, str(ob[k])) for k, lbl in OB_LABELS if ob.get(k)]
+		rows = "".join("<tr>" + "".join(f"<th>{esc(l)}</th><td>{esc(v)}</td>" for l, v in pairs[i:i + 2]) + "</tr>" for i in range(0, len(pairs), 2))
+		sec.append(f"<h3>Obstetric summary</h3><table class='org ob'>{rows}</table>")
 	sec.append(f"<h3>Findings</h3>{_findings(d.get('findings'))}")
-	if d.get("measurements"):
+	ob_shown = {lbl.split(" ")[0].upper() for _k, lbl in OB_LABELS} | {"AFI"} if d.get("ob") else set()
+	meas = [m for m in (d.get("measurements") or []) if str(m.get("value") or "").strip()  # unfilled template rows are not printed
+		and (m.get("label") or "").split(" ")[0].upper() not in ob_shown]  # nor what the obstetric summary already shows
+	if meas:
 		rows = "".join(f"<tr><td>{esc(m.get('label') or '')}</td><td class='num'>{esc(m.get('value') or '')} {esc(m.get('unit') or '')}</td><td class='mut'>{esc(m.get('reference') or '')}</td></tr>"
-			for m in d["measurements"])
+			for m in meas)
 		sec.append(f"<h3>Measurements</h3><table class='ms'><thead><tr><th>Parameter</th><th>Measured</th><th>Normal / reference</th></tr></thead><tbody>{rows}</tbody></table>")
 	crit = "<div class='crit'>CRITICAL FINDING — communicated to the referring doctor</div>" if d.get("critical") else ""
 	sec.append(f"<div class='imp'><div class='imp-h'>Impression</div>{crit}{_para(d.get('impression'))}</div>")
@@ -661,33 +665,34 @@ def report_html(d, for_pdf=True):
 	mark = _watermark()
 	return f"""<!doctype html><html><head><meta charset='utf-8'><style>
 	@page {{ size: A4; margin: 12mm 12mm 16mm }}
-	body {{ font-family: Helvetica, Arial, sans-serif; color:#0f2830; font-size:11.2px; line-height:1.5; margin:0 }}
+	body {{ font-family: Helvetica, Arial, sans-serif; color:#0f2830; font-size:11px; line-height:1.45; margin:0 }}
 	.wm {{ position:fixed; top:30%; left:24%; width:52%; z-index:-1 }}
 	.dept {{ text-align:center; letter-spacing:.22em; font-size:10px; font-weight:700; color:{TEAL}; margin:-1mm 0 3mm }}
 	table.pt {{ width:100%; border-collapse:collapse; border:1px solid #d5e3e6; border-radius:6px; background:#f6fafb }}
-	table.pt td {{ padding:4px 8px; border-bottom:1px solid #e4eef0; font-size:10.5px }} table.pt td.k {{ color:#5b7079; width:17% }} table.pt td.v {{ font-weight:700; width:33% }}
-	h1 {{ text-align:center; font-family: Georgia, 'Times New Roman', serif; font-size:17px; letter-spacing:.08em; color:#0c2431; margin:5mm 0 1mm }}
-	.rule {{ width:60px; height:3px; background:{RED}; margin:0 auto 4mm; border-radius:2px }}
-	h3 {{ font-size:10.5px; text-transform:uppercase; letter-spacing:.14em; color:{TEAL}; margin:4.5mm 0 1.5mm; border-bottom:1px solid #e1eaeb; padding-bottom:1mm }}
-	p {{ margin:0 0 1.6mm }}
+	table.pt td {{ padding:3px 8px; border-bottom:1px solid #e4eef0; font-size:10.5px }} table.pt td.k {{ color:#5b7079; width:17% }} table.pt td.v {{ font-weight:700; width:33% }}
+	h1 {{ text-align:center; font-family: Georgia, 'Times New Roman', serif; font-size:16px; letter-spacing:.08em; color:#0c2431; margin:3.5mm 0 1mm }}
+	.rule {{ width:60px; height:3px; background:{RED}; margin:0 auto 2.5mm; border-radius:2px }}
+	h3 {{ font-size:10.5px; text-transform:uppercase; letter-spacing:.14em; color:{TEAL}; margin:3mm 0 1.2mm; border-bottom:1px solid #e1eaeb; padding-bottom:.8mm }}
+	p {{ margin:0 0 1.2mm }}
 	table.org {{ width:100%; border-collapse:collapse }} table.org th {{ text-align:left; vertical-align:top; width:24%; padding:2px 8px 2px 0; color:#0c2431 }}
-	table.org td {{ padding:2px 0 }}
-	table.ms {{ width:100%; border-collapse:collapse }} table.ms th {{ background:#0e5e6f; color:#fff; text-align:left; padding:4px 8px; font-size:10px }}
-	table.ms td {{ padding:4px 8px; border-bottom:1px solid #e4eef0 }} .num {{ font-weight:700 }} .mut {{ color:#5b7079 }}
+	table.org td {{ padding:2px 0 }} table.ob th {{ width:17% }} table.ob td {{ width:33%; padding-right:8px }}
+	table.ms {{ width:100%; border-collapse:collapse }} table.ms th {{ background:#0e5e6f; color:#fff; text-align:left; padding:3px 8px; font-size:10px }}
+	table.ms td {{ padding:3px 8px; border-bottom:1px solid #e4eef0 }} .num {{ font-weight:700 }} .mut {{ color:#5b7079 }}
 	.imp, table.sign, table.ki, table.ms tr, table.org tr, .add {{ page-break-inside:avoid }}
-	.imp {{ margin-top:5mm; border:1.5px solid {TEAL}; border-left:6px solid {TEAL}; background:#eef7f6; border-radius:6px; padding:3mm 4mm; font-weight:700; font-size:12px }}
+	.imp {{ margin-top:3.5mm; border:1.5px solid {TEAL}; border-left:6px solid {TEAL}; background:#eef7f6; border-radius:6px; padding:2.5mm 4mm; font-weight:700; font-size:11.5px }}
 	.imp-h {{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:{TEAL}; margin-bottom:1.5mm }}
 	.crit {{ background:{RED}; color:#fff; font-size:9.5px; letter-spacing:.08em; padding:1.5mm 3mm; border-radius:4px; margin-bottom:2mm; display:inline-block }}
 	.add {{ margin-top:3mm; border:1px dashed #c9a24d; background:#fffaf0; padding:2.5mm 3.5mm; border-radius:6px }}
 	table.ki {{ width:100%; border-collapse:separate; border-spacing:4px; table-layout:fixed }} table.ki td {{ width:25%; vertical-align:top; text-align:center }}
-	table.ki img {{ width:100%; max-height:42mm; object-fit:cover; border-radius:4px; background:#000 }} .cap {{ font-size:8.5px; color:#5b7079 }}
-	table.sign {{ width:100%; margin-top:7mm; border-top:1px solid #d5e3e6; padding-top:3mm }} table.sign td {{ vertical-align:bottom }}
-	.sigimg {{ height:13mm }} .sigline {{ width:46mm; border-bottom:1px solid #94a3b8; height:11mm }} .rn {{ font-weight:700; font-size:12px; margin-top:1mm }}
+	table.ki img {{ width:100%; max-height:32mm; object-fit:cover; border-radius:4px; background:#000 }} .cap {{ font-size:8.5px; color:#5b7079 }}
+	table.sign {{ width:100%; margin-top:4mm; border-top:1px solid #d5e3e6; padding-top:2mm }} table.sign td {{ vertical-align:bottom }}
+	.sigimg {{ height:11mm }} .sigline {{ width:46mm; border-bottom:1px solid #94a3b8; height:8mm }} .rn {{ font-weight:700; font-size:12px; margin-top:1mm }}
 	.stamp {{ display:inline-block; border:2px solid {TEAL}; color:{TEAL}; border-radius:8px; padding:2mm 4mm; font-weight:800; letter-spacing:.1em; font-size:10px;
 		transform:rotate(-4deg) }} .stamp small {{ display:block; font-weight:600; letter-spacing:0; font-size:8.5px }}
 	.stamp.draft {{ border-color:#b45309; color:#b45309 }}
-	.qr {{ width:24mm; height:24mm }}
-	.disc {{ margin-top:4mm; font-size:8.8px; color:#5b7079; text-align:center; font-style:italic }}
+	.qr {{ width:20mm; height:20mm }}
+	{'table.ki img { max-height:24mm } body { line-height:1.35 } h3 { margin:2.2mm 0 1mm } table.sign { margin-top:2.5mm }' if compact else ''}
+	.disc {{ margin-top:2.5mm; font-size:8.5px; color:#5b7079; text-align:center; font-style:italic }}
 	</style></head><body>
 	<img class='wm' src='{mark}'>
 	{header_html(d['clinic'])}
@@ -698,16 +703,27 @@ def report_html(d, for_pdf=True):
 	{sign}
 	<div class='disc'>This report should be correlated clinically. It is based on the images obtained at the time of the examination.
 	Verify authenticity by scanning the QR code or at {esc(frappe.utils.get_url('/hms/site/radiology'))}.</div>
-	<div style='margin-top:4mm'>{footer_html(d['clinic'], right='Radiology &amp; Imaging')}</div>
+	<div style='margin-top:2.5mm'>{footer_html(d['clinic'], right='Radiology &amp; Imaging')}</div>
 	</body></html>"""
 
 
 def report_pdf(name, staff=False):
+	"""A4 PDF that fits on one page: if the content runs over, re-render slightly smaller (down to 78%) before allowing page 2."""
+	import io
+
 	from frappe.utils.pdf import get_pdf
+	from pypdf import PdfReader
 
 	d = report_data(name, staff=staff)
-	return get_pdf(report_html(d), {"margin-top": "10mm", "margin-bottom": "14mm", "margin-left": "11mm", "margin-right": "11mm",
-		"footer-center": f"{d['name']} · {d['title']} · Page [page] of [topage]", "footer-font-size": "7", "footer-spacing": "4"})
+	html = report_html(d)
+	opts = {"margin-top": "8mm", "margin-bottom": "12mm", "margin-left": "10mm", "margin-right": "10mm",
+		"footer-center": f"{d['name']} · {d['title']} · Page [page] of [topage]", "footer-font-size": "7", "footer-spacing": "3"}
+	compact = report_html(d, compact=True)
+	for page, zoom in ((html, "1"), (html, "0.94"), (html, "0.88"), (compact, "0.88"), (compact, "0.83"), (compact, "0.78")):
+		pdf = get_pdf(page, {**opts, "zoom": zoom})
+		if len(PdfReader(io.BytesIO(pdf)).pages) == 1:
+			return pdf
+	return get_pdf(html, opts)  # genuinely long (many addenda / measurements): normal size over two pages
 
 
 def public_check(name, sig):
