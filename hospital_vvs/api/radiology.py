@@ -333,11 +333,11 @@ def create_procedure(data):
 		frappe.throw(_("Name the procedure."))
 	if frappe.db.exists("Imaging Procedure", name):
 		frappe.throw(_("{0} is already in the catalogue.").format(name))
-	if d.get("modality") not in ("X-Ray", "Ultrasound", "Doppler"):
+	if d.get("modality") not in ("X-Ray", "Ultrasound", "Doppler", "MRI", "CT"):
 		frappe.throw(_("Choose the modality."))
-	cats = ("X-Ray", "Contrast Study", "Ultrasound", "Pregnancy", "Doppler", "Guided Procedure")
+	cats = ("X-Ray", "Contrast Study", "Ultrasound", "Pregnancy", "Doppler", "Guided Procedure", "MRI", "CT", "CT Angiography")
 	doc = frappe.get_doc({"doctype": "Imaging Procedure", "procedure_name": name, "modality": d["modality"],
-		"category": d.get("category") if d.get("category") in cats else {"X-Ray": "X-Ray", "Ultrasound": "Ultrasound", "Doppler": "Doppler"}[d["modality"]],
+		"category": d.get("category") if d.get("category") in cats else d["modality"],
 		"code": (d.get("code") or "").strip().upper() or None, "body_region": d.get("body_region"),
 		"report_kind": d.get("report_kind") if d.get("report_kind") in ("General", "Obstetric", "Abdomen") else "General",
 		"female_only": cint(d.get("female_only")), **{k: d[k] for k in PROC_EDIT if k in d}})

@@ -13,9 +13,10 @@ export interface Row {
   booking_source?: string; payment_status: string; payment_option: string; amount?: number; expected_at?: string | null; scanned_at?: string | null; verified_at?: string | null;
   radiologist?: string; radiologist_name?: string; critical_finding: number; copy_requested: number; ward_location?: string; referring_name?: string; external_referrer?: string;
   tat?: "green" | "amber" | "red" | null; qc_passed?: number; registered_at?: string | null;
+  machine?: string; safety_status?: string; counter_receipt?: string; contrast_used?: number;
 }
-export interface Ctx { procedures: { name: string; procedure_name: string; modality: string; category: string; price: number; walk_in: number; needs_consent: number; female_only: number; duration_min: number; tat_hours: number }[];
-  radiologists: { name: string; doctor_name: string }[]; doctors: { name: string; doctor_name: string; specialization?: string }[]; panels: string[]; me?: string }
+export interface Ctx { procedures: { name: string; procedure_name: string; modality: string; category: string; price: number; walk_in: number; needs_consent: number; female_only: number; duration_min: number; tat_hours: number; contrast?: string; contrast_surcharge?: number }[];
+  radiologists: { name: string; doctor_name: string }[]; doctors: { name: string; doctor_name: string; specialization?: string }[]; panels: string[]; me?: string; machines?: string[] }
 
 export const STATUSES = ["Booked", "Registered", "In Progress", "Scanned", "Reporting", "Verified", "Delivered"] as const;
 export const STATUS_TONE: Record<string, string> = {
@@ -75,3 +76,9 @@ export function openPdf(name: string) {
 export const age = (r: { age?: number; gender?: string }) => [r.age ? `${r.age}y` : "", r.gender?.[0] ?? ""].filter(Boolean).join(" ");
 export const hm = (t?: string | null) => (t ? t.slice(0, 5) : "");
 export const rs = (v?: number) => `Rs ${Math.round(Number(v) || 0).toLocaleString("en-PK")}`;
+
+/** MRI / CT safety status chip (D-98). */
+export const SAFETY_TONE: Record<string, string> = {
+  Pending: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200", "Clearance required": "bg-rose-600 text-white",
+  Cleared: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200", Safe: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200",
+};

@@ -32,7 +32,7 @@ export default function CataloguePage() {
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <Tabs tabs={[{ key: "procedures", label: "Procedures", count: data?.procedures.length }, { key: "templates", label: "Report templates", count: data?.templates.length }]} value={tab} onChange={setTab} />
         <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-card p-1" role="radiogroup" aria-label="Modality">
-          {["", "X-Ray", "Ultrasound", "Doppler"].map((m) => <button key={m || "all"} role="radio" aria-checked={mod === m} onClick={() => setMod(m)}
+          {["", "X-Ray", "Ultrasound", "Doppler", "MRI", "CT"].map((m) => <button key={m || "all"} role="radio" aria-checked={mod === m} onClick={() => setMod(m)}
             className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold transition", mod === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
             {m || "All"} <span className="ms-1 text-xs opacity-70 tabular-nums">{count(m)}</span></button>)}
         </div>
@@ -139,7 +139,7 @@ function TplModal({ t, onClose, onDone }: { t: Partial<T>; onClose: () => void; 
     <Modal title={t.name || "New template"} wide onClose={onClose} footer={<><Button variant="outline" onClick={onClose}>Close</Button><Button variant="submit" disabled={save.isPending} onClick={() => save.mutate({ data: JSON.stringify(v) })}>Save</Button></>}>
       <div className="grid gap-3 md:grid-cols-2">
         {!t.name && <Field label="Template name" required><input className={inputCls} value={v.template_name ?? ""} onChange={(e) => setV({ ...v, template_name: e.target.value })} /></Field>}
-        {!t.name && <Field label="Modality"><select className={inputCls} value={v.modality} onChange={(e) => setV({ ...v, modality: e.target.value })}><option>X-Ray</option><option>Ultrasound</option><option>Doppler</option></select></Field>}
+        {!t.name && <Field label="Modality"><select className={inputCls} value={v.modality} onChange={(e) => setV({ ...v, modality: e.target.value })}><option>X-Ray</option><option>Ultrasound</option><option>Doppler</option><option>MRI</option><option>CT</option></select></Field>}
         <Field label="Printed title" className="md:col-span-2"><input className={cn(inputCls, "uppercase")} value={v.report_title ?? ""} onChange={(e) => setV({ ...v, report_title: e.target.value })} /></Field>
         {ta("technique", "Technique", 2)}{ta("findings", "Findings (one line per organ: “Organ: text”)", 10)}{ta("impression", "Impression", 2)}{ta("recommendations", "Recommendations", 2)}
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!v.is_active} onChange={(e) => setV({ ...v, is_active: e.target.checked ? 1 : 0 })} className="h-4 w-4" />Active</label>
@@ -148,12 +148,12 @@ function TplModal({ t, onClose, onDone }: { t: Partial<T>; onClose: () => void; 
   );
 }
 
-const CATS: Record<string, string[]> = { "X-Ray": ["X-Ray", "Contrast Study"], Ultrasound: ["Ultrasound", "Pregnancy", "Guided Procedure"], Doppler: ["Doppler"] };
+const CATS: Record<string, string[]> = { "X-Ray": ["X-Ray", "Contrast Study"], Ultrasound: ["Ultrasound", "Pregnancy", "Guided Procedure"], Doppler: ["Doppler"], MRI: ["MRI"], CT: ["CT", "CT Angiography"] };
 const PREPS = ["None", "Fasting", "Full Bladder", "Fasting + Full Bladder", "Metal Removal", "Contrast", "Pregnancy"];
 
 function NewProcModal({ mod, templates, onClose, onDone }: { mod: string; templates: T[]; onClose: () => void; onDone: () => void }) {
   const [v, setV] = useState({ procedure_name: "", code: "", modality: mod || "X-Ray", category: CATS[mod || "X-Ray"][0], body_region: "", price: 0, duration_min: 15, tat_hours: 4,
-    prep_group: "None", preparation: "", description: "", report_kind: "General", default_template: "", walk_in: 0, needs_consent: 0, female_only: 0, show_on_website: 1, is_active: 1, sort_order: 500 });
+    prep_group: "None", preparation: "", description: "", report_kind: "General", default_template: "", walk_in: 0, needs_consent: 0, female_only: 0, show_on_website: 1, is_active: 1, sort_order: 500, contrast: "No", contrast_surcharge: 0, urgent_surcharge: 0 });
   const save = useAction("radiology.create_procedure", { success: "Procedure added to the catalogue", onSuccess: onDone });
   const set = (k: string, val: unknown) => setV((x) => ({ ...x, [k]: val }));
   const chk = (k: keyof typeof v, l: string) => <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!v[k]} onChange={(e) => set(k, e.target.checked ? 1 : 0)} className="h-4 w-4" />{l}</label>;
@@ -171,6 +171,10 @@ function NewProcModal({ mod, templates, onClose, onDone }: { mod: string; templa
         <Field label="Duration (min)"><input type="number" className={inputCls} value={v.duration_min} onChange={(e) => set("duration_min", Number(e.target.value))} /></Field>
         <Field label="Report TAT (hours)"><input type="number" step="0.5" className={inputCls} value={v.tat_hours} onChange={(e) => set("tat_hours", Number(e.target.value))} /></Field>
         <Field label="Sort order"><input type="number" className={inputCls} value={v.sort_order} onChange={(e) => set("sort_order", Number(e.target.value))} /></Field>
+        {["MRI", "CT"].includes(v.modality) && <>
+          <Field label="Contrast"><select className={inputCls} value={v.contrast} onChange={(e) => set("contrast", e.target.value)}><option>No</option><option>Optional</option><option>Yes</option></select></Field>
+          <Field label="Contrast surcharge (Rs)"><input type="number" className={inputCls} value={v.contrast_surcharge} onChange={(e) => set("contrast_surcharge", Number(e.target.value))} /></Field>
+          <Field label="Urgent surcharge (Rs)"><input type="number" className={inputCls} value={v.urgent_surcharge} onChange={(e) => set("urgent_surcharge", Number(e.target.value))} /></Field></>}
         <div className="flex flex-wrap gap-4 md:col-span-4">{chk("is_active", "Active")}{chk("show_on_website", "Show on website")}{chk("walk_in", "Walk-in allowed")}{chk("needs_consent", "Needs consent")}{chk("female_only", "Female patients only")}</div>
         <Field label="Short description (website)" className="md:col-span-4"><input className={inputCls} value={v.description} onChange={(e) => set("description", e.target.value)} placeholder="Elbow pain, injury or fracture follow-up." /></Field>
         <Field label="Preparation group"><select className={inputCls} value={v.prep_group} onChange={(e) => set("prep_group", e.target.value)}>{PREPS.map((x) => <option key={x}>{x}</option>)}</select></Field>
