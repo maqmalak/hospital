@@ -251,10 +251,10 @@ function CradleArt() {
           <rect width="340" height="340" fill="url(#nzsky)" />
           <circle cx="250" cy="80" r="34" fill="#F3DCC8" opacity=".9" /><circle cx="264" cy="70" r="30" fill="#0B4552" opacity=".55" />
           <g className="nz-twinkle" fill="#fff">{[[60, 60], [110, 40], [180, 70], [300, 140], [40, 150], [150, 110]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i % 2 ? 2 : 3} />)}</g>
-          <g transform="translate(70 170)" className="nz-rock">
+          <g transform="translate(70 170)"><g className="nz-rock">
             <path d="M0 40 Q100 140 200 40" fill="#F6EEE3" opacity=".95" /><path d="M0 40 h200" stroke="#CFE6F7" strokeWidth="6" strokeLinecap="round" />
             <path d="M20 30 Q100 -40 180 30" fill="none" stroke="#CFE6F7" strokeWidth="5" opacity=".8" /><circle cx="100" cy="46" r="16" fill="#F3DCC8" /><path d="M70 62 Q100 80 130 62" stroke="#F7D6DA" strokeWidth="10" strokeLinecap="round" fill="none" />
-          </g>
+          </g></g>
           <path className="nz-ecg" d="M30 300 h90 l10 -18 l12 30 l10 -22 l8 10 h150" stroke="#FF8A84" strokeWidth="2.5" fill="none" />
         </svg>
       </div>
@@ -272,10 +272,10 @@ const NZ_CSS = `
 .nz-tint{background:linear-gradient(180deg,var(--nz-cream),var(--nz-blue) 60%,var(--nz-blush))}
 .nz-glass{background:color-mix(in srgb,var(--surface) 78%,transparent);backdrop-filter:blur(10px)}
 .nz-art{background:linear-gradient(135deg,var(--a),var(--b))}
-.s2-dark .nz-art{filter:saturate(.7) brightness(.55)}
+.s2-dark .nz-art{filter:saturate(.85) brightness(.68)}
 .nz-twinkle circle{animation:nztw 4.5s ease-in-out infinite}.nz-twinkle circle:nth-child(2n){animation-delay:-2s}
 @keyframes nztw{0%,100%{opacity:.25}50%{opacity:.95}}
-.nz-rock{transform-origin:170px 210px;animation:nzrock 6s ease-in-out infinite}@keyframes nzrock{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+.nz-rock{transform-box:fill-box;transform-origin:50% 20%;animation:nzrock 6s ease-in-out infinite}@keyframes nzrock{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
 .nz-ecg{stroke-dasharray:320;stroke-dashoffset:320;animation:nzecg 4s linear infinite}@keyframes nzecg{to{stroke-dashoffset:0}}
 .nz-rail{background:linear-gradient(90deg,var(--primary),#9CC7E6,var(--line));background-size:200% 100%;animation:nzrail 6s ease-in-out infinite}@keyframes nzrail{0%,100%{background-position:100% 0}50%{background-position:0 0}}
 .nz-node{transition:transform .3s,background .3s,color .3s;animation:nznode 5s ease-in-out infinite}

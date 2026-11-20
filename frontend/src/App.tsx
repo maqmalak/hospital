@@ -96,6 +96,11 @@ const OnlinePaymentsPage = lazy(() => import("@/modules/finance/PaymentsPages").
 const FbrPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.FbrPage })));
 const LabTemplatesPage = lazy(() => import("@/modules/lab/TemplatesPage"));
 const RadWorklistPage = lazy(() => import("@/modules/radiology/WorklistPage"));
+const NurseryBoardPage = lazy(() => import("@/modules/nursery/BoardPage"));
+const NurseryRegisterPage = lazy(() => import("@/modules/nursery/RegisterPage"));
+const NurseryBabyPage = lazy(() => import("@/modules/nursery/BabyPage"));
+const NurserySecurityPage = lazy(() => import("@/modules/nursery/SecurityPage"));
+const NurseryReportsPage = lazy(() => import("@/modules/nursery/ReportsPage"));
 const RadReportPage = lazy(() => import("@/modules/radiology/ReportEditorPage"));
 const RadAnalyticsPage = lazy(() => import("@/modules/radiology/AnalyticsPage"));
 const RadCataloguePage = lazy(() => import("@/modules/radiology/CataloguePage"));
@@ -227,6 +232,11 @@ export default function App() {
         <Route path="/purchase_invoice" element={g("/purchase_invoice", <PurchaseInvoicesPage />)} />
         <Route path="/assets" element={g("/assets", <AssetsPage />)} />
         <Route path="/consumption" element={g("/consumption", <ConsumptionPage />)} />
+        <Route path="/nursery" element={g("/nursery", <NurseryBoardPage />)} />
+        <Route path="/nursery/register" element={g("/nursery/register", <NurseryRegisterPage />)} />
+        <Route path="/nursery/baby/:name" element={g("/nursery/baby", <NurseryBabyPage />)} />
+        <Route path="/nursery/security" element={g("/nursery/security", <NurserySecurityPage />)} />
+        <Route path="/nursery/reports" element={g("/nursery/reports", <NurseryReportsPage />)} />
         <Route path="/radiology" element={g("/radiology", <RadWorklistPage />)} />
         <Route path="/radiology/report/:name" element={g("/radiology/report", <RadReportPage />)} />
         <Route path="/radiology/analytics" element={g("/radiology/analytics", <RadAnalyticsPage />)} />

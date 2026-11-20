@@ -20,7 +20,7 @@ export function UnitArt({ kind, className = "h-40" }: { kind: string; className?
 
 
 export const NZ_ART_CSS = `.nz-art{background:linear-gradient(135deg,var(--a),var(--b))}
-.s2-dark .nz-art{filter:saturate(.7) brightness(.55)}
+.s2-dark .nz-art{filter:saturate(.85) brightness(.68)}
 .nz-twinkle circle{animation:nztw 4.5s ease-in-out infinite}.nz-twinkle circle:nth-child(2n){animation-delay:-2s}
 @keyframes nztw{0%,100%{opacity:.25}50%{opacity:.95}}
 .nz-ecg{stroke-dasharray:320;stroke-dashoffset:320;animation:nzecg 4s linear infinite}@keyframes nzecg{to{stroke-dashoffset:0}}

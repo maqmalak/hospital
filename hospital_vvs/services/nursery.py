@@ -445,6 +445,19 @@ def _row(cells):
 	return "<tr>" + "".join(f"<td class='k'>{esc(k)}<span class='ur'>{esc(u)}</span></td><td class='v'>{esc(str(v if v not in (None, '') else '—'))}</td>" for k, u, v in cells) + "</tr>"
 
 
+import re
+
+_URDU = re.compile(r"([\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\s\u200c\u200d/()،۔:-]*)")
+
+
+def _urdu_runs(html):
+	"""Wrap every run of Urdu text in <span class='u'> so wkhtmltopdf uses a font that has all Urdu letters (e.g. ہ, ے)."""
+	head, sep, rest = html.partition("</style>")
+	if not sep:
+		return html
+	return head + sep + re.sub(r">([^<]+)<", lambda m: ">" + _URDU.sub(r"<span class='u'>\1</span>", m.group(1)) + "<", rest)
+
+
 def _shell(kind, nb, body, signer=None):
 	from hospital_vvs.letterhead import RED, TEAL, clinic_block, footer_html, header_html
 	from hospital_vvs.services.lab import _image_uri, qr_data_uri
@@ -455,17 +468,18 @@ def _shell(kind, nb, body, signer=None):
 	sig = _image_uri(doc.signature) if doc and doc.signature else None
 	qr = qr_data_uri(verify_url(kind, nb))
 	signed = kind != "discharge" or nb.status == "Discharged"
-	return f"""<!doctype html><html><head><meta charset='utf-8'><style>
+	return _urdu_runs(f"""<!doctype html><html><head><meta charset='utf-8'><style>
 	@page {{ size:A4; margin:10mm 11mm 14mm }}
-	body {{ font-family: Helvetica, Arial, sans-serif; color:#0f2830; font-size:10.8px; line-height:1.45; margin:0 }}
+	.u {{ font-family:'FreeSerif','Noto Naskh Arabic',serif; font-weight:normal }}
+	body {{ font-family: Helvetica, Arial, 'Liberation Sans', 'DejaVu Sans', 'FreeSerif', sans-serif; color:#0f2830; font-size:10.8px; line-height:1.45; margin:0 }}
 	.wm {{ position:fixed; top:30%; left:24%; width:52%; z-index:-1 }}
 	.dept {{ text-align:center; letter-spacing:.22em; font-size:9.5px; font-weight:700; color:{TEAL}; margin:-1mm 0 2mm }}
 	h1 {{ text-align:center; font-family:Georgia,serif; font-size:16px; letter-spacing:.06em; margin:2mm 0 0; color:#0c2431 }}
-	.h1ur {{ text-align:center; font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq',serif; direction:rtl; font-size:13px; color:{TEAL}; margin:0 0 1mm }}
+	.h1ur {{ text-align:center; font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic','FreeSerif',serif; direction:rtl; font-size:13px; color:{TEAL}; margin:0 0 1mm }}
 	.rule {{ width:60px; height:3px; background:{RED}; margin:0 auto 3mm; border-radius:2px }}
 	table.g {{ width:100%; border-collapse:collapse; border:1px solid #d5e3e6; background:#f6fafb; margin-bottom:2.5mm }}
 	table.g td {{ padding:3px 7px; border-bottom:1px solid #e4eef0; vertical-align:top }} td.k {{ color:#5b7079; width:18% }} td.v {{ font-weight:700; width:32% }}
-	.ur {{ display:block; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; text-align:left; font-size:8.5px; color:#8aa0a7 }}
+	.ur {{ display:block; font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic','FreeSerif',serif; direction:rtl; text-align:left; font-size:8.5px; color:#8aa0a7 }}
 	h3 {{ font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:{TEAL}; margin:3mm 0 1.2mm; border-bottom:1px solid #e1eaeb; padding-bottom:.8mm }}
 	table.t {{ width:100%; border-collapse:collapse }} table.t th {{ background:#0e5e6f; color:#fff; text-align:left; padding:3px 6px; font-size:9.5px }}
 	table.t td {{ padding:3px 6px; border-bottom:1px solid #e4eef0 }} .ok {{ color:#047857; font-weight:700 }} .due {{ color:#b45309 }}
@@ -485,7 +499,7 @@ def _shell(kind, nb, body, signer=None):
 		<td style='text-align:center'><span class='stamp {"" if signed else "draft"}'>{"ELECTRONICALLY VERIFIED" if signed else "DRAFT — NOT SIGNED"}<br><small style='font-weight:600;letter-spacing:0'>{esc(nb.name)} · v{cint(nb.doc_version)} · {_now():%d %b %Y}</small></span></td>
 		<td style='width:22%;text-align:right'><img src='{qr}' style='width:20mm;height:20mm'><div style='font-size:7.5px;color:#5b7079'>Scan to verify · تصدیق کے لیے اسکین کریں</div></td></tr></table>
 	<div class='disc'>Clinical values and the vaccination schedule follow LMC paediatric protocols and the national EPI programme. Keep this document safe.</div>
-	<div style='margin-top:2.5mm'>{footer_html(clinic_block(nb.branch), right='Nursery &amp; Newborn Care')}</div></body></html>"""
+	<div style='margin-top:2.5mm'>{footer_html(clinic_block(nb.branch), right='Nursery &amp; Newborn Care')}</div></body></html>""")
 
 
 def _ident(nb):
@@ -523,7 +537,7 @@ def birth_html(nb):
 		+ _row([("Delivery", "زچگی", nb.delivery_type), ("Multiple birth", "جڑواں", f"{nb.multiple_birth}" + (f" (baby {nb.birth_order})" if nb.multiple_birth != "Single" else ""))]) \
 		+ _row([("Attended by", "زچگی کرائی", frappe.db.get_value("Doctor", nb.obstetrician, "doctor_name") if nb.obstetrician else "—"), ("ID band no.", "شناختی بینڈ", nb.band_no)]) + "</table>"
 	body += ("<div class='box'>This slip records a birth at this hospital for registration with the Union Council / NADRA (CRMS). Parents should register the birth "
-		"and obtain the child's birth certificate (B-form) from the Union Council. <br><span style=\"font-family:'Noto Nastaliq Urdu',serif\">یہ پرچی یونین کونسل / نادرا میں پیدائش کے اندراج کے لیے ہے۔</span></div>")
+		"and obtain the child's birth certificate (B-form) from the Union Council. <br><span style=\"font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic','FreeSerif',serif\">یہ پرچی یونین کونسل / نادرا میں پیدائش کے اندراج کے لیے ہے۔</span></div>")
 	return _shell("birth", nb, body, signer=nb.obstetrician)
 
 
