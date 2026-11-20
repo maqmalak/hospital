@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   AlertTriangle, Banknote, ClipboardPlus, BedDouble, CheckCircle2, CloudOff, CreditCard, Delete, FlaskConical, Globe, HandCoins, History, Keyboard, Landmark, Lock,
-  MonitorSmartphone, PauseCircle, Percent, Plus, Printer, ReceiptText, RefreshCw, Search, Smartphone, Stethoscope, Trash2, Undo2, User, UserPlus, Wallet, Wifi, X,
+  MonitorSmartphone, PauseCircle, Percent, Plus, Printer, ReceiptText, RefreshCw, ScanLine, Search, ShieldCheck, Smartphone, Stethoscope, Trash2, Undo2, User, UserPlus, Wallet, Wifi, X,
 } from "lucide-react";
 import { call, humanizeError, useApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -14,13 +14,17 @@ import { Dialog } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/skeleton";
 import { cn } from "@/utils/cn";
 import { type Bundle, type Doctor, isNetworkError, kvGet, kvSet, type LabT, loadBundle, publishDisplay, refreshBundle, type Service, useCounterSync, uuid } from "./offline";
-import { type Receipt, receiptHtml } from "./receipt";
+import { type Receipt } from "./receipt";
+import { type SlipReceipt, slipHtml } from "./slip";
 
-type Kind = "Consultation" | "Service" | "Lab" | "Lab Order" | "IPD Advance" | "IPD Settlement" | "Online Fee" | "Dues";
+type Kind = "Consultation" | "Service" | "Lab" | "Lab Order" | "Imaging" | "Imaging Order" | "IPD Advance" | "IPD Settlement" | "Online Fee" | "Dues";
+/** Imaging catalogue (X-ray / ultrasound / Doppler / MRI / CT) from the radiology module (D-98). */
+interface ImgProc { name: string; procedure_name: string; code?: string; modality: string; category: string; price: number; contrast?: string; contrast_surcharge?: number; urgent_surcharge?: number; walk_in?: number; tat_hours?: number }
+interface ImgOrder { name: string; booking_ref: string; procedure: string; procedure_name: string; modality: string; scheduled_date: string; slot_time?: string; amount: number; safety_status?: string }
 interface Line { key: string; kind: Kind; label: string; doctor?: string; item_code?: string; template?: string; target?: string; qty: number; rate: number; discount: number;
-  amount: number; priority?: string; free?: number; payer_share?: number }
+  amount: number; priority?: string; free?: number; payer_share?: number; procedure?: string; contrast?: number; urgent?: number; modality?: string }
 interface Ctx { branch: string; shift: { name: string; opened_at: string; counter: string; expected: number; stale: boolean; closing: boolean } | null; counter?: string;
-  modes?: string[]; doctors: Doctor[]; services: Service[]; labs: LabT[]; counters?: { name: string; current_user?: string }[] }
+  modes?: string[]; doctors: Doctor[]; services: Service[]; labs: LabT[]; imaging?: ImgProc[]; counters?: { name: string; current_user?: string }[] }
 interface Panel { patient: { name: string; patient_name: string; gender: string; age?: number; phone?: string; category?: string; temporary_record?: number };
   admission?: { name: string; ward: string; bed_no?: string; running: number; advances: number; balance: number; final_invoice?: string; outstanding: number } | null;
   online: { name: string; fee: number; fee_status: string; payment_method: string; payment_reference?: string }[];
@@ -28,7 +32,7 @@ interface Panel { patient: { name: string; patient_name: string; gender: string;
 /** A lab order made in the lab, waiting for payment here (D-60). */
 interface LabOrder { name: string; patient: string; patient_name: string; gross_total: number; patient_share: number; priority: string; creation: string; tests: string[]; ordered_by?: string }
 type Limits = Record<string, { percent: number; amount: number | null }>;
-const LIMIT_BT: Partial<Record<Kind, string>> = { Consultation: "OPD Slip", Lab: "Lab", "Lab Order": "Lab", Service: "General" };
+const LIMIT_BT: Partial<Record<Kind, string>> = { Consultation: "OPD Slip", Lab: "Lab", "Lab Order": "Lab", Service: "General", Imaging: "General", "Imaging Order": "General" };
 interface Tender { mode_of_payment: string; amount: number; reference_no?: string }
 interface Held { id: string; at: string; patient?: PatientHit | null; newPatient?: NewP | null; lines: Line[] }
 interface NewP { patient_name: string; gender: string; age: string; phone: string }
@@ -39,6 +43,7 @@ const KIND_STYLE: Record<Kind, { icon: typeof Stethoscope; tone: string }> = {
   Lab: { icon: FlaskConical, tone: "from-violet-500 to-indigo-600" }, "Lab Order": { icon: FlaskConical, tone: "from-purple-600 to-fuchsia-600" }, "IPD Advance": { icon: BedDouble, tone: "from-amber-500 to-orange-600" },
   "IPD Settlement": { icon: BedDouble, tone: "from-orange-500 to-red-600" }, "Online Fee": { icon: Globe, tone: "from-fuchsia-500 to-purple-600" },
   Dues: { icon: ReceiptText, tone: "from-rose-500 to-pink-600" },
+  Imaging: { icon: ScanLine, tone: "from-cyan-600 to-teal-700" }, "Imaging Order": { icon: ScanLine, tone: "from-lime-600 to-emerald-700" },
 };
 const MODE_ICON: Record<string, typeof Banknote> = { Cash: Banknote, Card: CreditCard, "Bank Transfer": Landmark, JazzCash: Smartphone, Easypaisa: Wallet };
 const PRIORITIES = ["Normal", "Elderly", "Disabled", "Urgent"];
@@ -59,7 +64,10 @@ export default function CounterPage() {
   const pullBundle = useCallback(async () => { try { setBundle(await refreshBundle(branch)); } catch (e) { if (isNetworkError(e)) sync.markOffline(); } }, [branch]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (live.data?.shift && sync.online) void pullBundle(); }, [live.data?.shift?.name, sync.online]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [tab, setTab] = useState<"doctors" | "services" | "lab" | "bills" | "fromlab">("doctors");
+  const [tab, setTab] = useState<"doctors" | "services" | "lab" | "imaging" | "bills" | "fromlab">("doctors");
+  const [imgMod, setImgMod] = useState("");
+  const [refDoc, setRefDoc] = useState("");
+  const [imgOrders, setImgOrders] = useState<ImgOrder[]>([]);
   const fromLab = useApi<LabOrder[]>("counter.pending_lab", { branch }, { enabled: sync.online, refetchInterval: 15_000 });
   const limits = useApi<Limits>("counter.discount_limits", undefined, { enabled: sync.online, staleTime: 300_000 });
   const [q, setQ] = useState("");
@@ -86,6 +94,7 @@ export default function CounterPage() {
     setPanel(null);
     if (!patient || offline) return;
     void call<Panel>("counter.patient", { name: patient.name }).then((p) => { setPanel(p); if (p.lab_orders?.length) toast(`${p.lab_orders.length} lab order(s) waiting for payment — see Patient bills`, { icon: "🧪" }); }).catch(() => undefined);
+    void call<ImgOrder[]>("counter.pending_imaging", { patient: patient.name }).then((o) => { setImgOrders(o); if (o.length) toast(`${o.length} imaging booking(s) waiting for payment — see Imaging`, { icon: "🩻" }); }).catch(() => setImgOrders([]));
   }, [patient?.name, offline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // server pricing (free follow-up, panel share) whenever the cart or patient changes
@@ -110,11 +119,12 @@ export default function CounterPage() {
     if (l.kind === "Consultation" && lines.some((x) => x.kind === "Consultation" && x.doctor === l.doctor)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
     if (l.kind === "Lab" && lines.some((x) => x.kind === "Lab" && x.template === l.template)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
     if (l.kind === "Lab Order" && lines.some((x) => x.kind === "Lab Order" && x.target === l.target)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
+    if (l.kind === "Imaging Order" && lines.some((x) => x.kind === "Imaging Order" && x.target === l.target)) { toast("Already in the cart", { icon: "ℹ️" }); return; }
     if (l.kind === "Service") { const ex = lines.find((x) => x.kind === "Service" && x.item_code === l.item_code); if (ex) { upd(ex.key, { qty: ex.qty + 1 }); return; } }
     setLines((ls) => [...ls, { qty: 1, discount: 0, ...l, key: uuid(), amount: 0 } as Line]);
   };
   const upd = (key: string, patch: Partial<Line>) => setLines((ls) => ls.map((x) => (x.key === key ? { ...x, ...patch } : x)));
-  const clear = () => { setLines([]); setPatient(null); setNewP(null); setPriced(null); };
+  const clear = () => { setLines([]); setPatient(null); setNewP(null); setPriced(null); setRefDoc(""); setImgOrders([]); };
   const hold = async () => {
     if (!lines.length) return;
     const h = [{ id: uuid(), at: new Date().toISOString(), patient, newPatient: newP, lines }, ...held].slice(0, 30);
@@ -147,6 +157,8 @@ export default function CounterPage() {
   const shopServices = services.filter((s) => !term || `${s.item_name} ${s.item_code}`.toLowerCase().includes(term));
   const depts = [...new Set(labs.map((l) => l.department).filter(Boolean))] as string[];
   const shopLabs = labs.filter((l) => (!dept || l.department === dept) && (!term || `${l.name} ${l.test_code}`.toLowerCase().includes(term)));
+  const imaging = ctx.imaging ?? [];
+  const shopImg = imaging.filter((p) => (!imgMod || p.modality === imgMod) && (!term || `${p.procedure_name} ${p.code ?? ""}`.toLowerCase().includes(term)));
   const ready = lines.length > 0 && (patient || (newP?.patient_name.trim() && newP.gender));
   return (
     <div className="flex h-[calc(100vh-128px)] flex-col overflow-hidden rounded-2xl bg-muted/40">
@@ -173,13 +185,15 @@ export default function CounterPage() {
         <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card shadow-sm">
           <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
             <div className="relative min-w-48 flex-1"><Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" /><input ref={searchRef} className={inputCls + " ps-9"} placeholder="Search doctor, service or test (F3)" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-            <div className="flex gap-1 rounded-xl bg-muted p-1">{([["doctors", "Doctors", Stethoscope], ["services", "Services", HandCoins], ["lab", "Lab tests", FlaskConical], ["fromlab", "From the lab", ClipboardPlus], ["bills", "Patient bills", BedDouble]] as const).map(([k, l, I]) => {
+            <div className="flex gap-1 rounded-xl bg-muted p-1">{([["doctors", "Doctors", Stethoscope], ["imaging", "Imaging", ScanLine], ["services", "Services", HandCoins], ["lab", "Lab tests", FlaskConical], ["fromlab", "From the lab", ClipboardPlus], ["bills", "Patient bills", BedDouble]] as const).map(([k, l, I]) => {
               const billsN = panel ? panel.dues.length + panel.online.length + (panel.admission ? 1 : 0) + (panel.lab_orders?.length ?? 0) : 0;
               const n = k === "bills" ? billsN : k === "fromlab" ? (fromLab.data?.length ?? 0) : 0;
               return (
-              <button key={k} onClick={() => setTab(k)} disabled={(k === "bills" && (!patient || offline)) || (k === "fromlab" && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "tab-gold" : "text-muted-foreground")}>
+              <button key={k} onClick={() => setTab(k)} disabled={(k === "bills" && (!patient || offline)) || ((k === "fromlab" || k === "imaging") && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "tab-gold" : "text-muted-foreground")}>
                 <I className="h-4 w-4" />{l}{n ? <span className={cn("rounded-full px-1.5 text-[10px] text-white", k === "fromlab" ? "bg-fuchsia-600" : "bg-rose-600")}>{n}</span> : null}</button>); })}</div>
           </div>
+          {tab === "imaging" && <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">{["", "X-Ray", "Ultrasound", "Doppler", "MRI", "CT"].map((m) => <button key={m} onClick={() => setImgMod(m)}
+            className={cn("rounded-full border px-3 py-1 text-xs font-semibold", imgMod === m ? "border-cyan-700 bg-cyan-700 text-white" : "border-border")}>{m || "All"} <span className="opacity-70">{m ? imaging.filter((p) => p.modality === m).length : imaging.length}</span></button>)}</div>}
           {tab === "lab" && <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">{["", ...depts].map((d) => <button key={d} onClick={() => setDept(d)} className={cn("rounded-full border px-3 py-1 text-xs font-semibold", dept === d ? "border-violet-600 bg-violet-600 text-white" : "border-border")}>{d || "All"}</button>)}</div>}
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
             {tab === "doctors" && <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">{shopDoctors.map((d) => (
@@ -196,6 +210,18 @@ export default function CounterPage() {
               <button key={l.name} onClick={() => add({ kind: "Lab", label: l.name, template: l.name, rate: l.price })} className={cn("rounded-xl border p-3 text-start shadow-sm", on ? "border-violet-500 bg-violet-50 dark:bg-violet-500/10" : "border-border bg-card hover:border-violet-400")}>
                 <div className="line-clamp-2 text-sm font-semibold">{l.name}</div><div className="text-[11px] text-muted-foreground">{l.test_code} · {l.sample_type}{l.tat_hours ? ` · ${l.tat_hours}h` : ""}</div>
                 <div className="mt-1 font-black tabular-nums text-violet-700 dark:text-violet-300">{rs(l.price)}</div></button>); })}</div>}
+            {tab === "imaging" && <div className="space-y-3">
+              {!!imgOrders.length && <div className="rounded-2xl border border-lime-300 bg-lime-50 p-3 dark:border-lime-500/40 dark:bg-lime-500/10"><div className="mb-2 text-xs font-bold uppercase tracking-wide text-lime-800 dark:text-lime-300">Booked for this patient — not paid</div>
+                <div className="space-y-1.5">{imgOrders.map((o) => { const inCart = lines.some((x) => x.kind === "Imaging Order" && x.target === o.name); return (
+                  <button key={o.name} disabled={inCart} onClick={() => add({ kind: "Imaging Order", label: `${o.procedure_name} · ${o.booking_ref}`, target: o.name, rate: o.amount, modality: o.modality })}
+                    className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-2.5 text-start text-sm disabled:opacity-50"><ScanLine className="h-4 w-4 text-lime-700" /><span className="min-w-0 flex-1"><b>{o.procedure_name}</b>
+                    <span className="block text-xs text-muted-foreground">{o.booking_ref} · {o.scheduled_date}{o.slot_time ? ` ${o.slot_time}` : ""}{o.safety_status && !["Not required", "Cleared"].includes(o.safety_status) ? ` · safety: ${o.safety_status}` : ""}</span></span>
+                    <b className="tabular-nums">{rs(o.amount)}</b></button>); })}</div></div>}
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-4">{shopImg.map((p) => { const on = lines.some((x) => x.kind === "Imaging" && x.procedure === p.name); return (
+                <button key={p.name} onClick={() => add({ kind: "Imaging", label: p.procedure_name, procedure: p.name, rate: p.price + (p.contrast === "Yes" ? Number(p.contrast_surcharge || 0) : 0), modality: p.modality, contrast: 0, urgent: 0 })}
+                  className={cn("rounded-xl border p-3 text-start shadow-sm", on ? "border-cyan-600 bg-cyan-50 dark:bg-cyan-500/10" : "border-border bg-card hover:border-cyan-500")}>
+                  <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-cyan-700 dark:text-cyan-300">{p.modality}{p.contrast && p.contrast !== "No" ? <span className="rounded bg-amber-100 px-1 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">{p.contrast === "Yes" ? "contrast" : "± contrast"}</span> : null}</div>
+                  <div className="line-clamp-2 text-sm font-semibold">{p.procedure_name}</div><div className="mt-1 font-black tabular-nums text-cyan-800 dark:text-cyan-200">{rs(p.price)}</div></button>); })}</div></div>}
             {tab === "bills" && panel && <Bills panel={panel} onAdd={add} inCart={lines} />}
             {tab === "fromlab" && <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Orders the lab made for walk-in patients. Collect here, give the receipt, then the lab takes the sample.</p>
@@ -244,7 +270,7 @@ export default function CounterPage() {
         </section>
       </div>
 
-      {dlg === "pay" && <PayDialog total={total} modes={modes} offline={offline} lines={lines} patient={patient} newP={newP} branch={branch} counter={ctx.shift.counter}
+      {dlg === "pay" && <PayDialog total={total} modes={modes} offline={offline} lines={lines} patient={patient} newP={newP} branch={branch} counter={ctx.shift.counter} doctors={doctors} refDoc={refDoc} setRefDoc={setRefDoc}
         cashier={boot?.full_name} clinic={bundle?.clinic} onClose={() => setDlg(null)} enqueue={sync.enqueue}
         onDone={(r) => { setDone(r); setDlg("done"); clear(); void live.refetch(); publishDisplay({ kind: "done", patient: r.patient_name, receipt: r.name, total: r.patient_total, change: r.change_amount, tokens: r.tokens.map((t) => ({ ...t, token: Number(t.token) || 0 })) }); }} />}
       {dlg === "done" && done && <DoneDialog r={done} onClose={() => { setDlg(null); publishDisplay({ kind: "idle" }); }} />}
@@ -264,6 +290,7 @@ export default function CounterPage() {
 }
 
 const strip = (l: Line) => ({ kind: l.kind, label: l.label, doctor: l.doctor, item_code: l.item_code, template: l.template, target: l.target, qty: l.qty, discount: l.discount,
+  procedure: l.procedure, contrast: l.contrast ? 1 : undefined, urgent: l.urgent ? 1 : undefined,
   amount: l.kind === "IPD Advance" || l.kind === "IPD Settlement" || l.kind === "Dues" ? l.rate : undefined, priority: l.priority !== "Normal" ? l.priority : undefined });
 
 function TopBtn({ icon: I, label, onClick, k }: { icon: typeof Lock; label: string; onClick: () => void; k?: string }) {
@@ -292,7 +319,7 @@ function CartLine({ l, amount, free, offline, limit, onChange, onRemove }: { l: 
   const st = KIND_STYLE[l.kind];
   const [open, setOpen] = useState(l.kind === "IPD Advance");
   const [unit, setUnit] = useState<"Rs" | "%">("Rs");
-  const isCharge = ["Consultation", "Service", "Lab", "Lab Order"].includes(l.kind);
+  const isCharge = ["Consultation", "Service", "Lab", "Lab Order", "Imaging", "Imaging Order"].includes(l.kind);
   const gross = l.rate * l.qty;
   const pct = gross ? Math.round((l.discount / gross) * 1000) / 10 : 0;
   const over = !!limit && limit.percent < 100 && (pct > limit.percent || (limit.amount != null && limit.amount > 0 && l.discount > limit.amount));
@@ -360,7 +387,8 @@ function OfflinePatient({ bundle, value, onPick, onClear }: { bundle?: Bundle; v
 }
 
 // ------------------------------------------------------------------ pay
-function PayDialog({ total, modes, offline, lines, patient, newP, branch, counter, cashier, clinic, onClose, onDone, enqueue }: { total: number; modes: string[]; offline: boolean; lines: Line[];
+function PayDialog({ total, modes, offline, lines, patient, newP, branch, counter, cashier, clinic, onClose, onDone, enqueue, doctors, refDoc, setRefDoc }: { total: number; modes: string[]; offline: boolean; lines: Line[];
+  doctors: Doctor[]; refDoc: string; setRefDoc: (v: string) => void;
   patient: PatientHit | null; newP: NewP | null; branch: string; counter: string; cashier?: string; clinic?: Bundle["clinic"]; onClose: () => void; onDone: (r: Receipt) => void;
   enqueue: (q: import("./offline").Queued) => Promise<void> }) {
   const [tenders, setTenders] = useState<Tender[]>([]);
@@ -394,7 +422,8 @@ function PayDialog({ total, modes, offline, lines, patient, newP, branch, counte
   };
   const payload = () => ({ client_ref: clientRef, branch, counter, patient: patient?.name, new_patient: patient ? undefined : { ...newP, age: Number(newP?.age) || undefined },
     lines: lines.map(strip), tenders: tenders.length ? tenders : [{ mode_of_payment: mode, amount: Math.round(Number(entry) || 0), reference_no: ref || undefined }],
-    auths: auths ? Object.fromEntries(Object.entries(auths).map(([k, v]) => [k, v.name])) : undefined, discount_reason: reason || undefined });
+    auths: auths ? Object.fromEntries(Object.entries(auths).map(([k, v]) => [k, v.name])) : undefined, discount_reason: reason || undefined,
+    referring_doctor: refDoc && !refDoc.startsWith("ext:") ? refDoc : undefined, external_referrer: refDoc.startsWith("ext:") ? refDoc.slice(4) : undefined });
   const finish = async () => {
     const data = payload();
     const sum = (data.tenders as Tender[]).reduce((s, t) => s + t.amount, 0);
@@ -409,7 +438,8 @@ function PayDialog({ total, modes, offline, lines, patient, newP, branch, counte
     setBusy(true);
     try {
       const r = await call<Receipt>("counter.checkout", { data: { ...payload(), tenders: data.tenders } });
-      void printDoc(receiptHtml(r), "receipt");
+      void printDoc(slipHtml(r as SlipReceipt), "receipt");
+      void call("counter.mark_printed", { name: r.name }).catch(() => undefined);
       onDone(r);
     } catch (e) {
       if (isNetworkError(e) || offline) {
@@ -420,7 +450,7 @@ function PayDialog({ total, modes, offline, lines, patient, newP, branch, counte
           cashier, counter, offline: true, pending_sync: true, clinic: clinic ?? { name: "Lyallpur Medical Complex" } };
         await enqueue({ client_ref: clientRef, created: new Date().toISOString(), total, patient_name: local.patient_name, status: "pending", attempts: 0,
           data: { ...data, offline: 1, offline_created: local.posted_at }, receipt: local });
-        void printDoc(receiptHtml(local), "receipt");
+        void printDoc(slipHtml(local as SlipReceipt), "receipt");
         toast("Saved offline — it posts when the connection returns", { icon: "📴" });
         onDone(local);
       } else toast.error(humanizeError(e), { duration: 8000 });
@@ -436,6 +466,9 @@ function PayDialog({ total, modes, offline, lines, patient, newP, branch, counte
             <button key={m} onClick={() => { setMode(m); if (m !== "Cash") setEntry(String(due)); }} className={cn("flex h-16 flex-col items-center justify-center rounded-xl border-2 text-sm font-bold", mode === m ? "border-emerald-600 bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-200" : "border-border")}>
               <I className="h-5 w-5" />{m}</button>); })}</div>
           {mode !== "Cash" && <input className={inputCls} placeholder="Transaction ID / slip no." value={ref} onChange={(e) => setRef(e.target.value)} />}
+          <select className={inputCls} value={refDoc.startsWith("ext:") ? "__ext" : refDoc} onChange={(e) => setRefDoc(e.target.value === "__ext" ? "ext:" : e.target.value)} aria-label="Referring doctor">
+            <option value="">Referring doctor — self / not given</option>{doctors.map((d) => <option key={d.name} value={d.name}>{d.doctor_name}</option>)}<option value="__ext">Outside doctor…</option></select>
+          {refDoc.startsWith("ext:") && <input className={inputCls} placeholder="Outside doctor's name" value={refDoc.slice(4)} onChange={(e) => setRefDoc(`ext:${e.target.value}`)} />}
           <div className="flex items-center gap-2"><input className={inputCls + " h-14 text-end text-3xl font-black tabular-nums"} inputMode="numeric" value={entry} onChange={(e) => setEntry(e.target.value.replace(/\D/g, ""))} />
             <Button variant="save" size="lg" className="h-14" onClick={() => addTender()}><Plus className="h-5 w-5" />Add</Button></div>
           <div className="grid grid-cols-4 gap-2">{["1", "2", "3", "C", "4", "5", "6", "⌫", "7", "8", "9", "00", "0"].map((k) => (
@@ -470,7 +503,8 @@ function DoneDialog({ r, onClose }: { r: Receipt; onClose: () => void }) {
       <div className="space-y-3 text-center">
         {r.change_amount > 0 && <div className="rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-500/10"><div className="text-xs uppercase text-muted-foreground">Give change</div><div className="text-5xl font-black tabular-nums text-emerald-700 dark:text-emerald-300">{rs(r.change_amount)}</div></div>}
         {r.tokens.length > 0 && <div className="flex flex-wrap justify-center gap-2">{r.tokens.map((t, i) => <div key={i} className="rounded-2xl border-2 border-teal-600 px-5 py-2"><div className="text-xs text-muted-foreground">{t.doctor}{t.room ? ` · ${t.room}` : ""}</div><div className="text-4xl font-black">{t.token}</div></div>)}</div>}
-        <div className="flex gap-2"><Button variant="neutral" className="flex-1" onClick={() => void printDoc(receiptHtml(r), "receipt")}><Printer className="h-4 w-4" />Reprint</Button>
+        {!!(r as SlipReceipt).departments?.length && <div className="flex flex-wrap justify-center gap-2">{(r as SlipReceipt).departments!.map((d, i) => <div key={i} className="rounded-2xl border-2 border-cyan-600 px-4 py-2 text-start"><div className="text-xs text-muted-foreground">{d.department}{d.where ? ` · ${d.where}` : ""}</div><div className="text-3xl font-black">{d.token}</div>{d.report_at && <div className="text-[11px] text-muted-foreground">Report {d.report_at}</div>}</div>)}</div>}
+        <div className="flex gap-2"><Button variant="neutral" className="flex-1" onClick={() => void reprint(r.name, false)}><Printer className="h-4 w-4" />80 mm</Button><Button variant="neutral" className="flex-1" onClick={() => void reprint(r.name, true)}><Printer className="h-4 w-4" />A5</Button>
           <Button variant="submit" className="flex-1" onClick={onClose}>Next sale <span className="text-xs opacity-70">Enter</span></Button></div>
       </div>
     </Dialog>
@@ -505,10 +539,10 @@ function ReceiptView({ name, onBack }: { name: string; onBack: () => void }) {
   const { data: r, refetch } = useApi<Receipt>("counter.receipt", { name });
   const [sel, setSel] = useState<number[]>([]);
   if (!r) return <div className="flex h-40 items-center justify-center"><Spinner /></div>;
-  const refund = async () => {
-    const reason = prompt(`Refund ${sel.length ? `${sel.length} line(s)` : "the whole receipt"} — reason?`);
-    if (!reason) return;
-    try { await call("counter.refund", { name, rows: sel.length ? sel : undefined, reason }); toast.success("Refunded from your shift"); setSel([]); void refetch(); }
+  const [ask, setAsk] = useState(false);
+  const refund = async (reason: string, approver?: string, password?: string) => {
+    try { const out = await call<Receipt>("counter.refund", { name, rows: sel.length ? sel : undefined, reason, approver, password }); toast.success("Refunded — refund slip printing"); setSel([]); setAsk(false);
+      void printDoc(slipHtml(out as SlipReceipt, { refund: true }), "receipt"); void refetch(); }
     catch (e) { toast.error(humanizeError(e), { duration: 8000 }); }
   };
   return (
@@ -520,9 +554,41 @@ function ReceiptView({ name, onBack }: { name: string; onBack: () => void }) {
           <span className="flex-1">{l.label}{l.token_no ? <span className="ms-1 rounded bg-teal-100 px-1 text-xs font-bold text-teal-800">token {l.token_no}</span> : null}{l.refunded ? <span className="ms-1 text-xs text-rose-600">refunded</span> : null}</span>
           <b className="tabular-nums">{rs(l.amount)}</b></label>))}</div>
       <div className="text-sm text-muted-foreground">{r.tenders.map((t) => `${t.mode_of_payment} ${rs(t.amount)}${t.reference_no ? ` (${t.reference_no})` : ""}`).join(" + ")}{r.change_amount ? ` · change ${rs(r.change_amount)}` : ""}</div>
-      <div className="flex gap-2"><Button variant="neutral" onClick={() => void printDoc(receiptHtml(r), "receipt")}><Printer className="h-4 w-4" />Reprint</Button>
-        <Button variant="danger" disabled={r.status === "Refunded"} onClick={() => void refund()}><Undo2 className="h-4 w-4" />Refund {sel.length ? `${sel.length} line(s)` : "all"}</Button></div>
+      <div className="flex flex-wrap gap-2"><Button variant="neutral" onClick={() => void reprint(r.name, false)}><Printer className="h-4 w-4" />80 mm</Button><Button variant="neutral" onClick={() => void reprint(r.name, true)}><Printer className="h-4 w-4" />A5</Button>
+        {r.lines.some((l) => l.refunded) && <Button variant="neutral" onClick={() => void printDoc(slipHtml(r as SlipReceipt, { refund: true }), "receipt")}><Printer className="h-4 w-4" />Refund slip</Button>}
+        <Button variant="danger" disabled={r.status === "Refunded"} onClick={() => setAsk(true)}><Undo2 className="h-4 w-4" />Refund {sel.length ? `${sel.length} line(s)` : "all"}</Button></div>
+      {ask && <RefundApproval count={sel.length} onCancel={() => setAsk(false)} onConfirm={(reason, u, p) => void refund(reason, u, p)} />}
       <div className="text-xs text-muted-foreground">Refunds are paid back from your shift in the receipt's own payment method. Online fees are refunded from the online visit.</div>
+    </div>
+  );
+}
+
+
+/** Reprint: every print after the first is marked DUPLICATE COPY with its number (server counter). */
+async function reprint(name: string, a5: boolean) {
+  try {
+    const r = await call<SlipReceipt>("counter.receipt", { name });
+    const n = await call<{ print_count: number }>("counter.mark_printed", { name });
+    void printDoc(slipHtml(r, { a5, copy: Math.max(n.print_count - 1, 0) }), a5 ? "a4" : "receipt");
+  } catch (e) { toast.error(humanizeError(e)); }
+}
+
+/** Refund needs a reason and — for cashiers — a cash supervisor's on-the-spot approval (their own login). */
+function RefundApproval({ count, onCancel, onConfirm }: { count: number; onCancel: () => void; onConfirm: (reason: string, approver?: string, password?: string) => void }) {
+  const { hasRole } = useAuth();
+  const sup = hasRole("PW Cash Supervisor");
+  const [reason, setReason] = useState("");
+  const [user, setUser] = useState("");
+  const [pwd, setPwd] = useState("");
+  return (
+    <div className="rounded-2xl border border-rose-300 bg-rose-50 p-3 dark:border-rose-500/40 dark:bg-rose-500/10">
+      <div className="mb-2 flex items-center gap-2 text-sm font-bold"><ShieldCheck className="h-4 w-4" />Refund {count ? `${count} line(s)` : "the whole slip"} — only for services not yet performed</div>
+      <input className={inputCls} placeholder="Reason (required)" value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
+      {!sup && <div className="mt-2 grid gap-2 sm:grid-cols-2"><input className={inputCls} placeholder="Supervisor login (email)" value={user} onChange={(e) => setUser(e.target.value)} autoComplete="off" />
+        <input className={inputCls} type="password" placeholder="Supervisor password" value={pwd} onChange={(e) => setPwd(e.target.value)} autoComplete="new-password" /></div>}
+      <div className="mt-2 flex justify-end gap-2"><Button variant="neutral" onClick={onCancel}>Cancel</Button>
+        <Button variant="danger" disabled={reason.trim().length < 3 || (!sup && (!user || !pwd))} onClick={() => onConfirm(reason.trim(), sup ? undefined : user.trim(), sup ? undefined : pwd)}><Undo2 className="h-4 w-4" />Approve & refund</Button></div>
+      {!sup && <p className="mt-1 text-[11px] text-muted-foreground">The supervisor types their own login; it is checked once and never stored.</p>}
     </div>
   );
 }

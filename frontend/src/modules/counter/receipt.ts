@@ -1,7 +1,7 @@
 import { esc, money, qrSvg } from "@/lib/print";
 import { thermalHeader } from "@/lib/letterhead";
 
-export interface ReceiptLine { idx?: number; kind: string; label: string; qty: number; rate: number; discount?: number; amount: number; token_no?: number; refunded?: number; reference_name?: string }
+export interface ReceiptLine { idx?: number; kind: string; label: string; qty: number; rate: number; discount?: number; amount: number; token_no?: number; refunded?: number; reference_name?: string; department?: string; target?: string; procedure?: string }
 export interface Receipt {
   name: string; posted_at: string; patient: string; patient_name: string; status?: string; lines: ReceiptLine[]; tenders: { mode_of_payment: string; amount: number; reference_no?: string }[];
   gross_total: number; discount_total: number; payer_share?: number; patient_total: number; tendered: number; change_amount: number;
