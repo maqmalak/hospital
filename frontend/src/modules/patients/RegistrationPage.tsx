@@ -100,7 +100,8 @@ export default function RegistrationPage() {
       <div className="relative z-20 mb-5 rounded-3xl border border-border bg-card p-5 text-foreground shadow-sm sm:p-6">
         <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(700px_260px_at_0%_0%,rgba(132,204,22,0.12),transparent_60%),radial-gradient(600px_260px_at_100%_100%,rgba(20,184,166,0.10),transparent_60%)] dark:bg-[radial-gradient(700px_260px_at_0%_0%,rgba(196,240,26,0.08),transparent_60%)]" />
         <div className="relative flex flex-wrap items-center gap-4">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/20"><UserPlus className="h-6 w-6" /></span>
+          <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-ink text-teal-300 shadow-md ring-1 ring-inset ring-teal-500/45 dark:bg-white/[0.06]"><UserPlus className="h-6 w-6" />
+            <span className="absolute inset-x-2.5 -bottom-px h-0.5 rounded-full bg-gradient-to-r from-teal-600 to-teal-500 opacity-80" aria-hidden /></span>
           <div className="min-w-0 flex-1"><h1 className="vvs-serif text-2xl font-semibold">{t("Patient registration")}</h1>
             <p className="text-sm text-muted-foreground">Search first — scan the card QR or type MR, phone, CNIC or name. Register only if the patient is new.</p></div>
         </div>
