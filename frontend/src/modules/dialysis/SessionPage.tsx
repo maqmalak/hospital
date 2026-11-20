@@ -25,6 +25,8 @@ const NUM = ["pre_weight", "pre_bp_sys", "pre_bp_dia", "pre_pulse", "pre_temp", 
 const TXT = ["access_check", "pre_symptoms", "pre_notes", "machine_serial", "dialyser_type", "dialyser_use", "heparin", "haemostasis", "condition", "doctor_note"];
 const COMPS = ["Hypotension", "Cramps", "Nausea / vomiting", "Chest pain", "Headache", "Clotting", "Fever / rigors", "Access bleeding", "Arrhythmia", "Hypertension", "Other"];
 const nowHM = () => new Date().toTimeString().slice(0, 5);
+/** Frappe Time values can arrive as "8:52:00" — time inputs need "08:52". */
+const hhmm = (v: unknown) => { const m = String(v ?? "").match(/(\d{1,2}):(\d{2})/); return m ? `${m[1].padStart(2, "0")}:${m[2]}` : ""; };
 
 export default function SessionPage() {
   const { name = "" } = useParams();
@@ -40,8 +42,9 @@ export default function SessionPage() {
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (!data || dirty) return;
-    setF(Object.fromEntries([...NUM, ...TXT].map((k) => [k, data[k] == null ? "" : String(data[k])])));
-    setObs(data.observations); setComps(data.complications); setMeds(data.medicines); setCons(data.consumables);
+    // empty Int / Float come back from Frappe as 0 — no chart value here is meaningfully 0, so show them blank
+    setF(Object.fromEntries([...NUM, ...TXT].map((k) => [k, data[k] == null || data[k] === 0 ? "" : String(data[k])])));
+    setObs(data.observations.map((o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v === 0 && k !== "arterial_p" ? "" : v])))); setComps(data.complications); setMeds(data.medicines); setCons(data.consumables);
   }, [data, dirty]);
   const locked = !!data?.nurse_signed_by && !hasRole("PW Nephrologist");
   const neph = hasRole("PW Nephrologist");
@@ -123,7 +126,7 @@ export default function SessionPage() {
               <tbody>{obs.map((o, i) => <tr key={i}>{(["obs_time", "bp_sys", "bp_dia", "pulse", "venous_p", "arterial_p", "blood_flow", "uf_removed", "note"] as const).map((k) => (
                 <td key={k} className="px-1 py-1"><input disabled={locked} type={k === "obs_time" ? "time" : k === "note" ? "text" : "number"} step={k === "uf_removed" ? "0.1" : undefined} inputMode={k === "note" || k === "obs_time" ? undefined : "decimal"}
                   className={cn(inputCls, "h-11 min-w-[64px] px-2 text-base", k === "bp_sys" && o.bp_sys !== "" && o.bp_sys != null && (Number(o.bp_sys) < 90 || Number(o.bp_sys) > 180) && "border-rose-500 bg-rose-50 dark:bg-rose-500/10")}
-                  value={String(o[k] ?? "").slice(0, k === "obs_time" ? 5 : undefined)} onChange={(e) => { const v = e.target.value; setObs((xs) => xs.map((x, j) => j === i ? { ...x, [k]: v } : x)); setDirty(true); }} /></td>))}
+                  value={k === "obs_time" ? hhmm(o[k]) : String(o[k] ?? "")} onChange={(e) => { const v = e.target.value; setObs((xs) => xs.map((x, j) => j === i ? { ...x, [k]: v } : x)); setDirty(true); }} /></td>))}
                 <td>{!locked && <button aria-label="Remove reading" className="rounded-lg p-2 text-muted-foreground hover:bg-muted" onClick={() => { setObs((xs) => xs.filter((_x, j) => j !== i)); setDirty(true); }}><Trash2 className="h-4 w-4" /></button>}</td></tr>)}</tbody></table></div>
               : <p className="text-sm text-muted-foreground">Record BP, pulse, pressures and UF every 30–60 minutes.</p>}
           </Card>
@@ -135,7 +138,7 @@ export default function SessionPage() {
                 <div className="mb-2 flex flex-wrap gap-1.5">{COMPS.map((c) => <button key={c} disabled={locked} onClick={() => { setComps((x) => [...x, { comp_time: nowHM(), complication: c, action: "" }]); setDirty(true); }}
                   className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10">{c}</button>)}</div>
                 {comps.map((c, i) => <div key={i} className="mb-2 rounded-xl border border-rose-300 bg-rose-50 p-2 dark:border-rose-500/40 dark:bg-rose-500/10">
-                  <div className="flex items-center gap-2 text-sm font-bold"><span className="flex-1">{String(c.complication)} · {String(c.comp_time ?? "").slice(0, 5)}</span>{!locked && <button aria-label="Remove" onClick={() => { setComps((x) => x.filter((_y, j) => j !== i)); setDirty(true); }}><Trash2 className="h-4 w-4" /></button>}</div>
+                  <div className="flex items-center gap-2 text-sm font-bold"><span className="flex-1">{String(c.complication)} · {hhmm(c.comp_time)}</span>{!locked && <button aria-label="Remove" onClick={() => { setComps((x) => x.filter((_y, j) => j !== i)); setDirty(true); }}><Trash2 className="h-4 w-4" /></button>}</div>
                   <input disabled={locked} className={cn(inputCls, "mt-1")} placeholder="Action taken (e.g. UF stopped, 200 mL saline)" value={String(c.action ?? "")} onChange={(e) => { const v = e.target.value; setComps((x) => x.map((y, j) => j === i ? { ...y, action: v } : y)); setDirty(true); }} /></div>)}
               </div>
               <div>

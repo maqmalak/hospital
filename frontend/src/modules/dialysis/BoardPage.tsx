@@ -23,7 +23,7 @@ export default function BoardPage() {
   const [act, setAct] = useState<{ kind: "assign" | "allow" | "swap"; s: SessionLite | Board["swaps"][number] } | null>(null);
   const checkin = useAction("dialysis.checkin", { success: "Checked in", onSuccess: () => void refetch() });
   const all = (data?.stations ?? []).flatMap((s) => Object.values(s.cells)).filter((c) => c.session);
-  const alerts = all.filter((c) => c.session!.alerts.length);
+  const alerts = [...all, ...(data?.unplaced ?? []).map((u) => ({ state: "Booked" as const, session: u }))].filter((c) => c.session!.alerts.length);
 
   const cellClick = (c: Cell) => {
     if (!c.session) return;
