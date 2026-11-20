@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Empty, PageHeader, StatCard } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
-import { ageLabel, SEVERITY, STATUS_STYLE, StatusChip, UNITS, useNurseryLive, type Alert } from "./shared";
+import { ageLabel, SEVERITY, STATUS_STYLE, UNITS, useNurseryLive, type Alert } from "./shared";
 
 interface BabyLite { name: string; baby_name: string; sex?: string; status: string; unit: string; birth_weight_g?: number; current_weight_g?: number; gestation_weeks?: number; last_bilirubin?: number;
   phototherapy_on?: number; resp_support?: string; tag_active?: number; mother_name?: string; age_hours?: number; multiple_birth?: string; birth_order?: number; band_no?: string }
@@ -42,6 +42,13 @@ export default function BoardPage() {
       </div>
       <div className="grid gap-4 xl:grid-cols-[1fr_340px]">
         <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border bg-card px-4 py-2.5 text-xs font-medium text-muted-foreground shadow-sm" aria-label="Status legend">
+            <span className="font-bold uppercase tracking-wide text-foreground">Status</span>
+            {Object.entries(STATUS_STYLE).filter(([k]) => k !== "Discharged").map(([k, v]) => <span key={k} className="flex items-center gap-1.5"><span className={cn("h-2.5 w-2.5 rounded-full", v.dot)} />{k}</span>)}
+            <span className="ms-auto flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-0.5 rounded bg-sky-500 px-1 text-[10px] font-bold text-white"><Sun className="h-3 w-3" />Photo</span>
+              <span className="inline-flex items-center gap-0.5 rounded bg-indigo-500 px-1 text-[10px] font-bold text-white"><Wind className="h-3 w-3" />CPAP</span><span className="rounded bg-pink-500 px-1 text-[10px] font-bold text-white">Twin</span>
+              <span className="rounded bg-rose-600 px-1 text-[10px] font-bold text-white">NO TAG</span></span>
+          </div>
           {UNITS.map((u) => { const cots = data?.units[u] ?? []; const I = UNIT_ICON[u]; const occ = cots.filter((c) => c.baby).length; return (
             <section key={u} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="mb-3 flex items-center gap-2"><span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary"><I className="h-5 w-5" /></span>
@@ -65,7 +72,6 @@ export default function BoardPage() {
               </div> : <p className="text-sm text-muted-foreground">No cots set up for this unit.</p>}
             </section>); })}
           {!!data?.unplaced.length && <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm dark:bg-amber-500/10"><b>Without a cot:</b> {data.unplaced.map((b) => <Link key={b.name} to={`/nursery/baby/${b.name}`} className="ms-2 font-semibold text-primary">{b.baby_name}</Link>)}</section>}
-          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">{Object.entries(STATUS_STYLE).filter(([k]) => k !== "Discharged").map(([k, v]) => <span key={k} className="flex items-center gap-1.5"><span className={cn("h-2.5 w-2.5 rounded-full", v.dot)} />{k}</span>)}</div>
         </div>
         <aside className="space-y-3 xl:sticky xl:top-20 xl:self-start">
           <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
@@ -77,7 +83,6 @@ export default function BoardPage() {
               : <Empty title="No alerts" icon={ShieldCheck} />}
           </div>
           {security && <p className="rounded-xl bg-muted/50 p-3 text-xs text-muted-foreground">Security view: cots, names and tags only — clinical details are hidden.</p>}
-          <div className="rounded-2xl border border-border bg-card p-4 text-xs text-muted-foreground"><b className="text-foreground">Legend</b><div className="mt-2 flex flex-wrap gap-2">{["Stable", "Observation", "Critical", "Phototherapy", "Ready for discharge"].map((s) => <StatusChip key={s} s={s} />)}</div></div>
         </aside>
       </div>
     </div>

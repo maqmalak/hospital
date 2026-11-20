@@ -372,11 +372,11 @@ input.urdu-input, textarea.urdu-input, input[lang="ur"], textarea[lang="ur"] {
   padding-top: 0.15rem; padding-bottom: 0.15rem; min-height: 2.9rem; height: auto !important;
 }
 input.urdu-input::placeholder, input[lang="ur"]::placeholder { font-family: "Gulzar", "Noto Nastaliq Urdu", serif; opacity: 0.55; }
-html[lang="ur"] body { font-family: "Gulzar", "Noto Nastaliq Urdu", Inter, system-ui, sans-serif; line-height: 1.85; }
+html[lang="ur"] body { font-family: "Gulzar", "Noto Nastaliq Urdu", Outfit, Inter, system-ui, sans-serif; line-height: 1.85; }
 html[lang="ur"] body h1, html[lang="ur"] body h2, html[lang="ur"] body h3 { line-height: 1.9; }
 /* numbers, codes and English data stay in Inter even in the Urdu UI */
 html[lang="ur"] .font-mono, html[lang="ur"] input:not([lang="ur"]):not(.urdu-input), html[lang="ur"] select, html[lang="ur"] .tabular-nums, html[lang="ur"] table td {
-  font-family: Inter, system-ui, sans-serif; line-height: 1.5;
+  font-family: Outfit, Inter, system-ui, sans-serif; line-height: 1.5;
 }
 html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-serif; }
 @media print { .no-print { display: none !important; } }
@@ -581,4 +581,13 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
     background-image: linear-gradient(90deg, #4D7C0F 0%, #65A30D 48%, #84CC16 100%) !important; color: #FFFFFF !important; border-color: transparent !important;
     box-shadow: 0 10px 24px -12px rgb(132 204 22 / 0.7) !important; transform: translateY(-1px);
   }
+}
+
+/* Outfit everywhere in the staff ERP + lime headings in the Lime palette (user, 2026-11-20). Website (.s2) keeps its own fonts. */
+@layer components {
+  html[data-palette="lime"] main h1, html[data-palette="lime"] main h1.vvs-serif { color: #3F6212; }
+  html[data-palette="lime"] main section > div > h2, html[data-palette="lime"] main section > h2, html[data-palette="lime"] main section > div > h3 { color: #4D7C0F; }
+  html.dark[data-palette="lime"] main h1, html.dark[data-palette="lime"] main h1.vvs-serif { color: #C4F01A; }
+  html.dark[data-palette="lime"] main section > div > h2, html.dark[data-palette="lime"] main section > h2, html.dark[data-palette="lime"] main section > div > h3 { color: #C4F01A; }
+  html[data-palette="lime"] main [role="dialog"] h2, html[data-palette="lime"] main .s2 h1, html[data-palette="lime"] main .s2 h2 { color: inherit; }
 }

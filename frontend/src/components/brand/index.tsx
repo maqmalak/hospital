@@ -36,7 +36,7 @@ export function useBrandFonts() {
     if (document.getElementById("vvs-brand-fonts")) return;
     const l = document.createElement("link"); l.id = "vvs-brand-fonts"; l.rel = "stylesheet"; l.href = FONTS; document.head.appendChild(l);
     const s = document.createElement("style"); s.id = "vvs-brand-css";
-    s.textContent = ".vvs-brand{font-family:'Cinzel',Georgia,serif;font-weight:600}.vvs-serif{font-family:'Cormorant Garamond',Georgia,serif}"
+    s.textContent = ".vvs-brand{font-family:'Cinzel',Georgia,serif;font-weight:600}.vvs-serif{font-family:'Outfit',Inter,system-ui,sans-serif;font-weight:600;letter-spacing:-0.01em}"
       + "[dir=rtl] .vvs-serif,[lang=ur] .vvs-serif,[lang=ar] .vvs-serif{font-family:inherit;font-weight:700}";
     document.head.appendChild(s);
   }, []);
