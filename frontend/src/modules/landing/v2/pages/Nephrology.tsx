@@ -1,6 +1,7 @@
 /**
  * Nephrology & Dialysis department page (D-99) + "Reserve a dialysis slot" request form (/site/nephrology/reserve).
- * LMC look (dark teal hero over a photo, serif headings, glass cards, stat strip) with the renal accent: aqua (--accent-renal-aqua) and
+ * LMC look (serif headings, glass cards, stat strip); hero from the design canvas; colours from the MRI & CT page's lime / gold theme
+ * (--accent-renal-aqua = lime, --accent-renal-violet = gold;
  * soft violet (--accent-renal-violet); darker text shades keep WCAG AA on white and on dark. Flowing-water / droplet motif with a slow
  * gradient wave behind the hero text (disabled under prefers-reduced-motion). Live facts and doctors from the ERP; English / Urdu.
  */
@@ -11,7 +12,7 @@ import {
   MapPin, Phone, Plane, ScanLine, ShieldCheck, Siren, Stethoscope, Syringe, Upload, Users, Utensils, Waves, X, type LucideIcon,
 } from "lucide-react";
 import { postCall, humanizeError } from "@/services/frappe";
-import { CONFIG, PHOTOS } from "../content";
+import { CONFIG } from "../content";
 import { phoneOf, rs, tel, useDoctors } from "../data";
 import { useS2, Wrap } from "../SiteV2";
 import { btn, card, DoctorCard, Reveal, SectionHead, useJsonLd, useTitle } from "../ui";
@@ -40,38 +41,47 @@ export default function Nephrology() {
   return (
     <div className="rn-root">
       <style>{RN_CSS}</style>
-      {/* ------------------------------------------------ hero */}
-      <section className="relative overflow-hidden bg-[#08303A] text-white">
-        <img src={PHOTOS.icu} alt="" className="s2-kenburns absolute inset-0 h-full w-full object-cover opacity-30" />{/* [confirm] replace with a photo of the LMC dialysis unit */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#08303A] via-[#08303A]/90 to-[#0B4552]/55 rtl:bg-gradient-to-l" />
-        <svg className="rn-wave pointer-events-none absolute -bottom-6 left-0 h-48 w-[200%] opacity-50" viewBox="0 0 1440 200" preserveAspectRatio="none" aria-hidden>
-          <path d="M0 120 C240 60 480 180 720 120 S1200 60 1440 120 V200 H0Z" fill="url(#rnw)" /><path d="M0 150 C260 100 520 190 780 140 S1240 100 1440 150" fill="none" stroke="var(--accent-renal-aqua)" strokeOpacity=".5" strokeWidth="2" />
-          <defs><linearGradient id="rnw" x1="0" x2="1"><stop offset="0" stopColor="var(--accent-renal-aqua)" stopOpacity=".35" /><stop offset="1" stopColor="var(--accent-renal-violet)" stopOpacity=".35" /></linearGradient></defs>
-        </svg>
-        <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-24 pt-14 sm:px-6 sm:pt-20 lg:grid-cols-[1.15fr_1fr] lg:items-center">
-          <div>
-            <Reveal><span className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-renal-aqua)]/40 bg-white/5 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--rn-aqua-on-dark)]"><Droplets className="h-3.5 w-3.5" />{T.pill}</span></Reveal>
-            <Reveal delay={80}><h1 className="s2-display mt-5 text-[2.6rem] leading-[1.04] sm:text-[4rem]">{T.h1a}<br /><span className="rn-grad-text">{T.h1b}</span></h1></Reveal>
-            <Reveal delay={160}><p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">{T.lead}</p></Reveal>
-            <Reveal delay={240} className="mt-9 flex flex-wrap gap-3">
-              <a href={book} className="rn-btn inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold"><Stethoscope className="h-5 w-5" />{T.book}</a>
-              <Link to="/site/nephrology/reserve" className={btn.glass}><CalendarCheck className="h-5 w-5" />{T.reserve}</Link>
-              {unit && <a href={tel(unit)} className={btn.glass}><Phone className="h-5 w-5" />{T.call}: <span dir="ltr">{unit}</span></a>}
-            </Reveal>
-            <Reveal delay={300} className="mt-6 text-sm text-white/70"><Link to="/site/my-dialysis" className="underline-offset-4 hover:underline">{T.myDialysis} →</Link></Reveal>
+      {/* ------------------------------------------------ hero (design: "Nephrology · Dialysis Unit" canvas) */}
+      <section className="rn-hero relative overflow-hidden text-[#f1f7ec]">
+        <div aria-hidden className="rn-dots pointer-events-none absolute inset-0" />
+        <div className="relative z-[2] mx-auto grid max-w-7xl items-center gap-10 px-4 pb-32 pt-14 sm:px-6 sm:pt-[72px] lg:grid-cols-2">
+          <div className="flex flex-col items-start gap-[26px]">
+            <span className="rn-rise inline-flex items-center gap-2.5 rounded-full border border-[#bef264]/25 bg-[#bef264]/[0.07] px-3.5 py-2 text-xs font-semibold tracking-[0.16em] text-[#d9f99d]">
+              <span className="rn-live h-[7px] w-[7px] rounded-full bg-[#bef264]" />{T.pill.toUpperCase()}</span>
+            <h1 className="rn-rise s2-display m-0 text-[clamp(46px,5.8vw,80px)] leading-[1.02] tracking-[-0.025em] rtl:text-[clamp(34px,4.4vw,58px)] rtl:leading-[1.6]" style={{ animationDelay: ".08s" }}>{T.h1a}<br /><span className="rn-grad-text italic" style={{ fontWeight: 400 }}>{T.h1b}</span></h1>
+            <p className="rn-rise m-0 max-w-[540px] text-lg leading-[1.65] text-[rgba(232,240,226,.8)]" style={{ animationDelay: ".18s" }}>{T.lead}</p>
+            <div className="rn-rise flex flex-wrap gap-3" style={{ animationDelay: ".28s" }}>
+              <a href={book} className="rn-b rn-btn-primary inline-flex min-h-[52px] items-center gap-2.5 rounded-full px-[26px] text-base font-semibold"><Stethoscope className="h-[18px] w-[18px]" />{T.book}</a>
+              <Link to="/site/nephrology/reserve" className="rn-b rn-btn-ghost inline-flex min-h-[52px] items-center gap-2.5 rounded-full border border-white/20 bg-white/[0.04] px-6 text-base font-medium text-[#f1f7ec]"><CalendarCheck className="h-[18px] w-[18px]" />{T.reserve}</Link>
+            </div>
+            <div className="rn-rise flex flex-wrap items-center gap-x-7 gap-y-3.5" style={{ animationDelay: ".38s" }}>
+              {unit && <a href={tel(unit)} className="inline-flex min-h-[44px] items-center gap-2.5 text-[15px] text-[#f1f7ec]">
+                <span className="grid h-9 w-9 place-items-center rounded-full border border-white/15"><Phone className="h-4 w-4" /></span>
+                <span><span className="text-[rgba(232,240,226,.65)]">{T.call}</span> <span dir="ltr" className="font-semibold tracking-[0.02em]">{unit}</span></span></a>}
+              <Link to="/site/my-dialysis" className="rn-portal inline-flex min-h-[44px] items-center gap-1.5 border-b border-[#d9f99d]/30 text-sm text-[#d9f99d]">{T.myDialysis} <span className="rn-arrow rtl:rotate-180">→</span></Link>
+            </div>
           </div>
-          <Reveal delay={200} className="hidden justify-self-center lg:block"><FilterArt /></Reveal>
+          <figure className="rn-rise m-0 flex flex-col items-center gap-[18px]" style={{ animationDelay: ".2s" }}>
+            <div dir="ltr" className="rn-hover-float w-full max-w-[560px]" style={{ direction: "ltr" }}><Dialyser /></div>
+            <figcaption className="flex flex-wrap justify-center gap-x-[22px] gap-y-2.5 font-mono text-xs tracking-[0.06em] text-[rgba(232,240,226,.72)]">
+              {([["#ff8fa3", T.legend[0]], ["#bef264", T.legend[1]], ["#f2cf6b", T.legend[2]]] as [string, string][]).map(([c, l]) => <span key={l} className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full" style={{ background: c }} />{l}</span>)}
+            </figcaption>
+          </figure>
+        </div>
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-[96px] h-[130px] overflow-hidden">
+          <svg className="rn-wave-slow absolute left-0 top-0 h-[130px] w-[200%]" viewBox="0 0 2880 130" preserveAspectRatio="none"><path d="M0 80 C360 40 1080 120 1440 80 C1800 40 2520 120 2880 80 V130 H0 Z" fill="rgba(212,167,44,.05)" /></svg>
+          <svg className="rn-wave absolute left-0 top-0 h-[130px] w-[200%]" viewBox="0 0 2880 130" preserveAspectRatio="none"><path d="M0 70 C360 20 1080 120 1440 70 C1800 20 2520 120 2880 70 V130 H0 Z" fill="rgba(163,230,53,.06)" />
+            <path d="M0 70 C360 20 1080 120 1440 70 C1800 20 2520 120 2880 70" fill="none" stroke="rgba(163,230,53,.28)" strokeWidth="1.5" /></svg>
+        </div>
+        {/* stat strip (live facts from the ERP) */}
+        <div className="relative z-[2] mx-auto -mt-16 max-w-7xl px-4 pb-[72px] sm:px-6" aria-label="Unit at a glance">
+          <div className="rn-rise grid grid-cols-2 gap-px overflow-hidden rounded-[22px] border border-white/[0.08] bg-white/[0.08] shadow-[0_30px_60px_-30px_rgba(0,0,0,.6)] md:grid-cols-5" style={{ animationDelay: ".45s" }}>
+            {([[facts?.stations ?? "—", T.stats.stations], [facts?.sessions_month ?? "—", T.stats.sessions], [facts?.shifts ?? "—", T.stats.shifts], [facts?.nephrologists || "—", T.stats.nephs], ["24/7", T.stats.emergency]] as [string | number, string][]).map(([v, l], i) => (
+              <div key={l} className={`rn-stat flex flex-col items-center gap-1.5 bg-[#132219] px-4 py-7 ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
+                <span className="rn-num text-[40px] font-semibold leading-none text-[#d9f99d]">{v}</span><span className="text-sm text-[rgba(232,240,226,.75)]">{l}</span></div>))}
+          </div>
         </div>
       </section>
-
-      {/* ------------------------------------------------ stats */}
-      <section className="relative z-10 -mt-10"><Wrap>
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[26px] border border-[var(--line)] bg-[var(--line)] shadow-[0_30px_60px_-34px_rgba(8,48,58,0.55)] md:grid-cols-5">
-          {([[facts?.stations ?? "12", T.stats.stations], [facts?.sessions_month ?? "—", T.stats.sessions], [facts?.shifts ?? "3", T.stats.shifts], [facts?.nephrologists || "—", T.stats.nephs], ["24/7", T.stats.emergency]] as [string | number, string][]).map(([v, l], i) => (
-            <Reveal key={l} delay={i * 60} className={`bg-[var(--surface)] p-5 text-center ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
-              <div className="s2-num text-[1.9rem] font-semibold leading-none text-[var(--rn-aqua-ink)]">{v}</div><div className="mt-1.5 text-[13px] font-medium text-[var(--muted)]">{l}</div></Reveal>))}
-        </div>
-      </Wrap></section>
 
       {/* ------------------------------------------------ services */}
       <section className="py-24" id="services"><Wrap>
@@ -89,7 +99,7 @@ export default function Nephrology() {
       </Wrap></section>
 
       {/* ------------------------------------------------ unit features */}
-      <section className="relative overflow-hidden bg-[#08303A] py-24 text-white"><div className="rn-drops pointer-events-none absolute inset-0 opacity-30" />
+      <section className="relative overflow-hidden bg-[#0B1A12] py-24 text-white"><div className="rn-drops pointer-events-none absolute inset-0 opacity-30" />
         <Wrap className="relative">
           <SectionHead light eyebrow={T.call} title={T.featuresTitle} sub={T.featuresSub} />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{T.features.map(([k, t, d], i) => { const I = FEAT_ICON[k] ?? Droplets; return (
@@ -107,7 +117,7 @@ export default function Nephrology() {
           <span aria-hidden className="rn-rail absolute bottom-4 start-[23px] top-4 w-[3px] rounded" />
           {T.steps.map(([t, d], i) => (
             <Reveal as="li" key={t} delay={i * 60} className="relative flex gap-5 pb-7">
-              <span className="rn-node relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#0B4552] text-base font-black text-[var(--rn-aqua-on-dark)] ring-4 ring-[var(--bg)]" style={{ animationDelay: `${i * 0.4}s` }}>{i + 1}</span>
+              <span className="rn-node relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#1a2e1f] text-base font-black text-[var(--rn-aqua-on-dark)] ring-4 ring-[var(--bg)]" style={{ animationDelay: `${i * 0.4}s` }}>{i + 1}</span>
               <div className="pt-1.5"><h3 className="font-bold">{t}</h3><p className="mt-0.5 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
                 {i === 5 && <span className="mt-1 inline-block text-xs font-semibold text-[var(--rn-violet-ink)]">Slip shows station, token and sessions remaining</span>}</div>
             </Reveal>))}
@@ -152,7 +162,7 @@ export default function Nephrology() {
           <Reveal className={`${card} p-6`}><h3 className="flex items-center gap-2 text-lg font-bold"><MapPin className="h-5 w-5 text-[var(--rn-aqua-ink)]" />{T.locTitle}</h3><p className="mt-2 text-[15px] leading-relaxed text-[var(--ink2)]">{T.locText}</p>
             <Link to="/site/directions" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[var(--rn-aqua-ink)]">Get directions <ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link></Reveal>
           <Reveal className="rn-cta rounded-[24px] p-7 text-white"><h3 className="s2-display text-2xl">{T.ctaTitle}</h3><p className="mt-2 text-white/85">{T.ctaText}</p>
-            <div className="mt-5 flex flex-wrap gap-3"><Link to="/site/nephrology/reserve" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-semibold text-[#0c3b55]"><CalendarCheck className="h-4 w-4" />{T.reserve}</Link>
+            <div className="mt-5 flex flex-wrap gap-3"><Link to="/site/nephrology/reserve" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-semibold text-[#1F3A0B]"><CalendarCheck className="h-4 w-4" />{T.reserve}</Link>
               <a href={book} className={btn.glass}><Stethoscope className="h-4 w-4" />{T.book}</a></div></Reveal>
         </div>
       </Wrap></section>
@@ -170,20 +180,117 @@ function Accordion({ items }: { items: { title: string; body: React.ReactNode }[
     </div>); })}</div>;
 }
 
-/** Hero visual: a dialyser (hollow-fibre filter) with blood and dialysate flowing in opposite directions, and droplets. */
-function FilterArt() {
+/** Hero visual (from the design canvas): a hollow-fibre dialyser — blood flows down the fibres, dialysate flows up around them (counter-current),
+ *  toxins drift across the membrane. Speed follows --flow; all motion stops under prefers-reduced-motion. */
+function Dialyser() {
   return (
-    <svg viewBox="0 0 420 380" className="w-[420px] max-w-full" aria-hidden>
-      <defs><linearGradient id="rnb" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#f87171" /><stop offset="1" stopColor="#b91c1c" /></linearGradient>
-        <linearGradient id="rnd" x1="0" x2="1"><stop offset="0" stopColor="var(--accent-renal-aqua)" /><stop offset="1" stopColor="var(--accent-renal-violet)" /></linearGradient></defs>
-      <rect x="150" y="40" width="120" height="300" rx="56" fill="rgba(255,255,255,.06)" stroke="url(#rnd)" strokeWidth="3" />
-      {Array.from({ length: 7 }).map((_, i) => <line key={i} x1={170 + i * 13} y1="70" x2={170 + i * 13} y2="310" stroke="rgba(255,255,255,.25)" strokeWidth="2" />)}
-      <path className="rn-flow" d="M210 0 V40 M210 340 V380" stroke="url(#rnb)" strokeWidth="10" strokeLinecap="round" strokeDasharray="14 12" />
-      <path className="rn-flow-rev" d="M270 290 H360 M60 90 H150" stroke="url(#rnd)" strokeWidth="8" strokeLinecap="round" strokeDasharray="12 10" />
-      {[[80, 220, 12], [350, 150, 9], [110, 300, 7], [330, 320, 11]].map(([x, y, r], i) => <path key={i} className="rn-drop" style={{ animationDelay: `${i * 0.8}s` }}
-        d={`M${x} ${y - r * 1.6} C${x + r} ${y - r * 0.4} ${x + r} ${y + r * 0.6} ${x} ${y + r * 0.8} C${x - r} ${y + r * 0.6} ${x - r} ${y - r * 0.4} ${x} ${y - r * 1.6}Z`} fill="var(--accent-renal-aqua)" fillOpacity=".55" />)}
-      <g fontFamily="monospace" fontSize="11" fill="rgba(255,255,255,.75)"><text x="290" y="282">dialysate</text><text x="40" y="80">dialysate</text><text x="222" y="24">blood</text></g>
-    </svg>
+    <svg viewBox="0 0 560 600" width="100%" direction="ltr" role="img" aria-label="Animated dialyzer: blood flows down through hollow fibres while dialysate flows up around them, drawing toxins across the membrane">
+            <defs>
+              <linearGradient id="rn-shellStroke" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#d4a72c"/>
+                <stop offset="1" stopColor="#a3e635"/>
+              </linearGradient>
+              <linearGradient id="rn-glass" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor="#ffffff" stopOpacity=".13"/>
+                <stop offset=".45" stopColor="#ffffff" stopOpacity=".03"/>
+                <stop offset="1" stopColor="#ffffff" stopOpacity=".08"/>
+              </linearGradient>
+              <radialGradient id="rn-glow" cx=".5" cy=".5" r=".5">
+                <stop offset="0" stopColor="#a3e635" stopOpacity=".38"/>
+                <stop offset=".6" stopColor="#d4a72c" stopOpacity=".12"/>
+                <stop offset="1" stopColor="#d4a72c" stopOpacity="0"/>
+              </radialGradient>
+              <clipPath id="rn-core"><rect x="215" y="115" width="130" height="370" rx="65"/></clipPath>
+            </defs>
+
+            <ellipse className="rn-glow" cx="280" cy="300" rx="200" ry="270" fill="url(#rn-glow)"/>
+            <circle className="rn-ring" cx="280" cy="300" r="252" fill="none" stroke="rgba(255,255,255,.08)" strokeDasharray="1 9"/>
+            <circle className="rn-ring-rev" cx="280" cy="300" r="214" fill="none" stroke="rgba(163,230,53,.12)" strokeDasharray="40 14 4 14"/>
+
+            <g fill="none" stroke="#bef264" strokeWidth="1">
+              <circle className="rn-drift" cx="96" cy="430" r="5" style={{ animationDelay: "0s" } as React.CSSProperties}/>
+              <circle className="rn-drift" cx="470" cy="300" r="3.5" style={{ animationDelay: "-4s" } as React.CSSProperties}/>
+              <circle className="rn-drift" cx="150" cy="300" r="2.5" style={{ animationDelay: "-8s" } as React.CSSProperties}/>
+              <circle className="rn-drift" cx="430" cy="500" r="4" style={{ animationDelay: "-2s" } as React.CSSProperties}/>
+              <circle className="rn-drift" cx="120" cy="560" r="3" style={{ animationDelay: "-6s" } as React.CSSProperties}/>
+            </g>
+
+            <g fill="none" strokeLinecap="round">
+              <path d="M24 60 H196 C246 60 280 74 280 114" stroke="rgba(255,122,144,.16)" strokeWidth="9"/>
+              <path className="rn-flow rn-f-tube" d="M24 60 H196 C246 60 280 74 280 114" stroke="#ff8fa3" strokeWidth="2.4"/>
+              <path d="M280 486 C280 526 314 540 364 540 H536" stroke="rgba(255,122,144,.16)" strokeWidth="9"/>
+              <path className="rn-flow rn-f-tube" d="M280 486 C280 526 314 540 364 540 H536" stroke="#ff8fa3" strokeWidth="2.4"/>
+              <path d="M536 420 H348" stroke="rgba(163,230,53,.16)" strokeWidth="9"/>
+              <path className="rn-flow rn-f-tube" d="M536 420 H348" stroke="#bef264" strokeWidth="2.4"/>
+              <path d="M212 180 H24" stroke="rgba(163,230,53,.16)" strokeWidth="9"/>
+              <path className="rn-flow rn-f-tube" d="M212 180 H24" stroke="#bef264" strokeWidth="2.4"/>
+            </g>
+
+            <rect x="212" y="112" width="136" height="376" rx="68" fill="rgba(11,26,18,.55)"/>
+
+            <g clipPath="url(#rn-core)">
+              <rect x="212" y="112" width="136" height="64" fill="rgba(255,143,163,.07)"/>
+              <rect x="212" y="424" width="136" height="64" fill="rgba(255,143,163,.07)"/>
+              <line x1="212" y1="176" x2="348" y2="176" stroke="rgba(255,255,255,.12)"/>
+              <line x1="212" y1="424" x2="348" y2="424" stroke="rgba(255,255,255,.12)"/>
+
+              <g stroke="rgba(255,255,255,.17)" strokeWidth="1.2">
+                <line x1="238" y1="114" x2="238" y2="486"/>
+                <line x1="250" y1="114" x2="250" y2="486"/>
+                <line x1="262" y1="114" x2="262" y2="486"/>
+                <line x1="274" y1="114" x2="274" y2="486"/>
+                <line x1="286" y1="114" x2="286" y2="486"/>
+                <line x1="298" y1="114" x2="298" y2="486"/>
+                <line x1="310" y1="114" x2="310" y2="486"/>
+                <line x1="322" y1="114" x2="322" y2="486"/>
+              </g>
+              <g stroke="#ff8fa3" strokeWidth="1.7" strokeLinecap="round">
+                <line className="rn-flow rn-f-fibre" x1="238" y1="114" x2="238" y2="486" style={{ animationDelay: "-.2s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-fibre" x1="250" y1="114" x2="250" y2="486" style={{ animationDelay: "-.9s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-fibre" x1="262" y1="114" x2="262" y2="486" style={{ animationDelay: "-.5s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-fibre" x1="274" y1="114" x2="274" y2="486" style={{ animationDelay: "-1.3s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-fibre" x1="286" y1="114" x2="286" y2="486" style={{ animationDelay: "-.1s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-fibre" x1="298" y1="114" x2="298" y2="486" style={{ animationDelay: "-1.1s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-fibre" x1="310" y1="114" x2="310" y2="486" style={{ animationDelay: "-.7s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-fibre" x1="322" y1="114" x2="322" y2="486" style={{ animationDelay: "-1.5s" } as React.CSSProperties}/>
+              </g>
+              <g stroke="#bef264" strokeOpacity=".7" strokeWidth="1.2" strokeLinecap="round">
+                <line className="rn-flow rn-f-dial" x1="226" y1="424" x2="226" y2="176" style={{ animationDelay: "-.4s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-dial" x1="244" y1="424" x2="244" y2="176" style={{ animationDelay: "-1.6s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-dial" x1="268" y1="424" x2="268" y2="176" style={{ animationDelay: "-.9s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-dial" x1="292" y1="424" x2="292" y2="176" style={{ animationDelay: "-2s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-dial" x1="316" y1="424" x2="316" y2="176" style={{ animationDelay: "-1.2s" } as React.CSSProperties}/>
+                <line className="rn-flow rn-f-dial" x1="334" y1="424" x2="334" y2="176" style={{ animationDelay: "-.2s" } as React.CSSProperties}/>
+              </g>
+              <g fill="#f2cf6b">
+                <circle className="rn-tox" cx="250" cy="390" r="2.2" style={{ "--dx": "-6px", animationDelay: "0s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="274" cy="340" r="1.8" style={{ "--dx": "-6px", animationDelay: "-1.1s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="298" cy="300" r="2.2" style={{ "--dx": "6px", animationDelay: "-2.4s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="322" cy="370" r="1.8" style={{ "--dx": "6px", animationDelay: "-3.3s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="238" cy="270" r="2" style={{ "--dx": "-6px", animationDelay: "-4.1s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="286" cy="410" r="2" style={{ "--dx": "6px", animationDelay: "-1.8s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="310" cy="250" r="1.8" style={{ "--dx": "6px", animationDelay: "-2.9s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="262" cy="230" r="2" style={{ "--dx": "6px", animationDelay: "-4.6s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="250" cy="320" r="1.6" style={{ "--dx": "-6px", animationDelay: "-3.7s" } as React.CSSProperties}/>
+                <circle className="rn-tox" cx="298" cy="380" r="1.6" style={{ "--dx": "-6px", animationDelay: "-0.6s" } as React.CSSProperties}/>
+              </g>
+              <rect x="224" y="140" width="5" height="320" rx="2.5" fill="#ffffff" fillOpacity=".09"/>
+            </g>
+
+            <rect x="212" y="112" width="136" height="376" rx="68" fill="url(#rn-glass)" stroke="url(#rn-shellStroke)" strokeWidth="2.4"/>
+
+            <circle cx="280" cy="114" r="5" fill="#0B1A12" stroke="#ff8fa3" strokeWidth="2"/>
+            <circle cx="280" cy="486" r="5" fill="#0B1A12" stroke="#ff8fa3" strokeWidth="2"/>
+            <circle cx="348" cy="420" r="4" fill="#0B1A12" stroke="#bef264" strokeWidth="2"/>
+            <circle cx="212" cy="180" r="4" fill="#0B1A12" stroke="#bef264" strokeWidth="2"/>
+
+            <g fontFamily="JetBrains Mono, monospace" fontSize="10.5" letterSpacing="1.6" fill="rgba(232,240,226,.72)">
+              <text x="24" y="44">BLOOD IN</text>
+              <text x="24" y="166">DIALYSATE OUT</text>
+              <text x="536" y="404" textAnchor="end">DIALYSATE IN</text>
+              <text x="536" y="564" textAnchor="end">BLOOD OUT</text>
+            </g>
+          </svg>
   );
 }
 
@@ -212,7 +319,7 @@ export function NephReserve() {
   };
   return (
     <div className="rn-root bg-[var(--soft)] pb-24"><style>{RN_CSS}</style>
-      <section className="relative overflow-hidden bg-[#08303A] pb-28 pt-12 text-white"><div className="rn-drops pointer-events-none absolute inset-0 opacity-25" />
+      <section className="relative overflow-hidden bg-[#0B1A12] pb-28 pt-12 text-white"><div className="rn-drops pointer-events-none absolute inset-0 opacity-25" />
         <Wrap className="relative"><Link to="/site/nephrology" className="text-sm text-white/70 hover:text-white">← {T.title}</Link>
           <h1 className="s2-display mt-4 text-[2.4rem] leading-tight sm:text-[3.2rem]">{T.rTitle}</h1><p className="mt-2 max-w-2xl text-white/75">{T.rSub}</p></Wrap>
       </section>
@@ -260,20 +367,44 @@ function L({ l, req, hint, className = "", children }: { l: string; req?: boolea
   return <label className={`block ${className}`}><span className="mb-2 block text-sm font-semibold">{l}{req && <span className="text-rose-600"> *</span>}</span>{children}{hint && <span className="mt-1 block text-xs text-rose-600">{hint}</span>}</label>;
 }
 
-/** Renal accent tokens. Aqua #38BDF8 / #0EA5E9 and violet #8B5CF6 / #A78BFA are fills; text uses AA-checked shades (computed WCAG ratios):
- *  #0369A1 on white 5.9:1, #6D28D9 on white 7.1:1, #7DD3FC on the dark surface #0D2730 9.3:1, #C4B5FD on #0D2730 8.4:1;
- *  button text #0B1B2B on the gradient: 8.1:1 (aqua end) and 6.4:1 (#A78BFA end). */
+/** Accent tokens — the MRI & CT page's lime / gold theme (mrct: --accent-imaging-lime #A3E635, --accent-imaging-gold #D4A72C), kept under the
+ *  --accent-renal-* / --rn-* names. Text shades, computed WCAG ratios: #3F6212 on white 7.1:1, #7C5A06 on white 6.3:1, #3F6212 on #ECFCCB 6.5:1,
+ *  #BEF264 on the dark surface #0D2730 11.9:1, #F2CF6B on #0D2730 10.3:1, #D9F99D on the hero #0B1A12 15.4:1; button text #14260A on the
+ *  gradient 12.3:1 (#BEF264 end) and 5.2:1 (#65A30D end); white on the CTA band #3F6212 7.1:1. */
 const RN_CSS = `
-.rn-root{--accent-renal-aqua:#38bdf8;--accent-renal-aqua-strong:#0ea5e9;--accent-renal-violet:#8b5cf6;--accent-renal-violet-soft:#a78bfa;
-  --rn-aqua-ink:#0369a1;--rn-violet-ink:#6d28d9;--rn-aqua-soft:#e0f2fe;--rn-violet-soft:#ede9fe;--rn-aqua-on-dark:#7dd3fc}
-.s2-dark .rn-root,.dark .rn-root{--rn-aqua-ink:#7dd3fc;--rn-violet-ink:#c4b5fd;--rn-aqua-soft:rgba(56,189,248,.14);--rn-violet-soft:rgba(139,92,246,.18)}
-.rn-btn{background:linear-gradient(135deg,#38bdf8,#a78bfa);color:#0b1b2b}.rn-btn:hover{filter:brightness(1.06)}
-.rn-grad-text{background:linear-gradient(90deg,#7dd3fc,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
-.rn-cta{background:linear-gradient(135deg,#0c4a6e,#0369a1 50%,#6d28d9)}
-.rn-wave{animation:rnwave 18s linear infinite}@keyframes rnwave{to{transform:translateX(-50%)}}
-.rn-drops{background-image:radial-gradient(circle at 20% 30%,rgba(56,189,248,.35) 0 3px,transparent 4px),radial-gradient(circle at 70% 60%,rgba(139,92,246,.35) 0 2px,transparent 3px),radial-gradient(circle at 40% 80%,rgba(56,189,248,.3) 0 2px,transparent 3px);background-size:180px 160px,220px 200px,260px 240px}
-.rn-rail{background:linear-gradient(180deg,#38bdf8,#8b5cf6,var(--line));background-size:100% 200%;animation:rnrail 6s ease-in-out infinite}@keyframes rnrail{0%,100%{background-position:0 100%}50%{background-position:0 0}}
-.rn-node{animation:rnnode 4.4s ease-in-out infinite}@keyframes rnnode{0%,9%{box-shadow:0 0 0 0 rgba(56,189,248,.5)}4%{box-shadow:0 0 0 9px rgba(56,189,248,.18)}100%{box-shadow:0 0 0 0 transparent}}
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=JetBrains+Mono:wght@400&display=swap');
+.rn-hero{background:radial-gradient(1100px 620px at 78% 30%,rgba(163,230,53,.16) 0%,rgba(163,230,53,0) 70%),radial-gradient(800px 500px at 10% 0%,rgba(212,167,44,.10) 0%,rgba(212,167,44,0) 70%),#0B1A12;--flow:1}
+.rn-dots{background-image:linear-gradient(rgba(163,230,53,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(163,230,53,.07) 1px,transparent 1px);background-size:36px 36px}
+.rn-hero .s2-display{font-weight:500}
+.rn-num{font-family:'Barlow Condensed',Oswald,'Arial Narrow',sans-serif}
+.rn-btn-primary{background:linear-gradient(135deg,#bef264,#65a30d);color:#14260a}
+.rn-b{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s,background .35s,border-color .35s}.rn-b:hover{transform:translateY(-2px)}
+.rn-btn-primary:hover{box-shadow:0 14px 34px -12px rgba(163,230,53,.65)}.rn-btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.32)}
+.rn-portal .rn-arrow{display:inline-block;transition:transform .35s}.rn-portal:hover .rn-arrow{transform:translateX(4px)}
+.rn-rise{animation:rnrise 1s cubic-bezier(.2,.7,.2,1) both}@keyframes rnrise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.rn-live{animation:rnlive 2.4s ease-out infinite}@keyframes rnlive{0%{box-shadow:0 0 0 0 rgba(163,230,53,.55)}80%,100%{box-shadow:0 0 0 7px rgba(163,230,53,0)}}
+.rn-flow{animation:rndash linear infinite}.rn-f-tube{stroke-dasharray:4 12;animation-duration:calc(var(--flow,1)*1.1s)}
+.rn-f-fibre{stroke-dasharray:2 14;animation-duration:calc(var(--flow,1)*1.7s)}.rn-f-dial{stroke-dasharray:1 15;animation-duration:calc(var(--flow,1)*2.3s)}
+@keyframes rndash{to{stroke-dashoffset:-32}}
+.rn-tox{animation:rntox calc(var(--flow,1)*5.2s) ease-in-out infinite;opacity:0}@keyframes rntox{0%{transform:translate(0,0);opacity:0}18%{opacity:1}72%{opacity:.85}100%{transform:translate(var(--dx),-52px);opacity:0}}
+.rn-ring{transform-box:view-box;transform-origin:280px 300px;animation:rnspin 70s linear infinite}
+.rn-ring-rev{transform-box:view-box;transform-origin:280px 300px;animation:rnspin 110s linear infinite reverse}@keyframes rnspin{to{transform:rotate(360deg)}}
+.rn-glow{transform-box:view-box;transform-origin:280px 300px;animation:rnbreathe 7s ease-in-out infinite}@keyframes rnbreathe{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.95;transform:scale(1.05)}}
+.rn-drift{animation:rndrift 13s ease-in-out infinite;opacity:0}@keyframes rndrift{0%{transform:translateY(0);opacity:0}25%{opacity:.9}100%{transform:translateY(-90px);opacity:0}}
+.rn-hover-float{animation:rnhfloat 9s ease-in-out infinite}@keyframes rnhfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.rn-wave-slow{animation:rnwave 52s linear infinite reverse}
+.rn-stat{transition:background .35s}.rn-stat:hover{background:#1a2e1f}
+@media (prefers-reduced-motion: reduce){.rn-rise,.rn-live,.rn-flow,.rn-tox,.rn-ring,.rn-ring-rev,.rn-glow,.rn-drift,.rn-hover-float,.rn-wave-slow{animation:none!important}.rn-tox,.rn-drift{opacity:.8}}
+.rn-root{--accent-renal-aqua:#a3e635;--accent-renal-aqua-strong:#84cc16;--accent-renal-violet:#d4a72c;--accent-renal-violet-soft:#f2cf6b;
+  --rn-aqua-ink:#3f6212;--rn-violet-ink:#7c5a06;--rn-aqua-soft:#ecfccb;--rn-violet-soft:#fdf3d6;--rn-aqua-on-dark:#d9f99d}
+.s2-dark .rn-root,.dark .rn-root{--rn-aqua-ink:#bef264;--rn-violet-ink:#f2cf6b;--rn-aqua-soft:rgba(163,230,53,.14);--rn-violet-soft:rgba(212,167,44,.16)}
+.rn-btn{background:linear-gradient(135deg,#bef264,#65a30d);color:#14260a}.rn-btn:hover{filter:brightness(1.06)}
+.rn-grad-text{background:linear-gradient(90deg,#d9f99d,#f2cf6b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rn-cta{background:linear-gradient(135deg,#365314,#3f6212 55%,#7c5a06)}
+.rn-wave{animation:rnwave 34s linear infinite}@keyframes rnwave{to{transform:translateX(-50%)}}
+.rn-drops{background-image:radial-gradient(circle at 20% 30%,rgba(163,230,53,.35) 0 3px,transparent 4px),radial-gradient(circle at 70% 60%,rgba(212,167,44,.35) 0 2px,transparent 3px),radial-gradient(circle at 40% 80%,rgba(163,230,53,.3) 0 2px,transparent 3px);background-size:180px 160px,220px 200px,260px 240px}
+.rn-rail{background:linear-gradient(180deg,#a3e635,#d4a72c,var(--line));background-size:100% 200%;animation:rnrail 6s ease-in-out infinite}@keyframes rnrail{0%,100%{background-position:0 100%}50%{background-position:0 0}}
+.rn-node{animation:rnnode 4.4s ease-in-out infinite}@keyframes rnnode{0%,9%{box-shadow:0 0 0 0 rgba(163,230,53,.5)}4%{box-shadow:0 0 0 9px rgba(163,230,53,.18)}100%{box-shadow:0 0 0 0 transparent}}
 .rn-flow{animation:rnflow 1.6s linear infinite}.rn-flow-rev{animation:rnflow 1.8s linear infinite reverse}@keyframes rnflow{to{stroke-dashoffset:-52}}
 .rn-drop{animation:rndrop 3.2s ease-in-out infinite}@keyframes rndrop{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(-10px);opacity:.9}}
 @media (prefers-reduced-motion: reduce){.rn-wave,.rn-rail,.rn-node,.rn-flow,.rn-flow-rev,.rn-drop{animation:none}}

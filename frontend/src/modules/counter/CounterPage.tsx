@@ -198,7 +198,7 @@ export default function CounterPage() {
               const billsN = panel ? panel.dues.length + panel.online.length + (panel.admission ? 1 : 0) + (panel.lab_orders?.length ?? 0) : 0;
               const n = k === "bills" ? billsN : k === "fromlab" ? (fromLab.data?.length ?? 0) : 0;
               return (
-              <button key={k} onClick={() => setTab(k)} disabled={((k === "bills" || k === "dialysis") && (!patient || offline)) || ((k === "fromlab" || k === "imaging") && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "tab-gold" : "text-muted-foreground")}>
+              <button key={k} onClick={() => setTab(k)} disabled={(k === "bills" && (!patient || offline)) || (k === "dialysis" && offline) || ((k === "fromlab" || k === "imaging") && offline)} className={cn("flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === k ? "tab-gold" : "text-muted-foreground")}>
                 <I className="h-4 w-4" />{l}{n ? <span className={cn("rounded-full px-1.5 text-[10px] text-white", k === "fromlab" ? "bg-fuchsia-600" : "bg-rose-600")}>{n}</span> : null}</button>); })}</div>
           </div>
           {tab === "imaging" && <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">{["", "X-Ray", "Ultrasound", "Doppler", "MRI", "CT"].map((m) => <button key={m} onClick={() => setImgMod(m)}
@@ -231,7 +231,7 @@ export default function CounterPage() {
                   className={cn("rounded-xl border p-3 text-start shadow-sm", on ? "border-cyan-600 bg-cyan-50 dark:bg-cyan-500/10" : "border-border bg-card hover:border-cyan-500")}>
                   <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-cyan-700 dark:text-cyan-300">{p.modality}{p.contrast && p.contrast !== "No" ? <span className="rounded bg-amber-100 px-1 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">{p.contrast === "Yes" ? "contrast" : "± contrast"}</span> : null}</div>
                   <div className="line-clamp-2 text-sm font-semibold">{p.procedure_name}</div><div className="mt-1 font-black tabular-nums text-cyan-800 dark:text-cyan-200">{rs(p.price)}</div></button>); })}</div></div>}
-            {tab === "dialysis" && <DialysisTab dia={dia} lines={lines} onAdd={add} />}
+            {tab === "dialysis" && <DialysisTab dia={dia} lines={lines} onAdd={add} items={services.filter((x) => x.item_code.startsWith("DIA-"))} hasPatient={!!patient || !!newP} />}
             {tab === "bills" && panel && <Bills panel={panel} onAdd={add} inCart={lines} />}
             {tab === "fromlab" && <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Orders the lab made for walk-in patients. Collect here, give the receipt, then the lab takes the sample.</p>
@@ -605,8 +605,19 @@ function RefundApproval({ count, onCancel, onConfirm }: { count: number; onCance
 
 
 /** Dialysis at the counter (D-99): pay a session in cash, from the patient's package, or as Panel / Sehat Card credit; sell a package. */
-function DialysisTab({ dia, lines, onAdd }: { dia: DiaPending | null; lines: Line[]; onAdd: (l: Omit<Line, "key" | "amount" | "qty" | "discount">) => void }) {
-  if (!dia) return <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">This patient is not registered in the dialysis unit. The dialysis in-charge registers patients (Dialysis → Patients).</p>;
+function DialysisTab({ dia, lines, onAdd, items, hasPatient }: { dia: DiaPending | null; lines: Line[]; onAdd: (l: Omit<Line, "key" | "amount" | "qty" | "discount">) => void; items: Service[]; hasPatient: boolean }) {
+  // rate card: injections, catheter, needles, biopsy, consult — and walk-in / guest sessions for patients not on the schedule
+  const card = items.filter((x) => !(dia && x.item_code.startsWith("DIA-HD-")));
+  const rateCard = <div>
+    <div className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">{dia ? "Other dialysis charges" : "Dialysis charges"}</div>
+    {!hasPatient && <p className="mb-2 text-xs text-muted-foreground">Choose the patient first to see scheduled sessions and packages.</p>}
+    <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-4">{card.map((x) => { const on = lines.some((l) => l.kind === "Service" && l.item_code === x.item_code); return (
+      <button key={x.item_code} onClick={() => onAdd({ kind: "Service", label: x.item_name, item_code: x.item_code, rate: x.rate })}
+        className={cn("rounded-xl border p-3 text-start shadow-sm", on ? "border-sky-600 bg-sky-50 dark:bg-sky-500/10" : "border-border bg-card hover:border-sky-500")}>
+        <div className="text-[10px] font-bold uppercase tracking-wide text-sky-700 dark:text-sky-300">{x.item_code.startsWith("DIA-HD-") || x.item_code === "DIA-UF" ? "Walk-in / guest" : "Dialysis"}</div>
+        <div className="line-clamp-2 text-sm font-semibold">{x.item_name}</div><div className="mt-1 font-black tabular-nums text-sky-800 dark:text-sky-200">{rs(x.rate)}</div></button>); })}</div>
+  </div>;
+  if (!dia) return <div className="space-y-3">{hasPatient && <p className="rounded-2xl border border-dashed border-border p-3 text-sm text-muted-foreground">Not on the dialysis schedule — charges below bill as walk-in / guest. Regular patients are registered by the dialysis in-charge (Dialysis → Patients) to get scheduled sessions and packages.</p>}{rateCard}</div>;
   const pkgInCart = lines.find((x) => x.kind === "Dialysis Package");
   const usedInCart = lines.filter((x) => x.kind === "Dialysis" && x.use_package).length;
   const left = dia.package.remaining + (pkgInCart ? dia.packages.find((p) => p.item_code === pkgInCart.item_code)?.sessions ?? 0 : 0) - usedInCart;
@@ -637,6 +648,7 @@ function DialysisTab({ dia, lines, onAdd }: { dia: DiaPending | null; lines: Lin
           className="rounded-xl border border-border bg-card p-3 text-start shadow-sm hover:border-violet-500 disabled:opacity-50"><div className="text-2xl font-black text-violet-700 dark:text-violet-300">{p.sessions}</div>
           <div className="text-xs text-muted-foreground">sessions</div><div className="mt-1 font-bold tabular-nums">{rs(p.rate)}</div><div className="text-[11px] text-muted-foreground">{rs(p.rate / p.sessions)} / session</div></button>)}</div>
       </div>
+      {rateCard}
     </div>
   );
 }

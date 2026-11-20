@@ -7,8 +7,8 @@ import type { Lang } from "./content";
 
 /** Equipment shown on the page [confirm] — replace with the installed models. */
 export const EQUIPMENT = {
-  mri: { name: "1.5 Tesla MRI scanner [confirm]", bore: "Wide-bore, quiet mode [confirm]" },
-  ct: { name: "Multi-slice CT scanner [confirm]", slices: "128-slice, low-dose protocols [confirm]" },
+  mri: { name: "1.5 Tesla MRI scanner", bore: "Wide-bore, quiet mode" },
+  ct: { name: "Multi-slice CT scanner", slices: "128-slice, low-dose protocols" },
 };
 
 const en = {
@@ -62,7 +62,7 @@ const en = {
     ["Can I get a refund if I cancel?", "Yes, before the scan is performed. Refunds are approved by the cash supervisor and a refund slip is printed for you."],
     ["Will I get the images?", "Yes — a CD or online link on request, and your doctor sees the report in the hospital record."],
   ] as [string, string][],
-  locTitle: "Where to find us", locText: "MRI and CT suites, ground floor, radiology wing [confirm] — follow the Radiology signs from the main lobby. Pay at the reception counter; your slip shows the room (MRI-1 / CT-1) and token.",
+  locTitle: "Where to find us", locText: "MRI and CT suites, ground floor, radiology wing — follow the Radiology signs from the main lobby. Pay at the reception counter; your slip shows the room (MRI-1 / CT-1) and token.",
   ctaTitle: "Need an MRI or CT?", ctaText: "Book online in two minutes, or bring your doctor's slip to the reception counter.",
   safety: "Safety", report24: "Report within 24 hrs", hours: "Hours",
 };

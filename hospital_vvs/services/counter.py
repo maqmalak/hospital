@@ -84,7 +84,7 @@ MONEY_KINDS = ("IPD Advance", "IPD Settlement", "Online Fee", "Dues")
 # D-60: a lab order made in the lab (unpaid) is collected here; its receipt lines are ordinary Lab lines (refunds work the same)
 LAB_ORDER = "Lab Order"
 GROUP_BT = {"Consultation": "OPD Slip", "Lab": "Lab", "Service": "General"}
-EXCLUDED_ITEMS = ("IPD-", "ER-FEE", "OV-CONSULT", "PKG-", "REG-FEE", "DIA-PKG-", "DIA-HD-")  # dialysis sessions / packages have their own lines
+EXCLUDED_ITEMS = ("IPD-", "ER-FEE", "OV-CONSULT", "PKG-", "REG-FEE", "DIA-PKG-")  # packages have their own line; DIA-HD-* = walk-in / guest session (Dialysis tab)
 
 
 def hospital_company():
@@ -380,6 +380,8 @@ def checkout(data, counter=None):
 		ti.run_method("validate")
 	lab_orders = [(x, _lab_order(x["target"], flt(x.get("discount")))) for x in lines if x.get("kind") == LAB_ORDER]
 	svc_lines = [x for x in lines if x.get("kind") == "Service"]
+	if any(str(x.get("item_code") or "").startswith("DIA-HD-") for x in svc_lines) and frappe.db.exists("Dialysis Patient", {"patient": patient, "status": "Active", "schedule_active": 1}):
+		frappe.throw(_("This patient is on the dialysis schedule — pay the scheduled session from the Dialysis tab so the station board shows it paid."))
 	svc_rows = [{"item_code": x["item_code"], "qty": flt(x.get("qty")) or 1, "rate": _service_rate(x["item_code"])} for x in svc_lines]
 	# imaging: a walk-in study is created now (or the booked one is used); its item joins the services invoice (D-98)
 	from hospital_vvs.services import radiology as rad

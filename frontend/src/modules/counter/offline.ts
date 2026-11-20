@@ -24,7 +24,7 @@ export const kvGet = <T,>(k: string) => run<T | undefined>("kv", "readonly", (s)
 export const kvSet = (k: string, v: unknown) => run("kv", "readwrite", (s) => s.put(v, k)).catch(() => undefined);
 
 export interface Doctor { name: string; doctor_name: string; doctor_name_ur?: string; specialization?: string; fee: number; follow_up_fee?: number; consultation_room?: string; color?: string; photo?: string; waiting?: number }
-export interface Service { item_code: string; item_name: string; rate: number; hv_billing_type?: string }
+export interface Service { item_code: string; item_name: string; rate: number; hv_billing_type?: string; category?: string | null }
 export interface LabT { name: string; test_code: string; department?: string; price: number; sample_type?: string; tat_hours?: number }
 export interface Bundle { doctors: Doctor[]; services: Service[]; labs: LabT[]; patients: { name: string; patient_name: string; phone?: string; gender?: string; age?: number; category?: string }[];
   modes: string[]; generated_at: string; branch: string; clinic: { name: string; name_ur?: string; phone?: string; address?: string } }
