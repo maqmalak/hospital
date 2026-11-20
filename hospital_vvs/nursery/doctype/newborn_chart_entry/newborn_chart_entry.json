@@ -1,0 +1,375 @@
+{
+ "actions": [],
+ "creation": "2026-11-20 12:00:00.000000",
+ "modified": "2026-11-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Newborn Chart Entry",
+ "module": "Nursery",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "newborn",
+  "entry_type",
+  "recorded_at",
+  "recorded_by",
+  "x1",
+  "age_hours",
+  "alert_flags",
+  "cancelled",
+  "cancel_reason",
+  "v",
+  "temp_c",
+  "hr",
+  "rr",
+  "spo2",
+  "f",
+  "feed_type",
+  "feed_ml",
+  "feed_min",
+  "f1",
+  "urine",
+  "stool",
+  "weight_g",
+  "j",
+  "bilirubin",
+  "bili_method",
+  "photo_on",
+  "m",
+  "item",
+  "dose",
+  "route",
+  "batch_no",
+  "m1",
+  "screening",
+  "result",
+  "n",
+  "resp_support",
+  "fio2",
+  "peep",
+  "pip",
+  "vent_rate",
+  "n1",
+  "iv_fluid",
+  "iv_rate",
+  "incubator_temp",
+  "t",
+  "note",
+  "share_with_parents"
+ ],
+ "fields": [
+  {
+   "fieldname": "newborn",
+   "fieldtype": "Link",
+   "label": "Newborn",
+   "options": "Newborn",
+   "reqd": 1,
+   "in_list_view": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "entry_type",
+   "fieldtype": "Select",
+   "label": "Entry Type",
+   "options": "Vitals\nFeed\nOutput\nWeight\nBilirubin\nPhototherapy\nMedication\nVaccine\nScreening\nDoctor Note\nNursing Note\nNICU Support",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "recorded_at",
+   "fieldtype": "Datetime",
+   "label": "Recorded At",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "recorded_by",
+   "fieldtype": "Link",
+   "label": "Recorded By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "x1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "age_hours",
+   "fieldtype": "Float",
+   "label": "Age Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "alert_flags",
+   "fieldtype": "Small Text",
+   "label": "Alert Flags",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancelled",
+   "fieldtype": "Check",
+   "label": "Cancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cancel_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancel Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "v",
+   "fieldtype": "Section Break",
+   "label": "Vitals"
+  },
+  {
+   "fieldname": "temp_c",
+   "fieldtype": "Float",
+   "label": "Temp (°C)"
+  },
+  {
+   "fieldname": "hr",
+   "fieldtype": "Int",
+   "label": "Heart Rate"
+  },
+  {
+   "fieldname": "rr",
+   "fieldtype": "Int",
+   "label": "Resp. Rate"
+  },
+  {
+   "fieldname": "spo2",
+   "fieldtype": "Int",
+   "label": "SpO₂ (%)"
+  },
+  {
+   "fieldname": "f",
+   "fieldtype": "Section Break",
+   "label": "Feed / output / weight"
+  },
+  {
+   "fieldname": "feed_type",
+   "fieldtype": "Select",
+   "label": "Feed Type",
+   "options": "\nBreastfeed\nExpressed breast milk\nFormula\nDonor milk\nNG / OG tube\nNil by mouth"
+  },
+  {
+   "fieldname": "feed_ml",
+   "fieldtype": "Float",
+   "label": "Volume (ml)"
+  },
+  {
+   "fieldname": "feed_min",
+   "fieldtype": "Int",
+   "label": "Duration (min)"
+  },
+  {
+   "fieldname": "f1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "urine",
+   "fieldtype": "Int",
+   "label": "Wet Nappies"
+  },
+  {
+   "fieldname": "stool",
+   "fieldtype": "Select",
+   "label": "Stool",
+   "options": "\nNone\nMeconium\nTransitional\nYellow\nAbnormal"
+  },
+  {
+   "fieldname": "weight_g",
+   "fieldtype": "Int",
+   "label": "Weight (g)"
+  },
+  {
+   "fieldname": "j",
+   "fieldtype": "Section Break",
+   "label": "Jaundice"
+  },
+  {
+   "fieldname": "bilirubin",
+   "fieldtype": "Float",
+   "label": "Bilirubin (mg/dL)"
+  },
+  {
+   "fieldname": "bili_method",
+   "fieldtype": "Select",
+   "label": "Bili Method",
+   "options": "\nTranscutaneous\nSerum"
+  },
+  {
+   "fieldname": "photo_on",
+   "fieldtype": "Select",
+   "label": "Phototherapy",
+   "options": "\nStarted\nStopped"
+  },
+  {
+   "fieldname": "m",
+   "fieldtype": "Section Break",
+   "label": "Medicine / vaccine / screening"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Data",
+   "label": "Medicine / Vaccine"
+  },
+  {
+   "fieldname": "dose",
+   "fieldtype": "Data",
+   "label": "Dose"
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Select",
+   "label": "Route",
+   "options": "\nIM\nIV\nOral\nSC\nIntradermal\nTopical"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Data",
+   "label": "Batch No."
+  },
+  {
+   "fieldname": "m1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "screening",
+   "fieldtype": "Select",
+   "label": "Screening",
+   "options": "\nHearing (OAE)\nCCHD pulse oximetry\nMetabolic (heel prick)\nEye (ROP)\nHip"
+  },
+  {
+   "fieldname": "result",
+   "fieldtype": "Select",
+   "label": "Result",
+   "options": "\nPass\nRefer\nNormal\nAbnormal"
+  },
+  {
+   "fieldname": "n",
+   "fieldtype": "Section Break",
+   "label": "NICU support"
+  },
+  {
+   "fieldname": "resp_support",
+   "fieldtype": "Select",
+   "label": "Resp Support",
+   "options": "\nRoom air\nNasal oxygen\nHigh-flow\nCPAP\nVentilator"
+  },
+  {
+   "fieldname": "fio2",
+   "fieldtype": "Int",
+   "label": "FiO₂ (%)"
+  },
+  {
+   "fieldname": "peep",
+   "fieldtype": "Float",
+   "label": "PEEP / CPAP (cmH₂O)"
+  },
+  {
+   "fieldname": "pip",
+   "fieldtype": "Float",
+   "label": "PIP (cmH₂O)"
+  },
+  {
+   "fieldname": "vent_rate",
+   "fieldtype": "Int",
+   "label": "Vent Rate"
+  },
+  {
+   "fieldname": "n1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "iv_fluid",
+   "fieldtype": "Data",
+   "label": "IV Fluid"
+  },
+  {
+   "fieldname": "iv_rate",
+   "fieldtype": "Float",
+   "label": "IV Rate (ml/h)"
+  },
+  {
+   "fieldname": "incubator_temp",
+   "fieldtype": "Float",
+   "label": "Incubator Temp (°C)"
+  },
+  {
+   "fieldname": "t",
+   "fieldtype": "Section Break",
+   "label": "Note"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  },
+  {
+   "fieldname": "share_with_parents",
+   "fieldtype": "Check",
+   "label": "Share With Parents"
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Nursery Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW NICU Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Neonatologist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Ward Admin",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash"
+}

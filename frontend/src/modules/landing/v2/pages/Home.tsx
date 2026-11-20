@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarCheck, ChevronLeft, ChevronRight, MapPin, Phone, Siren, Stethoscope, UserRound, Building2, Quote, HeartPulse } from "lucide-react";
-import { ARTICLES, CONFIG, DEPARTMENTS, PHOTOS, SERVICES } from "../content";
+import { ARTICLES, CONFIG, DEPARTMENTS, PHOTOS, SERVICES, serviceLink } from "../content";
+import { NZ_ART_CSS, UnitArt } from "../NurseryArt";
 import ServiceGlobe from "../ServiceGlobe";
 import DeptOrbit from "../DeptOrbit";
 import { phoneOf, tel, useDoctors } from "../data";
@@ -196,7 +197,7 @@ function ServicesOrbit() {
               <Reveal delay={140}><p className="mt-4 max-w-lg text-[17px] leading-relaxed text-white/75">{s}</p></Reveal>
               <Reveal delay={200}><ul className="mt-7 flex max-w-xl flex-wrap gap-2">
                 {SERVICES.map((sv) => { const I = ICONS[sv.icon] ?? Stethoscope; return (
-                  <li key={sv.id}><Link to={`/site/services#${sv.id}`} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-2 text-sm font-medium text-white/90 backdrop-blur transition hover:border-[#9FE3DA]/60 hover:bg-white/15">
+                  <li key={sv.id}><Link to={serviceLink(sv)} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-2 text-sm font-medium text-white/90 backdrop-blur transition hover:border-[#9FE3DA]/60 hover:bg-white/15">
                     <I className="h-4 w-4 text-[#9FE3DA]" />{sv.title}</Link></li>); })}
               </ul></Reveal>
               <Reveal delay={260}><Link to="/site/services" className={`${btn.primary} mt-8`}>{ui.nav.all}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link></Reveal>
@@ -231,17 +232,22 @@ function DoctorsRail() {
 }
 
 function Tour() {
-  const { ui } = useS2();
+  const { ui, lang } = useS2();
   const [e, t, s] = ui.sections.tour;
-  const shots: [string, string, string][] = [[PHOTOS.reception, "Reception", "lg:col-span-2 lg:row-span-2"], [PHOTOS.lounge, "Waiting lounge", ""], [PHOTOS.room, "Private room", ""], [PHOTOS.icu, "Intensive care", ""], [PHOTOS.pharmacy, "Pharmacy", ""]];
+  // "" = illustrated panel (UnitArt) until real Nursery / NICU photos are supplied [replace with photos]
+  const shots: [string, string, string, string?][] = [[PHOTOS.reception, "Reception", "lg:col-span-2 lg:row-span-2"], [PHOTOS.lounge, "Waiting lounge", ""], [PHOTOS.room, "Private room", ""], [PHOTOS.icu, "Intensive care", ""],
+    [PHOTOS.pharmacy, "Pharmacy", ""], ["", lang === "ur" ? "نرسری" : "Nursery", "", "/site/nursery#units"], ["", lang === "ur" ? "این آئی سی یو" : "NICU", "", "/site/nursery#nicu"], [PHOTOS.lounge, lang === "ur" ? "ماں اور بچے کا کمرہ" : "Mother & baby room", "", "/site/rooms#mother-baby"]];
   return (
     <section className="py-24">
       <Wrap>
         <SectionHead eyebrow={e} title={t} sub={s} action={<Link to="/site/about#tour" className={btn.ghost}>{ui.nav.all}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link>} />
+        <style>{NZ_ART_CSS}</style>
         <div className="grid auto-rows-[200px] gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {shots.map(([src, label, span], i) => (
+          {shots.map(([src, label, span, to], i) => (
             <Reveal key={label} delay={i * 60} className={`group relative overflow-hidden rounded-[24px] ${span}`}>
-              <img src={src} alt={label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+              {to && <Link to={to} className="absolute inset-0 z-10" aria-label={label} />}
+              {src ? <img src={src} alt={label} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                : <UnitArt kind={label === "NICU" || label === "این آئی سی یو" ? "nicu" : "nursery"} className="absolute inset-0 h-full transition duration-700 group-hover:scale-105" />}
               <div className="absolute inset-0 bg-gradient-to-t from-[#08303A]/80 via-transparent to-transparent" />
               <span className="absolute bottom-4 start-4 rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-md">{label}</span>
             </Reveal>

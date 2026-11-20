@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "creation": "2026-11-20 12:00:00.000000",
+ "modified": "2026-11-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Newborn Security Event",
+ "module": "Nursery",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "newborn",
+  "event",
+  "at",
+  "by_user",
+  "c",
+  "staff_id",
+  "with_whom",
+  "band_match",
+  "tag_no",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "newborn",
+   "fieldtype": "Link",
+   "label": "Newborn",
+   "options": "Newborn",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "event",
+   "fieldtype": "Select",
+   "label": "Event",
+   "options": "Tag applied\nTag removed\nLeft ward\nReturned to ward\nBand check at hand-over\nTag alarm\nAlarm resolved",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "at",
+   "fieldtype": "Datetime",
+   "label": "At",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "by_user",
+   "fieldtype": "Link",
+   "label": "By User",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "c",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "staff_id",
+   "fieldtype": "Data",
+   "label": "Staff ID"
+  },
+  {
+   "fieldname": "with_whom",
+   "fieldtype": "Data",
+   "label": "Handed to / with"
+  },
+  {
+   "fieldname": "band_match",
+   "fieldtype": "Check",
+   "label": "Bands Matched"
+  },
+  {
+   "fieldname": "tag_no",
+   "fieldtype": "Data",
+   "label": "Tag No"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Nursery Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW NICU Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Security",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Ward Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Neonatologist",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash"
+}

@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, CalendarCheck, CheckCircle2, Cpu, MapPin, Phone } from "lucide-react";
+import { ArrowLeft, Baby, CalendarCheck, CheckCircle2, Cpu, MapPin, Phone } from "lucide-react";
 import { DEPARTMENTS, FLOORS } from "../content";
 import { doctorsOf, tel, useDoctors } from "../data";
 import { useS2, Wrap } from "../SiteV2";
@@ -22,6 +22,7 @@ export default function Department() {
       <PageHero eyebrow="Department" title={d.name} sub={d.summary} img={d.img}>
         <div className="flex flex-wrap gap-3"><a href={book} className={btn.primary}><CalendarCheck className="h-5 w-5" />{isRad ? "Book a scan" : "Book with this department"}</a>
           {isRad && <Link to="/site/radiology" className={btn.glass}>Services, prices & reports</Link>}
+          {(d.slug === "paediatrics" || d.slug === "gynaecology") && <Link to="/site/nursery" className={btn.glass}><Baby className="h-5 w-5" />Nursery & Newborn Care</Link>}
           {phone && <a href={tel(phone)} className={btn.glass}><Phone className="h-5 w-5" /><span dir="ltr">{phone}</span></a>}</div>
       </PageHero>
       <section className="py-20">
@@ -40,6 +41,9 @@ export default function Department() {
               <p className="mt-1 flex items-center gap-2 text-[var(--muted)]"><MapPin className="h-4 w-4 text-[var(--accent)]" />{floor?.label ?? "Ask at reception"}</p>
               <Link to="/site/map" className={`${btn.ghost} mt-5 w-full py-2.5 text-sm`}>Open the floor map</Link></Reveal>
             <Reveal delay={80} className="rounded-[22px] bg-gradient-to-br from-[#0E5E6F] to-[#08303A] p-6 text-white"><h3 className="s2-display text-2xl">Ready to book?</h3><p className="mt-2 text-sm text-white/75">Choose a consultant and a time — confirmation by SMS.</p><a href={book} className={`${btn.primary} mt-5 w-full`}>{ui.common.book}</a></Reveal>
+            {(d.slug === "paediatrics" || d.slug === "gynaecology") && <Reveal delay={120} className={`${card} p-6`}><span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--accent)] text-white"><Baby className="h-5 w-5" /></span>
+              <h3 className="mt-3 text-lg font-bold">Nursery & Newborn Care</h3><p className="mt-1 text-sm text-[var(--muted)]">Rooming-in, nursery and NICU — paediatricians present at every birth.</p>
+              <Link to="/site/nursery" className={`${btn.ghost} mt-4 w-full py-2.5 text-sm`}>Visit the newborn unit</Link></Reveal>}
           </aside>
         </Wrap>
       </section>

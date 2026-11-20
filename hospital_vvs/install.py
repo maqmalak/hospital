@@ -287,6 +287,9 @@ def after_migrate():
 	from hospital_vvs.setup.radiology import ensure_catalogue
 
 	ensure_catalogue()  # imaging procedures + report templates (D-91); inserts only what is missing
+	from hospital_vvs.setup.nursery import ensure_wards
+
+	ensure_wards()  # Mother & Baby Rooms, Rooming-in Cradles, Nursery, NICU cots (D-95); insert-only
 	from hospital_vvs.services.doctor_share import ensure_accounts
 
 	ensure_accounts()

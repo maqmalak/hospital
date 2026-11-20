@@ -19,6 +19,7 @@ APP_ROUTES = {
 	"clinic": ["/opd/vitals", "/physician-queue", "/pw-prescription", "/pw-history", "/masters"],
 	"lab": ["/lab/orders", "/lab/samples", "/tests", "/lab/verify", "/lab/outsourced", "/lab/templates"],
 	"radiology": ["/radiology", "/radiology/analytics", "/radiology/catalogue"],
+	"nursery": ["/nursery", "/nursery/register", "/nursery/security", "/nursery/reports"],
 	"ipd": ["/er", "/ward", "/ipd", "/ipd/mar", "/ns", "/ipd_slip", "/ipd/kitchen", "/ipd/pre-auth", "/roster", "/ipd_report", "/display/ward"],
 	"pharmacy": ["/medicine_invoice", "/pharmacy/pick", "/pharmacy/review", "/pharmacy/dispense", "/pharmacy/tickets", "/pharmacy/items"],
 	"store": ["/store/receive", "/store/transfers", "/store/cycle-count", "/store/returns"],

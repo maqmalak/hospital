@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { CalendarCheck, Check, Phone, Video } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { ArrowRight, CalendarCheck, Check, Phone, Video } from "lucide-react";
 import { CONFIG, PHOTOS, SERVICES } from "../content";
 import { rs, tel } from "../data";
 import { useS2, Wrap } from "../SiteV2";
@@ -32,6 +32,7 @@ export default function Services() {
                   <h2 className="s2-display mt-4 text-[1.9rem]">{s.title}</h2><p className="mt-2 text-[var(--muted)]">{s.text}</p>
                   <ul className="mt-5 grid gap-2 sm:grid-cols-2">{s.items.map((x) => <li key={x} className="flex items-center gap-2 text-[15px]"><Check className="h-4 w-4 text-[var(--accent)]" />{x}</li>)}</ul>
                   {s.id === "telemedicine" && <a href="/hms/online-visit" className={`${btn.teal} mt-6`}><Video className="h-5 w-5" />Request an online consultation</a>}
+                  {s.href && <Link to={s.href} className={`${btn.teal} mt-6`}>Open {s.title}<ArrowRight className="h-4 w-4 rtl:rotate-180" /></Link>}
                 </div>
               </article>
             </Reveal>); })}

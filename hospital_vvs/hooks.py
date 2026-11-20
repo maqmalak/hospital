@@ -74,6 +74,7 @@ scheduler_events = {
 		"hospital_vvs.services.appointments.generate_slots",
 		"hospital_vvs.api.ops.daily_health_summary",
 		"hospital_vvs.services.expenses.scheduled",
+		"hospital_vvs.services.nursery.vaccine_reminders",
 	],
 }
 

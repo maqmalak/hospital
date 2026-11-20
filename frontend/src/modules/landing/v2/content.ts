@@ -6,7 +6,7 @@
 
 export const CONFIG = {
   // phones: empty = the main landline from Clinic Settings
-  phones: { emergency: "", reception: "", appointments: "", ambulance: "" } as Record<string, string>,
+  phones: { emergency: "", reception: "", appointments: "", ambulance: "", nicu: "" } as Record<string, string>,   // nicu: NICU helpline [confirm]
   whatsapp: "92XXXXXXXXXX",          // international format, digits only — hidden while it contains X
   email: "",                         // e.g. info@lyallpurhospital.pk — empty = not shown
   social: { facebook: "", instagram: "", youtube: "", linkedin: "" } as Record<string, string>,
@@ -155,17 +155,21 @@ export const DEPARTMENTS: Dept[] = [
     services: ["Blood tests", "Urine and stool tests", "Cultures", "Hormone and special tests", "Home sample collection on request"], technology: ["Automated analysers", "QR-verified digital reports"], match: ["patholog", "lab"] },
 ];
 
-export interface ServiceGroup { id: string; title: string; icon: string; /** "" → illustrated panel until a real photo is supplied */ img: string; text: string; items: string[] }
+export interface ServiceGroup { id: string; title: string; icon: string; /** "" → illustrated panel until a real photo is supplied */ img: string; text: string; items: string[]; /** own page (D-91/D-95) instead of /site/services#id */ href?: string }
+/** Where a service links: its own page when it has one, else its section on /site/services. */
+export const serviceLink = (s: ServiceGroup) => s.href ?? `/site/services#${s.id}`;
 export const SERVICES: ServiceGroup[] = [
   { id: "laboratory", title: "Laboratory", icon: "microscope", img: "", text: "Routine and special tests, verified by a pathologist and sent to your phone.", items: ["Blood and urine tests", "Cultures and sensitivities", "Hormone and thyroid tests", "Health check-up profiles"] },
   { id: "mri", title: "MRI", icon: "magnet", img: "", text: "Detailed, radiation-free scans of the brain, spine, joints and soft tissue, reported by a radiologist.", items: ["Brain and spine MRI", "Joint and sports-injury MRI", "Abdomen and pelvis MRI", "Contrast studies"] },
   { id: "ct-scan", title: "CT scan", icon: "scan", img: "", text: "Fast cross-sectional imaging — for emergencies, chest and abdomen, and planning treatment.", items: ["Head CT (stroke and injury)", "Chest and abdomen CT", "CT with contrast", "CT angiography"] },
-  { id: "ultrasound", title: "Ultrasound", icon: "waves", img: "", text: "Safe, painless scans with no radiation — including pregnancy and Doppler studies.", items: ["Abdomen and pelvis", "Pregnancy (obstetric) scans", "Doppler studies", "Thyroid, breast and soft tissue"] },
-  { id: "x-ray", title: "X-ray", icon: "bone", img: "", text: "Digital X-rays in minutes, with images in your record for every doctor to see.", items: ["Chest X-ray", "Bones and joints", "Spine", "Portable X-ray for wards and ICU"] },
+  { id: "ultrasound", title: "Ultrasound", icon: "waves", img: "", text: "Safe, painless scans with no radiation — including pregnancy and Doppler studies.", items: ["Abdomen and pelvis", "Pregnancy (obstetric) scans", "Doppler studies", "Thyroid, breast and soft tissue"], href: "/site/radiology" },
+  { id: "x-ray", title: "X-ray", icon: "bone", img: "", text: "Digital X-rays in minutes, with images in your record for every doctor to see.", items: ["Chest X-ray", "Bones and joints", "Spine", "Portable X-ray for wards and ICU"], href: "/site/radiology" },
   { id: "surgery", title: "Surgery", icon: "scissors", img: PHOTOS.icu, text: "Planned and emergency operations in modern theatres.", items: ["General surgery", "Orthopaedic surgery", "Gynaecological surgery", "ENT surgery"] },
   { id: "daycare", title: "Day care", icon: "clock", img: PHOTOS.room, text: "Minor procedures and infusions without an overnight stay.", items: ["Day-care procedures", "Infusions", "Dressings", "Minor operations"] },
   { id: "emergency", title: "Emergency 24/7", icon: "siren", img: PHOTOS.corridor, text: "Triage, resuscitation and monitored bays, day and night.", items: ["Triage on arrival", "Trauma care", "Chest pain & stroke", "Ambulance handover"] },
   { id: "critical", title: "Critical care (ICU / CCU)", icon: "activity", img: PHOTOS.icu, text: "Monitored beds and specialist nursing around the clock.", items: ["Intensive care", "Coronary care", "Ventilator support", "Family waiting area"] },
+  { id: "nursery", title: "Nursery & Newborn Care", icon: "baby", img: "", text: "Rooming-in, a well-baby nursery and paediatricians for every newborn — from the very first breath.", items: ["Newborn examination", "Birth vaccinations", "Jaundice care & phototherapy", "Lactation support"], href: "/site/nursery" },
+  { id: "nicu", title: "NICU", icon: "heart", img: PHOTOS.icu, text: "Neonatal intensive care for premature and sick babies, with parents welcome 24/7.", items: ["Incubators & CPAP", "Ventilator support", "Phototherapy", "Kangaroo mother care"], href: "/site/nursery#nicu" },
   { id: "dialysis", title: "Dialysis", icon: "droplets", img: PHOTOS.room, text: "Scheduled haemodialysis with monitoring throughout.", items: ["Haemodialysis", "Kidney clinic", "Access follow-up"] },
   { id: "telemedicine", title: "Online consultation", icon: "video", img: PHOTOS.lounge, text: "See a consultant by video for follow-ups and advice.", items: ["Video follow-ups", "e-Prescription", "Report review"] },
   { id: "pharmacy", title: "Pharmacy", icon: "pill", img: PHOTOS.pharmacy, text: "In-house pharmacy for prescriptions and ward medicines.", items: ["Prescriptions", "Ward medicines", "Medicine counselling"] },

@@ -1,0 +1,562 @@
+{
+ "actions": [],
+ "creation": "2026-11-20 12:00:00.000000",
+ "modified": "2026-11-20 12:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Newborn",
+ "module": "Nursery",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "status",
+  "unit",
+  "cot",
+  "admission",
+  "branch",
+  "c1",
+  "baby_patient",
+  "baby_name",
+  "named",
+  "sex",
+  "blood_group",
+  "c2",
+  "mother",
+  "mother_name",
+  "mother_phone",
+  "father_name",
+  "mother_admission",
+  "birth",
+  "birth_datetime",
+  "delivery_type",
+  "place_of_birth",
+  "multiple_birth",
+  "birth_order",
+  "multiple_group",
+  "b1",
+  "gestation_weeks",
+  "gestation_days",
+  "birth_weight_g",
+  "length_cm",
+  "head_circ_cm",
+  "b2",
+  "apgar_1",
+  "apgar_5",
+  "attending_doctor",
+  "obstetrician",
+  "nicu_reason",
+  "sec",
+  "band_no",
+  "tag_no",
+  "tag_active",
+  "s1",
+  "last_band_check",
+  "portal_photo_consent",
+  "now",
+  "current_weight_g",
+  "last_bilirubin",
+  "phototherapy_on",
+  "n1",
+  "resp_support",
+  "last_vitals_at",
+  "last_feed_at",
+  "dc",
+  "dc_feeding",
+  "dc_weight",
+  "dc_jaundice",
+  "dc_screenings",
+  "d1",
+  "dc_vaccines",
+  "dc_parent_taught",
+  "dc_tag_removed",
+  "dc_band_checked",
+  "d2",
+  "discharge_diagnosis",
+  "discharge_advice",
+  "discharge_meds",
+  "d3",
+  "follow_up_date",
+  "discharged_at",
+  "discharged_by",
+  "discharge_weight_g",
+  "signature_hash",
+  "doc_version"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Stable\nObservation\nCritical\nPhototherapy\nReady for discharge\nDischarged",
+   "default": "Stable",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Select",
+   "label": "Unit",
+   "options": "Rooming-in\nNursery\nNICU",
+   "default": "Rooming-in",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "cot",
+   "fieldtype": "Link",
+   "label": "Cot",
+   "options": "Hospital Bed"
+  },
+  {
+   "fieldname": "admission",
+   "fieldtype": "Link",
+   "label": "Baby Admission",
+   "options": "Bed Allotment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "baby_patient",
+   "fieldtype": "Link",
+   "label": "Baby MR",
+   "options": "Patient",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "baby_name",
+   "fieldtype": "Data",
+   "label": "Baby Name",
+   "in_list_view": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "named",
+   "fieldtype": "Check",
+   "label": "Named by Parents"
+  },
+  {
+   "fieldname": "sex",
+   "fieldtype": "Select",
+   "label": "Sex",
+   "options": "Male\nFemale\nIndeterminate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "blood_group",
+   "fieldtype": "Select",
+   "label": "Blood Group",
+   "options": "\nA+\nA-\nB+\nB-\nAB+\nAB-\nO+\nO-\nPending"
+  },
+  {
+   "fieldname": "c2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mother",
+   "fieldtype": "Link",
+   "label": "Mother MR",
+   "options": "Patient",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "mother_name",
+   "fieldtype": "Data",
+   "label": "Mother Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mother_phone",
+   "fieldtype": "Data",
+   "label": "Mother's Mobile"
+  },
+  {
+   "fieldname": "father_name",
+   "fieldtype": "Data",
+   "label": "Father's / Husband's Name"
+  },
+  {
+   "fieldname": "mother_admission",
+   "fieldtype": "Link",
+   "label": "Mother Admission",
+   "options": "Bed Allotment"
+  },
+  {
+   "fieldname": "birth",
+   "fieldtype": "Section Break",
+   "label": "Birth"
+  },
+  {
+   "fieldname": "birth_datetime",
+   "fieldtype": "Datetime",
+   "label": "Date & Time of Birth",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "delivery_type",
+   "fieldtype": "Select",
+   "label": "Delivery Type",
+   "options": "Normal vaginal\nAssisted (vacuum / forceps)\nC-section (elective)\nC-section (emergency)\nBorn before arrival"
+  },
+  {
+   "fieldname": "place_of_birth",
+   "fieldtype": "Select",
+   "label": "Place Of Birth",
+   "options": "This hospital\nBorn outside (transferred)",
+   "default": "This hospital"
+  },
+  {
+   "fieldname": "multiple_birth",
+   "fieldtype": "Select",
+   "label": "Multiple Birth",
+   "options": "Single\nTwin\nTriplet",
+   "default": "Single"
+  },
+  {
+   "fieldname": "birth_order",
+   "fieldtype": "Int",
+   "label": "Birth Order",
+   "default": "1"
+  },
+  {
+   "fieldname": "multiple_group",
+   "fieldtype": "Data",
+   "label": "Multiple-Birth Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "b1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gestation_weeks",
+   "fieldtype": "Int",
+   "label": "Gestation (weeks)"
+  },
+  {
+   "fieldname": "gestation_days",
+   "fieldtype": "Int",
+   "label": "Gestation (+days)"
+  },
+  {
+   "fieldname": "birth_weight_g",
+   "fieldtype": "Int",
+   "label": "Birth Weight (g)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "length_cm",
+   "fieldtype": "Float",
+   "label": "Length (cm)"
+  },
+  {
+   "fieldname": "head_circ_cm",
+   "fieldtype": "Float",
+   "label": "Head Circumference (cm)"
+  },
+  {
+   "fieldname": "b2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "apgar_1",
+   "fieldtype": "Int",
+   "label": "Apgar 1 min"
+  },
+  {
+   "fieldname": "apgar_5",
+   "fieldtype": "Int",
+   "label": "Apgar 5 min"
+  },
+  {
+   "fieldname": "attending_doctor",
+   "fieldtype": "Link",
+   "label": "Attending Paediatrician",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "obstetrician",
+   "fieldtype": "Link",
+   "label": "Obstetrician",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "nicu_reason",
+   "fieldtype": "Select",
+   "label": "NICU Admission Reason",
+   "options": "\nPrematurity\nRespiratory distress\nNeonatal jaundice\nSuspected sepsis\nLow birth weight\nHypoglycaemia\nBirth asphyxia\nCongenital anomaly\nOther"
+  },
+  {
+   "fieldname": "sec",
+   "fieldtype": "Section Break",
+   "label": "Identity & security"
+  },
+  {
+   "fieldname": "band_no",
+   "fieldtype": "Data",
+   "label": "ID Band No.",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "tag_no",
+   "fieldtype": "Data",
+   "label": "Security Tag No."
+  },
+  {
+   "fieldname": "tag_active",
+   "fieldtype": "Check",
+   "label": "Tag Active"
+  },
+  {
+   "fieldname": "s1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_band_check",
+   "fieldtype": "Datetime",
+   "label": "Last Band Check",
+   "read_only": 1
+  },
+  {
+   "fieldname": "portal_photo_consent",
+   "fieldtype": "Check",
+   "label": "Parents Consent to Photos in Portal"
+  },
+  {
+   "fieldname": "now",
+   "fieldtype": "Section Break",
+   "label": "Current"
+  },
+  {
+   "fieldname": "current_weight_g",
+   "fieldtype": "Int",
+   "label": "Current Weight G",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_bilirubin",
+   "fieldtype": "Float",
+   "label": "Last Bilirubin (mg/dL)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "phototherapy_on",
+   "fieldtype": "Check",
+   "label": "Phototherapy On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "n1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "resp_support",
+   "fieldtype": "Data",
+   "label": "Respiratory Support",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_vitals_at",
+   "fieldtype": "Datetime",
+   "label": "Last Vitals At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_feed_at",
+   "fieldtype": "Datetime",
+   "label": "Last Feed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dc",
+   "fieldtype": "Section Break",
+   "label": "Discharge checklist"
+  },
+  {
+   "fieldname": "dc_feeding",
+   "fieldtype": "Check",
+   "label": "Feeding Established"
+  },
+  {
+   "fieldname": "dc_weight",
+   "fieldtype": "Check",
+   "label": "Weight Acceptable"
+  },
+  {
+   "fieldname": "dc_jaundice",
+   "fieldtype": "Check",
+   "label": "Jaundice Cleared / Safe"
+  },
+  {
+   "fieldname": "dc_screenings",
+   "fieldtype": "Check",
+   "label": "Screenings Done"
+  },
+  {
+   "fieldname": "d1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dc_vaccines",
+   "fieldtype": "Check",
+   "label": "Birth Vaccines Given"
+  },
+  {
+   "fieldname": "dc_parent_taught",
+   "fieldtype": "Check",
+   "label": "Parents Taught"
+  },
+  {
+   "fieldname": "dc_tag_removed",
+   "fieldtype": "Check",
+   "label": "Security Tag Removed"
+  },
+  {
+   "fieldname": "dc_band_checked",
+   "fieldtype": "Check",
+   "label": "Bands Matched at Hand-over"
+  },
+  {
+   "fieldname": "d2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "discharge_diagnosis",
+   "fieldtype": "Small Text",
+   "label": "Discharge Diagnosis"
+  },
+  {
+   "fieldname": "discharge_advice",
+   "fieldtype": "Small Text",
+   "label": "Discharge Advice"
+  },
+  {
+   "fieldname": "discharge_meds",
+   "fieldtype": "Small Text",
+   "label": "Medicines at Discharge"
+  },
+  {
+   "fieldname": "d3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "follow_up_date",
+   "fieldtype": "Date",
+   "label": "Follow Up Date"
+  },
+  {
+   "fieldname": "discharged_at",
+   "fieldtype": "Datetime",
+   "label": "Discharged At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discharged_by",
+   "fieldtype": "Link",
+   "label": "Discharged By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discharge_weight_g",
+   "fieldtype": "Int",
+   "label": "Discharge Weight G",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_hash",
+   "fieldtype": "Data",
+   "label": "Signature Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doc_version",
+   "fieldtype": "Int",
+   "label": "Doc Version",
+   "default": "0",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "index_web_pages_for_search": 0,
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Nursery Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW NICU Nurse",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Neonatologist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Ward Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Security",
+   "read": 1,
+   "report": 1
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "NB-.YY.-.#####",
+ "title_field": "baby_name",
+ "show_title_field_in_link": 1,
+ "search_fields": "baby_name,mother_name,band_no"
+}

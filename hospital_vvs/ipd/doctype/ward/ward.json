@@ -43,7 +43,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Ward Type",
-   "options": "General\nSemi-Private\nPrivate\nICU\nCCU\nNICU\nHDU\nEmergency\nMaternity\nDay Care"
+   "options": "General\nSemi-Private\nPrivate\nICU\nCCU\nNICU\nNursery\nHDU\nEmergency\nMaternity\nDay Care"
   },
   {
    "default": "Mixed",

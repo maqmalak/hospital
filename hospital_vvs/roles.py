@@ -19,10 +19,15 @@ OV_DOCTOR = "OV Doctor"
 RADIOGRAPHER = "PW Radiographer"
 SONOGRAPHER = "PW Sonographer"
 RADIOLOGIST = "PW Radiologist"
+NURSERY_NURSE = "PW Nursery Nurse"
+NICU_NURSE = "PW NICU Nurse"
+NEONATOLOGIST = "PW Neonatologist"
+WARD_ADMIN = "PW Ward Admin"
+SECURITY = "PW Security"
 
 ALL = [ADMIN, DOCTOR, RECEPTIONIST, LAB_USER, PATHOLOGIST, PHARMACY_CASHIER, FINDER, REVIEWER, DISPENSER,
 	STORE_KEEPER, CASH_SUPERVISOR, ACCOUNTANT, NURSE, DEO, OV_STAFF, OV_DOCTOR,
-	RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST]
+	RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST, WARD_ADMIN, SECURITY]
 
 # Desk access: staff may open ERPNext Desk screens (POS for the pharmacy, stock screens for the store keeper).
 DESK = ALL
@@ -31,7 +36,7 @@ DESK = ALL
 TWO_FACTOR = [ADMIN, ACCOUNTANT, CASH_SUPERVISOR, PATHOLOGIST, RADIOLOGIST]
 
 # Clinical roles see diagnoses, notes, vitals, allergies and results (permlevel 1). Money roles do not.
-CLINICAL = [ADMIN, DOCTOR, NURSE, PATHOLOGIST, REVIEWER, DEO, OV_DOCTOR, RADIOLOGIST, RADIOGRAPHER, SONOGRAPHER]
+CLINICAL = [ADMIN, DOCTOR, NURSE, PATHOLOGIST, REVIEWER, DEO, OV_DOCTOR, RADIOLOGIST, RADIOGRAPHER, SONOGRAPHER, NURSERY_NURSE, NICU_NURSE, NEONATOLOGIST]
 FRONT_DESK = [ADMIN, RECEPTIONIST]
 MONEY = [RECEPTIONIST, LAB_USER, PHARMACY_CASHIER, DISPENSER, ACCOUNTANT, CASH_SUPERVISOR]
 CNIC_REVEAL = [ADMIN, RECEPTIONIST]
@@ -56,6 +61,11 @@ DESCRIPTIONS = {
 	RADIOGRAPHER: "X-ray room: start and complete scans, image quality check",
 	SONOGRAPHER: "Ultrasound / Doppler room: start and complete scans, draft measurements",
 	RADIOLOGIST: "Reports imaging studies, signs final reports, critical findings, addenda",
+	NURSERY_NURSE: "Nursery & rooming-in babies: registration, vitals, feeds, security hand-overs",
+	NICU_NURSE: "NICU babies: charting incl. respiratory support, IV fluids, incubator",
+	NEONATOLOGIST: "Paediatrician / neonatologist: baby notes, orders, discharge checklist and signed papers",
+	WARD_ADMIN: "Maternity & newborn ward admin: registration, cots, papers, reports (no clinical charting)",
+	SECURITY: "Infant security: tag events, in/out log, alarms (no clinical data)",
 }
 
 

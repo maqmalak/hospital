@@ -9,7 +9,7 @@ import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, 
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { ArrowUp, ChevronDown, Languages, Mail, MapPin, Menu, Moon, Phone, Search, Siren, Sun, X, LogIn, Facebook, Instagram, Youtube, Linkedin, Loader2 } from "lucide-react";
 import { postCall } from "@/services/frappe";
-import { CONFIG, DEPARTMENTS, FLOORS, SERVICES, UI, type Lang, type UICopy } from "./content";
+import { CONFIG, DEPARTMENTS, FLOORS, SERVICES, UI, serviceLink, type Lang, type UICopy } from "./content";
 import { hasWa, phoneOf, tel, useDoctors, useSite, slugDoc, type Site } from "./data";
 import { ICONS, btn } from "./ui";
 
@@ -20,6 +20,8 @@ const Pages = {
   Rooms: lazy(() => import("./pages/Rooms")), Pharmacy: lazy(() => import("./pages/Pharmacy")), Wayfinding: lazy(() => import("./pages/Wayfinding")),
   Directions: lazy(() => import("./pages/Directions")), Patients: lazy(() => import("./pages/Patients")), Careers: lazy(() => import("./pages/Careers")),
   News: lazy(() => import("./pages/News")), Article: lazy(() => import("./pages/Article")), Contact: lazy(() => import("./pages/Contact")),
+  Nursery: lazy(() => import("./pages/Nursery")), MyBaby: lazy(() => import("./pages/MyBaby")),
+  MyBabyVerify: lazy(() => import("./pages/MyBaby").then((m) => ({ default: m.MyBabyVerify }))),
   Radiology: lazy(() => import("./pages/Radiology")), RadiologyBook: lazy(() => import("./pages/RadiologyBook")), RadiologyReports: lazy(() => import("./pages/RadiologyReports")),
   RadiologyVerify: lazy(() => import("./pages/RadiologyVerify").then((m) => ({ default: m.RadiologyVerify }))),
   RadiologyShared: lazy(() => import("./pages/RadiologyVerify").then((m) => ({ default: m.RadiologyShared }))),
@@ -79,6 +81,9 @@ export default function SiteV2() {
               <Route path="news" element={<Pages.News />} />
               <Route path="news/:slug" element={<Pages.Article />} />
               <Route path="contact" element={<Pages.Contact />} />
+              <Route path="nursery" element={<Pages.Nursery />} />
+              <Route path="my-baby" element={<Pages.MyBaby />} />
+              <Route path="my-baby/verify/:kind/:name/:sig" element={<Pages.MyBabyVerify />} />
               <Route path="radiology" element={<Pages.Radiology />} />
               <Route path="radiology/book" element={<Pages.RadiologyBook />} />
               <Route path="radiology/reports" element={<Pages.RadiologyReports />} />
@@ -131,7 +136,7 @@ function Logo({ small }: { small?: boolean }) {
 }
 
 function NavBar() {
-  const { ui } = useS2();
+  const { ui, lang } = useS2();
   const [small, setSmall] = useState(false);
   const [open, setOpen] = useState(false);
   const [mega, setMega] = useState<"" | "depts" | "services">("");
@@ -147,7 +152,7 @@ function NavBar() {
           <Link key={d.slug} to={`/site/departments/${d.slug}`} className="flex items-start gap-3 rounded-2xl p-3 hover:bg-[var(--soft)]"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--mint)] text-[var(--primary)]"><I className="h-[18px] w-[18px]" /></span>
             <span><span className="block text-sm font-semibold">{d.name}</span><span className="line-clamp-1 text-xs text-[var(--muted)]">{d.summary}</span></span></Link>); })}</div>
           : <div className="grid grid-cols-2 gap-1 md:grid-cols-3">{SERVICES.map((s) => { const I = ICONS[s.icon]; return (
-          <Link key={s.id} to={s.id === "x-ray" || s.id === "ultrasound" ? "/site/radiology" : `/site/services#${s.id}`} className="flex items-start gap-3 rounded-2xl p-3 hover:bg-[var(--soft)]"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--mint)] text-[var(--primary)]"><I className="h-[18px] w-[18px]" /></span>
+          <Link key={s.id} to={serviceLink(s)} className="flex items-start gap-3 rounded-2xl p-3 hover:bg-[var(--soft)]"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--mint)] text-[var(--primary)]"><I className="h-[18px] w-[18px]" /></span>
             <span><span className="block text-sm font-semibold">{s.title}</span><span className="line-clamp-1 text-xs text-[var(--muted)]">{s.text}</span></span></Link>); })}</div>}
         <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
           {k === "services" ? <span className="flex flex-wrap gap-3 text-sm"><Link to="/site/radiology/book" className="font-semibold text-[var(--accent)]">Book a scan</Link><Link to="/site/radiology/reports" className="font-semibold text-[var(--primary)]">Download my report</Link></span> : <span />}
@@ -155,7 +160,7 @@ function NavBar() {
       </div></div>}
     </div>
   );
-  const mobile: [string, string][] = [["/site", ui.nav.home], ["/site/about", ui.nav.about], ["/site/departments", ui.nav.departments], ["/site/services", ui.nav.services], ["/site/radiology", "Radiology & Imaging"], ["/site/doctors", ui.nav.doctors],
+  const mobile: [string, string][] = [["/site", ui.nav.home], ["/site/about", ui.nav.about], ["/site/departments", ui.nav.departments], ["/site/services", ui.nav.services], ["/site/radiology", "Radiology & Imaging"], ["/site/nursery", lang === "ur" ? "نرسری اور نومولود" : "Nursery & Newborn Care"], ["/site/doctors", ui.nav.doctors],
     ["/site/rooms", ui.nav.rooms], ["/site/pharmacy", ui.nav.pharmacy], ["/site/map", ui.nav.map], ["/site/directions", ui.nav.directions], ["/site/patients", ui.nav.patients], ["/site/news", ui.nav.news], ["/site/careers", ui.nav.careers], ["/site/contact", ui.nav.contact]];
   return (
     <header className={`sticky top-0 z-40 border-b transition-all duration-300 ${small ? "border-[var(--line)] s2-glass shadow-[0_10px_30px_-20px_rgba(8,48,58,0.5)] backdrop-blur-xl" : "border-transparent bg-[var(--bg)]"}`}>
@@ -194,12 +199,14 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
   useEffect(() => { ref.current?.focus(); const f = (e: KeyboardEvent) => e.key === "Escape" && onClose(); window.addEventListener("keydown", f); return () => window.removeEventListener("keydown", f); }, [onClose]);
   const all = useMemo<Hit[]>(() => {
     const pages: [string, string][] = [["/site/about", ui.nav.about], ["/site/departments", ui.nav.departments], ["/site/services", ui.nav.services],
-      ["/site/radiology", "Radiology & Imaging — X-ray, ultrasound, Doppler"], ["/site/radiology/book", "Book a scan"], ["/site/radiology/reports", "Download my report"], ["/site/doctors", ui.nav.doctors], ["/site/rooms", ui.nav.rooms],
+      ["/site/radiology", "Radiology & Imaging — X-ray, ultrasound, Doppler"], ["/site/radiology/book", "Book a scan"], ["/site/radiology/reports", "Download my report"],
+      ["/site/nursery", "Nursery & Newborn Care · نرسری"], ["/site/nursery#nicu", "NICU — neonatal intensive care · این آئی سی یو"], ["/site/nursery#services", "Newborn vaccination (BCG, OPV, Hepatitis B) · ویکسین"],
+      ["/site/nursery#faq", "Birth certificate / birth registration slip · پیدائشی سرٹیفکیٹ"], ["/site/nursery#visiting", "Visiting hours — nursery & NICU · ملاقات کے اوقات"], ["/site/my-baby", "My Baby — parent portal · میرا بچہ"], ["/site/doctors", ui.nav.doctors], ["/site/rooms", ui.nav.rooms],
       ["/site/pharmacy", ui.nav.pharmacy], ["/site/map", ui.nav.map], ["/site/directions", ui.nav.directions], ["/site/patients", ui.nav.patients], ["/site/news", ui.nav.news], ["/site/careers", ui.nav.careers], ["/site/contact", ui.nav.contact]];
     return [
       ...pages.map(([to, label]) => ({ group: ui.search.pages, label, to })),
       ...DEPARTMENTS.map((d) => ({ group: ui.search.depts, label: d.name, sub: d.summary, to: `/site/departments/${d.slug}` })),
-      ...SERVICES.flatMap((s) => [{ group: ui.search.services, label: s.title, sub: s.items.join(", "), to: `/site/services#${s.id}` }]),
+      ...SERVICES.flatMap((s) => [{ group: ui.search.services, label: s.title, sub: s.items.join(", "), to: serviceLink(s) }]),
       ...(opts?.doctors ?? []).map((d) => ({ group: ui.search.doctors, label: d.doctor_name, sub: d.specialization, to: `/site/doctors/${slugDoc(d)}` })),
       ...FLOORS.flatMap((f) => f.places.map((p) => ({ group: ui.search.places, label: p.name, sub: `${f.label} · ${p.keywords ?? ""}`, to: `/site/map?q=${encodeURIComponent(p.id)}` }))),
     ];

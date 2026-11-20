@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { BadgeCheck, ChevronDown, ClipboardList, CreditCard, FileText, FlaskConical, Scale, ShieldCheck, Video } from "lucide-react";
+import { Baby, BadgeCheck, ChevronDown, ClipboardList, CreditCard, FileText, FlaskConical, Scale, ShieldCheck, Video } from "lucide-react";
 import { CONFIG, FAQS, PHOTOS } from "../content";
 import { Wrap } from "../SiteV2";
 import { btn, card, PageHero, Reveal, SectionHead, useJsonLd, useTitle } from "../ui";
@@ -27,9 +27,10 @@ export default function Patients() {
       <section id="portal" className="scroll-mt-28 py-20">
         <Wrap>
           <SectionHead eyebrow="Patient portal" title="Your care, on your phone" sub="No app or password needed — secure links arrive by SMS or WhatsApp." />
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {([[FlaskConical, "Lab reports", "A secure link with a QR code anyone can scan to confirm the report is genuine.", "", ""], [ClipboardList, "Appointments", "Book online and manage or cancel from the link in your confirmation SMS.", "/hms/book-appointment", "Book now"],
-              [Video, "Online consultation", "Request a video follow-up and receive an e-prescription.", "/hms/online-visit", "Request a visit"]] as [typeof Video, string, string, string, string][]).map(([I, t, d, href, cta], i) => (
+              [Video, "Online consultation", "Request a video follow-up and receive an e-prescription.", "/hms/online-visit", "Request a visit"],
+              [Baby, "My Baby", "Updates from the nursery or NICU, your baby's papers and vaccination reminders.", "/hms/site/my-baby", "Open My Baby"]] as [typeof Video, string, string, string, string][]).map(([I, t, d, href, cta], i) => (
               <Reveal key={t} delay={i * 70} className={`${card} flex flex-col p-7`}><span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--mint)] text-[var(--primary)]"><I className="h-6 w-6" /></span><h3 className="mt-4 text-lg font-bold">{t}</h3><p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
                 {href && <a href={href} className={`${btn.teal} mt-5 py-2.5 text-sm`}>{cta}</a>}</Reveal>))}
           </div>
