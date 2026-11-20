@@ -1,0 +1,150 @@
+{
+ "actions": [],
+ "creation": "2026-11-20 10:00:00.000000",
+ "modified": "2026-11-20 10:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Imaging Report Link",
+ "module": "Radiology",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "study",
+  "patient",
+  "purpose",
+  "recipient",
+  "l1",
+  "token_hash",
+  "expires_at",
+  "revoked",
+  "opens",
+  "l2",
+  "created_by_patient",
+  "last_opened_at",
+  "last_ip"
+ ],
+ "fields": [
+  {
+   "fieldname": "study",
+   "fieldtype": "Link",
+   "label": "Study",
+   "options": "Imaging Study",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Select",
+   "label": "Purpose",
+   "options": "Share\nPatient",
+   "default": "Share",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "recipient",
+   "fieldtype": "Data",
+   "label": "Shared With"
+  },
+  {
+   "fieldname": "l1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "token_hash",
+   "fieldtype": "Data",
+   "label": "Token Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expires_at",
+   "fieldtype": "Datetime",
+   "label": "Expires At",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "revoked",
+   "fieldtype": "Check",
+   "label": "Revoked"
+  },
+  {
+   "fieldname": "opens",
+   "fieldtype": "Int",
+   "label": "Opens",
+   "read_only": 1
+  },
+  {
+   "fieldname": "l2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "created_by_patient",
+   "fieldtype": "Check",
+   "label": "Created By Patient",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_opened_at",
+   "fieldtype": "Datetime",
+   "label": "Last Opened At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_ip",
+   "fieldtype": "Data",
+   "label": "Last Ip",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1,
+   "delete": 1
+  },
+  {
+   "role": "PW Radiologist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Receptionist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  }
+ ],
+ "track_changes": 0,
+ "autoname": "hash"
+}

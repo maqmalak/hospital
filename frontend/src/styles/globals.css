@@ -497,6 +497,16 @@ html[lang="ar"] body { font-family: "Noto Kufi Arabic", Inter, system-ui, sans-s
   html[data-palette="lime"] .vvs-gold-text { background-image: linear-gradient(110deg, #3F6212, #65A30D 45%, #4D7C0F 70%, #365314); }
   html.dark[data-palette="lime"] .vvs-gold-text { background-image: linear-gradient(110deg, #C4F01A, #D9F99D 40%, #4ADE80 75%, #22C55E); }
   html.dark[data-palette="lime"] .tab-gold { box-shadow: 0 6px 16px -8px var(--grad-glow), inset 0 -2px 0 #16A34A; }
+  /* Lime action buttons (user, 2026-11-20): deep olive → lime, white bold text, soft lime glow — light and dark */
+  html[data-palette="lime"] button.bg-primary, html[data-palette="lime"] a.bg-primary, html[data-palette="lime"] .btn-gold,
+  html[data-palette="lime"] .btn-azure, html[data-palette="lime"] .btn-act, html[data-palette="lime"] .btn-act-soft {
+    background-image: linear-gradient(90deg, #4D7C0F 0%, #65A30D 48%, #84CC16 100%) !important;
+    color: #FFFFFF !important; font-weight: 700;
+    box-shadow: 0 10px 26px -10px rgb(132 204 22 / 0.65), inset 0 1px 0 rgb(255 255 255 / 0.18) !important;
+  }
+  html[data-palette="lime"] button.bg-primary:hover, html[data-palette="lime"] a.bg-primary:hover, html[data-palette="lime"] .btn-gold:hover,
+  html[data-palette="lime"] .btn-act:hover, html[data-palette="lime"] .btn-act-soft:hover { filter: brightness(1.08); box-shadow: 0 14px 32px -10px rgb(132 204 22 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.22) !important; }
+  html[data-palette="lime"] .btn-gold:disabled, html[data-palette="lime"] .btn-act:disabled, html[data-palette="lime"] button.bg-primary:disabled { filter: saturate(.55) brightness(.9); box-shadow: none !important; }
 }
 /* Lime dark cards (D-90), after the aaghaz.ai content cards: near-black #121212 surface, hairline border, a lime glow
    along the top edge and a faint lime wash at the top of summary / form cards. */

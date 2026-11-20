@@ -1,0 +1,239 @@
+{
+ "actions": [],
+ "creation": "2026-11-20 10:00:00.000000",
+ "modified": "2026-11-20 10:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Imaging Procedure",
+ "module": "Radiology",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "procedure_name",
+  "code",
+  "modality",
+  "category",
+  "body_region",
+  "p1",
+  "price",
+  "duration_min",
+  "tat_hours",
+  "item",
+  "p2",
+  "is_active",
+  "show_on_website",
+  "walk_in",
+  "needs_consent",
+  "female_only",
+  "sort_order",
+  "p3",
+  "description",
+  "prep_group",
+  "preparation",
+  "p4",
+  "report_kind",
+  "default_template"
+ ],
+ "fields": [
+  {
+   "fieldname": "procedure_name",
+   "fieldtype": "Data",
+   "label": "Procedure Name",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Code"
+  },
+  {
+   "fieldname": "modality",
+   "fieldtype": "Select",
+   "label": "Modality",
+   "options": "X-Ray\nUltrasound\nDoppler",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "X-Ray\nContrast Study\nUltrasound\nPregnancy\nDoppler\nGuided Procedure",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "body_region",
+   "fieldtype": "Data",
+   "label": "Body Region"
+  },
+  {
+   "fieldname": "p1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "label": "Price",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "duration_min",
+   "fieldtype": "Int",
+   "label": "Duration (min)",
+   "default": "15"
+  },
+  {
+   "fieldname": "tat_hours",
+   "fieldtype": "Float",
+   "label": "Report Turnaround (hours)",
+   "default": "4"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "description": "Billing item (created automatically)"
+  },
+  {
+   "fieldname": "p2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_on_website",
+   "fieldtype": "Check",
+   "label": "Show on Website",
+   "default": "1"
+  },
+  {
+   "fieldname": "walk_in",
+   "fieldtype": "Check",
+   "label": "Walk-in Allowed"
+  },
+  {
+   "fieldname": "needs_consent",
+   "fieldtype": "Check",
+   "label": "Needs Written Consent"
+  },
+  {
+   "fieldname": "female_only",
+   "fieldtype": "Check",
+   "label": "Female Patients Only"
+  },
+  {
+   "fieldname": "sort_order",
+   "fieldtype": "Int",
+   "label": "Sort Order",
+   "default": "100"
+  },
+  {
+   "fieldname": "p3",
+   "fieldtype": "Section Break",
+   "label": "Patient information"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Short Description"
+  },
+  {
+   "fieldname": "prep_group",
+   "fieldtype": "Select",
+   "label": "Preparation Group",
+   "options": "None\nFasting\nFull Bladder\nFasting + Full Bladder\nMetal Removal\nContrast\nPregnancy"
+  },
+  {
+   "fieldname": "preparation",
+   "fieldtype": "Small Text",
+   "label": "Preparation Instructions"
+  },
+  {
+   "fieldname": "p4",
+   "fieldtype": "Section Break",
+   "label": "Reporting"
+  },
+  {
+   "fieldname": "report_kind",
+   "fieldtype": "Select",
+   "label": "Report Kind",
+   "options": "General\nObstetric\nAbdomen",
+   "default": "General"
+  },
+  {
+   "fieldname": "default_template",
+   "fieldtype": "Link",
+   "label": "Default Template",
+   "options": "Imaging Report Template"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1,
+   "delete": 1
+  },
+  {
+   "role": "PW Radiologist",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Radiographer",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Sonographer",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Receptionist",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Doctor",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "field:procedure_name"
+}

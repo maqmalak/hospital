@@ -16,18 +16,22 @@ NURSE = "PW Nurse"
 DEO = "PW DEO"
 OV_STAFF = "OV Staff"
 OV_DOCTOR = "OV Doctor"
+RADIOGRAPHER = "PW Radiographer"
+SONOGRAPHER = "PW Sonographer"
+RADIOLOGIST = "PW Radiologist"
 
 ALL = [ADMIN, DOCTOR, RECEPTIONIST, LAB_USER, PATHOLOGIST, PHARMACY_CASHIER, FINDER, REVIEWER, DISPENSER,
-	STORE_KEEPER, CASH_SUPERVISOR, ACCOUNTANT, NURSE, DEO, OV_STAFF, OV_DOCTOR]
+	STORE_KEEPER, CASH_SUPERVISOR, ACCOUNTANT, NURSE, DEO, OV_STAFF, OV_DOCTOR,
+	RADIOGRAPHER, SONOGRAPHER, RADIOLOGIST]
 
 # Desk access: staff may open ERPNext Desk screens (POS for the pharmacy, stock screens for the store keeper).
 DESK = ALL
 
 # Roles that must use two-factor authentication (09-security-ops.md)
-TWO_FACTOR = [ADMIN, ACCOUNTANT, CASH_SUPERVISOR, PATHOLOGIST]
+TWO_FACTOR = [ADMIN, ACCOUNTANT, CASH_SUPERVISOR, PATHOLOGIST, RADIOLOGIST]
 
 # Clinical roles see diagnoses, notes, vitals, allergies and results (permlevel 1). Money roles do not.
-CLINICAL = [ADMIN, DOCTOR, NURSE, PATHOLOGIST, REVIEWER, DEO, OV_DOCTOR]
+CLINICAL = [ADMIN, DOCTOR, NURSE, PATHOLOGIST, REVIEWER, DEO, OV_DOCTOR, RADIOLOGIST, RADIOGRAPHER, SONOGRAPHER]
 FRONT_DESK = [ADMIN, RECEPTIONIST]
 MONEY = [RECEPTIONIST, LAB_USER, PHARMACY_CASHIER, DISPENSER, ACCOUNTANT, CASH_SUPERVISOR]
 CNIC_REVEAL = [ADMIN, RECEPTIONIST]
@@ -49,6 +53,9 @@ DESCRIPTIONS = {
 	DEO: "Data entry across clinical modules (no money, no verification)",
 	OV_STAFF: "Online Visit queue and fees",
 	OV_DOCTOR: "Online Visit consultations",
+	RADIOGRAPHER: "X-ray room: start and complete scans, image quality check",
+	SONOGRAPHER: "Ultrasound / Doppler room: start and complete scans, draft measurements",
+	RADIOLOGIST: "Reports imaging studies, signs final reports, critical findings, addenda",
 }
 
 

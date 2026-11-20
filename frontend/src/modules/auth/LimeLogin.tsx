@@ -104,8 +104,8 @@ export default function LimeLogin({ L }: { L: ReturnType<typeof useLogin> }) {
             </>
           )}
           <button type="submit" disabled={busy || (!!verify && otp.join("").length < 6)}
-            className="group mt-6 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#C4F01A] text-[15px] font-medium text-black transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#C4F01A]/30 disabled:opacity-60">
-            {busy ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-black border-t-transparent" /> : <>{verify ? t("Verify") : t("Sign in")}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" /></>}
+            className="group mt-6 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[linear-gradient(90deg,#4D7C0F,#65A30D_48%,#84CC16)] text-[15px] font-bold text-white shadow-[0_10px_26px_-10px_rgba(132,204,22,0.65)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#C4F01A]/30 disabled:opacity-60">
+            {busy ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <>{verify ? t("Verify") : t("Sign in")}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" /></>}
           </button>
           {!verify && (
             <p className="mt-5 text-center text-sm text-white/80">

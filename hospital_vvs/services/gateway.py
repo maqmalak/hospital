@@ -67,6 +67,11 @@ def amount_for(reference_doctype, reference_name):
 		if si.docstatus != 1 or flt(si.outstanding_amount) <= 0:
 			frappe.throw(_("This bill has nothing to pay."))
 		return flt(si.outstanding_amount), si.get("hv_patient"), _("Bill {0}").format(si.name)
+	if reference_doctype == "Imaging Study":
+		st = frappe.get_doc(reference_doctype, reference_name)
+		if st.payment_status in ("Paid", "Panel Approved", "Waived"):
+			frappe.throw(_("This scan is already paid."))
+		return flt(st.amount), st.patient, _("Imaging {0} · {1}").format(st.booking_ref, st.procedure_name)
 	frappe.throw(_("Online payment is not available for {0}.").format(reference_doctype))
 
 
@@ -171,6 +176,24 @@ def fulfil(op):
 			"fee_verified_at": now_datetime()})
 		op.db_set({"sales_invoice": si, "payment_entry": pe})
 		publish("ov", {"action": "fee", "name": ov.name}, ov.branch)
+	elif op.reference_doctype == "Imaging Study":
+		from hospital_vvs.services import billing, radiology as rad
+
+		st = frappe.get_doc("Imaging Study", op.reference_name)
+		patient = rad.ensure_patient(st)
+		customer = frappe.db.get_value("Patient", patient, "customer")
+		p = rad.proc(st.procedure)
+		frappe.flags.hv_no_shift = True  # card money is in the gateway, not a drawer
+		try:
+			si = billing.create_invoice(customer=customer, patient=patient, lines=[{"item_code": rad.ensure_item(p), "qty": 1, "rate": flt(op.amount),
+				"description": p.procedure_name}], billing_type=rad.BILLING_TYPE, branch=st.branch, reference_doctype="Imaging Study", reference_name=st.name,
+				pos=False, remarks=_("Imaging {0} · card {1}").format(st.booking_ref, op.provider_ref))
+		finally:
+			frappe.flags.hv_no_shift = False
+		company = frappe.db.get_value("Sales Invoice", si, "company")
+		pe = _payment_entry(company, customer, flt(op.amount), op.provider_ref, si, f"Card payment {op.name}")
+		st.db_set({"payment_status": "Paid", "sales_invoice": si})
+		op.db_set({"sales_invoice": si, "payment_entry": pe})
 	elif op.reference_doctype == "Sales Invoice":
 		si = frappe.get_doc("Sales Invoice", op.reference_name)
 		amt = min(flt(op.amount), flt(si.outstanding_amount))

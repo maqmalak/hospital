@@ -11,7 +11,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const variantClasses: Record<Variant, string> = {
-  default: "bg-foreground text-background hover:opacity-90",
+  default: "btn-act-soft bg-foreground text-background hover:opacity-90",
   primary:
     "btn-gold btn-gold font-semibold hover:brightness-110 active:brightness-95",
   destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
@@ -23,7 +23,7 @@ const variantClasses: Record<Variant, string> = {
   save:
     "rounded-lg btn-gold font-semibold hover:-translate-y-px hover:shadow-lg hover:shadow-primary/40 active:translate-y-0 transition-all",
   submit:
-    "rounded-lg bg-gradient-to-b from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-1 ring-inset ring-white/15 hover:-translate-y-px hover:from-emerald-500 hover:to-emerald-500 hover:shadow-lg hover:shadow-emerald-600/40 active:translate-y-0 transition-all",
+    "btn-act rounded-lg bg-gradient-to-b from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-1 ring-inset ring-white/15 hover:-translate-y-px hover:from-emerald-500 hover:to-emerald-500 hover:shadow-lg hover:shadow-emerald-600/40 active:translate-y-0 transition-all",
   workflow:
     "rounded-lg bg-gradient-to-b from-violet-500 to-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-1 ring-inset ring-white/15 hover:-translate-y-px hover:shadow-lg hover:shadow-indigo-600/40 active:translate-y-0 transition-all",
   neutral:

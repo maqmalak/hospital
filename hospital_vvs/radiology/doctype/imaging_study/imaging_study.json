@@ -1,0 +1,788 @@
+{
+ "actions": [],
+ "creation": "2026-11-20 10:00:00.000000",
+ "modified": "2026-11-20 10:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Imaging Study",
+ "module": "Radiology",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "status",
+  "priority",
+  "procedure",
+  "procedure_name",
+  "modality",
+  "s1",
+  "branch",
+  "booking_source",
+  "scheduled_date",
+  "slot_time",
+  "walk_in",
+  "s2",
+  "token_no",
+  "ward_location",
+  "booking_ref",
+  "pt",
+  "patient",
+  "patient_name",
+  "gender",
+  "age",
+  "pt1",
+  "phone",
+  "cnic",
+  "mr_given",
+  "pt2",
+  "pregnancy_status",
+  "lmp",
+  "whatsapp_opt_in",
+  "rf",
+  "referring_doctor",
+  "external_referrer",
+  "clinical_notes",
+  "rf1",
+  "prescription_file",
+  "consent_taken",
+  "safety_checked",
+  "py",
+  "payment_option",
+  "payment_status",
+  "amount",
+  "py1",
+  "panel",
+  "policy_no",
+  "sales_invoice",
+  "wf",
+  "registered_at",
+  "scan_started_at",
+  "scanned_at",
+  "expected_at",
+  "wf1",
+  "technologist",
+  "qc_passed",
+  "qc_note",
+  "films",
+  "wf2",
+  "radiologist",
+  "verified_at",
+  "delivered_at",
+  "delivered_via",
+  "rp",
+  "report_status",
+  "report_template",
+  "report_title",
+  "report_version",
+  "rp1",
+  "critical_finding",
+  "critical_note",
+  "critical_notified_at",
+  "rp2",
+  "clinical_history",
+  "technique",
+  "findings",
+  "impression",
+  "recommendations",
+  "ob",
+  "ob_ga",
+  "ob_edd",
+  "ob_fhr",
+  "ob_presentation",
+  "ob1",
+  "ob_bpd",
+  "ob_hc",
+  "ob_ac",
+  "ob_fl",
+  "ob2",
+  "ob_efw",
+  "ob_placenta",
+  "ob_afi",
+  "ob_number",
+  "ms",
+  "measurements",
+  "ki",
+  "key_images",
+  "ad",
+  "addenda",
+  "sg",
+  "signed_by",
+  "signature_hash",
+  "content_hash",
+  "sg1",
+  "copy_requested",
+  "copy_note",
+  "reminder_24_sent",
+  "reminder_2_sent",
+  "ev",
+  "events"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Booked\nRegistered\nIn Progress\nScanned\nReporting\nVerified\nDelivered\nCancelled\nNo Show",
+   "default": "Booked",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Routine\nUrgent\nEmergency",
+   "default": "Routine",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "label": "Procedure",
+   "options": "Imaging Procedure",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "procedure_name",
+   "fieldtype": "Data",
+   "label": "Procedure Name",
+   "fetch_from": "procedure.procedure_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "modality",
+   "fieldtype": "Select",
+   "label": "Modality",
+   "options": "X-Ray\nUltrasound\nDoppler",
+   "fetch_from": "procedure.modality",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "s1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "booking_source",
+   "fieldtype": "Select",
+   "label": "Booked Via",
+   "options": "Online\nPhone\nWhatsApp\nWalk-in\nWard / ICU\nOPD",
+   "default": "Walk-in"
+  },
+  {
+   "fieldname": "scheduled_date",
+   "fieldtype": "Date",
+   "label": "Scheduled Date",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "slot_time",
+   "fieldtype": "Time",
+   "label": "Slot Time"
+  },
+  {
+   "fieldname": "walk_in",
+   "fieldtype": "Check",
+   "label": "Walk-in (no fixed time)"
+  },
+  {
+   "fieldname": "s2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "token_no",
+   "fieldtype": "Data",
+   "label": "Token No.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ward_location",
+   "fieldtype": "Data",
+   "label": "Ward / Bed (portable)"
+  },
+  {
+   "fieldname": "booking_ref",
+   "fieldtype": "Data",
+   "label": "Booking ID",
+   "read_only": 1,
+   "unique": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "pt",
+   "fieldtype": "Section Break",
+   "label": "Patient"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient",
+   "search_index": 1
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "pt1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Mobile",
+   "search_index": 1
+  },
+  {
+   "fieldname": "cnic",
+   "fieldtype": "Data",
+   "label": "CNIC"
+  },
+  {
+   "fieldname": "mr_given",
+   "fieldtype": "Data",
+   "label": "MR No. given by patient"
+  },
+  {
+   "fieldname": "pt2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pregnancy_status",
+   "fieldtype": "Select",
+   "label": "Pregnancy Status",
+   "options": "\nNot pregnant\nPregnant\nPossibly pregnant\nNot applicable"
+  },
+  {
+   "fieldname": "lmp",
+   "fieldtype": "Date",
+   "label": "LMP"
+  },
+  {
+   "fieldname": "whatsapp_opt_in",
+   "fieldtype": "Check",
+   "label": "Messages OK",
+   "default": "1"
+  },
+  {
+   "fieldname": "rf",
+   "fieldtype": "Section Break",
+   "label": "Referral"
+  },
+  {
+   "fieldname": "referring_doctor",
+   "fieldtype": "Link",
+   "label": "Referring Doctor",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "external_referrer",
+   "fieldtype": "Data",
+   "label": "Outside Referring Doctor"
+  },
+  {
+   "fieldname": "clinical_notes",
+   "fieldtype": "Small Text",
+   "label": "Clinical Notes / Indication"
+  },
+  {
+   "fieldname": "rf1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prescription_file",
+   "fieldtype": "Attach",
+   "label": "Prescription"
+  },
+  {
+   "fieldname": "consent_taken",
+   "fieldtype": "Check",
+   "label": "Consent Taken"
+  },
+  {
+   "fieldname": "safety_checked",
+   "fieldtype": "Check",
+   "label": "Safety Screening Done"
+  },
+  {
+   "fieldname": "py",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "fieldname": "payment_option",
+   "fieldtype": "Select",
+   "label": "Payment Option",
+   "options": "Pay at counter\nPay online\nInsurance / Panel",
+   "default": "Pay at counter"
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment Status",
+   "options": "Unpaid\nPaid\nPanel Pending\nPanel Approved\nWaived",
+   "default": "Unpaid",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "py1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "panel",
+   "fieldtype": "Link",
+   "label": "Panel / Insurer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "policy_no",
+   "fieldtype": "Data",
+   "label": "Policy / Employee No."
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wf",
+   "fieldtype": "Section Break",
+   "label": "Workflow"
+  },
+  {
+   "fieldname": "registered_at",
+   "fieldtype": "Datetime",
+   "label": "Registered At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_started_at",
+   "fieldtype": "Datetime",
+   "label": "Scan Started At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scanned_at",
+   "fieldtype": "Datetime",
+   "label": "Scanned At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expected_at",
+   "fieldtype": "Datetime",
+   "label": "Report Due",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wf1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "technologist",
+   "fieldtype": "Link",
+   "label": "Radiographer / Sonographer",
+   "options": "User"
+  },
+  {
+   "fieldname": "qc_passed",
+   "fieldtype": "Check",
+   "label": "Image Quality OK"
+  },
+  {
+   "fieldname": "qc_note",
+   "fieldtype": "Small Text",
+   "label": "Quality Note"
+  },
+  {
+   "fieldname": "films",
+   "fieldtype": "Data",
+   "label": "Films / CD"
+  },
+  {
+   "fieldname": "wf2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "radiologist",
+   "fieldtype": "Link",
+   "label": "Radiologist",
+   "options": "Doctor"
+  },
+  {
+   "fieldname": "verified_at",
+   "fieldtype": "Datetime",
+   "label": "Verified At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivered_at",
+   "fieldtype": "Datetime",
+   "label": "Delivered At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivered_via",
+   "fieldtype": "Data",
+   "label": "Delivered Via",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp",
+   "fieldtype": "Section Break",
+   "label": "Report"
+  },
+  {
+   "fieldname": "report_status",
+   "fieldtype": "Select",
+   "label": "Report Status",
+   "options": "Not Started\nDraft\nPreliminary\nFinal",
+   "default": "Not Started",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "report_template",
+   "fieldtype": "Link",
+   "label": "Report Template",
+   "options": "Imaging Report Template"
+  },
+  {
+   "fieldname": "report_title",
+   "fieldtype": "Data",
+   "label": "Report Title"
+  },
+  {
+   "fieldname": "report_version",
+   "fieldtype": "Int",
+   "label": "Report Version",
+   "default": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "critical_finding",
+   "fieldtype": "Check",
+   "label": "Critical Finding"
+  },
+  {
+   "fieldname": "critical_note",
+   "fieldtype": "Small Text",
+   "label": "Critical Note"
+  },
+  {
+   "fieldname": "critical_notified_at",
+   "fieldtype": "Datetime",
+   "label": "Critical Notified At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rp2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "clinical_history",
+   "fieldtype": "Small Text",
+   "label": "Clinical History / Indication"
+  },
+  {
+   "fieldname": "technique",
+   "fieldtype": "Small Text",
+   "label": "Technique"
+  },
+  {
+   "fieldname": "findings",
+   "fieldtype": "Long Text",
+   "label": "Findings"
+  },
+  {
+   "fieldname": "impression",
+   "fieldtype": "Small Text",
+   "label": "Impression"
+  },
+  {
+   "fieldname": "recommendations",
+   "fieldtype": "Small Text",
+   "label": "Recommendations"
+  },
+  {
+   "fieldname": "ob",
+   "fieldtype": "Section Break",
+   "label": "Obstetric biometry",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "ob_ga",
+   "fieldtype": "Data",
+   "label": "Gestational Age"
+  },
+  {
+   "fieldname": "ob_edd",
+   "fieldtype": "Date",
+   "label": "EDD"
+  },
+  {
+   "fieldname": "ob_fhr",
+   "fieldtype": "Data",
+   "label": "FHR (bpm)"
+  },
+  {
+   "fieldname": "ob_presentation",
+   "fieldtype": "Data",
+   "label": "Presentation"
+  },
+  {
+   "fieldname": "ob1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ob_bpd",
+   "fieldtype": "Data",
+   "label": "BPD"
+  },
+  {
+   "fieldname": "ob_hc",
+   "fieldtype": "Data",
+   "label": "HC"
+  },
+  {
+   "fieldname": "ob_ac",
+   "fieldtype": "Data",
+   "label": "AC"
+  },
+  {
+   "fieldname": "ob_fl",
+   "fieldtype": "Data",
+   "label": "FL"
+  },
+  {
+   "fieldname": "ob2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ob_efw",
+   "fieldtype": "Data",
+   "label": "EFW"
+  },
+  {
+   "fieldname": "ob_placenta",
+   "fieldtype": "Data",
+   "label": "Placenta"
+  },
+  {
+   "fieldname": "ob_afi",
+   "fieldtype": "Data",
+   "label": "Liquor (AFI)"
+  },
+  {
+   "fieldname": "ob_number",
+   "fieldtype": "Data",
+   "label": "Fetal Number"
+  },
+  {
+   "fieldname": "ms",
+   "fieldtype": "Section Break",
+   "label": "Measurements"
+  },
+  {
+   "fieldname": "measurements",
+   "fieldtype": "Table",
+   "label": "Measurements",
+   "options": "Imaging Measurement"
+  },
+  {
+   "fieldname": "ki",
+   "fieldtype": "Section Break",
+   "label": "Key images"
+  },
+  {
+   "fieldname": "key_images",
+   "fieldtype": "Table",
+   "label": "Key Images",
+   "options": "Imaging Key Image"
+  },
+  {
+   "fieldname": "ad",
+   "fieldtype": "Section Break",
+   "label": "Addenda"
+  },
+  {
+   "fieldname": "addenda",
+   "fieldtype": "Table",
+   "label": "Addenda",
+   "options": "Imaging Addendum"
+  },
+  {
+   "fieldname": "sg",
+   "fieldtype": "Section Break",
+   "label": "Signature",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "signed_by",
+   "fieldtype": "Link",
+   "label": "Signed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signature_hash",
+   "fieldtype": "Data",
+   "label": "Signature Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "content_hash",
+   "fieldtype": "Data",
+   "label": "Content Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sg1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "copy_requested",
+   "fieldtype": "Check",
+   "label": "Printed Copy / CD Requested"
+  },
+  {
+   "fieldname": "copy_note",
+   "fieldtype": "Small Text",
+   "label": "Copy Request Note"
+  },
+  {
+   "fieldname": "reminder_24_sent",
+   "fieldtype": "Check",
+   "label": "Reminder 24 Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reminder_2_sent",
+   "fieldtype": "Check",
+   "label": "Reminder 2 Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ev",
+   "fieldtype": "Section Break",
+   "label": "Timeline"
+  },
+  {
+   "fieldname": "events",
+   "fieldtype": "Table",
+   "label": "Events",
+   "options": "Imaging Study Event"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1,
+   "delete": 1
+  },
+  {
+   "role": "PW Receptionist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Radiographer",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Sonographer",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Radiologist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Doctor",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Nurse",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "RAD-.YY.-.#####",
+ "title_field": "patient_name",
+ "show_title_field_in_link": 1,
+ "search_fields": "patient_name,phone,booking_ref,procedure_name"
+}

@@ -1,0 +1,53 @@
+{
+ "actions": [],
+ "creation": "2026-11-20 10:00:00.000000",
+ "modified": "2026-11-20 10:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Imaging Addendum",
+ "module": "Radiology",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "text",
+  "added_by",
+  "added_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "text",
+   "fieldtype": "Small Text",
+   "label": "Text",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 6
+  },
+  {
+   "fieldname": "added_by",
+   "fieldtype": "Link",
+   "label": "Added By",
+   "options": "User",
+   "in_list_view": 1,
+   "columns": 2,
+   "read_only": 1
+  },
+  {
+   "fieldname": "added_at",
+   "fieldtype": "Datetime",
+   "label": "Added At",
+   "in_list_view": 1,
+   "columns": 2,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "istable": 1,
+ "editable_grid": 1,
+ "permissions": []
+}

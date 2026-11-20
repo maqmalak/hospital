@@ -67,6 +67,7 @@ scheduler_events = {
 		"*/15 * * * *": [
 			"hospital_vvs.services.patient_comms.queue_feedback_requests",
 			"hospital_vvs.services.fbr.scheduled",
+			"hospital_vvs.services.radiology.send_reminders",
 		],
 	},
 	"daily": [

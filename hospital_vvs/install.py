@@ -260,7 +260,16 @@ def ensure_erp_roles():
 				frappe.get_doc("User", user).add_roles(*missing)
 
 
+def ensure_module_defs():
+	"""Modules added after install (modules.txt) need their Module Def, or their doctypes resolve to frappe.core."""
+	for m in frappe.get_module_list("hospital_vvs"):
+		if not frappe.db.exists("Module Def", m):
+			frappe.get_doc({"doctype": "Module Def", "module_name": m, "app_name": "hospital_vvs"}).insert(ignore_permissions=True)
+	frappe.clear_cache()
+
+
 def after_migrate():
+	ensure_module_defs()
 	ensure_roles()
 	ensure_mm_core_compat()
 	ensure_erpnext_permissions()
@@ -275,6 +284,9 @@ def after_migrate():
 	from hospital_vvs.letterhead import ensure_letter_head
 
 	ensure_letter_head()
+	from hospital_vvs.setup.radiology import ensure_catalogue
+
+	ensure_catalogue()  # imaging procedures + report templates (D-91); inserts only what is missing
 	from hospital_vvs.services.doctor_share import ensure_accounts
 
 	ensure_accounts()

@@ -1,0 +1,166 @@
+{
+ "actions": [],
+ "creation": "2026-11-20 10:00:00.000000",
+ "modified": "2026-11-20 10:00:00.000000",
+ "modified_by": "Administrator",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "name": "Imaging Report Template",
+ "module": "Radiology",
+ "owner": "Administrator",
+ "custom": 0,
+ "field_order": [
+  "template_name",
+  "modality",
+  "procedure",
+  "t1",
+  "report_title",
+  "is_active",
+  "t2",
+  "technique",
+  "findings",
+  "impression",
+  "recommendations",
+  "t3",
+  "measurements"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "modality",
+   "fieldtype": "Select",
+   "label": "Modality",
+   "options": "X-Ray\nUltrasound\nDoppler",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "label": "Procedure",
+   "options": "Imaging Procedure",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "t1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "report_title",
+   "fieldtype": "Data",
+   "label": "Report Title",
+   "description": "Printed title, e.g. X-RAY CHEST PA VIEW"
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "default": "1"
+  },
+  {
+   "fieldname": "t2",
+   "fieldtype": "Section Break",
+   "label": "Text"
+  },
+  {
+   "fieldname": "technique",
+   "fieldtype": "Small Text",
+   "label": "Technique"
+  },
+  {
+   "fieldname": "findings",
+   "fieldtype": "Long Text",
+   "label": "Findings",
+   "reqd": 1
+  },
+  {
+   "fieldname": "impression",
+   "fieldtype": "Small Text",
+   "label": "Impression"
+  },
+  {
+   "fieldname": "recommendations",
+   "fieldtype": "Small Text",
+   "label": "Recommendations"
+  },
+  {
+   "fieldname": "t3",
+   "fieldtype": "Section Break",
+   "label": "Default measurements"
+  },
+  {
+   "fieldname": "measurements",
+   "fieldtype": "Table",
+   "label": "Measurements",
+   "options": "Imaging Measurement"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "row_format": "Dynamic",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1,
+   "delete": 1
+  },
+  {
+   "role": "PW Radiologist",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Radiographer",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Sonographer",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Receptionist",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  },
+  {
+   "role": "PW Doctor",
+   "read": 1,
+   "report": 1,
+   "print": 1
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "field:template_name"
+}

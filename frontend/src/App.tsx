@@ -95,6 +95,10 @@ const CheckoutPage = lazy(() => import("@/modules/finance/PaymentsPages").then((
 const OnlinePaymentsPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.OnlinePaymentsPage })));
 const FbrPage = lazy(() => import("@/modules/finance/PaymentsPages").then((m) => ({ default: m.FbrPage })));
 const LabTemplatesPage = lazy(() => import("@/modules/lab/TemplatesPage"));
+const RadWorklistPage = lazy(() => import("@/modules/radiology/WorklistPage"));
+const RadReportPage = lazy(() => import("@/modules/radiology/ReportEditorPage"));
+const RadAnalyticsPage = lazy(() => import("@/modules/radiology/AnalyticsPage"));
+const RadCataloguePage = lazy(() => import("@/modules/radiology/CataloguePage"));
 const BuyingDashboardPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.BuyingDashboardPage })));
 const SuppliersPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.SuppliersPage })));
 const PurchaseOrdersPage = lazy(() => import("@/modules/buying/BuyingPages").then((m) => ({ default: m.PurchaseOrdersPage })));
@@ -223,6 +227,10 @@ export default function App() {
         <Route path="/purchase_invoice" element={g("/purchase_invoice", <PurchaseInvoicesPage />)} />
         <Route path="/assets" element={g("/assets", <AssetsPage />)} />
         <Route path="/consumption" element={g("/consumption", <ConsumptionPage />)} />
+        <Route path="/radiology" element={g("/radiology", <RadWorklistPage />)} />
+        <Route path="/radiology/report/:name" element={g("/radiology/report", <RadReportPage />)} />
+        <Route path="/radiology/analytics" element={g("/radiology/analytics", <RadAnalyticsPage />)} />
+        <Route path="/radiology/catalogue" element={g("/radiology/catalogue", <RadCataloguePage />)} />
         <Route path="/lab/orders" element={g("/lab/orders", <LabOrdersPage />)} />
         <Route path="/lab/samples" element={g("/lab/samples", <LabSamplesPage />)} />
         <Route path="/tests" element={g("/tests", <LabTestsPage />)} />

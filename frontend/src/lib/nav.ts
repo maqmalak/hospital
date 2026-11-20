@@ -1,6 +1,6 @@
 import { Building2, CreditCard, FileCheck2, FileText, HandHeart, MessageSquareHeart, Radio, TrendingUp,
   Barcode, Beaker, Boxes, ClipboardCheck, FlaskConical, HandCoins, Lock as LockIcon, MonitorSmartphone, PackageCheck, PackageOpen, PackageSearch,
-  ScanLine, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
+  ScanLine, ScanSearch, Send, ShoppingCart, Truck, Wallet, Undo2, Microscope, ListChecks,
   Activity, BarChart3, BedDouble, Receipt, ReceiptText, Soup, UserCheck, ShieldPlus, ClipboardPlus, Video, CalendarClock, ClipboardList, FileClock, FilePlus2, HeartPulse, History, LayoutDashboard, LayoutGrid,
   MessageCircle, MessagesSquare, UserCog, Factory, PackageMinus, MonitorPlay, Percent, Pill, ScrollText, Settings, ShieldCheck, Stethoscope, UserPlus, Users, Merge,
   LifeBuoy, Network, BookOpen, Scale, Landmark, Coins, FileSpreadsheet, ArrowLeftRight, Ship, FileQuestion, type LucideIcon,
@@ -32,6 +32,11 @@ export const NAV: NavGroup[] = [
     { route: "/lab/verify", label: "Lab verification", icon: Microscope, color: "from-violet-500 to-purple-600", desc: "Pathologist sign-off" },
     { route: "/lab/outsourced", label: "Outsourced tests", icon: Send, color: "from-slate-500 to-slate-700", desc: "Reference lab dispatch" },
     { route: "/lab/templates", label: "Test templates", icon: FlaskConical, color: "from-fuchsia-600 to-purple-700", desc: "Tests, ranges, prices, turnaround" },
+  ] },
+  { label: "Radiology", items: [
+    { route: "/radiology", label: "Radiology worklist", icon: ScanSearch, color: "from-cyan-500 to-teal-600", desc: "X-ray, ultrasound, Doppler: register, scan, report" },
+    { route: "/radiology/analytics", label: "Radiology analytics", icon: BarChart3, color: "from-sky-500 to-indigo-600", desc: "Volumes, turnaround, revenue, workload" },
+    { route: "/radiology/catalogue", label: "Imaging catalogue", icon: BookOpen, color: "from-teal-600 to-emerald-700", desc: "Scans, prices, preparation, report templates" },
   ] },
   { label: "Pharmacy", items: [
     { route: "/medicine_invoice", label: "Pharmacy POS", icon: ShoppingCart, color: "from-emerald-500 to-teal-600", desc: "Bill medicines with FEFO batches" },

@@ -5,7 +5,7 @@
  */
 import {
   BarChart3, BedDouble, BookOpen, Boxes, FlaskConical, HandCoins, LayoutDashboard, LifeBuoy, Percent, Pill, Settings, ShoppingCart, Stethoscope,
-  UserPlus, Video, Wallet, type LucideIcon,
+  UserPlus, Video, Wallet, ScanSearch, type LucideIcon,
 } from "lucide-react";
 import { NAV, type NavItem } from "@/lib/nav";
 
@@ -28,6 +28,8 @@ export const APPS: App[] = [
     flow: ["/opd/vitals", "/physician-queue", "/pw-prescription", "/pw-history"], flowTitle: "Token to prescription", manual: "doctor" },
   { slug: "lab", label: "Laboratory", desc: "Orders, samples, results, verification", icon: FlaskConical, hue: "violet", color: "from-violet-500 to-purple-600", routes: group("Laboratory"),
     flow: ["/lab/orders", "/lab/samples", "/tests", "/lab/verify"], flowTitle: "Order to report", manual: "lab" },
+  { slug: "radiology", label: "Radiology", desc: "X-ray, ultrasound, Doppler — worklist, reports, analytics", icon: ScanSearch, hue: "cyan", color: "from-cyan-500 to-teal-600", routes: group("Radiology"),
+    flow: ["/radiology"], flowTitle: "Booking to signed report" },
   { slug: "ipd", label: "IPD & Emergency", desc: "ER, beds, admissions, drug round, IPD bill", icon: BedDouble, hue: "sky", color: "from-cyan-500 to-sky-600", routes: group("Inpatient"),
     flow: ["/er", "/ward", "/ipd", "/ipd/mar", "/ipd_slip"], flowTitle: "Arrival to discharge", manual: "wards" },
   { slug: "pharmacy", label: "Pharmacy", desc: "POS, pick, review, handover", icon: Pill, hue: "emerald", color: "from-emerald-500 to-green-600", routes: group("Pharmacy"),
