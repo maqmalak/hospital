@@ -7,7 +7,7 @@ import { LmcMark } from "@/components/brand";
 import { ORBIT_CSS } from "./orbitCss";
 import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { ArrowUp, ChevronDown, Languages, Mail, MapPin, Menu, Phone, Search, Siren, X, LogIn, Facebook, Instagram, Youtube, Linkedin, Loader2 } from "lucide-react";
+import { ArrowUp, ChevronDown, Languages, Mail, MapPin, Menu, Phone, Search, Siren, X, LogIn, Facebook, Instagram, Youtube, Linkedin, Loader2, ArrowRight } from "lucide-react";
 import { postCall } from "@/services/frappe";
 import { CONFIG, DEPARTMENTS, FLOORS, SERVICES, UI, serviceLink, type Lang, type UICopy } from "./content";
 import { hasWa, phoneOf, tel, useDoctors, useSite, slugDoc, type Site } from "./data";
@@ -171,7 +171,7 @@ function NavBar() {
             <span><span className="block text-sm font-semibold">{s.title}</span><span className="line-clamp-1 text-xs text-[var(--muted)]">{s.text}</span></span></Link>); })}</div>}
         <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
           {k === "services" ? <span className="flex flex-wrap gap-3 text-sm"><Link to="/site/radiology/book" className="font-semibold text-[var(--accent)]">Book a scan</Link><Link to="/site/mri-ct" className="font-semibold text-[var(--accent)]">MRI & CT</Link><Link to="/site/nephrology" className="font-semibold text-[var(--accent)]">Dialysis</Link><Link to="/site/radiology/reports" className="font-semibold text-[var(--primary)]">Download my report</Link></span> : <span />}
-          <Link to={k === "depts" ? "/site/departments" : "/site/services"} className="text-sm font-semibold text-[var(--primary)]">{ui.nav.all} →</Link></div>
+          <Link to={k === "depts" ? "/site/departments" : "/site/services"} className="s2-viewall group inline-flex min-h-[40px] items-center gap-2 rounded-full ps-5 pe-1.5 text-sm font-bold">{ui.nav.all}{k === "depts" ? ` · ${DEPARTMENTS.length}` : ` · ${SERVICES.length}`}<span className="grid h-7 w-7 place-items-center rounded-full"><ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 rtl:rotate-180" /></span></Link></div>
       </div></div>}
     </div>
   );
@@ -357,6 +357,21 @@ function CSS(rtl: boolean) {
   .s2-lime [class*="border-white/10"][class*="bg-white/[0.0"]:hover{border-color:rgba(190,242,100,.55);background:linear-gradient(160deg,#25361e 0%,#141c13 45%,#0a0d0a 100%);box-shadow:0 24px 50px -28px rgba(132,204,22,.5)}
   .s2-lime [class*="border-white/10"][class*="bg-white/[0.0"] h3{color:#eef7e8;transition:color .3s}
   .s2-lime [class*="border-white/10"][class*="bg-white/[0.0"]:hover h3{color:#bef264}
+    .s2-mega a.rounded-2xl{border:1px solid transparent;transition:background .25s,border-color .25s,transform .25s,box-shadow .25s}
+  .s2-mega a.rounded-2xl > span:first-child{transition:background .25s,color .25s,transform .3s,box-shadow .25s}
+  .s2-mega a.rounded-2xl:hover,.s2-mega a.rounded-2xl:focus-visible{background:color-mix(in srgb,var(--primary) 12%,transparent);border-color:color-mix(in srgb,var(--primary) 45%,transparent);transform:translateX(3px);box-shadow:0 14px 30px -20px color-mix(in srgb,var(--primary) 70%,transparent)}
+  [dir=rtl] .s2-mega a.rounded-2xl:hover{transform:translateX(-3px)}
+  .s2-mega a.rounded-2xl:hover > span:first-child,.s2-mega a.rounded-2xl:focus-visible > span:first-child{background:var(--primary);color:var(--bg);transform:scale(1.08) rotate(-4deg);box-shadow:0 8px 18px -8px var(--primary)}
+  .s2-mega a.rounded-2xl:hover .font-semibold,.s2-mega a.rounded-2xl:focus-visible .font-semibold{color:var(--primary)}
+  .s2-lime .s2-mega a.rounded-2xl:hover,.s2-lime .s2-mega a.rounded-2xl:focus-visible{background:linear-gradient(135deg,rgba(190,242,100,.14),rgba(101,163,13,.06))}
+  .s2-lime .s2-mega a.rounded-2xl:hover > span:first-child,.s2-lime .s2-mega a.rounded-2xl:focus-visible > span:first-child{background:#bef264;color:#14260a}
+  .s2-lime .s2-mega a.rounded-2xl:hover .font-semibold{color:#bef264}
+  @media (prefers-reduced-motion: reduce){.s2-mega a.rounded-2xl,.s2-mega a.rounded-2xl > span:first-child{transition:none}.s2-mega a.rounded-2xl:hover{transform:none}}
+    .s2-viewall{background:var(--primary);color:var(--bg);box-shadow:0 10px 24px -12px var(--primary);transition:transform .25s,box-shadow .25s,filter .25s}
+  .s2-viewall > span{background:color-mix(in srgb,var(--bg) 18%,transparent)}
+  .s2-viewall:hover,.s2-viewall:focus-visible{transform:translateY(-1px);box-shadow:0 16px 32px -12px var(--primary);filter:brightness(1.06)}
+  .s2-lime .s2-viewall{background:linear-gradient(135deg,#d9f99d,#bef264 45%,#84cc16);color:#14260a}
+  .s2-lime .s2-viewall > span{background:#14260a;color:#bef264}
     .s2-lime .s2-mega{background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(190,242,100,.18)}
   .s2-dark .s2-mega a:hover{background:rgba(255,255,255,.06)}
   .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}
