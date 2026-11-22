@@ -352,6 +352,11 @@ function CSS(rtl: boolean) {
     .s2-lime .s2-band [class*="border-white/30"] svg,.s2-lime .s2-band [class*="border-white/30"]{color:#eef7e8}.s2-lime .s2-band [class*="border-white/30"] svg{color:#bef264}
   .s2-lime .nz-tint{background:linear-gradient(180deg,#040604 0%,#070b07 100%)}
   .s2-lime .s2-price{color:#bef264}
+    .s2-lime [class*="border-white/10"][class*="bg-white/[0.0"]{position:relative;background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(255,255,255,.08);backdrop-filter:none}
+  .s2-lime [class*="border-white/10"][class*="bg-white/[0.0"]::before{content:"";position:absolute;inset:0 18px auto;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#65a30d,#bef264,#65a30d);opacity:.85;pointer-events:none}
+  .s2-lime [class*="border-white/10"][class*="bg-white/[0.0"]:hover{border-color:rgba(190,242,100,.55);background:linear-gradient(160deg,#25361e 0%,#141c13 45%,#0a0d0a 100%);box-shadow:0 24px 50px -28px rgba(132,204,22,.5)}
+  .s2-lime [class*="border-white/10"][class*="bg-white/[0.0"] h3{color:#eef7e8;transition:color .3s}
+  .s2-lime [class*="border-white/10"][class*="bg-white/[0.0"]:hover h3{color:#bef264}
     .s2-lime .s2-mega{background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(190,242,100,.18)}
   .s2-dark .s2-mega a:hover{background:rgba(255,255,255,.06)}
   .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}
