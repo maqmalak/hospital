@@ -43,7 +43,7 @@ export default function Department() {
                   <span aria-hidden className="dp-shine pointer-events-none absolute inset-0" />
                   <div className="flex items-start justify-between gap-3">
                     <span className="dp-tag self-start rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide">{r.tag}</span>
-                    <span className="dp-art -me-1 -mt-1 h-[72px] w-[72px] shrink-0"><CardArt id={r.id} /></span>
+                    <span className="dp-art -me-1 -mt-1 h-[72px] w-[72px] shrink-0"><CardArt id={r.art} /></span>
                   </div>
                   <h3 className="dp-title mt-3 text-lg font-bold leading-snug text-white transition-colors">{name}</h3>
                   <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-white/65">{r.text}</p>
@@ -86,11 +86,41 @@ const RULES: [RegExp, string][] = [[/\bmri\b/i, "mri"], [/\bct\b/i, "ct-scan"], 
   [/surgery|surgical|hernia|appendectomy|caesarean|theatre|wound|tonsil/i, "surgery"], [/day-care|day care/i, "daycare"], [/vaccin/i, "nursery"], [/delivery|antenatal/i, "nursery"]];
 const MODULE: Record<string, string> = { dialysis: "/site/nephrology", nursery: "/site/nursery", "x-ray": "/site/radiology", ultrasound: "/site/radiology" };
 
-function resolve(name: string, dept: string): { to: string; text: string; tag: string; id: string } {
+/** Per-service illustration + one-line description from the service's own name (so cards in one department differ). */
+const ART: [RegExp, string, string][] = [
+  [/triage|resuscitation/i, "siren", "Seen on arrival by severity — resuscitation bay ready day and night."],
+  [/ambulance/i, "ambulance", "Ambulances unload straight into Emergency with a team waiting."],
+  [/poison|heat/i, "thermo", "Antidotes, cooling and monitoring for poisoning and heat-stroke."],
+  [/fever|infection|dengue/i, "thermo", "Fever, infections and dengue assessed with same-day tests."],
+  [/chest pain|stroke path/i, "heartbrain", "Fast pathways for heart attack and stroke — ECG and scans within minutes."],
+  [/fracture|trauma|bone|joint|arthritis|spine|back|sports|orthopaedic/i, "bone", "Fractures, joints and spine assessed with X-ray and treated by orthopaedic surgeons."],
+  [/\becg\b|exercise tolerance/i, "ecg", "Heart rhythm and stress testing, reported by a cardiologist."],
+  [/echo/i, "heart", "Ultrasound of the heart's pumping and valves."],
+  [/cardiology|heart|coronary|ccu/i, "heart", "Heart clinics and coronary care with continuous monitoring."],
+  [/hypertension|cholesterol|blood-pressure|diabetes/i, "gauge", "Blood pressure, sugar and cholesterol brought to target and followed up."],
+  [/neurology|epilep|seizure|headache|migraine|nerve|muscle/i, "brain", "Brain, nerve and muscle conditions — diagnosis and long-term care."],
+  [/stroke/i, "brain", "Stroke assessment, scans and follow-up to prevent another."],
+  [/kidney|renal|electrolyte/i, "kidney", "Kidney function, fluids and electrolytes managed by nephrologists."],
+  [/vaccin/i, "syringe", "Vaccines on the national schedule, with reminders."],
+  [/newborn|baby|children|child|growth|nutrition|paediatric/i, "baby", "Care for babies and children, from the first check-up to the ward."],
+  [/delivery|caesarean|antenatal|pregnan/i, "baby", "Safe delivery and antenatal care with paediatricians at every birth."],
+  [/family planning|gynaecology/i, "female", "Women's health clinics and family-planning advice."],
+  [/hearing|ear\b|ent clinic/i, "ear", "Ear, nose and throat clinic with hearing assessment."],
+  [/sinus|tonsil|adenoid/i, "ear", "Sinus, tonsil and adenoid care — medical or surgical."],
+  [/skin|acne|eczema|hair|nail|allergy|derma/i, "skin", "Skin, hair and nail problems treated by dermatologists."],
+  [/surgery|surgical|hernia|gallbladder|appendectomy|wound|day-care|procedure/i, "scalpel", "Planned and emergency surgery with recovery on the ward or day care."],
+  [/pre-employment|fitness|check-up|walk-in|consultation|clinic/i, "stetho", "Consultant clinic — book a time or walk in."],
+  [/home sample/i, "pin", "A phlebotomist collects samples at home on request."],
+];
+
+function resolve(name: string, dept: string): { to: string; text: string; tag: string; id: string; art: string } {
   const id = RULES.find(([re]) => re.test(name))?.[1];
   const g: ServiceGroup | undefined = id ? SERVICES.find((x) => x.id === id) : undefined;
-  if (g) return { to: MODULE[g.id] ?? serviceLink(g), text: g.text, tag: g.title, id: g.id };
-  return { to: dept === "nephrology" ? "/site/nephrology" : `/site/departments/${dept}#doctors`, text: "Consultant clinic in this department — see the doctors and book a time.", tag: "Clinic", id: dept === "nephrology" ? "dialysis" : "clinic" };
+  const own = ART.find(([re]) => re.test(name));
+  const imaging = id && ["mri", "ct-scan", "x-ray", "ultrasound", "dialysis", "laboratory"].includes(id);
+  const art = imaging ? id! : own?.[1] ?? id ?? "clinic";
+  if (g) return { to: MODULE[g.id] ?? serviceLink(g), text: own && !imaging ? own[2] : g.text, tag: g.title, id: g.id, art };
+  return { to: dept === "nephrology" ? "/site/nephrology" : `/site/departments/${dept}#doctors`, text: own?.[2] ?? "Consultant clinic in this department — see the doctors and book a time.", tag: "Clinic", id: dept === "nephrology" ? "dialysis" : "clinic", art: own?.[1] ?? (dept === "nephrology" ? "kidney" : "stetho") };
 }
 
 /** Small animated imaging illustrations for the service cards (lime strokes on black; always gentle, livelier on hover). */
@@ -126,6 +156,56 @@ function CardArt({ id }: { id: string }) {
     <path d="M8 38h14l5-12 7 24 6-18 4 6h20" className="dp-ecg" strokeWidth="2" /><circle cx="36" cy="36" r="30" stroke={D} strokeOpacity=".5" /></>);
   if (id === "surgery" || id === "daycare") return svg(<>
     <circle cx="36" cy="30" r="14" stroke={D} /><circle cx="36" cy="30" r="6" className="dp-pulse-o" /><path d="M36 44v14M24 62h24" /></>);
+  if (id === "siren") return svg(<>
+    <path d="M22 50V38a14 14 0 0 1 28 0v12" /><path d="M16 50h40v6H16z" fill="#14260a" />
+    <path d="M36 16v-6M18 22l-4-4M54 22l4-4" className="dp-twinkle" /><circle cx="36" cy="40" r="5" fill={L} stroke="none" className="dp-flash" /></>);
+  if (id === "ambulance") return svg(<>
+    <g className="dp-drive"><path d="M10 46V28h28v18M38 34h12l8 8v4H38" /><circle cx="20" cy="48" r="4" /><circle cx="48" cy="48" r="4" /><path d="M22 34h8M26 30v8" stroke={D} />
+      <rect x="18" y="22" width="8" height="5" rx="1" fill={L} stroke="none" className="dp-flash" /></g>
+    <path d="M6 56h60" strokeDasharray="6 6" stroke={D} className="dp-road" /></>);
+  if (id === "thermo") return svg(<>
+    <path d="M32 14a4 4 0 0 1 8 0v26a9 9 0 1 1-8 0Z" /><circle cx="36" cy="48" r="5" fill={L} stroke="none" />
+    <rect x="34.5" y="22" width="3" height="24" rx="1.5" fill={L} stroke="none" className="dp-rise" style={{ transformOrigin: "36px 46px" }} />
+    <path d="M48 20h6M48 28h4M48 36h6" stroke={D} /></>);
+  if (id === "heartbrain") return svg(<>
+    <path d="M24 56s-14-8-14-18a7 7 0 0 1 14-3 7 7 0 0 1 14 3c0 10-14 18-14 18Z" className="dp-beat" style={{ transformOrigin: "24px 44px" }} />
+    <path d="M46 14a9 9 0 0 1 14 6 8 8 0 0 1-2 14 8 8 0 0 1-12 2 8 8 0 0 1-8-12 8 8 0 0 1 8-10Z" stroke={D} />
+    <path d="M50 18l-3 7h5l-3 7" className="dp-twinkle" strokeWidth="2" /></>);
+  if (id === "bone") return svg(<>
+    <path d="M22 18a6 6 0 0 0-8 8l26 26a6 6 0 0 0 8 8 6 6 0 0 0 8-8 6 6 0 0 0-8-8L22 18a6 6 0 0 0-8-8 6 6 0 0 0 8 8" transform="translate(0 2)" />
+    <path d="M33 30l4 4-3 3 4 4" stroke="#f87171" strokeWidth="2" className="dp-flash" /></>);
+  if (id === "ecg") return svg(<>
+    <rect x="8" y="16" width="56" height="40" rx="6" stroke={D} /><path d="M12 40h10l4-12 6 22 5-16 4 6h19" className="dp-ecg" strokeWidth="2" /></>);
+  if (id === "heart") return svg(<>
+    <path d="M36 58s-20-12-20-26a10 10 0 0 1 20-4 10 10 0 0 1 20 4c0 14-20 26-20 26Z" className="dp-beat" /><path d="M20 38h9l3-6 4 10 3-4h13" stroke={D} className="dp-ecg" /></>);
+  if (id === "gauge") return svg(<>
+    <path d="M14 48a22 22 0 1 1 44 0" /><path d="M14 48h44" stroke={D} />{[0, 1, 2, 3, 4].map((i) => <path key={i} d={`M${17 + i * 9.5} ${i === 0 || i === 4 ? 40 : i === 2 ? 30 : 33}l2 2`} stroke={D} />)}
+    <path d="M36 48l12-14" strokeWidth="2.4" className="dp-needle" style={{ transformOrigin: "36px 48px" }} /><circle cx="36" cy="48" r="3" fill={L} stroke="none" /></>);
+  if (id === "brain") return svg(<>
+    <path d="M36 16v40M36 16c-8-4-18 2-16 10-6 2-6 12 0 14-2 8 8 14 16 10M36 16c8-4 18 2 16 10 6 2 6 12 0 14 2 8-8 14-16 10" />
+    {[[26, 30], [46, 28], [28, 46], [45, 44]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="2" fill={L} stroke="none" className="dp-twinkle" style={{ animationDelay: `${i * 0.35}s` }} />)}</>);
+  if (id === "kidney") return svg(<>
+    <path d="M30 14c-12 0-18 10-18 22s6 22 18 22c6 0 8-6 6-10s-6-6-6-12 4-8 6-12-0-10-6-10Z" /><path d="M42 14c12 0 18 10 18 22s-6 22-18 22c-6 0-8-6-6-10s6-6 6-12-4-8-6-12 0-10 6-10Z" stroke={D} />
+    <path d="M36 30v28" strokeDasharray="2 5" className="dp-flow" /></>);
+  if (id === "syringe") return svg(<>
+    <g transform="rotate(-45 36 36)"><rect x="26" y="20" width="20" height="30" rx="3" /><path d="M36 50v12M30 14h12M36 14v6" />
+      <rect x="28" y="30" width="16" height="18" rx="2" fill={L} stroke="none" opacity=".5" className="dp-press" style={{ transformOrigin: "36px 48px" }} /></g></>);
+  if (id === "baby") return svg(<>
+    <circle cx="36" cy="26" r="11" /><path d="M31 25h.01M41 25h.01M32 31c2 2 6 2 8 0" strokeWidth="2" /><path d="M22 58c2-10 8-14 14-14s12 4 14 14" stroke={D} />
+    <path d="M14 16l2 2M58 14l-2 3M60 30h-3" className="dp-twinkle" /></>);
+  if (id === "female") return svg(<><circle cx="36" cy="28" r="13" className="dp-pulse-o" style={{ transformOrigin: "36px 28px" }} /><path d="M36 41v18M28 51h16" stroke={D} /></>);
+  if (id === "ear") return svg(<>
+    <path d="M26 30a12 12 0 1 1 22 6c-4 5-6 7-6 12a6 6 0 0 1-12 0" /><path d="M32 30a6 6 0 0 1 11 2" stroke={D} />
+    {[0, 1, 2].map((i) => <path key={i} d={`M${54 + i * 4} ${26 - i * 2}a${10 + i * 4} ${10 + i * 4} 0 0 1 0 ${20 + i * 4}`} className="dp-echo-r" style={{ animationDelay: `${i * 0.5}s` }} />)}</>);
+  if (id === "skin") return svg(<>
+    <path d="M12 46c8-6 16-6 24 0s16 6 24 0" /><path d="M12 56c8-6 16-6 24 0s16 6 24 0" stroke={D} />
+    {[[24, 22], [40, 16], [52, 28]].map(([x, y], i) => <path key={i} d={`M${x} ${y - 5}v10M${x - 5} ${y}h10`} className="dp-twinkle" style={{ animationDelay: `${i * 0.4}s` }} />)}</>);
+  if (id === "scalpel") return svg(<>
+    <path d="M14 58l24-24 6 6-24 24z" /><path d="M38 34l14-20c4 2 6 6 4 10L44 40" className="dp-glint" /><path d="M10 64h24" stroke={D} /></>);
+  if (id === "stetho") return svg(<>
+    <path d="M22 12v14a10 10 0 0 0 20 0V12" /><path d="M32 36v6a12 12 0 0 0 24 0v-6" stroke={D} /><circle cx="56" cy="32" r="5" className="dp-pulse-o" style={{ transformOrigin: "56px 32px" }} /></>);
+  if (id === "pin") return svg(<>
+    <path d="M36 62s-16-16-16-28a16 16 0 0 1 32 0c0 12-16 28-16 28Z" className="dp-bob" /><circle cx="36" cy="34" r="6" stroke={D} /></>);
   return svg(<><path d="M36 58s-20-12-20-26a10 10 0 0 1 20-4 10 10 0 0 1 20 4c0 14-20 26-20 26Z" className="dp-beat" /><path d="M18 36h10l4-7 5 12 4-5h13" stroke={D} /></>);
 }
 
@@ -163,4 +243,14 @@ const DP_CSS = `
 .dp-card:hover .dp-spin{animation-duration:5s}.dp-card:hover .dp-spin-fast{animation-duration:1.4s}.dp-card:hover .dp-scan,.dp-card:hover .dp-scan-x{animation-duration:1.6s}
 @media (prefers-reduced-motion: reduce){.dp-shine,.dp-art{transition:none}.dp-spin,.dp-spin-fast,.dp-scan,.dp-scan-x,.dp-slide,.dp-echo,.dp-flow,.dp-bubble,.dp-twinkle,.dp-ecg,.dp-pulse-o,.dp-beat{animation:none}.dp-echo{opacity:.6}}
 
+.dp-flash{animation:dpflash 1s steps(2,end) infinite}@keyframes dpflash{50%{opacity:.15}}
+.dp-drive{animation:dpdrive 2.4s ease-in-out infinite}@keyframes dpdrive{0%,100%{transform:translateX(-3px)}50%{transform:translateX(3px)}}
+.dp-road{animation:dpflow .8s linear infinite}
+.dp-rise{animation:dprise 2.6s ease-in-out infinite}@keyframes dprise{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+.dp-needle{animation:dpneedle 3s ease-in-out infinite}@keyframes dpneedle{0%,100%{transform:rotate(-70deg)}60%{transform:rotate(0deg)}}
+.dp-press{animation:dppress 2.4s ease-in-out infinite}@keyframes dppress{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.3)}}
+.dp-echo-r{animation:dptw 1.5s ease-in-out infinite}
+.dp-glint{animation:dpglint 2.8s ease-in-out infinite}@keyframes dpglint{0%,100%{stroke:#bef264}50%{stroke:#ffffff}}
+.dp-bob{animation:dpbob 2.2s ease-in-out infinite}@keyframes dpbob{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion: reduce){.dp-flash,.dp-drive,.dp-road,.dp-rise,.dp-needle,.dp-press,.dp-echo-r,.dp-glint,.dp-bob{animation:none}}
 `;
