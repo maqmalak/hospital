@@ -80,7 +80,7 @@ export const btn = {
   ghost: "inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-6 py-3.5 text-[15px] font-semibold text-[var(--ink)] transition hover:-translate-y-0.5 hover:border-[var(--primary)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary-ring)]",
   glass: "inline-flex items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-[15px] font-semibold text-white backdrop-blur-md transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30",
 };
-export const card = "rounded-[22px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_18px_44px_-30px_rgba(14,46,56,0.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(14,46,56,0.55)]";
+export const card = "s2-card rounded-[22px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_18px_44px_-30px_rgba(14,46,56,0.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(14,46,56,0.55)]";
 
 /** Page banner for inner pages. */
 /** Hospital logo on a white disc inside thin concentric rings, for the right side of a page hero (lg and up). */

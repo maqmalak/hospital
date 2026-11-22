@@ -336,7 +336,11 @@ function CSS(rtl: boolean) {
   .s2.s2-dark{--bg:#071C22;--surface:#0D2730;--soft:#12313B;--mint:#11393F;--ink:#E7F1F2;--muted:#9AB2B8;--line:#1D3C46;--primary:#5CC3C9;--accent:#F0574E;--ink2:rgba(231,241,242,.78);--primary-ring:rgba(92,195,201,.25);--accent-ring:rgba(240,87,78,.35);}
   .s2.s2-lime{--hero:#0B1A12;--hero2:#1A2E1F;--hero3:#07120B;--hero-accent:#D9F99D;--btn-from:#4D7C0F;--btn-to:#3F6212;--bg:#08130C;--surface:#102016;--soft:#14271A;--mint:#1C3A16;--ink:#EEF7E8;--muted:#A9BBA0;--line:#22402A;--primary:#BEF264;--accent:#F0574E;--ink2:rgba(238,247,232,.78);--primary-ring:rgba(190,242,100,.25);--accent-ring:rgba(240,87,78,.35);}
   .s2-dark .s2-mega{background:linear-gradient(160deg,#123843 0%,#0D2730 45%,#071C22 100%)}
-  .s2-lime .s2-mega{background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(190,242,100,.18)}
+  .s2-lime .s2-card{position:relative;background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(255,255,255,.08);box-shadow:0 18px 44px -30px rgba(0,0,0,.7)}
+  .s2-lime .s2-card::before{content:"";position:absolute;inset:0 18px auto;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#65a30d,#bef264,#65a30d);opacity:.85;pointer-events:none;z-index:1}
+  .s2-lime .s2-card:hover,.s2-lime .s2-card:focus-within{border-color:rgba(190,242,100,.55);background:linear-gradient(160deg,#25361e 0%,#141c13 45%,#0a0d0a 100%);box-shadow:0 26px 54px -28px rgba(132,204,22,.5)}
+  .s2-lime .s2-card:hover h3,.s2-lime .s2-card:hover h2{color:#bef264;transition:color .3s}
+    .s2-lime .s2-mega{background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(190,242,100,.18)}
   .s2-dark .s2-mega a:hover{background:rgba(255,255,255,.06)}
   .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}
   .s2 .s2-num{font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "Oswald,'Arial Narrow',sans-serif"}}
