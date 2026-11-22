@@ -340,6 +340,15 @@ function CSS(rtl: boolean) {
   .s2-lime .s2-card::before{content:"";position:absolute;inset:0 18px auto;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#65a30d,#bef264,#65a30d);opacity:.85;pointer-events:none;z-index:1}
   .s2-lime .s2-card:hover,.s2-lime .s2-card:focus-within{border-color:rgba(190,242,100,.55);background:linear-gradient(160deg,#25361e 0%,#141c13 45%,#0a0d0a 100%);box-shadow:0 26px 54px -28px rgba(132,204,22,.5)}
   .s2-lime .s2-card:hover h3,.s2-lime .s2-card:hover h2{color:#bef264;transition:color .3s}
+    .s2-lime [class*="bg-[var(--primary)]"] [class*="text-white"]:not([class*="bg-[var(--accent)]"]){color:#14260A}
+  .s2-lime [class*="bg-[var(--primary)]"] [class*="border-white/30"]{border-color:rgba(20,38,10,.35);background:rgba(20,38,10,.06)}
+  .s2-lime [class*="bg-[var(--primary)]"] [class*="border-white/30"]:hover{background:rgba(20,38,10,.14)}
+    .s2-lime .s2-band{background:linear-gradient(160deg,#25361e 0%,#121a11 50%,#080b08 100%)!important;color:#fff;border:1px solid rgba(190,242,100,.28);box-shadow:0 30px 70px -40px rgba(132,204,22,.6)}
+  .s2-lime .s2-band::before{content:"";position:absolute;inset:0 32px auto;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#65a30d,#bef264,#65a30d);z-index:1}
+  .s2-lime .s2-band h2{color:#bef264}
+  .s2-lime .s2-band [class*="text-white"]:not([class*="bg-[var(--accent)]"]){color:rgba(238,247,232,.82)}
+  .s2-lime .s2-band [class*="border-white/30"]{border-color:rgba(190,242,100,.4);background:rgba(190,242,100,.08);color:#eef7e8}
+  .s2-lime .s2-band [class*="border-white/30"]:hover{background:rgba(190,242,100,.16)}
     .s2-lime .s2-mega{background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(190,242,100,.18)}
   .s2-dark .s2-mega a:hover{background:rgba(255,255,255,.06)}
   .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}

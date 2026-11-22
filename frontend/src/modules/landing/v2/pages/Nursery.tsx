@@ -213,7 +213,7 @@ export default function Nursery() {
       {/* ------------------------------------------------ CTA band (as on the homepage) */}
       <section className="py-24">
         <Wrap>
-          <Reveal className="relative overflow-hidden rounded-[30px] bg-[var(--primary)] px-6 py-14 text-center text-white sm:px-12">
+          <Reveal className="s2-band relative overflow-hidden rounded-[30px] bg-[var(--primary)] px-6 py-14 text-center text-white sm:px-12">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_260px_at_10%_0%,rgba(255,255,255,0.18),transparent_60%),radial-gradient(500px_260px_at_100%_100%,rgba(229,72,63,0.35),transparent_60%)]" />
             <h2 className="s2-display relative text-[2.2rem] sm:text-[3rem]">{T.cta.title}</h2>
             <p className="relative mx-auto mt-3 max-w-xl text-white/80">{T.cta.sub}</p>

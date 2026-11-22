@@ -257,7 +257,7 @@ export default function Radiology() {
       {/* ------------------------------------------------ CTA */}
       <section className="pb-24">
         <Wrap>
-          <Reveal className="relative overflow-hidden rounded-[30px] bg-[var(--primary)] px-6 py-14 text-center text-white sm:px-12">
+          <Reveal className="s2-band relative overflow-hidden rounded-[30px] bg-[var(--primary)] px-6 py-14 text-center text-white sm:px-12">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_260px_at_10%_0%,rgba(255,255,255,0.18),transparent_60%),radial-gradient(500px_260px_at_100%_100%,rgba(229,72,63,0.35),transparent_60%)]" />
             <h2 className="s2-display relative text-[2.2rem] sm:text-[3rem]">Ready when you are</h2>
             <p className="relative mx-auto mt-3 max-w-xl text-white/80">Book in under two minutes — we send your booking ID, preparation and a reminder before you come.</p>
