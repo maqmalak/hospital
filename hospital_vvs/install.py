@@ -263,11 +263,23 @@ def ensure_erp_roles():
 
 
 def ensure_module_defs():
-	"""Modules added after install (modules.txt) need their Module Def, or their doctypes resolve to frappe.core."""
+	"""Modules added after install (modules.txt) need their Module Def linked to hospital_vvs, or their doctypes resolve to
+	frappe.core ("No module named frappe.core.doctype.…"). Frappe's doctype sync creates a missing Module Def itself but with
+	no app_name, so an existing Module Def is repaired too — that is what a site installed before the module existed has."""
+	fixed = False
 	for m in frappe.get_module_list("hospital_vvs"):
-		if not frappe.db.exists("Module Def", m):
+		app = frappe.db.get_value("Module Def", m, "app_name")
+		if app is None and not frappe.db.exists("Module Def", m):
 			frappe.get_doc({"doctype": "Module Def", "module_name": m, "app_name": "hospital_vvs"}).insert(ignore_permissions=True)
+			fixed = True
+		elif app != "hospital_vvs":
+			frappe.db.set_value("Module Def", m, "app_name", "hospital_vvs", update_modified=False)
+			fixed = True
 	frappe.clear_cache()
+	if fixed:  # the doctype → app map is cached per process; drop it so the rest of this migrate loads hospital_vvs controllers
+		frappe.cache.delete_value(["doctype_modules", "doctype_app_map"])
+		if getattr(frappe.local, "cache", None) is not None:
+			frappe.local.cache.clear()
 
 
 def after_migrate():
