@@ -60,11 +60,29 @@ Passwords (MariaDB root, and this site's `LMC_ADMIN_PASSWORD`) are generated on 
 ## Updating later
 
 ```bash
-cd ~/frappe-bench/apps/hospital_vvs/deploy && APT_UPGRADE=0 SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=… bash install-production.sh
+cd ~/frappe-bench/apps/hospital_vvs/deploy && git pull && APT_UPGRADE=0 SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=… bash install-production.sh
 ```
 
+It pulls hospital_vvs and mm_core, rebuilds the React app, runs `migrate` **twice** (a module added since the last
+deploy — e.g. Dialysis — only becomes syncable after the first run creates its Module Def) and restarts.
+
+**Release D-98 / D-99 (Imaging MRI-CT, Nephrology & Dialysis, website themes):** nothing extra is needed for the code;
+`migrate` creates the 39 MRI/CT procedures, 4 report templates, 12 dialysis stations, the DIA-* rate items, the Dialysis
+Store and the dialysis lab templates. To also add the **sample data** (MRI/CT studies, ~30 dialysis patients with a month
+of sessions, labs, packages, unit logs) to the live data, add `SEED_MODULES=1`:
+
+```bash
+cd ~/frappe-bench/apps/hospital_vvs/deploy && git pull && APT_UPGRADE=0 SEED_MODULES=1 SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=… bash install-production.sh
+```
+
+`SEED_MODULES` only adds; it never deletes or overwrites. Demo dialysis patients have SMS / WhatsApp switched off.
+`RESTORE_DIR=…` (data from `export-data.sh`) is different: it **replaces** the whole live database — anything entered on
+production since the last restore (website bookings, registrations, bills) is lost. Back up first (`bash backup.sh`).
+
 or by hand: `git -C apps/hospital_vvs pull`, `cd apps/hospital_vvs/frontend && npm ci && npm run build`,
-`bench --site lyallpurhospital.pk migrate`, `bench build --app hospital_vvs`, `sudo supervisorctl restart all`.
+`bench --site lyallpurhospital.pk migrate` (twice), `bench build --app hospital_vvs`, `sudo supervisorctl restart all`,
+optionally `bench --site lyallpurhospital.pk execute hospital_vvs.setup.radiology_demo.run_mrct` and
+`bench --site lyallpurhospital.pk execute hospital_vvs.setup.dialysis_demo.run`.
 
 ## Help centre videos
 

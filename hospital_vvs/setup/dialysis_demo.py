@@ -9,6 +9,7 @@ module, packages, unit logs (water + disinfection), opening stock in the Dialysi
   2. HCV-positive patient on a dedicated HCV-zone station with a permanent catheter;
   3. emergency AKI patient from the ICU (bedside dialysis today).
 Demo sessions are marked paid without a counter receipt (no cashier shift); the real flow pays at the Reception counter.
+Demo patients have SMS / WhatsApp consent off, so a live messaging gateway never texts their (made-up) numbers.
 """
 
 import json
@@ -157,7 +158,7 @@ def _profile(p, rnd, branch, neph, **kw):
 		"access_type": "AV fistula", "access_site": rnd.choice(["Left radio-cephalic", "Left brachio-cephalic", "Right radio-cephalic"]), "access_status": "Working",
 		"rx_duration_hrs": 4, "dialyser": rnd.choice(["F8 HPS", "FX 80", "Elisio 17H"]), "blood_flow": rnd.choice([250, 280, 300, 320]), "dialysate_flow": 500,
 		"dialysate": "K 2.0 · Ca 1.5 · HCO3 35", "heparin": "2000 IU bolus + 1000 IU/h", "uf_guidance": "To dry weight; max 4% body weight per session",
-		"epo": "4000 IU IV weekly", "iron": "Iron sucrose 100 mg monthly x 4", "other_meds": "Calcium carbonate, vitamin B complex, amlodipine", "whatsapp_opt_in": 1,
+		"epo": "4000 IU IV weekly", "iron": "Iron sucrose 100 mg monthly x 4", "other_meds": "Calcium carbonate, vitamin B complex, amlodipine", "whatsapp_opt_in": 0,
 		"ec_name": "Attendant", "ec_relation": rnd.choice(["Son", "Wife", "Husband", "Brother", "Daughter"]), "ec_phone": "0300-0000000", "payer": "Self"})
 	dp.update(kw)
 	dp.append("accesses", {"access_type": dp.access_type, "site": dp.access_site, "created_on": add_days(dp.dialysis_start, -40), "status": "Working"})
@@ -254,7 +255,7 @@ def build(rnd):
 	_unit_logs(rnd, month_ago, t0)
 	# one pending website request
 	dz.public_request({"patient_name": "Muhammad Aslam (demo request)", "phone": "03001112233", "gender": "Male", "age": 58, "request_type": "Transfer in",
-		"current_hospital": "Allied Hospital, Faisalabad", "pref_days": "Mon, Thu", "pref_shift": "Morning", "access_type": "AV fistula", "notes": "Shifting home to Peoples Colony; HBsAg / HCV negative last month."})
+		"current_hospital": "Allied Hospital, Faisalabad", "pref_days": "Mon, Thu", "pref_shift": "Morning", "access_type": "AV fistula", "notes": "Shifting home to Peoples Colony; HBsAg / HCV negative last month.", "consent": 0})
 	return made
 
 

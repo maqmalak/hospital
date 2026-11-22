@@ -22,7 +22,10 @@
 #  DNS: <SITE> → the server's IP (a Cloudflare-proxied record is fine).
 #  Without a domain yet:  SSL=0 SITE=lmc.local bash install-production.sh
 #
-#  With the data of the development site (made by export-data.sh and copied to the server):
+#  Update a live site to the latest code (+ optional module sample data, added to — never replacing — the live data):
+#      APT_UPGRADE=0 SEED_MODULES=1 SITE=lyallpurhospital.pk LETSENCRYPT_EMAIL=… bash install-production.sh
+#
+#  With the data of the development site (made by export-data.sh and copied to the server) — REPLACES the site's data:
 #      RESTORE_DIR=~/lmc-data-<date> SITE=… LETSENCRYPT_EMAIL=… bash install-production.sh
 #
 #  Every value below can be overridden from the environment. The script can be re-run: finished steps are skipped,
@@ -62,6 +65,7 @@ NODE_VERSION="${NODE_VERSION:-24}"
 MARIADB_VERSION="${MARIADB_VERSION:-11.8}"   # from the MariaDB repository; set to "" to use Ubuntu's own MariaDB
 TIMEZONE="${TIMEZONE:-Asia/Karachi}"
 DEMO_JOBS="${DEMO_JOBS:-0}"                  # 1 = demo-data cron jobs (drug round 3x daily, pharmacy day) — demo servers only
+SEED_MODULES="${SEED_MODULES:-0}"            # 1 = add the MRI/CT + Nephrology & Dialysis sample data (D-98/D-99) to the existing data; never replaces it
 ENABLE_UFW="${ENABLE_UFW:-1}"                # firewall: only SSH, HTTP and HTTPS
 APT_UPGRADE="${APT_UPGRADE:-1}"              # 0 = skip `apt upgrade` (a server already in use: no service restarts)
 
@@ -364,6 +368,15 @@ bench --site "$SITE" set-config host_name "$BASE_URL"
 bench --site "$SITE" set-config developer_mode 0
 bench --site "$SITE" set-config allow_tests 0
 bench --site "$SITE" migrate                 # custom fields, roles, settings, scheduled jobs (after_migrate)
+# A module added since the last deploy (e.g. Dialysis, D-99) only gets its Module Def in the first run's after_migrate,
+# so its doctypes are synced — and its set-up (stations, items, lab templates) runs — on this second, otherwise no-op run.
+bench --site "$SITE" migrate
+if [ "$SEED_MODULES" = "1" ]; then
+	step "Sample data for the imaging (MRI/CT) and Nephrology & Dialysis modules (SEED_MODULES=1)"
+	# both are idempotent: they skip when their data is already there. Demo patients have SMS / WhatsApp switched off.
+	bench --site "$SITE" execute hospital_vvs.setup.radiology_demo.run_mrct || warn "MRI/CT sample data not added — see the log"
+	bench --site "$SITE" execute hospital_vvs.setup.dialysis_demo.run || warn "dialysis sample data not added — see the log"
+fi
 bench build --production
 bench --site "$SITE" clear-cache
 for port in "${TMP_REDIS[@]}"; do redis-cli -p "$port" shutdown nosave >/dev/null 2>&1 || true; done

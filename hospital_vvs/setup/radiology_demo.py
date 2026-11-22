@@ -173,7 +173,7 @@ def _base(p, procedure, date, slot, rnd, status="Delivered", priority="Routine",
 		"walk_in": 1 if pr.modality == "X-Ray" and rnd.random() < 0.6 else 0, "booking_ref": rad._booking_ref(), "patient": p.name, "patient_name": p.patient_name,
 		"gender": p.gender, "age": _age(p.dob), "phone": p.phone, "referring_doctor": ref, "payment_option": "Pay at counter", "payment_status": "Unpaid",
 		"amount": pr.price, "pregnancy_status": ("Not pregnant" if pr.report_kind != "Obstetric" else "Pregnant") if p.gender == "Female" else "Not applicable",
-		"report_status": "Not Started", "report_template": pr.default_template, "radiologist": rad_doctor, "whatsapp_opt_in": 1,
+		"report_status": "Not Started", "report_template": pr.default_template, "radiologist": rad_doctor, "whatsapp_opt_in": 0,
 		"clinical_notes": rnd.choice(["Pain for 1 week", "Follow-up", "Routine check", "Trauma — fall at home", "Fever and cough", "Abdominal pain", "Antenatal care"])})
 	return doc, pr
 
