@@ -57,7 +57,7 @@ const en = {
     ["CCTV", "Corridors and unit entrances are monitored 24/7."],
     ["Verified hand-over", "A baby is handed only to the verified mother or parent — bands are matched every time."],
   ] as [string, string][],
-  visiting: ["Visiting", "Visiting policy", "Calm visiting protects newborns from infection and lets mothers rest. [confirm]"],
+  visiting: ["Visiting", "Visiting policy", "Calm visiting protects newborns from infection and lets mothers rest."],
   visitList: [
     ["Mother & Baby rooms", "11:00 am – 1:00 pm and 5:00 pm – 7:00 pm; two visitors at a time; one female attendant may stay."],
     ["NICU", "Parents welcome 24/7. Grandparents by arrangement with the nurse in charge. No children under 12."],
@@ -79,7 +79,7 @@ const en = {
     ["Safe sleep", ["Always on the back, on a firm flat surface", "No pillows, soft toys or heavy quilts in the cot", "Keep the room comfortably warm, not hot", "Room-share, but do not sleep with the baby on a sofa"]],
   ] as [string, string[]][],
   danger: { title: "Danger signs — come to emergency immediately", list: ["Fever, or feeling cold to touch", "Poor feeding or not waking for feeds", "Yellow skin or eyes, especially in the first day or spreading to legs", "Fast or difficult breathing, grunting", "Very sleepy, floppy or unusually irritable", "Fits (convulsions) or blue lips"], call: "Call emergency" },
-  packages: ["Packages", "Maternity & newborn packages", "Indicative prices — your final bill depends on the length of stay and any extra care. [confirm]"],
+  packages: ["Packages", "Maternity & newborn packages", "Indicative prices — your final bill depends on the length of stay and any extra care."],
   packageList: [["Normal delivery + nursery", "2 days · mother & baby room · newborn exam, vitamin K, birth vaccines", "normal"], ["C-section + nursery", "4 days · private room · newborn care package", "csection"],
     ["NICU", "Per day · incubator, monitoring, neonatal nursing (medicines extra)", "nicuDay"], ["Mother & Baby room", "Per day · rooming-in, attendant bed, lactation support", "roomDay"]] as [string, string, string][],
   perDay: "per day", from: "from", enquire: "Ask about this package",

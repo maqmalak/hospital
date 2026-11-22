@@ -177,7 +177,7 @@ export default function Nursery() {
               <Reveal key={k} delay={i * 70} className={`${card} flex flex-col p-6 ${i === 0 ? "ring-2 ring-[var(--primary)]/30" : ""}`}>
                 <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--accent)] text-white">{k === "nicuDay" ? <HeartPulse className="h-5 w-5" /> : k === "roomDay" ? <Bed className="h-5 w-5" /> : <Baby className="h-5 w-5" />}</span>
                 <h3 className="mt-4 text-lg font-bold">{t}</h3><p className="mt-1 flex-1 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
-                {CONFIG.showPrices && <div className="mt-5"><span className="text-xs text-[var(--muted)]">{daily ? "" : T.from + " "}</span><span className="s2-num text-[1.8rem] font-semibold text-[var(--ink)]" dir="ltr">{rs(priceOf(k))}</span>
+                {CONFIG.showPrices && <div className="mt-5"><span className="text-xs text-[var(--muted)]">{daily ? "" : T.from + " "}</span><span className="s2-num s2-price text-[1.8rem] font-semibold text-[var(--ink)]" dir="ltr">{rs(priceOf(k))}</span>
                   {daily && <span className="text-sm text-[var(--muted)]"> / {T.perDay}</span>}</div>}
                 <Link to={`/site/contact?topic=${encodeURIComponent(NURSERY.en.packageList[i][0])}`} className={`${btn.ghost} mt-4 px-4 py-2.5 text-sm`}>{T.enquire}</Link>
               </Reveal>); })}

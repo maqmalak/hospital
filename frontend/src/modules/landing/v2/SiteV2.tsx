@@ -349,6 +349,9 @@ function CSS(rtl: boolean) {
   .s2-lime .s2-band [class*="text-white"]:not([class*="bg-[var(--accent)]"]){color:rgba(238,247,232,.82)}
   .s2-lime .s2-band [class*="border-white/30"]{border-color:rgba(190,242,100,.4);background:rgba(190,242,100,.08);color:#eef7e8}
   .s2-lime .s2-band [class*="border-white/30"]:hover{background:rgba(190,242,100,.16)}
+    .s2-lime .s2-band [class*="border-white/30"] svg,.s2-lime .s2-band [class*="border-white/30"]{color:#eef7e8}.s2-lime .s2-band [class*="border-white/30"] svg{color:#bef264}
+  .s2-lime .nz-tint{background:linear-gradient(180deg,#040604 0%,#070b07 100%)}
+  .s2-lime .s2-price{color:#bef264}
     .s2-lime .s2-mega{background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(190,242,100,.18)}
   .s2-dark .s2-mega a:hover{background:rgba(255,255,255,.06)}
   .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}
