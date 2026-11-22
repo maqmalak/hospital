@@ -1,11 +1,11 @@
 import { lazy, Suspense, type ReactNode } from "react";
+import { PageLoader } from "@/components/PageLoader";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ShieldAlert } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/layout/AppShell";
 import { accRoutes } from "@/acc/routes";
-import { Spinner } from "@/components/ui/skeleton";
 
 const LoginPage = lazy(() => import("@/modules/auth/LoginPage"));
 const DesktopPage = lazy(() => import("@/modules/home/DesktopPage"));
@@ -129,7 +129,7 @@ const OvStaffPage = lazy(() => import("@/modules/ov/OvStaffPage"));
 const OvReportPage = lazy(() => import("@/modules/ov/OvStaffPage").then((m) => ({ default: m.OvReportPage })));
 
 function Loading() {
-  return <div className="flex h-full min-h-[50vh] items-center justify-center"><Spinner size={28} /></div>;
+  return <PageLoader />;
 }
 
 /** Staff route: signed in + allowed by Page Access Rules (the server enforces it again on every call). */
