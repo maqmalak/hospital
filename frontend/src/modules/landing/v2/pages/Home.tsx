@@ -222,7 +222,7 @@ function DoctorsRail() {
           <button type="button" onClick={() => by(-1)} aria-label="Previous" className="grid h-11 w-11 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--primary)]"><ChevronLeft className="h-5 w-5 rtl:rotate-180" /></button>
           <button type="button" onClick={() => by(1)} aria-label="Next" className="grid h-11 w-11 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] hover:border-[var(--primary)]"><ChevronRight className="h-5 w-5 rtl:rotate-180" /></button>
           <Link to="/site/doctors" className={btn.ghost}>{ui.nav.all}</Link></div>} />
-        <div ref={rail} className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none] sm:-mx-6 sm:px-6">
+        <div ref={rail} className="-mx-4 -mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-6 pt-3 [scrollbar-width:none] sm:-mx-6 sm:px-6">
           {!done ? Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[300px] w-[300px] shrink-0" />)
             : (opts?.doctors ?? []).map((d) => <div key={d.name} className="w-[300px] shrink-0 snap-start"><DoctorCard d={d} ur={lang === "ur"} labels={{ book: ui.common.book, today: ui.common.today, next: ui.common.next, fee: ui.common.fee, profile: ui.common.profile }} /></div>)}
         </div>
