@@ -372,6 +372,12 @@ function CSS(rtl: boolean) {
   .s2-mega .s2-viewall:hover,.s2-mega .s2-viewall:focus-visible{background:var(--primary);color:var(--bg);transform:translateY(-1px);box-shadow:0 16px 32px -12px var(--primary);filter:brightness(1.06)}
   .s2-lime .s2-mega .s2-viewall,.s2-lime .s2-mega .s2-viewall:hover,.s2-lime .s2-mega .s2-viewall:focus-visible{background:linear-gradient(135deg,#d9f99d,#bef264 45%,#84cc16);color:#14260a}
   .s2-lime .s2-viewall > span{background:#14260a;color:#bef264}
+    .s2 .s2-glass-btn{transition:background .25s,color .25s,border-color .25s,transform .25s,box-shadow .25s}
+  .s2 .s2-glass-btn:hover,.s2 .s2-glass-btn:focus-visible{background:var(--hero-accent);border-color:var(--hero-accent);color:#0b1f26;transform:translateY(-2px);box-shadow:0 16px 34px -14px var(--hero-accent)}
+  .s2 .s2-glass-btn:hover svg,.s2 .s2-glass-btn:focus-visible svg{color:#0b1f26}
+  .s2-lime .s2-glass-btn:hover,.s2-lime .s2-glass-btn:focus-visible{background:linear-gradient(135deg,#d9f99d,#bef264 50%,#84cc16);border-color:#bef264;color:#14260a}
+  .s2-lime .s2-glass-btn:hover svg{color:#14260a}
+  @media (prefers-reduced-motion: reduce){.s2 .s2-glass-btn:hover{transform:none}}
     .s2-lime .s2-mega{background:radial-gradient(420px 220px at 0% 0%,rgba(132,204,22,.10),transparent 70%),linear-gradient(160deg,#0c100b 0%,#070907 50%,#030403 100%);border-color:rgba(190,242,100,.16)}
   .s2-dark .s2-mega a:not(.s2-viewall):hover{background:rgba(255,255,255,.06)}
   .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}
