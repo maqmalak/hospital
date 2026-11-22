@@ -92,13 +92,13 @@ export default function MriCt() {
         </div>
         <div className="sticky top-[72px] z-20 mb-8 grid gap-2 rounded-[22px] border border-[var(--line)] bg-[var(--surface)]/90 p-2 shadow-sm backdrop-blur-xl md:grid-cols-[1fr_auto_auto]">
           <label className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--bg)] px-4 focus-within:border-[var(--mc-lime-ink)]">
-            <Search className="h-4 w-4 text-[var(--muted)]" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={T.searchPh} aria-label={T.searchPh} className="h-11 flex-1 bg-transparent text-[15px] outline-none placeholder:text-[var(--muted)]" />
+            <Search className="h-4 w-4 text-[var(--muted)]" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={T.searchPh} aria-label={T.searchPh} className="h-11 flex-1 bg-transparent text-[15px] outline-none placeholder:text-[var(--muted)]" style={{ background: "transparent", boxShadow: "none" }} />
             {q && <button onClick={() => setQ("")} aria-label="Clear"><X className="h-4 w-4 text-[var(--muted)]" /></button>}
           </label>
           <select value={part} onChange={(e) => setPart(e.target.value)} aria-label={T.partLabel} className="h-11 rounded-full border border-[var(--line)] bg-[var(--bg)] px-4 text-sm">
             <option value="">{T.allParts}</option>{parts.map((p) => <option key={p} value={p}>{p}</option>)}</select>
           <div className="flex gap-1 overflow-x-auto" role="group" aria-label={T.contrastLabel}>{["all", "No", "Optional", "Yes"].map((c) => <button key={c} onClick={() => setCon(c)} aria-pressed={con === c}
-            className={`shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold ${con === c ? "bg-[var(--mc-lime-ink)] text-white" : "text-[var(--ink2)] hover:bg-[var(--soft)]"}`}>{T.contrast[c]}</button>)}</div>
+            className={`shrink-0 rounded-full px-3.5 py-2 text-[13px] font-semibold ${con === c ? "bg-[var(--mc-lime-ink)] text-[var(--mc-on-ink)]" : "text-[var(--ink2)] hover:bg-[var(--soft)]"}`}>{T.contrast[c]}</button>)}</div>
         </div>
         {!done ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-60" />)}</div> : <>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{shown.map((p, i) => <ScanCard key={p.name} p={p} delay={(i % 3) * 60} T={T} />)}</div>
@@ -236,8 +236,8 @@ function ScannerArt() {
 }
 
 const MC_CSS = `
-.mc-root{--accent-imaging-lime:#a3e635;--accent-imaging-gold:#d4a72c;--mc-lime-on-dark:#d9f99d;--mc-lime-ink:#3f6212;--mc-gold-ink:#7c5a06;--mc-lime-soft:#ecfccb;--mc-gold-soft:#fdf3d6}
-.dark .mc-root,[data-theme="dark"] .mc-root{--mc-lime-ink:#bef264;--mc-gold-ink:#f2cf6b;--mc-lime-soft:rgba(163,230,53,.14);--mc-gold-soft:rgba(212,167,44,.16)}
+.mc-root{--mc-on-ink:#ffffff;--accent-imaging-lime:#a3e635;--accent-imaging-gold:#d4a72c;--mc-lime-on-dark:#d9f99d;--mc-lime-ink:#3f6212;--mc-gold-ink:#7c5a06;--mc-lime-soft:#ecfccb;--mc-gold-soft:#fdf3d6}
+.dark .mc-root,[data-theme="dark"] .mc-root{--mc-on-ink:#14260a;--mc-lime-ink:#bef264;--mc-gold-ink:#f2cf6b;--mc-lime-soft:rgba(163,230,53,.14);--mc-gold-soft:rgba(212,167,44,.16)}
 .mc-btn{background:linear-gradient(135deg,#bef264,#65a30d);color:#14260a}.mc-btn:hover{filter:brightness(1.05)}
 .mc-cta{background:linear-gradient(135deg,#365314,#3f6212 55%,#7c5a06)}
 .mc-grid{background-image:linear-gradient(rgba(163,230,53,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(163,230,53,.08) 1px,transparent 1px);background-size:36px 36px}

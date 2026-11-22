@@ -141,7 +141,7 @@ export default function Nephrology() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {([[T.pkg.single, pr["DIA-HD-SESSION"], 1, T.pkg.perSession], [T.pkg.m8, pr["DIA-PKG-8"], 8], [T.pkg.m12, pr["DIA-PKG-12"], 12, "", true], [T.pkg.m13, pr["DIA-PKG-13"], 13], [T.pkg.emergency, pr["DIA-HD-EMERGENCY"], 1, T.pkg.perSession], [T.pkg.cath, pr["DIA-CATH-TEMP"], 0]] as [string, number | undefined, number, string?, boolean?][]).map(([t, price, n, unitL, hot], i) => (
             <Reveal key={t} delay={(i % 3) * 60} className={`${card} relative p-6 ${hot ? "ring-2 ring-[var(--rn-violet-ink)]" : ""}`}>
-              {hot && <span className="absolute -top-3 start-6 rounded-full bg-[var(--rn-violet-ink)] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Most chosen</span>}
+              {hot && <span className="absolute -top-3 start-6 rounded-full bg-[var(--rn-violet-ink)] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--rn-on-ink)]">Most chosen</span>}
               <div className="text-sm font-semibold text-[var(--muted)]">{t}</div>
               <div className="s2-num mt-2 text-[2rem] font-semibold leading-none" dir="ltr">{price ? rs(price) : "—"}</div>
               <div className="mt-1 text-xs text-[var(--muted)]">{unitL || (n > 1 && price ? `${rs(price / n)} ${T.pkg.perSession} · ${n} ${T.pkg.sessions}` : "")}</div>
@@ -336,14 +336,14 @@ export function NephReserve() {
               <L l={T.rName} req className="sm:col-span-2"><input className={inp} value={f.patient_name} onChange={(e) => setF({ ...f, patient_name: e.target.value })} autoComplete="name" /></L>
               <L l={T.rAge}><input className={inp} inputMode="numeric" value={f.age} onChange={(e) => setF({ ...f, age: e.target.value.replace(/\D/g, "").slice(0, 3) })} /></L>
               <L l={T.rGender} req><div className="grid grid-cols-3 gap-2">{["Female", "Male", "Other"].map((g) => <button key={g} type="button" aria-pressed={f.gender === g} onClick={() => setF({ ...f, gender: g })}
-                className={`h-12 rounded-2xl border-2 text-sm font-semibold ${f.gender === g ? "border-[var(--rn-aqua-ink)] bg-[var(--rn-aqua-ink)] text-white" : "border-[var(--line)]"}`}>{g}</button>)}</div></L>
+                className={`h-12 rounded-2xl border-2 text-sm font-semibold ${f.gender === g ? "border-[var(--rn-aqua-ink)] bg-[var(--rn-aqua-ink)] text-[var(--rn-on-ink)]" : "border-[var(--line)]"}`}>{g}</button>)}</div></L>
               <L l={T.rPhone} req hint={f.phone && !phoneOk ? "e.g. 0300 1234567" : ""}><input className={inp} inputMode="tel" dir="ltr" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} placeholder="03XX XXXXXXX" /></L>
               <L l={T.rMr}><input className={inp} dir="ltr" value={f.mr} onChange={(e) => setF({ ...f, mr: e.target.value })} placeholder="MR-…" /></L>
               <L l={T.rRef}><select className={inp} value={f.referring_doctor || (f.external_referrer ? "__o" : "")} onChange={(e) => setF({ ...f, referring_doctor: e.target.value === "__o" ? "" : e.target.value, external_referrer: e.target.value === "__o" ? " " : "" })}>
                 <option value="">{T.none}</option>{(opts?.doctors ?? []).map((d) => <option key={d.name} value={d.name}>{d.doctor_name}</option>)}<option value="__o">{T.rRefOut}…</option></select></L>
               {!!f.external_referrer && <L l={T.rRefOut}><input className={inp} value={f.external_referrer.trim()} onChange={(e) => setF({ ...f, external_referrer: e.target.value || " " })} /></L>}
               <L l={T.rDays} className="sm:col-span-2"><div className="flex flex-wrap gap-2">{DAYS.map((d) => <button key={d} type="button" aria-pressed={f.pref_days.includes(d)} onClick={() => setF({ ...f, pref_days: f.pref_days.includes(d) ? f.pref_days.filter((x) => x !== d) : [...f.pref_days, d] })}
-                className={`h-11 min-w-14 rounded-xl border-2 px-3 text-sm font-semibold ${f.pref_days.includes(d) ? "border-[var(--rn-violet-ink)] bg-[var(--rn-violet-ink)] text-white" : "border-[var(--line)]"}`}>{d}</button>)}</div></L>
+                className={`h-11 min-w-14 rounded-xl border-2 px-3 text-sm font-semibold ${f.pref_days.includes(d) ? "border-[var(--rn-violet-ink)] bg-[var(--rn-violet-ink)] text-[var(--rn-on-ink)]" : "border-[var(--line)]"}`}>{d}</button>)}</div></L>
               <L l={T.rShift}><select className={inp} value={f.pref_shift} onChange={(e) => setF({ ...f, pref_shift: e.target.value })}>{["Morning", "Afternoon", "Evening"].map((s) => <option key={s}>{s}</option>)}</select></L>
               <L l={T.rAccess}><select className={inp} value={f.access_type} onChange={(e) => setF({ ...f, access_type: e.target.value })}><option value="">{T.none}</option>{["AV fistula", "AV graft", "Permanent catheter (tunnelled)", "Temporary catheter"].map((s) => <option key={s}>{s}</option>)}</select></L>
               {(f.request_type === "Transfer in" || f.request_type === "Regular" || f.request_type === "Guest") && <L l={T.rHosp} className="sm:col-span-2"><input className={inp} value={f.current_hospital} onChange={(e) => setF({ ...f, current_hospital: e.target.value })} /></L>}
@@ -398,9 +398,9 @@ const RN_CSS = `
 .rn-wave-slow{animation:rnwave 52s linear infinite reverse}
 .rn-stat{transition:background .35s}.rn-stat:hover{background:#1a2e1f}
 @media (prefers-reduced-motion: reduce){.rn-rise,.rn-live,.rn-flow,.rn-tox,.rn-ring,.rn-ring-rev,.rn-glow,.rn-drift,.rn-hover-float,.rn-wave-slow{animation:none!important}.rn-tox,.rn-drift{opacity:.8}}
-.rn-root{--accent-renal-aqua:#a3e635;--accent-renal-aqua-strong:#84cc16;--accent-renal-violet:#d4a72c;--accent-renal-violet-soft:#f2cf6b;
+.rn-root{--rn-on-ink:#ffffff;--accent-renal-aqua:#a3e635;--accent-renal-aqua-strong:#84cc16;--accent-renal-violet:#d4a72c;--accent-renal-violet-soft:#f2cf6b;
   --rn-aqua-ink:#3f6212;--rn-violet-ink:#7c5a06;--rn-aqua-soft:#ecfccb;--rn-violet-soft:#fdf3d6;--rn-aqua-on-dark:#d9f99d}
-.s2-dark .rn-root,.dark .rn-root{--rn-aqua-ink:#bef264;--rn-violet-ink:#f2cf6b;--rn-aqua-soft:rgba(163,230,53,.14);--rn-violet-soft:rgba(212,167,44,.16)}
+.s2-dark .rn-root,.dark .rn-root{--rn-on-ink:#14260a;--rn-aqua-ink:#bef264;--rn-violet-ink:#f2cf6b;--rn-aqua-soft:rgba(163,230,53,.14);--rn-violet-soft:rgba(212,167,44,.16)}
 .rn-btn{background:linear-gradient(135deg,#bef264,#65a30d);color:#14260a}.rn-btn:hover{filter:brightness(1.06)}
 .rn-grad-text{background:linear-gradient(90deg,#d9f99d,#f2cf6b);-webkit-background-clip:text;background-clip:text;color:transparent}
 .rn-cta{background:linear-gradient(135deg,#365314,#3f6212 55%,#7c5a06)}
