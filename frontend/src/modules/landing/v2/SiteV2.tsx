@@ -369,11 +369,11 @@ function CSS(rtl: boolean) {
   @media (prefers-reduced-motion: reduce){.s2-mega a.rounded-2xl,.s2-mega a.rounded-2xl > span:first-child{transition:none}.s2-mega a.rounded-2xl:hover{transform:none}}
     .s2-viewall{background:var(--primary);color:var(--bg);box-shadow:0 10px 24px -12px var(--primary);transition:transform .25s,box-shadow .25s,filter .25s}
   .s2-viewall > span{background:color-mix(in srgb,var(--bg) 18%,transparent)}
-  .s2-viewall:hover,.s2-viewall:focus-visible{transform:translateY(-1px);box-shadow:0 16px 32px -12px var(--primary);filter:brightness(1.06)}
-  .s2-lime .s2-viewall{background:linear-gradient(135deg,#d9f99d,#bef264 45%,#84cc16);color:#14260a}
+  .s2-mega .s2-viewall:hover,.s2-mega .s2-viewall:focus-visible{background:var(--primary);color:var(--bg);transform:translateY(-1px);box-shadow:0 16px 32px -12px var(--primary);filter:brightness(1.06)}
+  .s2-lime .s2-mega .s2-viewall,.s2-lime .s2-mega .s2-viewall:hover,.s2-lime .s2-mega .s2-viewall:focus-visible{background:linear-gradient(135deg,#d9f99d,#bef264 45%,#84cc16);color:#14260a}
   .s2-lime .s2-viewall > span{background:#14260a;color:#bef264}
-    .s2-lime .s2-mega{background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(190,242,100,.18)}
-  .s2-dark .s2-mega a:hover{background:rgba(255,255,255,.06)}
+    .s2-lime .s2-mega{background:radial-gradient(420px 220px at 0% 0%,rgba(132,204,22,.10),transparent 70%),linear-gradient(160deg,#0c100b 0%,#070907 50%,#030403 100%);border-color:rgba(190,242,100,.16)}
+  .s2-dark .s2-mega a:not(.s2-viewall):hover{background:rgba(255,255,255,.06)}
   .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}
   .s2 .s2-num{font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "Oswald,'Arial Narrow',sans-serif"}}
   .s2-glass{background:color-mix(in srgb,var(--surface) 82%,transparent)}
