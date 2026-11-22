@@ -162,7 +162,7 @@ function NavBar() {
   const megaBtn = (k: "depts" | "services", label: string) => (
     <div className="relative" onMouseEnter={() => setMega(k)} onMouseLeave={() => setMega("")}>
       <button type="button" aria-expanded={mega === k} onClick={() => setMega(mega === k ? "" : k)} className="flex items-center gap-1 rounded-full px-3 py-2 text-[14.5px] font-medium text-[var(--ink2)] hover:text-[var(--ink)]">{label}<ChevronDown className={`h-4 w-4 transition ${mega === k ? "rotate-180" : ""}`} /></button>
-      {mega === k && <div className="absolute start-1/2 top-full z-50 w-[min(860px,90vw)] -translate-x-1/2 pt-3 rtl:translate-x-1/2"><div className="s2-pop rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_40px_80px_-30px_rgba(8,48,58,0.45)]">
+      {mega === k && <div className="absolute start-1/2 top-full z-50 w-[min(860px,90vw)] -translate-x-1/2 pt-3 rtl:translate-x-1/2"><div className="s2-pop s2-mega rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_40px_80px_-30px_rgba(8,48,58,0.45)]">
         {k === "depts" ? <div className="grid grid-cols-2 gap-1 md:grid-cols-3">{DEPARTMENTS.map((d) => { const I = ICONS[d.icon]; return (
           <Link key={d.slug} to={`/site/departments/${d.slug}`} className="flex items-start gap-3 rounded-2xl p-3 hover:bg-[var(--soft)]"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--mint)] text-[var(--primary)]"><I className="h-[18px] w-[18px]" /></span>
             <span><span className="block text-sm font-semibold">{d.name}</span><span className="line-clamp-1 text-xs text-[var(--muted)]">{d.summary}</span></span></Link>); })}</div>
@@ -335,6 +335,9 @@ function CSS(rtl: boolean) {
     font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "'Plus Jakarta Sans',Inter,system-ui,sans-serif"};}
   .s2.s2-dark{--bg:#071C22;--surface:#0D2730;--soft:#12313B;--mint:#11393F;--ink:#E7F1F2;--muted:#9AB2B8;--line:#1D3C46;--primary:#5CC3C9;--accent:#F0574E;--ink2:rgba(231,241,242,.78);--primary-ring:rgba(92,195,201,.25);--accent-ring:rgba(240,87,78,.35);}
   .s2.s2-lime{--hero:#0B1A12;--hero2:#1A2E1F;--hero3:#07120B;--hero-accent:#D9F99D;--btn-from:#4D7C0F;--btn-to:#3F6212;--bg:#08130C;--surface:#102016;--soft:#14271A;--mint:#1C3A16;--ink:#EEF7E8;--muted:#A9BBA0;--line:#22402A;--primary:#BEF264;--accent:#F0574E;--ink2:rgba(238,247,232,.78);--primary-ring:rgba(190,242,100,.25);--accent-ring:rgba(240,87,78,.35);}
+  .s2-dark .s2-mega{background:linear-gradient(160deg,#123843 0%,#0D2730 45%,#071C22 100%)}
+  .s2-lime .s2-mega{background:linear-gradient(160deg,#1b2618 0%,#111611 45%,#090b09 100%);border-color:rgba(190,242,100,.18)}
+  .s2-dark .s2-mega a:hover{background:rgba(255,255,255,.06)}
   .s2-lime .bg-\\[var\\(--primary\\)\\]{color:#14260A}.s2-lime .bg-\\[var\\(--primary\\)\\] svg{color:#14260A}
   .s2 .s2-num{font-family:${rtl ? "'Noto Nastaliq Urdu',serif" : "Oswald,'Arial Narrow',sans-serif"}}
   .s2-glass{background:color-mix(in srgb,var(--surface) 82%,transparent)}
